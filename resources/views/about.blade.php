@@ -19,7 +19,7 @@
             <div class="col-md-6">
                 <h3>Projeto Tecno-lixo</h3>
                 <p class="p-4">
-                    O Tecno-lixo se trata de um projeto de extensão da <a href="https://www.utfpr.edu.br">Universidade
+                    O Tecno-lixo se trata de um projeto de extensão da <a target="_blank" href="https://www.utfpr.edu.br">Universidade
                         Tecnológica Federal do Paraná - Câmpus
                         Guarapuava</a>, sob a coordenação da professora Sediane Carmem Lunardi Hernandes e da
                     professora Sílvia do Nascimento Rosa. As atividades do Tecno-lixo iniciaram em 2019, mas durante a
@@ -29,7 +29,7 @@
                     computador. O projeto foi tomando forma e hoje trabalhamos a conscientização sobre o descarte correto do
                     lixo eletrônico por meio de oficinas de conscientização. Assim, conseguimos reutilizar muitas peças de
                     computadores que não teriam serventia alguma.
-                    <a href="https://www.utfpr.edu.br"><button class="nav-link p-3 fw-bold explore-button mt-3">ACESSAR UTFPR</button></a>
+                    <a target="_blank" href="https://www.utfpr.edu.br"><button class="nav-link p-3 fw-bold explore-button mt-3">ACESSAR UTFPR</button></a>
                 </p>
             </div>
             <div class="col-md-6 ">
@@ -46,7 +46,7 @@
             <div class="col-md-6">
                 <p class="p-4">
                     O projeto E-lixo busca promover ações para a arrecadação do lixo eletrônico da comunidade interna da <a
-                        href="https://www3.unicentro.br">Unicentro</a>.
+                        href="https://www3.unicentro.br" target="_blank">Unicentro</a>.
                     Desta forma realizar a triagem do material recolhido. E, através do trabalho de recuperação dos
                     equipamentos que foram triados, proporcionar o treinamento dos acadêmicos do curso de Ciência da
                     Computação na manutenção de computadores, complementando a formação oferecida pelo curso. Essa é uma
@@ -55,7 +55,7 @@
                     de informática, despertando o senso de responsabilidade ambiental. Também, é importante destacar que é
                     realizado o encaminhamento, para empresa específica de reciclagem, do material que não pôde ser
                     utilizado no programa.
-                    <a href="https://www3.unicentro.br"><button class="nav-link p-3 fw-bold explore-button mt-3">ACESSAR UNICENTRO</button></a>
+                    <a target="_blank" href="https://www3.unicentro.br"><button class="nav-link p-3 fw-bold explore-button mt-3">ACESSAR UNICENTRO</button></a>
                 </p>
             </div>
         </div>
