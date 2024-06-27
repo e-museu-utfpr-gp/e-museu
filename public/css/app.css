@@ -502,6 +502,15 @@ footer {
     box-shadow: -3px 3px 3px rgba(0, 0, 0, 0.3);
 }
 
-  .orange-text {
+.orange-text {
     color: #ED6E38
+}
+
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+  .sticky-top-2 {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 100px;
+    z-index: 1019;
   }
+} 
