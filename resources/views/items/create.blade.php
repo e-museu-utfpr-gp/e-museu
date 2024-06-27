@@ -3,7 +3,7 @@
 
 @section('content')
     <div class="container main-container mb-auto">
-        <h1>Cadastrar um item</h1>
+        <h1>Colabore com um item</h1>
         <p class="ms-4 fw-bold">Possui algum item que gostaria de expor no nosso museu? Por favor, sinta se livre para
             cadastra-lo por aqui. Para quaiquer dúvidas temos a assistente virtual, ou se prefirir, entre em contato através
             do email emuseuvirtual@gmail.com.</p>
