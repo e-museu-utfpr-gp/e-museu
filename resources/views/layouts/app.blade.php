@@ -61,12 +61,12 @@
     @yield('content')
     <div>
         <footer class="d-md-flex custom-footer px-md-5 justify-content-between fixed align-items-center  py-5 mt-2">
-            <p class="custom-nav mb-0 d-flex justify-content-center col-md-4">Contato: emuseuvirtual@gmail.com</p>
+            <p class="custom-nav mb-0 d-flex justify-content-center col-md-4"><strong>Contato:</strong> emuseuvirtual@gmail.com</p>
 
             <a href="/"
                 class="col-md-4 d-flex align-items-center justify-content-center my-3 me-md-auto link-dark text-decoration-none">
                 <img class="e-lixo-footer-logo" src="/img/e-lixo-footer-logo.png" alt="">
-                <h2 class="mx-3">x</h2>
+                <h2 class="mx-3">-</h2>
                 <img class="tecnolixo-footer-logo" src="/img/tecnolixo-footer-logo.png" alt="">
             </a>
 
