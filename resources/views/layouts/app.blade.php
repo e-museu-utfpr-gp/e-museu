@@ -70,7 +70,7 @@
                 <img class="tecnolixo-footer-logo" src="/img/tecnolixo-footer-logo.png" alt="">
             </a>
 
-            <p class="col-md-4 mb-0 d-flex justify-content-center">2024 - <a href="https://www.utfpr.edu.br">UTFPR</a> - <a href="https://www3.unicentro.br">Unicentro</a></p>
+            <p class="col-md-4 mb-0 d-flex justify-content-center">2024 - UTFPR - Unicentro</p>
         </footer>
     </div>
     <script src="{{ asset('script/assistentDialogueHandler.js') }}"></script>
