@@ -1,4 +1,4 @@
-<div class="explore-menu-div mt-0 sticky-top d-none d-md-block" id="sub-menu">
+<div class="explore-menu-div mt-0 sticky-top-2 d-none d-md-block" id="sub-menu">
     <div class="container d-flex">
         <div class="col-3 m-0">
             <label class="fw-bold" for="search">Buscar por nome</label>
