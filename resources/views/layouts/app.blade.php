@@ -25,7 +25,7 @@
 
 <body class="bd-light d-flex flex-column min-vh-100">
     <nav
-        class="navbar navbar-border navbar-expand-lg navbar-light bg-light d-flex justify-content-between px-md-5 py-0">
+        class="navbar navbar-border navbar-expand-lg navbar-light bg-light d-flex justify-content-between px-md-5 py-0 sticky-top">
         <div class="container-fluid">
             <div class="navbar-left d-flex py-1">
                 <div class="logo-div">
@@ -61,21 +61,16 @@
     @yield('content')
     <div>
         <footer class="d-md-flex custom-footer px-md-5 justify-content-between fixed align-items-center  py-5 mt-2">
-            <ul class="custom-nav mb-0 d-flex justify-content-center col-md-4">
-                <li class="nav-item"><a href="/" class="nav-link p-2">Home</a></li>
-                <li class="nav-item"><a href="{{ route('items.index') }}" class="nav-link p-2">Explorar</a></li>
-                <li class="nav-item"><a href="{{ route('items.create') }}" class="nav-link p-2">Contribua</a></li>
-                <li class="nav-item"><a href="{{ route('about') }}" class="nav-link p-2">Sobre</a></li>
-            </ul>
+            <p class="custom-nav mb-0 d-flex justify-content-center col-md-4">Contato: emuseuvirtual@gmail.com</p>
 
             <a href="/"
-                class="col-md-4 d-flex align-items-center justify-content-center my-3 me-md-auto link-dark text-decoration-none">
+                class="col-md-4 d-flex align-items-center justify-content-center my-3 me-md-auto <a href="https://www.utfpr.edu.br">UTFPR</a>link-dark text-decoration-none">
                 <img class="e-lixo-footer-logo" src="/img/e-lixo-footer-logo.png" alt="">
                 <h2 class="mx-3">x</h2>
                 <img class="tecnolixo-footer-logo" src="/img/tecnolixo-footer-logo.png" alt="">
             </a>
 
-            <p class="col-md-4 mb-0 d-flex justify-content-center">2024 - UTFPR - Unicentro</p>
+            <p class="col-md-4 mb-0 d-flex justify-content-center">2024 - <a href="https://www.utfpr.edu.br">UTFPR</a> - <a href="https://www3.unicentro.br">Unicentro</a></p>
         </footer>
     </div>
     <script src="{{ asset('script/assistentDialogueHandler.js') }}"></script>
