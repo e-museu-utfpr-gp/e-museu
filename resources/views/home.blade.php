@@ -44,7 +44,7 @@
                         @endphp
                         @foreach ($items as $item)
                             <div class="carousel-item @if ($imageActive) active @endif">
-                                <img src="{{ $item->image }}" class="p-4 clickable-image"
+                                <img src="storage/{{ $item->image }}" class="p-4 clickable-image"
                                     style="aspect-ratio: 3 / 2; width: 100%; max-height: 100%; object-fit: cover"
                                     alt="">
                             </div>
