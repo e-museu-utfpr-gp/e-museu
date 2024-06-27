@@ -41,7 +41,7 @@
             <div class="collapse navbar-collapse flex-grow-0 mt-2" id="navbarSupportedContent">
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'items.index') explore-button @endif" href="{{ route('items.index') }}"><i
+                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'items.index' || Route::currentRouteName() == 'items.show') explore-button @endif" href="{{ route('items.index') }}"><i
                                 class="h5 bi bi-search me-2"></i>EXPLORAR</a>
                     </li>
                     <li class="nav-item">
