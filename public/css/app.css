@@ -321,12 +321,13 @@ textarea {
 .explore-menu-div {
     background-color: #5BE1B9;
     box-shadow: 0 4px 5px #c4c4c4;
-    padding-top: 50px;
+    margin-top: 60px;
+    z-index: 10;
 }
 
 .explore-menu-div-mobile {
     background-color: #e6f6f1;
-    box-shadow: 0 4px 5px #c4c4c4
+    box-shadow: 0 4px 5px #c4c4c4;
 }
 
 
