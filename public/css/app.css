@@ -321,6 +321,7 @@ textarea {
 .explore-menu-div {
     background-color: #5BE1B9;
     box-shadow: 0 4px 5px #c4c4c4
+    margin-top: 100px;
 }
 
 .explore-menu-div-mobile {
@@ -506,10 +507,3 @@ footer {
     color: #ED6E38
 }
 
-@supports ((position: -webkit-sticky) or (position: sticky)) {
-  .sticky-top-2 {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 100px;
-  }
-} 
