@@ -1,4 +1,4 @@
-<!doctype html>
+items.create<!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
@@ -41,14 +41,14 @@
             <div class="collapse navbar-collapse flex-grow-0 mt-2" id="navbarSupportedContent">
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName(), 'items.index')) explore-button @endif" href="{{ route('items.index') }}"><i
+                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName(), 'items.index') explore-button @endif" href="{{ route('items.index') }}"><i
                                 class="h5 bi bi-search me-2"></i>EXPLORAR</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName(), 'items.create')) explore-button @endif" href={{ route('items.create') }}>COLABORAÇÃO</a>
+                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName(), 'items.create') explore-button @endif" href={{ route('items.create') }}>COLABORAÇÃO</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName(), 'about')) explore-button @endif" href={{ route('about') }}>SOBRE</a>
+                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName(), 'about') explore-button @endif" href={{ route('about') }}>SOBRE</a>
                     </li>
                 </ul>
             </div>
