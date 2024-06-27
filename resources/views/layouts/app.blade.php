@@ -64,7 +64,7 @@
             <p class="custom-nav mb-0 d-flex justify-content-center col-md-4">Contato: emuseuvirtual@gmail.com</p>
 
             <a href="/"
-                class="col-md-4 d-flex align-items-center justify-content-center my-3 me-md-auto <a href="https://www.utfpr.edu.br">UTFPR</a>link-dark text-decoration-none">
+                class="col-md-4 d-flex align-items-center justify-content-center my-3 me-md-auto link-dark text-decoration-none">
                 <img class="e-lixo-footer-logo" src="/img/e-lixo-footer-logo.png" alt="">
                 <h2 class="mx-3">x</h2>
                 <img class="tecnolixo-footer-logo" src="/img/tecnolixo-footer-logo.png" alt="">
