@@ -44,12 +44,12 @@ body {
     color: #0D233D;
 }
 
-.explore-button {
+.button {
     background-color: #5BE1B9;
     border-bottom: 10px;
 }
 
-.explore-button {
+.button {
     background-color: #5BE1B9;
     border-bottom: 10px;
 }
@@ -258,7 +258,7 @@ textarea {
     border-bottom: 1px solid #0D233D;
 }
 
-.explore-menu-division-line {
+.menu-division-line {
     border-bottom: 1px solid #0D233D;
 }
 
@@ -323,6 +323,7 @@ textarea {
     box-shadow: 0 4px 5px #c4c4c4;
     padding-top: 70px;
     z-index: 10;
+    position: absolute;
 }
 
 .explore-menu-div-mobile {
