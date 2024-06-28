@@ -321,9 +321,7 @@ textarea {
 .explore-menu-div {
     background-color: #5BE1B9;
     box-shadow: 0 4px 5px #c4c4c4;
-    padding-top: 70px;
     z-index: 10;
-    position: absolute;
 }
 
 .explore-menu-div-mobile {
@@ -497,6 +495,15 @@ footer {
 .dialogue {
     border-radius: 5px;
 }
+
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+  .sticky-top-2 {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 70px;
+    z-index: 1019;
+  }
+} 
 
 .assistent-title {
     background-color: #5BE1B9;
