@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Categoria ' . $category->id)
+@section('title', 'Categoria de etiqueta' . $category->id)
 
 
 @section('content')

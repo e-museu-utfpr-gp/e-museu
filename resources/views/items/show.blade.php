@@ -71,7 +71,11 @@
                                 <p class="fw-bold">Data</p>
                             </div>
                             <div class="col-md-7">
-                                <p>{{ date('d/m/Y', strtotime($item->date)) }}</p>
+                                @if (\Carbon\Carbon::parse($item->date)->format('Y') != '0001')
+                                    <p>{{ date('d/m/Y', strtotime($item->date)) }}</p>
+                                @else
+                                    <p>Desconhecida</p>
+                                @endif
                             </div>
                         </div>
                         @foreach ($item->tagItems as $tagItem)
@@ -177,7 +181,7 @@
                 <h3>História</h3>
                 <div class="m-4">
                     @if ($item->history == null)
-                        <div class="m-4">
+                        <div>
                             <strong>No momento este item não apresenta história. Nos ajude enviando uma informação extra!</strong>
                         </div>
                     @else

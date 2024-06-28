@@ -118,7 +118,7 @@
                                         <img class="p-2" src="/img/form.png" style="width: 7rem;" alt="...">
                                     </div>
                                     <div class="col-md-8">
-                                        <h6 class="card-title fw-bold">Cadastrar um item</h6>
+                                        <h6 class="card-title fw-bold">Colabore com o museu</h6>
                                         <p>Quer colaborar com o nosso museu enviando um item ao nosso acervo virtual?
                                         </p>
                                     </div>

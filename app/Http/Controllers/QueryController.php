@@ -53,6 +53,7 @@ class QueryController extends Controller
     {
         $data = Proprietary::where('contact', 'LIKE', $request->get('contact'))
                             ->where('blocked', false)
+                            ->where('is_admin', false)
                             ->first();
 
         if ($data) {

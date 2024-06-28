@@ -47,7 +47,7 @@ const dialogues = [
     },
     {
         id: 6,
-        text: "Além das categorias, alguns itens também recebem uma ou mais etiquetas, que têm o propósito de organizar com mais precisão os itens do nosso museu. À esquerda do conteúdo central da página, ou em um botão flutuante no canto inferior esquerdo se estiver usando um aparelho mobile, você econtrará as opções de filtragem por etiqueta, ordenação por data e ordem alfabética. Com este sistema, você poderá filtrar itens por marca, série, e muito mais!",
+        text: "Além das categorias, alguns itens também recebem uma ou mais etiquetas, que têm o propósito de organizar com mais precisão os itens do nosso museu. À esquerda do conteúdo central da página, ou em um botão flutuante no canto inferior esquerdo se estiver usando um aparelho mobile, você econtrará as opções de filtragem por etiqueta, ordenação por data e ordem alfabética. Com este sistema, você poderá filtrar itens por marca e série!",
         choices: [
             { text: "Organização por categorias", nextId: 4 },
             { text: "Sistema de busca", nextId: 5 },

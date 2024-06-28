@@ -70,7 +70,7 @@
                                 @enderror
                             </div>
                             <div class="mb-3">
-                                <label for="date" class="form-label">Data*</label>
+                                <label for="date" class="form-label">Data</label>
                                 <input type="date" class="form-control @error('date') is-invalid @enderror"
                                     id="date" name="date" value="{{ $item->date }}">
                                 @error('date')

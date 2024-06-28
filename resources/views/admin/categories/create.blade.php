@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Criar categoria')
+@section('title', 'Criar categoria de etiqueta')
 
 @section('content')
     <div class="mb-auto container-fluid">
@@ -13,7 +13,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="card mb-3">
-                        <h2 class="card-header">Adicionar Categoria</h2>
+                        <h2 class="card-header">Adicionar Categoria de Etiqueta</h2>
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Nome</label>

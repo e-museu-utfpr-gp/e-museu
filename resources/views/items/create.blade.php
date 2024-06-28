@@ -69,10 +69,10 @@
                         </div>
                         <div class="col-md-6">
                             <label for="date">
-                                <h5>Data de Lançamento*
+                                <h5>Data de Lançamento
                                     <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
                                         data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                        data-bs-content="Data em que o item foi lançado e disponibilizado para uso.">
+                                        data-bs-content="Data em que o item foi lançado e disponibilizado para uso. Ao não ter certeza sobre o dia e mês exatos, pode-se inserir dia 01 e mês 01.">
                                         <i class="bi bi-info-circle-fill h4 ms-1"
                                             style="color: #ED6E38; cursor: pointer;"></i>
                                     </button>
@@ -80,7 +80,7 @@
                             </label>
                             <div class="input-div">
                                 <input class="form-control me-2 input-form  @error('date') is-invalid @enderror"
-                                    type="date" name="date" placeholder="" value="{{ old('date') }}" required>
+                                    type="date" name="date" placeholder="" value="{{ old('date') }}">
                                 @error('date')
                                     <div class="invalid-feedback">
                                         {{ $message }}
@@ -232,7 +232,7 @@
                             <h5>Etiquetas
                                 <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
                                     data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="As etiquetas servem para identificarmos com mais facilidade o seu item. Marca, tamanho e série são alguns dos exemplos de etiquetas disponíveis.">
+                                    data-bs-content="As etiquetas servem para identificarmos com mais facilidade o seu item. Marca é um dos exemplos de etiqueta disponíveis.">
                                     <i class="bi bi-info-circle-fill h4 ms-1"
                                         style="color: #ED6E38; cursor: pointer;"></i>
                                 </button>

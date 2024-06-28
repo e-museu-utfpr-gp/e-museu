@@ -132,7 +132,7 @@ class ItemController extends Controller
 
         self::storeMultipleComponent($request, $item, $componentData);
 
-        return redirect()->route('items.create')->with('success', 'Agradecemos pelo seu tempo! Analisaremos sua contribuição antes de adicionarmos ao nosso museu.');
+        return redirect()->route('items.create')->with('success', 'Agradecemos pelo seu tempo! Analisaremos sua colaboração antes de adicionarmos ao nosso museu.');
     }
 
     public function show($id)
@@ -160,6 +160,9 @@ class ItemController extends Controller
     {
         $itemData['proprietary_id'] = $proprietary->id;
         $itemData['identification_code'] = '000';
+
+        if ($itemData['date'] === null)
+            $itemData['date'] = '0001-01-01 00:00:00';
 
         $item = DB::transaction(function () use ($itemData){
 

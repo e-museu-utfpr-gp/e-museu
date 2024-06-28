@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Listar categorias')
+@section('title', 'Listar categorias de etiqueta')
 
 
 @section('content')
@@ -15,12 +15,12 @@
             </div>
         @endforeach
         <div class="card mb-3">
-            <h2 class="card-header">Categorias - {{ $count }} Cadastrados</h2>
+            <h2 class="card-header">Categorias de Etiqueta - {{ $count }} Cadastrados</h2>
         </div>
         <nav class="navbar navbar-light bg-light">
             <div class="container-fluid">
                 <a href="{{ route('admin.categories.create') }}" type="button" class="btn btn-success"><i
-                        class="bi bi-plus-circle"></i> Adicionar Categoria</a>
+                        class="bi bi-plus-circle"></i> Adicionar Categoria de Etiqueta</a>
                 <form action="{{ route('admin.categories.index') }}" class="d-flex" method="GET">
                     <select class="form-select me-2" id="search_column" name="search_column">
                         <option value="id" @if (request()->query('search_column') == 'id') selected @endif>Id</option>

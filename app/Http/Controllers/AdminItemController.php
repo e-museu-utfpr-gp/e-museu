@@ -116,7 +116,7 @@ class AdminItemController extends Controller
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+            return back()->withErrors($validator)->withInput();
         }
 
         $data = $request->all();
@@ -126,6 +126,9 @@ class AdminItemController extends Controller
         }
 
         $data['identification_code'] = '000';
+
+        if ($data['date'] === null)
+            $data['date'] = '0001-01-01 00:00:00';
 
         DB::transaction(function () use ($data, $item){
             $item = Item::create($data);
@@ -163,6 +166,9 @@ class AdminItemController extends Controller
         } else {
             unset($data['image']);
         }
+
+        if ($data['date'] === null)
+            $data['date'] = '0001-01-01 00:00:00';
 
         $item->update($data);
 

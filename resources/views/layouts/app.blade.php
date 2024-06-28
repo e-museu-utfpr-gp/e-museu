@@ -41,14 +41,20 @@
             <div class="collapse navbar-collapse flex-grow-0 mt-2" id="navbarSupportedContent">
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'items.index' || Route::currentRouteName() == 'items.show') explore-button @endif" href="{{ route('items.index') }}"><i
-                                class="h5 bi bi-search me-2"></i>EXPLORAR</a>
+                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'home') explore-button @endif"
+                            href="{{ route('home') }}">PÁGINA INICIAL</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'items.create') explore-button @endif" href={{ route('items.create') }}>COLABORAÇÃO</a>
+                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'items.index' || Route::currentRouteName() == 'items.show') explore-button @endif"
+                            href="{{ route('items.index') }}"><i class="bi bi-search h6 me-1"></i>EXPLORAR</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'about') explore-button @endif" href={{ route('about') }}>SOBRE</a>
+                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'items.create') explore-button @endif"
+                            href={{ route('items.create') }}>COLABORAÇÃO</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'about') explore-button @endif"
+                            href={{ route('about') }}>SOBRE</a>
                     </li>
                 </ul>
             </div>
@@ -61,7 +67,8 @@
     @yield('content')
     <div>
         <footer class="d-md-flex custom-footer px-md-5 justify-content-between fixed align-items-center  py-5 mt-2">
-            <p class="custom-nav mb-0 d-flex justify-content-center col-md-4"><strong class="me-1">Contato: </strong>emuseuvirtual@gmail.com</p>
+            <p class="custom-nav mb-0 d-flex justify-content-center col-md-4"><strong class="me-1">Contato:
+                </strong>emuseuvirtual@gmail.com</p>
 
             <a href="/"
                 class="col-md-4 d-flex align-items-center justify-content-center my-3 me-md-auto link-dark text-decoration-none">

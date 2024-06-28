@@ -65,6 +65,21 @@ class AdminProprietaryController extends Controller
     public function store(ProprietaryRequest $request)
     {
         $data = $request->validated();
+
+        $rules = [
+            'contact' => 'unique:proprietaries',
+        ];
+
+        $messages = [
+            'contact.unique:proprietaries' => 'O campo Email já está sendo utilizado',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return back()->withErrors($messages)->withInput();
+        }
+
         $proprietary = Proprietary::create($data);
 
         return redirect()->route('admin.proprietaries.show', $proprietary)->with('success', 'Colaborador adicionado com sucesso.');
@@ -82,6 +97,20 @@ class AdminProprietaryController extends Controller
     public function update(NewProprietaryRequest $request, Proprietary $proprietary)
     {
         $data = $request->validated();
+
+        $rules = [
+            'contact' => 'unique:proprietaries',
+        ];
+
+        $messages = [
+            'contact.unique:proprietaries' => 'O campo Email já está sendo utilizado',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            return back()->withErrors($messages)->withInput();
+        }
 
         $proprietary->update($data);
 
