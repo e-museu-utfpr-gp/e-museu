@@ -44,12 +44,7 @@ body {
     color: #0D233D;
 }
 
-.button {
-    background-color: #5BE1B9;
-    border-bottom: 10px;
-}
-
-.button {
+.explore-button {
     background-color: #5BE1B9;
     border-bottom: 10px;
 }
@@ -258,7 +253,7 @@ textarea {
     border-bottom: 1px solid #0D233D;
 }
 
-.menu-division-line {
+.explore-menu-division-line {
     border-bottom: 1px solid #0D233D;
 }
 
