@@ -200,8 +200,12 @@
                                             <div class="my-4">
                                                 <div class="d-flex align-items-start">
                                                     <div class="timeline-circle me-2"></div>
-                                                    <h6 class="fw-bold timeline-item-date">
-                                                        {{ date('d/m/Y', strtotime($timelineItem->date)) }}</h6>
+                                                    @if (\Carbon\Carbon::parse($timelineItem->date)->format('Y') != '0001')
+                                                        <h6 class="fw-bold timeline-item-date">
+                                                            {{ date('d/m/Y', strtotime($timelineItem->date)) }}</h6>
+                                                    @else
+                                                        <h6 class="fw-bold timeline-item-date">Data Desconhecida</h6>
+                                                    @endif
                                                 </div>
                                                 <div class="d-md-flex">
                                                     <div>
