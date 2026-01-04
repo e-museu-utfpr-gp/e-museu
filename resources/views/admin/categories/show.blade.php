@@ -58,5 +58,4 @@
         </div>
     </div>
 
-    <script src="{{ asset('script/deleteCategoryWarning.js') }}"></script>
 @endsection

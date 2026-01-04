@@ -1,4 +1,4 @@
-const dialogues = [
+window.aboutDialogues = [
     {
         id: 1,
         text: "Olá, sou Ada, sua assistente virtual. Como posso te ajudar?",
@@ -11,15 +11,15 @@ const dialogues = [
         text: "O que gostaria de saber?",
         choices: [
             { text: "Saber mais sobre a página atual", nextId: 3 },
+            { text: "Ir para a página inicial do museu >", url: "/" },
             { text: "Explorar itens do museu >", url: "items" },
             { text: "Contribuir com o museu >", url: "items/create" },
-            { text: "Saber mais sobre o museu >", url: "about" },
             { text: "Entrar em contato com o museu >", nextId: 4 },
         ]
     },
     {
         id: 3,
-        text: "Nesta página te contamos um pouco sobre o nosso projeto de museu para itens eletrônicos. E na parte de baixo estão disponibilizados algumas opções de páginas para navegar. Dê uma olhada!",
+        text: "Nesta página contaremos um pouco mais sobre o nosso projeto e as entidades envolvidas na criação do E-museu.",
         choices: [
             { text: "Voltar para as opções", nextId: 2 }
         ]

@@ -91,7 +91,4 @@
     </div>
 
     @include('image-modal.img-modal')
-    <script src="{{ asset('script/img-modal.js') }}"></script>
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/img-modal.css') }}">
-    <script src="{{ asset('script/assistentDialogues/aboutDialogue.js') }}"></script>
 @endsection
