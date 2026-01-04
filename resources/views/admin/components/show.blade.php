@@ -171,9 +171,5 @@
     </div>
 
     @include('image-modal.img-modal')
-    <script src="{{ asset('script/img-modal.js') }}"></script>
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/img-modal.css') }}">
 
-    <script src="{{ asset('script/deleteItemWarning.js') }}"></script>
-    <script src="{{ asset('script/deleteComponentWarning.js') }}"></script>
 @endsection

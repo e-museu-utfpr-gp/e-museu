@@ -2,9 +2,11 @@
     border-radius: 5px;
     cursor: pointer;
     transition: 0.3s;
-  }
+}
 
-.clickable-image:hover {opacity: 0.7;}
+.clickable-image:hover {
+    opacity: 0.7;
+}
 
 .img-modal {
     display: none;
@@ -18,16 +20,16 @@
     overflow: auto;
     background-color: rgb(0,0,0);
     background-color: rgba(0,0,0,0.9);
-  }
+}
 
-  .img-modal-content {
+.img-modal-content {
     margin: auto;
     display: block;
     width: 80%;
     max-width: 80vh;
-  }
+}
 
-  .close {
+.close {
     position: absolute;
     top: 15px;
     right: 35px;
@@ -35,33 +37,33 @@
     font-size: 40px;
     font-weight: bold;
     transition: 0.3s;
-  }
+}
 
-  .img-modal-content, #caption {
+.img-modal-content, #caption {
     animation-name: zoom;
     animation-duration: 0.1s;
-  }
+}
 
-  @keyframes zoom {
-    from {transform:scale(0)}
-    to {transform:scale(1)}
-  }
+@keyframes zoom {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
 
-  .close:hover,
-  .close:focus {
+.close:hover,
+.close:focus {
     color: #bbb;
     text-decoration: none;
     cursor: pointer;
-  }
+}
 
-  #modal-caption {
+#modal-caption {
     color: white;
     text-align: center;
     margin-top: 20px;
-  }
+}
 
-  @media only screen and (max-width: 700px){
+@media only screen and (max-width: 700px) {
     .img-modal-content {
-      width: 100%;
+        width: 100%;
     }
-  }
+}

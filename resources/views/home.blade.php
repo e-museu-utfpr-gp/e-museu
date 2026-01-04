@@ -53,6 +53,14 @@
                             @endphp
                         @endforeach
                     </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
                 </div>
             </div>
             <div class="row">
@@ -152,8 +160,4 @@
     </div>
 
     @include('image-modal.img-modal')
-    <script src="{{ asset('script/img-modal.js') }}"></script>
-    <script src="{{ asset('script/img-modal.js') }}"></script>
-    <script src="{{ asset('script/assistentDialogues/homeDialogue.js') }}"></script>
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/img-modal.css') }}">
 @endsection

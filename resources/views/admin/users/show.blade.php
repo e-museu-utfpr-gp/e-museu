@@ -55,5 +55,4 @@
         </div>
     </div>
 
-    <script src="{{ asset('script/deleteUserWarning.js') }}"></script>
 @endsection

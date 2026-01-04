@@ -9,12 +9,11 @@ use App\Models\ItemComponent;
 
 class ItemSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Item::factory(1000)->create();
-        ItemComponent::factory(500)->create();
+        if(app()->environment('local')) {
+            Item::factory(100)->create();
+            ItemComponent::factory(50)->create();
+        }
     }
 }

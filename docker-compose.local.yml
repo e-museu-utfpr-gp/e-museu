@@ -1,0 +1,56 @@
+services:
+  app:
+    build:
+        context: .
+        dockerfile: Dockerfile.local
+    working_dir: /var/www/
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/var/www
+    networks:
+      - e-museu_network
+    depends_on:
+      - db
+
+  web:
+    image: nginx:mainline-alpine3.22-perl
+    ports:
+      - "${WEB_SERVER_PORT_LOCAL}:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - e-museu_network
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0.43-debian
+    ports:
+      - "${DB_PORT}:3306"
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - e-museu_network 
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    ports:
+        - "${PHP_MYADMIN_PORT_LOCAL}:80"
+    environment:
+        PMA_HOST: db
+        PMA_PORT: ${DB_PORT}
+        MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-userpass}
+    networks:
+        - e-museu_network
+
+networks:
+  e-museu_network:
+    driver: bridge

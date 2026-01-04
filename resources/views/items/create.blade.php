@@ -421,6 +421,4 @@
         }
     </script>
 
-    <script src="{{ asset('script/popOverButton.js') }}"></script>
-    <script src="{{ asset('script/assistentDialogues/createDialogue.js') }}"></script>
 @endsection

@@ -9,11 +9,10 @@ use App\Models\Extra;
 
 class ExtraSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Extra::factory(100)->create();
+        if(app()->environment('local')) {
+            Extra::factory(100)->create();
+        }
     }
 }

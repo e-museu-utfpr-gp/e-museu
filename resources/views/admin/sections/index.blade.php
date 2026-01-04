@@ -83,5 +83,4 @@
         {{ $sections->links('pagination::bootstrap-5') }}
     </div>
 
-    <script src="{{ asset('script/deleteSectionWarning.js') }}"></script>
 @endsection
