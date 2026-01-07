@@ -17,14 +17,15 @@ function env {
 
 function get_compose_file {
   source .env
+  # "docker-compose.production.yml" will never be used in local environment, it's only for production environment
   if [ "$APP_ENV" == "production" ]; then
-    echo "docker-compose.production.yml"
+    echo "docker-compose.prod-local.yml"
   elif [ "$APP_ENV" == "local" ]; then
     echo "docker-compose.local.yml"
   elif [[ "$1" == "--no-check" ]]; then
     echo $APP_ENV
   else
-    echo "Error: APP_ENV must be 'local' or 'production'. Current value: '$APP_ENV'" >&2
+    echo "Error: APP_ENV must be 'local' or 'prod-local'. Current value: '$APP_ENV'" >&2
     exit 1
   fi
 }
@@ -41,12 +42,12 @@ function setup {
   echo "=================================================="
   if [ "$compose_file" == "docker-compose.local.yml" ]; then
     echo "    RUNNING IN LOCAL ENVIRONMENT"
-  elif [ "$compose_file" == "docker-compose.production.yml" ]; then
-    echo "    RUNNING IN PRODUCTION ENVIRONMENT"
+  elif [ "$compose_file" == "docker-compose.prod-local.yml" ]; then
+    echo "    RUNNING IN PRODUCTION SIMULATION (LOCAL)"
   else
     echo "    ERROR: UNKNOWN ENVIRONMENT"
     echo "    APP_ENV value: $(source .env && echo $APP_ENV)"
-    echo "    Please check your .env file and set APP_ENV to 'local' or 'production'"
+    echo "    Please check your .env file and set APP_ENV to 'local' or 'prod-local'"
   fi
   echo "    Docker Compose: $compose_file"
   echo "=================================================="

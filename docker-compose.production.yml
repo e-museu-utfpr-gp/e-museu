@@ -4,35 +4,38 @@ services:
       context: .
       dockerfile: Dockerfile.production
       target: app
-    working_dir: /var/www/
-    networks:
-      - e-museu_network
+    working_dir: /var/www
     depends_on:
       - db
+    networks:
+      - e-museu_network
 
   web:
     build:
       context: .
       dockerfile: Dockerfile.production
       target: web
-    ports:
-      - "${WEB_SERVER_PORT_PRODUCTION}:80"
     depends_on:
       - app
     networks:
       - e-museu_network
+    expose:
+      - "80"
 
   db:
     image: mysql:8.0.43-debian
     environment:
-      - MYSQL_DATABASE=${DB_DATABASE}
-      - MYSQL_USER=${DB_USERNAME}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
-      - ./mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     networks:
-      - e-museu_network 
+      - e-museu_network
+
+volumes:
+  mysql_data:
 
 networks:
   e-museu_network:
