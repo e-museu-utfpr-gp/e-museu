@@ -41,7 +41,7 @@ COPY resources/ ./resources/
 COPY routes/ ./routes/
 COPY storage/ ./storage/
 COPY artisan ./
-# COPY .env ./ # we don't need the .env file in the production environment
+COPY .env ./
 
 RUN composer dump-autoload --optimize
 
