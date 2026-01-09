@@ -17,3 +17,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+mysql_data
+vite.config.js.timestamp*

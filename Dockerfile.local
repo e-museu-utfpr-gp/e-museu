@@ -1,0 +1,32 @@
+FROM php:8.3.25-fpm-alpine3.22
+
+ARG user=laravel
+ARG uid=1000
+
+RUN apk update && apk add --no-cache \
+    git \
+    curl \
+    libpng-dev \
+    oniguruma-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    nodejs \
+    npm \
+    linux-headers
+
+RUN rm -rf /var/cache/apk/*
+
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd sockets
+
+COPY --from=composer:2.8.10 /usr/bin/composer /usr/bin/composer
+
+RUN adduser -D -s /bin/sh -u $uid -G www-data $user
+RUN mkdir -p /home/$user/.composer && \
+    chown -R $user:www-data /home/$user
+
+WORKDIR /var/www
+
+COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
+
+USER $user

@@ -337,17 +337,6 @@
     </div>
 
     @include('image-modal.img-modal')
-    <script src="{{ asset('script/img-modal.js') }}"></script>
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/img-modal.css') }}">
 
-    <script src="{{ asset('script/img-modal.js') }}"></script>
-    <script src="{{ asset('script/deleteComponentWarning.js') }}"></script>
-    <script src="{{ asset('script/deleteExtraWarning.js') }}"></script>
-    <script src="{{ asset('script/deleteItemTagWarning.js') }}"></script>
-    <script src="{{ asset('script/deleteItemWarning.js') }}"></script>
-    <script src="{{ asset('script/deleteSectionWarning.js') }}"></script>
-    <script src="{{ asset('script/deleteProprietaryWarning.js') }}"></script>
-    <script src="{{ asset('script/deleteContributionWarning.js') }}"></script>
 
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/img-modal.css') }}">
 @endsection

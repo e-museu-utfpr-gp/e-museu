@@ -128,5 +128,4 @@
         });
     </script>
 
-    <script src="{{ asset('script/getTagsByCategory.js') }}"></script>
 @endsection

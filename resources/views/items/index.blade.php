@@ -65,5 +65,4 @@
             {{ $items->links('pagination::bootstrap-5') }}
         </div>
     </div>
-    <script src="{{ asset('script/assistentDialogues/indexDialogue.js') }}"></script>
 @endsection

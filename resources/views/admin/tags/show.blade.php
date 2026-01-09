@@ -95,6 +95,4 @@
         </div>
     </div>
 
-    <script src="{{ asset('script/deleteCategoryWarning.js') }}"></script>
-    <script src="{{ asset('script/deleteTagWarning.js') }}"></script>
 @endsection

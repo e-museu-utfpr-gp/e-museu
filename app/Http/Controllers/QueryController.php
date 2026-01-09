@@ -11,20 +11,36 @@ class QueryController extends Controller
 {
     public function tagNameAutoComplete(Request $request)
     {
+        $query = $request->get('query', '');
+        $category = $request->get('category');
+        
         $data = Tag::select('name')
-                    ->where('category_id', 'LIKE', $request->get('category'))
-                    ->where('validation', true)
-                    ->get();
+                    ->where('category_id', 'LIKE', $category)
+                    ->where('validation', true);
+
+        if (!empty($query)) {
+            $data = $data->where('name', 'LIKE', '%' . $query . '%');
+        }
+        
+        $data = $data->limit(10)->get();
 
         return response()->json($data);
     }
 
     public function componentNameAutoComplete(Request $request)
     {
+        $query = $request->get('query', '');
+        $category = $request->get('category');
+        
         $data = Item::select('name')
-                    ->where('section_id', 'LIKE', $request->get('category'))
-                    ->where('validation', true)
-                    ->get();
+                    ->where('section_id', 'LIKE', $category)
+                    ->where('validation', true);
+        
+        if (!empty($query)) {
+            $data = $data->where('name', 'LIKE', '%' . $query . '%');
+        }
+        
+        $data = $data->limit(10)->get();
 
         return response()->json($data);
     }

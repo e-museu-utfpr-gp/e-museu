@@ -97,5 +97,4 @@
         {{ $tags->links('pagination::bootstrap-5') }}
     </div>
 
-    <script src="{{ asset('script/deleteTagWarning.js') }}"></script>
 @endsection

@@ -1,0 +1,413 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+
+function env {
+  echo ">> Copying environment file..."
+  if [ -f .env ]; then
+    echo ".env already exists, overwriting..."
+  else
+    echo "Creating .env file from .env.example"
+  fi
+  cp -f .env.example .env
+  chmod 664 .env
+  chown 1000:1000 .env
+}
+
+function get_compose_file {
+  source .env
+  # "docker-compose.production.yml" will never be used in local environment, it's only for production environment
+  if [ "$APP_ENV" == "production" ]; then
+    echo "docker-compose.prod-local.yml"
+  elif [ "$APP_ENV" == "local" ]; then
+    echo "docker-compose.local.yml"
+  elif [[ "$1" == "--no-check" ]]; then
+    echo $APP_ENV
+  else
+    echo "Error: APP_ENV must be 'local' or 'prod-local'. Current value: '$APP_ENV'" >&2
+    exit 1
+  fi
+}
+
+function setup {
+  echo "Running setup..."
+
+  if [[ "$1" == "-env" || "$2" == "-env" ]]; then
+    env || echo "[warn] Failed to copy .env (env); continuing..."
+  fi
+
+  compose_file=$(get_compose_file)
+  echo ""
+  echo "=================================================="
+  if [ "$compose_file" == "docker-compose.local.yml" ]; then
+    echo "    RUNNING IN LOCAL ENVIRONMENT"
+  elif [ "$compose_file" == "docker-compose.prod-local.yml" ]; then
+    echo "    RUNNING IN PRODUCTION SIMULATION (LOCAL)"
+  else
+    echo "    ERROR: UNKNOWN ENVIRONMENT"
+    echo "    APP_ENV value: $(source .env && echo $APP_ENV)"
+    echo "    Please check your .env file and set APP_ENV to 'local' or 'prod-local'"
+  fi
+  echo "    Docker Compose: $compose_file"
+  echo "=================================================="
+  echo ""
+
+  up || echo "[warn] Failed to start containers (up); continuing..."
+
+  composer || echo "[warn] Composer install failed (composer); continuing..."
+
+  if [ "$APP_ENV" == "local" ]; then
+    echo ">> Starting Vite dev server in background..."
+    npm-local-bg || echo "[warn] Failed to start Vite dev server in background; continuing..."
+  fi
+
+  if [[ "$1" == "-y" || "$2" == "-y" ]]; then
+    gen_key -y || echo "[warn] Key generation failed (gen_key); continuing..."
+  else
+    gen_key || echo "[warn] Key generation failed (gen_key); continuing..."
+  fi
+
+  migrate || echo "[warn] Migrations failed (migrate); continuing..."
+
+  seed || echo "[warn] Seeding failed (seed); continuing..."
+}
+
+function setup-hard {
+  if [[ "$1" != "-y" && "$2" != "-y" ]]; then
+    echo "WARNING: You are about to run setup-hard."
+    echo "This will delete and recreate your database, node_modules, vendor, and all Docker containers."
+    echo -n "Proceed only if you are sure. (y/n): "
+    read confirm
+
+    if [ "$confirm" != "y" ]; then
+      echo "Aborting setup-hard."
+      exit 1
+    fi
+  fi
+
+  if [[ "$1" == "-env" || "$2" == "-env" ]]; then
+    env || echo "[warn] Failed to copy .env (env); continuing..."
+  fi
+
+  echo "Running setup-hard..."
+
+  remove-all -y || echo "[warn] Could not complete cleanup (remove-all); continuing..."
+
+  if [[ "$1" == "-env" || "$2" == "-env" ]]; then
+    if [[ "$1" == "-y" || "$2" == "-y" ]]; then
+      setup -env -y || echo "[warn] Setup process failed (setup)."
+    else
+      setup -env || echo "[warn] Setup process failed (setup)."
+    fi
+  else
+    if [[ "$1" == "-y" || "$2" == "-y" ]]; then
+      setup -y || echo "[warn] Setup process failed (setup)."
+    else
+      setup || echo "[warn] Setup process failed (setup)."
+    fi
+  fi
+}
+
+function npm-local-bg {
+  source .env
+  if [ "$APP_ENV" != "local" ]; then
+    echo "npm-local-bg can only be run in local environment. Current APP_ENV: $APP_ENV" >&2
+    return 1
+  fi
+
+  echo ">> Installing Node.js dependencies in container..."
+    docker compose -f "$(get_compose_file)" exec app npm install
+    
+    echo ">> Starting Vite dev server in background..."
+    echo "Access your site at: http://localhost:$(grep WEB_SERVER_PORT_LOCAL .env | cut -d'=' -f2)"
+    echo ""
+    
+    docker compose -f "$(get_compose_file)" exec -d app npm run dev -- --host 0.0.0.0 --port 5173
+    
+    echo "Vite dev server started in background!"
+    echo "Access Vite at: http://localhost:5173"
+}
+
+function stop-vite-local {
+  source .env
+  echo ">> Stopping Vite dev server..."
+  
+  echo ">> Restarting app container to stop all Node.js processes..."
+  docker compose -f "$(get_compose_file)" exec app rm -rf public/hot
+  docker compose -f "$(get_compose_file)" restart app
+  
+  if [ $? -eq 0 ]; then
+    echo "Container restarted - Vite dev server stopped!"
+  else
+    echo "Failed to restart container"
+    return 1
+  fi
+}
+
+function start-vite-local {
+  source .env
+  if [ "$APP_ENV" != "local" ]; then
+    echo "start-vite-local can only be run in local environment. Current APP_ENV: $APP_ENV" >&2
+    return 1
+  fi
+
+  VITE_PORT=5173
+  if curl -s http://localhost:$VITE_PORT > /dev/null 2>&1; then
+    echo "Vite dev server is already running on port $VITE_PORT"
+    echo "Access Vite at: http://localhost:$VITE_PORT"
+    echo "Use './run stop-vite-local' to stop it first if you want to restart"
+    return 0
+  fi
+
+  echo ">> Starting Vite dev server in background..."
+  echo "Access your site at: http://localhost:$(grep WEB_SERVER_PORT_LOCAL .env | cut -d'=' -f2)"
+  echo ""
+
+  docker compose -f "$(get_compose_file)" exec -d app npm run dev -- --host 0.0.0.0 --port $VITE_PORT
+  
+  echo "Vite dev server started successfully!"
+  echo "Access Vite at: http://localhost:$VITE_PORT"
+}
+
+function build-vite {
+  source .env
+  echo ">> Removing old build files..."
+  docker compose -f "$(get_compose_file)" exec app rm -rf public/build public/hot
+  echo ">> Building assets with Vite for production..."
+  docker compose -f "$(get_compose_file)" exec app npm run build
+}
+
+function seed {
+  source .env
+  echo ">> Seeding database..."
+  docker compose -f "$(get_compose_file)" exec app php artisan db:seed --force
+}
+
+function phpstan {
+  TEST_PATH="${@:-}"
+  docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpstan analyse --memory-limit 1G ${TEST_PATH}
+}
+
+function phpcs {
+  if [ $# -eq 0 ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs app routes tests
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs "$@"
+  fi
+}
+
+function phpcbf {
+  if [ $# -eq 0 ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf app routes tests
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf "$@"
+  fi
+}
+
+function test {
+  docker compose -f "$(get_compose_file)" exec app php artisan test
+}
+
+function all-tests {
+  set -e
+  ./run test
+  ./run phpcs
+  ./run phpstan
+}
+
+function ps {
+  docker compose -f "$(get_compose_file)" ps "${@}"
+}
+
+function up {
+  source .env
+  docker compose -f "$(get_compose_file)" up -d "${@}"
+}
+
+function down {
+  docker compose -f "$(get_compose_file)" down "${@}"
+}
+
+function gen_key {
+  source .env
+  echo ">> Generating application key..."
+  if [[ "$1" == "-y" ]]; then
+    docker compose -f "$(get_compose_file)" exec app php artisan key:generate --force
+  else
+    docker compose -f "$(get_compose_file)" exec app php artisan key:generate
+  fi
+}
+
+function wait-for-db {
+  source .env
+  echo ">> Waiting for database to be ready..."
+  local max_attempts=30
+  local attempt=1
+  
+  while [ $attempt -le $max_attempts ]; do
+    # Test connection from app container to db container using PHP PDO
+    if docker compose -f "$(get_compose_file)" exec -T app php -r "try { \$pdo = new PDO('mysql:host=db;port=3306', '${DB_USERNAME}', '${DB_PASSWORD}'); \$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); exit(0); } catch (Exception \$e) { exit(1); }" 2>/dev/null; then
+      echo "  Database is ready!"
+      return 0
+    fi
+    
+    if [ $attempt -lt $max_attempts ]; then
+      echo "  Waiting for database... (attempt $attempt/$max_attempts)"
+      sleep 2
+    fi
+    
+    attempt=$((attempt + 1))
+  done
+  
+  echo "  ERROR: Database did not become ready after $max_attempts attempts"
+  return 1
+}
+
+function migrate {
+  source .env
+  wait-for-db
+  echo ">> Running database migrations..."
+  docker compose -f "$(get_compose_file)" exec app php artisan migrate --force
+}
+
+function storage_link {
+  source .env
+  echo ">> Creating storage symbolic link..."
+  docker compose -f "$(get_compose_file)" exec app php artisan storage:link
+}
+
+function composer {
+  source .env
+  echo ">> Installing Composer dependencies..."
+  docker compose -f "$(get_compose_file)" exec app composer install --no-interaction --optimize-autoloader
+}
+
+function remove-all {
+  if [[ "$1" != "-y" ]]; then
+    echo "WARNING: You are about to run remove-all."
+    echo "This will delete and recreate your production database, node_modules, vendor, and all Docker containers."
+    echo -n "Proceed only if you are sure. (y/n): "
+    read confirm
+
+    if [ "$confirm" != "y" ]; then
+      echo "Aborting setup-production-hard."
+      exit 1
+    fi
+  fi
+
+  remove-all-files -y || echo "[warn] Could not complete file cleanup (remove-all-files); continuing..."
+
+  remove-all-docker || echo "[warn] Could not complete Docker cleanup (remove-all-docker); continuing..."
+
+  echo ">> Cleanup completed!"
+}
+
+function remove-all-files {
+  if [[ "$1" != "-y" ]]; then
+    echo "WARNING: You are about to run remove-all-files."
+    echo "This will delete mysql_data, vendor, node_modules, public/hot and public/build."
+    echo -n "Proceed only if you are sure. (y/n): "
+    read confirm
+
+    if [ "$confirm" != "y" ]; then
+      echo "Aborting setup-production-hard."
+      exit 1
+    fi
+  fi
+
+  echo ">> Removing mysql_data, vendor, node_modules, public/hot and public/build..."
+
+  rm -rf mysql_data 2>/dev/null || echo "mysql_data directory not found, skipping removal"
+  rm -rf vendor 2>/dev/null || echo "vendor directory not found, skipping removal"
+  rm -rf node_modules 2>/dev/null || echo "node_modules directory not found, skipping removal"
+  rm -rf public/hot 2>/dev/null || echo "public/hot file not found, skipping removal"
+  rm -rf public/build 2>/dev/null || echo "public/build file not found, skipping removal"
+
+  echo ">> File cleanup completed!"
+}
+
+function remove-all-docker {
+  echo ">> Removing all Docker containers, images, and volumes..."
+
+  docker ps -a --filter "name=e-museu" -q | xargs -r docker rm -f
+
+  docker images --format "{{.Repository}}:{{.Tag}} {{.ID}}" | grep "e-museu" | awk '{print $2}' | xargs -r docker rmi -f
+
+  docker volume ls --format "{{.Name}}" | grep "e-museu" | xargs -r docker volume rm -f
+}
+
+function exec {
+  source .env
+  if [ $# -eq 0 ]; then
+    echo ">> Missing command to run inside app container"
+    exit 1
+  fi
+
+  echo ">> Executing in app container: $*"
+  sudo docker exec -it e-museu-app-1 "$@"
+}
+
+function help {
+  echo "Usage: run [command] [options]"
+  echo "Available commands:"
+  echo ""
+  echo "Environment & Setup:"
+  echo "  env                - Copy environment file (.env.example to .env)"
+  echo "  setup              - Complete environment setup (up, composer, gen_key, migrate, seed)"
+  echo "  setup -env         - Same as setup but copies .env.example to .env first"
+  echo "  setup -y           - Setup with automatic confirmation (skip prompts)"
+  echo "  setup -env -y      - Setup with new .env file and automatic confirmation"
+  echo "  setup-hard         - Hard reset: remove all data and containers, then run setup"
+  echo "  setup-hard -env    - Same as setup-hard but copies .env.example to .env first"
+  echo "  setup-hard -y      - Hard reset without confirmation prompt"
+  echo "  setup-hard -env -y - Hard reset with new .env file and no confirmation"
+  echo "  up                 - Start Docker containers"
+  echo "  down               - Stop Docker containers"
+  echo "  ps                 - Show container status"
+  echo "  remove-all         - Clean up environment (remove mysql_data, vendor, containers, images, volumes)"
+  echo "  remove-all-files   - Remove only files (mysql_data, vendor, node_modules, public/hot, public/build)"
+  echo "  remove-all-docker  - Remove only Docker containers, images, and volumes"
+  echo ""
+  echo "Node.js & Vite:"
+  echo "  npm-local-bg       - Install npm dependencies and start Vite dev server in background"
+  echo "  stop-vite-local    - Stop Vite dev server"
+  echo "  start-vite-local   - Start Vite dev server in background"
+  echo "  build-vite         - Build assets with Vite for production"
+  echo ""
+  echo "Laravel Commands:"
+  echo "  gen_key            - Generate Laravel application key"
+  echo "  gen_key -y         - Generate application key without confirmation (production)"
+  echo "  migrate            - Run database migrations"
+  echo "  seed               - Seed database with initial data"
+  echo "  storage_link       - Create storage symbolic link"
+  echo "  composer           - Install Composer dependencies"
+  echo ""
+  echo "Testing & Code Quality:"
+  echo "  test               - Run PHPUnit tests"
+  echo "  phpstan            - Run PHPStan static analysis (Level 8)"
+  echo "  phpcs              - Run PHP Code Sniffer (PSR-12 standards)"
+  echo "  phpcbf             - Run PHP Code Beautifier and Fixer"
+  echo "  all-tests          - Run all tests and code quality checks (test + phpcs + phpstan)"
+  echo ""
+  echo "Utilities:"
+  echo "  exec <cmd>         - Execute command inside app container"
+  echo "  help               - Show this help message"
+  echo ""
+  echo "Examples:"
+  echo "  ./run setup -env           # Complete project setup with new .env file"
+  echo "  ./run setup -env -y        # Setup with new .env and automatic confirmation"
+  echo "  ./run setup-hard -env -y   # Hard reset with new .env file and no confirmation"
+  echo "  ./run gen_key -y           # Generate app key without confirmation"
+  echo "  ./run test                 # Run tests"
+  echo "  ./run phpstan app/Models   # Analyze specific directory"
+  echo "  ./run exec php artisan tinker  # Open Laravel tinker"
+  echo "  ./run remove-all -y        # Remove all without confirmation prompt"
+  echo ""
+  echo "Options:"
+  echo "  -y                 - Skip confirmation prompts (works with setup, setup-hard, gen_key, remove-all, remove-all-files)"
+  echo "  -env               - Copy .env.example to .env before running setup commands"
+}
+
+TIMEFORMAT='\nTask completed in %3lR'
+time "${@}"
