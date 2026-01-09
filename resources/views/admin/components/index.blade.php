@@ -101,5 +101,4 @@
         {{ $components->links('pagination::bootstrap-5') }}
     </div>
 
-    <script src="{{ asset('script/deleteComponentWarning.js') }}"></script>
 @endsection

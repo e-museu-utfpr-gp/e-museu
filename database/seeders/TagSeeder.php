@@ -10,13 +10,12 @@ use App\Models\TagItem;
 
 class TagSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Tag::factory(100)->create();
+        if(app()->environment('local')) {
+            Tag::factory(100)->create();
 
-        TagItem::factory(500)->create();
+            TagItem::factory(50)->create();
+        }
     }
 }

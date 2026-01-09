@@ -57,6 +57,4 @@
         </div>
     </div>
 
-    <script src="{{ asset('script/deleteSectionWarning.js') }}"></script>
-    <script src="{{ asset('script/popOverButton.js') }}"></script>
 @endsection

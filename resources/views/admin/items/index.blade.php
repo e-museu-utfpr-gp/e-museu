@@ -125,5 +125,4 @@
         {{ $items->links('pagination::bootstrap-5') }}
     </div>
 
-    <script src="{{ asset('script/deleteItemWarning.js') }}"></script>
 @endsection

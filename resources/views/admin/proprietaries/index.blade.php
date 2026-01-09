@@ -108,5 +108,4 @@
         {{ $proprietaries->links('pagination::bootstrap-5') }}
     </div>
 
-    <script src="{{ asset('script/deleteProprietaryWarning.js') }}"></script>
 @endsection

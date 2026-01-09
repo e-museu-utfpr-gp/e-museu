@@ -244,16 +244,27 @@
         });
     }
 
-    $('#tag-name').typeahead({
-        source: function(query, process) {
-            return $.get(tagNameAutoCompletePath, {
-                query: query,
-                category: $('#tag-category').find(":selected").val()
-            }, function(data) {
-                return process(data);
-            });
+    function initTagAutocomplete() {
+        if (typeof $ === 'undefined' || typeof $.fn.modernTypeahead === 'undefined') {
+            setTimeout(initTagAutocomplete, 100);
+            return;
         }
-    });
+        
+        $('#tag-name').modernTypeahead({
+            source: function(query, process) {
+                return $.get(tagNameAutoCompletePath, {
+                    query: query,
+                    category: $('#tag-category').find(":selected").val()
+                }, function(data) {
+                    return process(data);
+                });
+            },
+            minLength: 1,
+            delay: 300
+        });
+    }
+    
+    initTagAutocomplete();
 
     $('#addTagModal').on('hidden.bs.modal', function() {
         $('#tag-category').val('');

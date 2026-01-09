@@ -103,5 +103,4 @@
         {{ $extras->links('pagination::bootstrap-5') }}
     </div>
 
-    <script src="{{ asset('script/deleteExtraWarning.js') }}"></script>
 @endsection

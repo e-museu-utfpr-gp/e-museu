@@ -247,15 +247,27 @@
         });
     }
 
-    $('#component-name').typeahead({
-        source: function(query, process) {
-            return $.get(componentNameAutoCompletePath, {
-                category: $('#component-category').find(":selected").val()
-            }, function(data) {
-                return process(data);
-            });
+    function initComponentAutocomplete() {
+        if (typeof $ === 'undefined' || typeof $.fn.modernTypeahead === 'undefined') {
+            setTimeout(initComponentAutocomplete, 100);
+            return;
         }
-    });
+        
+        $('#component-name').modernTypeahead({
+            source: function(query, process) {
+                return $.get(componentNameAutoCompletePath, {
+                    query: query,
+                    category: $('#component-category').find(":selected").val()
+                }, function(data) {
+                    return process(data);
+                });
+            },
+            minLength: 1,
+            delay: 300
+        });
+    }
+    
+    initComponentAutocomplete();
 
     $('#addComponentModal').on('hidden.bs.modal', function() {
         $('#component-category').val('');
