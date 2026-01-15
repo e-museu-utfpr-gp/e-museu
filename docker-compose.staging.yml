@@ -1,28 +1,28 @@
 services:
-  app-production:
+  app-staging:
     build:
       context: .
-      dockerfile: Dockerfile.production
+      dockerfile: Dockerfile.staging
       target: app
     working_dir: /var/www
     depends_on:
-      - db-production
+      - db-staging
     networks:
-      - e_museu_production
+      - e_museu_staging
 
-  web-production:
+  web-staging:
     build:
       context: .
-      dockerfile: Dockerfile.production
+      dockerfile: Dockerfile.staging
       target: web
     depends_on:
-      - app-production
+      - app-staging
     networks:
-      - e_museu_production
+      - e_museu_staging
     expose:
       - "80"
 
-  db-production:
+  db-staging:
     image: mysql:8.0.43-debian
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
@@ -30,13 +30,13 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
-      - mysql_production_data:/var/lib/mysql
+      - mysql_staging_data:/var/lib/mysql
     networks:
-      - e_museu_production
+      - e_museu_staging
 
 volumes:
-  mysql_production_data:
+  mysql_staging_data:
 
 networks:
-  e_museu_production:
+  e_museu_staging:
     driver: bridge
