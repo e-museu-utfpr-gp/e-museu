@@ -2,7 +2,7 @@
 
 #### Forked from https://github.com/tankesho/e-museu
 
-#### v1.0.0-beta
+#### v1.0.2-beta
 
 # 🚧 Work In Progress 
 
@@ -204,6 +204,7 @@ The script automatically detects the environment based on the `APP_ENV` variable
 
 Make sure the `.env` file is configured correctly. Important variables include:
 
+**For local and prod-local environments:**
 ```env
 APP_ENV=local  # or prod-local
 DB_HOST=db
