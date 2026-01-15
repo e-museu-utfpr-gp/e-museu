@@ -6,7 +6,7 @@ services:
       target: app
     working_dir: /var/www/
     networks:
-      - e-museu_network
+      - e_museu_prod_local_network
     depends_on:
       - db
 
@@ -20,7 +20,7 @@ services:
     depends_on:
       - app
     networks:
-      - e-museu_network
+      - e_museu_prod_local_network
 
   db:
     image: mysql:8.0.43-debian
@@ -32,8 +32,8 @@ services:
     volumes:
       - ./mysql_data:/var/lib/mysql
     networks:
-      - e-museu_network 
+      - e_museu_prod_local_network 
 
 networks:
-  e-museu_network:
+  e_museu_prod_local_network:
     driver: bridge
