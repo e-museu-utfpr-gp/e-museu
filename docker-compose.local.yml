@@ -19,7 +19,7 @@ services:
       - "${WEB_SERVER_PORT_LOCAL}:80"
     volumes:
       - ./:/var/www
-      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/local_prod-local/default.conf:/etc/nginx/conf.d/default.conf
     networks:
       - e_museu_local_network
     depends_on:
