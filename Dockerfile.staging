@@ -1,4 +1,4 @@
-# Production: Uses production nginx config, no .env file
+# Staging: Uses staging nginx config, no .env file
 FROM php:8.3.25-fpm-alpine3.22 AS php-base
 
 RUN apk update && apk upgrade && apk add --no-cache \
@@ -42,7 +42,7 @@ COPY resources/ ./resources/
 COPY routes/ ./routes/
 COPY storage/ ./storage/
 COPY artisan ./
-# Production: .env not copied (uses environment variables from Coolify)
+# Staging: .env not copied (uses environment variables)
 
 RUN composer dump-autoload --optimize
 
@@ -85,6 +85,6 @@ FROM nginx:mainline-alpine3.22-perl AS web
 
 WORKDIR /var/www
 
-# Production: nginx config points to app-production service
-COPY docker/nginx/production/default.conf /etc/nginx/conf.d/default.conf
+# Staging: nginx config points to app-staging service
+COPY docker/nginx/staging/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=app /var/www/public /var/www/public
