@@ -13,7 +13,7 @@ services:
   web-staging:
     build:
       context: .
-        dockerfile: Dockerfile.staging
+      dockerfile: Dockerfile.staging
       target: web
     depends_on:
       - app-staging
