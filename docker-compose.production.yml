@@ -30,12 +30,10 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
-      - mysql_production_data:/var/lib/mysql
+      # /root/databases/production/mysql_data_production (root's home directory when opening console)
+      - /root/databases/production/mysql_data_production:/var/lib/mysql
     networks:
       - e_museu_production
-
-volumes:
-  mysql_production_data:
 
 networks:
   e_museu_production:
