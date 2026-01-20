@@ -30,12 +30,10 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
-      - mysql_staging_data:/var/lib/mysql
+      # /root/databases/staging/mysql_data_staging (root's home directory when opening console)
+      - /root/databases/staging/mysql_data_staging:/var/lib/mysql
     networks:
       - e_museu_staging
-
-volumes:
-  mysql_staging_data:
 
 networks:
   e_museu_staging:
