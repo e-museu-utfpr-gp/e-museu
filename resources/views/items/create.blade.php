@@ -186,7 +186,7 @@
                         <div class="input-div">
                             <input class="form-control me-2 input-form  @error('contact') is-invalid @enderror"
                                 type="email" name="contact" id="contact" placeholder=""
-                                value="{{ old('contact') }}" onchange="checkContact()" onkeyup="checkContact()"
+                                value="{{ old('contact') }}"
                                 required>
                             @error('email')
                                 <div class="invalid-feedback">
@@ -326,99 +326,82 @@
     @include('items.create-modals.tag-modal')
 
     <script type="text/javascript">
-        let checkContactRoute = "{{ route('check-contact') }}";
+        // Disponibiliza a rota para o componente checkContact.js
+        window.checkContactRoute = "{{ route('check-contact') }}";
 
-        $(document).ready(function() {
-            @if (session()->has('success'))
-                sessionStorage.clear();
-            @endif
-
-            if (sessionStorage.getItem("itemCreateForm") === null) {
-                return;
-            } else {
-                @if (session()->has('errors'))
-                    getSessionStorage();
+        (function() {
+            function init() {
+                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
+                    setTimeout(init, 50);
                     return;
-                @endif
-
-                if (confirm(
-                        "Deseja recuperar as etiquetas, curiosidades extras e componentes inseridos anteriormente?"
-                    )) {
-                    getSessionStorage();
                 }
-            }
-            checkContact();
-        });
+                
+                function getSessionStorage() {
+                    tagCount = parseInt(sessionStorage.getItem("tagCount"));
+                    extraCount = parseInt(sessionStorage.getItem("extraCount"));
+                    componentCount = parseInt(sessionStorage.getItem("componentCount"));
 
-        function checkContact() {
-            $.ajax({
-                type: "GET",
-                url: checkContactRoute,
-                data: {
-                    contact: $('#contact').val()
-                },
-                success: function(data) {
-                    if (data == false) {
-                        $('#contact-warning').prop("hidden", false);
-                        $('#contact-success').prop("hidden", true);
-                        return;
-                    } else {
-                        if ($('#contact').val() != '') {
-                            $('#contact-warning').prop("hidden", true);
-                            $('#contact-success').prop("hidden", false);
-                            $('#full_name').val(data.full_name);
-                        } else {
-                            $('#contact-success').prop("hidden", true);
-                            $('#contact-warning').prop("hidden", true);
+                    if (tagCount > 0) {
+                        for (let i = 0; i < tagCount; i++) {
+                            let tagCategoryText = sessionStorage.getItem("tag" + tagIds + "categoryText");
+                            let tagCategoryVal = sessionStorage.getItem("tag" + tagIds + "categoryVal");
+                            let tagName = sessionStorage.getItem("tag" + tagIds + "name");
+
+                            tagBuilder(tagCategoryText, tagCategoryVal, tagName, tagIds);
+
+                            tagIds++;
                         }
-                        return;
+                        checkTags();
+                    }
+
+                    if (extraCount > 0) {
+                        for (let i = 0; i < extraCount; i++) {
+                            let extraInfo = sessionStorage.getItem("extra" + extraIds + "info");
+
+                            extraBuilder(extraInfo, extraIds);
+
+                            extraIds++;
+                        }
+                        checkExtras();
+                    }
+
+                    if (componentCount > 0) {
+                        for (let i = 0; i < componentCount; i++) {
+                            let componentCategoryText = sessionStorage.getItem("component" + componentIds + "categoryText");
+                            let componentCategoryVal = sessionStorage.getItem("component" + componentIds + "categoryVal");
+                            let componentName = sessionStorage.getItem("component" + componentIds + "name");
+
+                            componentBuilder(componentCategoryText, componentCategoryVal, componentName, componentIds);
+
+                            componentIds++;
+                        }
+                        checkComponents();
                     }
                 }
-            });
-        }
 
-        function getSessionStorage() {
-            tagCount = parseInt(sessionStorage.getItem("tagCount"));
-            extraCount = parseInt(sessionStorage.getItem("extraCount"));
-            componentCount = parseInt(sessionStorage.getItem("componentCount"));
+                $(document).ready(function() {
+                    @if (session()->has('success'))
+                        sessionStorage.clear();
+                    @endif
 
-            if (tagCount > 0) {
-                for (let i = 0; i < tagCount; i++) {
-                    let tagCategoryText = sessionStorage.getItem("tag" + tagIds + "categoryText");
-                    let tagCategoryVal = sessionStorage.getItem("tag" + tagIds + "categoryVal");
-                    let tagName = sessionStorage.getItem("tag" + tagIds + "name");
+                    if (sessionStorage.getItem("itemCreateForm") === null) {
+                        return;
+                    } else {
+                        @if (session()->has('errors'))
+                            getSessionStorage();
+                            return;
+                        @endif
 
-                    tagBuilder(tagCategoryText, tagCategoryVal, tagName, tagIds);
-
-                    tagIds++;
-                }
-                checkTags();
+                        if (confirm(
+                                "Deseja recuperar as etiquetas, curiosidades extras e componentes inseridos anteriormente?"
+                            )) {
+                            getSessionStorage();
+                        }
+                    }
+                });
             }
-
-            if (extraCount > 0) {
-                for (let i = 0; i < extraCount; i++) {
-                    let extraInfo = sessionStorage.getItem("extra" + extraIds + "info");
-
-                    extraBuilder(extraInfo, extraIds);
-
-                    extraIds++;
-                }
-                checkExtras();
-            }
-
-            if (componentCount > 0) {
-                for (let i = 0; i < componentCount; i++) {
-                    let componentCategoryText = sessionStorage.getItem("component" + componentIds + "categoryText");
-                    let componentCategoryVal = sessionStorage.getItem("component" + componentIds + "categoryVal");
-                    let componentName = sessionStorage.getItem("component" + componentIds + "name");
-
-                    componentBuilder(componentCategoryText, componentCategoryVal, componentName, componentIds);
-
-                    componentIds++;
-                }
-                checkComponents();
-            }
-        }
+            init();
+        })();
     </script>
 
 @endsection
