@@ -348,6 +348,10 @@ function exec {
   sudo docker exec -it e-museu-app-1 "$@"
 }
 
+function version {
+  echo "E-Museu $(cat VERSION)"
+}
+
 function help {
   echo "Usage: run [command] [options]"
   echo "Available commands:"
@@ -393,6 +397,7 @@ function help {
   echo "Utilities:"
   echo "  exec <cmd>         - Execute command inside app container"
   echo "  help               - Show this help message"
+  echo "  version            - Show E-Museu version"
   echo ""
   echo "Examples:"
   echo "  ./run setup -env           # Complete project setup with new .env file"

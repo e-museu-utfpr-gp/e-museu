@@ -4,10 +4,22 @@ services:
         context: .
         dockerfile: Dockerfile.local
     working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    networks:
+      - e_museu_local_network
+    depends_on:
+      - db
+
+  vite:
+    image: node:25.4.0-alpine3.22
+    working_dir: /var/www/
+    command: sh -lc "npm install --no-audit --no-fund && npm run dev -- --host 0.0.0.0 --port 5173"
     ports:
       - "5173:5173"
     volumes:
       - ./:/var/www
+      - e_museu_node_modules:/var/www/node_modules
     networks:
       - e_museu_local_network
     depends_on:
@@ -54,3 +66,6 @@ services:
 networks:
   e_museu_local_network:
     driver: bridge
+
+volumes:
+  e_museu_node_modules:

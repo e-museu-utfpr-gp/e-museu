@@ -7,6 +7,9 @@ import './components/popOverButton';
 import './components/getComponentsBySection';
 import './components/getItemsBySection';
 import './components/getTagsByCategory';
+import './components/sectionItemSelector';
+import './components/assistentPortrait';
+import './components/checkContact';
 
 import './components/warnings/deleteCategoryWarning';
 import './components/warnings/deleteComponentWarning';
