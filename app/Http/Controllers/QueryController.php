@@ -11,8 +11,8 @@ class QueryController extends Controller
 {
     public function tagNameAutoComplete(Request $request)
     {
-        $query = $request->get('query', '');
-        $category = $request->get('category');
+        $query = $request->input('query', '');
+        $category = $request->input('category');
         
         $data = Tag::select('name')
                     ->where('category_id', 'LIKE', $category)
@@ -29,8 +29,8 @@ class QueryController extends Controller
 
     public function componentNameAutoComplete(Request $request)
     {
-        $query = $request->get('query', '');
-        $category = $request->get('category');
+        $query = $request->input('query', '');
+        $category = $request->input('category');
         
         $data = Item::select('name')
                     ->where('section_id', 'LIKE', $category)
@@ -47,8 +47,8 @@ class QueryController extends Controller
 
     public function checkTagName(Request $request)
     {
-        $data = Tag::where('category_id', 'LIKE', $request->get('category'))
-                    ->where('name', 'LIKE', $request->get('name'))
+        $data = Tag::where('category_id', 'LIKE', $request->input('category'))
+                    ->where('name', 'LIKE', $request->input('name'))
                     ->where('validation', true)
                     ->count();
 
@@ -57,8 +57,8 @@ class QueryController extends Controller
 
     public function checkComponentName(Request $request)
     {
-        $data = Item::where('section_id', 'LIKE', $request->get('category'))
-                    ->where('name', 'LIKE', $request->get('name'))
+        $data = Item::where('section_id', 'LIKE', $request->input('category'))
+                    ->where('name', 'LIKE', $request->input('name'))
                     ->where('validation', true)
                     ->count();
 
@@ -67,7 +67,7 @@ class QueryController extends Controller
 
     public function checkContact(Request $request)
     {
-        $data = Proprietary::where('contact', 'LIKE', $request->get('contact'))
+        $data = Proprietary::where('contact', 'LIKE', $request->input('contact'))
                             ->where('blocked', false)
                             ->where('is_admin', false)
                             ->first();
@@ -81,7 +81,7 @@ class QueryController extends Controller
 
     public function getTags(Request $request)
     {
-        $data = Tag::where('category_id', 'LIKE', $request->get('category'))
+        $data = Tag::where('category_id', 'LIKE', $request->input('category'))
                     ->orderBy('name', 'asc')
                     ->get();
 
@@ -90,7 +90,7 @@ class QueryController extends Controller
 
     public function getItems(Request $request)
     {
-        $data = Item::where('section_id', 'LIKE', $request->get('section'))
+        $data = Item::where('section_id', 'LIKE', $request->input('section'))
                     ->orderBy('name', 'asc')
                     ->get();
 

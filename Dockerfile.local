@@ -1,5 +1,5 @@
 # Local: Development only, no multi-stage build, includes Node.js
-FROM php:8.3.25-fpm-alpine3.22
+FROM php:8.5-fpm-alpine3.22
 
 ARG user=laravel
 ARG uid=1000
@@ -12,13 +12,12 @@ RUN apk update && apk add --no-cache \
     libxml2-dev \
     zip \
     unzip \
-    nodejs \
-    npm \
-    linux-headers
+    linux-headers \
+    icu-dev
 
 RUN rm -rf /var/cache/apk/*
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd sockets
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd sockets intl
 
 COPY --from=composer:2.8.10 /usr/bin/composer /usr/bin/composer
 

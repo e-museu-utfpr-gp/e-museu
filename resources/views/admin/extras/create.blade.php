@@ -23,7 +23,11 @@
                             <div class="invalid-feedback"> {{ $message }} </div>
                         @enderror
                     </div>
-                    <div class="row">
+                    <div class="row" data-section-item-selector 
+                         data-section-selector="#section_id" 
+                         data-item-selector="#item_id" 
+                         data-original-item-id="{{ request()->query('id') }}"
+                         data-get-items-url="/get-items">
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="section_id" class="form-label">Categoria do Item</label>
@@ -86,39 +90,4 @@
         </form>
     </div>
 
-    <script>
-        $(document).ready(function() {
-            function getItems() {
-                var sectionId = $('#section_id').val();
-                $.ajax({
-                    url: "/get-items",
-                    type: "GET",
-                    data: {
-                        section: sectionId
-                    },
-                    success: function(data) {
-                        $('#item_id').empty();
-                        $.each(data, function(index, item) {
-                            $('#item_id').append('<option value="' + item.id + '">' + item
-                                .name + '</option>');
-                        });
-                        @if (request()->has('id'))
-                            selectOriginalItem();
-                        @endif
-                    }
-                });
-            }
-
-            getItems();
-
-            $('#section_id').on('change', function() {
-                getItems();
-            });
-
-            function selectOriginalItem() {
-                var originalItemId = {{ request()->query('id') }}
-                $('#item_id').val(originalItemId);
-            }
-        });
-    </script>
 @endsection
