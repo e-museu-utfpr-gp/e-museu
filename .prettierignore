@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+public/build/
+public/hot/
+storage/
+
+# Cache
+bootstrap/cache/
+
+# Minified files
+*.min.js
+*.min.css
+
+# Lock files
+package-lock.json
+composer.lock
+
+# Environment files
+.env
+.env.*
+
+# Blade templates (PHP + HTML)
+*.blade.php
+
+# Other
+.git/
+.DS_Store

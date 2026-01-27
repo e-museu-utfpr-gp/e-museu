@@ -6,19 +6,29 @@ use Illuminate\Contracts\Validation\Rule;
 
 class DifferentIds implements Rule
 {
-    protected $ids;
+    /**
+     * @var array<int|string>
+     */
+    protected array $ids;
 
+    /**
+     * @param array<int|string> $ids
+     */
     public function __construct(array $ids)
     {
         $this->ids = $ids;
     }
 
-    public function passes($attribute, $value)
+    /**
+     * @param string $attribute
+     * @param mixed $value
+     */
+    public function passes($attribute, $value): bool
     {
-        return $this->ids[0] != $this->ids[1];
+        return $this->ids[0] !== $this->ids[1];
     }
 
-    public function message()
+    public function message(): string
     {
         return 'O item e o componente precisam ser diferentes.';
     }

@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 class Lock extends Model
 {
@@ -25,19 +26,26 @@ class Lock extends Model
         return $this->morphTo();
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public static function findByModel($subject)
+    /**
+     * @return static|null
+     * @phpstan-return static|null
+     */
+    public static function findByModel(EloquentModel $subject)
     {
-        return self::where('lockable_type', get_class($subject))
-                    ->where('lockable_id', $subject->id)
-                    ->first();
+        /** @var static|null */
+        $result = static::where('lockable_type', $subject::class)
+            ->where('lockable_id', $subject->id)
+            ->first();
+
+        return $result;
     }
 
-    public function expiresAt()
+    public function expiresAt(): ?string
     {
         return $this->expiry_date;
     }

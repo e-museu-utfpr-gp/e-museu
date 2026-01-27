@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
 use Illuminate\Validation\Rule;
 
 class UpdateItemRequest extends FormRequest
@@ -13,9 +12,14 @@ class UpdateItemRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, string|array<int, string>>
+     */
     public function rules(): array
     {
-        $item = $this->route()->parameter('item') ?? null;
+        $route = $this->route();
+        $item = $route ? $route->parameter('item') : null;
+        $itemId = $item instanceof \App\Models\Item ? $item->id : null;
 
         return [
             'name' => [
@@ -23,7 +27,7 @@ class UpdateItemRequest extends FormRequest
                 'string',
                 'min:1',
                 'max:200',
-                Rule::unique('items')->ignore($item->id),
+                Rule::unique('items')->ignore($itemId),
             ],
             'date' => 'date',
             'description' => 'required|string|min:1|max:1000',
@@ -37,6 +41,9 @@ class UpdateItemRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [

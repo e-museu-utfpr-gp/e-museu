@@ -8,7 +8,7 @@
         })
         ->isEmpty();
 
-    $hasComponents = $item->ItemComponents
+    $hasComponents = $item->itemComponents
         ->filter(function ($itemComponent) {
             return $itemComponent->validation == true && $itemComponent->component->validation == true;
         })
@@ -103,7 +103,7 @@
                         <h5>Componentes</h5>
                     </div>
                     <div class="card-body row m-1">
-                        @foreach ($item->ItemComponents as $ItemComponent)
+                        @foreach ($item->itemComponents as $ItemComponent)
                             @if ($ItemComponent->validation == true && $ItemComponent->component->validation == true)
                                 <div class="col-6 p-2">
                                     <a href={{ route('items.show', $ItemComponent->component->id) }}>

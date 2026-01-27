@@ -12,7 +12,7 @@ class CreateAdmin extends Command
 
     protected $description = 'Criar administrador';
 
-    public function handle()
+    public function handle(): int
     {
         $username = $this->ask('Insira o nome de usuário do administrador:');
         $password = $this->secret('Insira a senha do administrador:');
@@ -24,5 +24,7 @@ class CreateAdmin extends Command
         $user->save();
 
         $this->info('Administrador adicionado com sucesso!');
+
+        return Command::SUCCESS;
     }
 }

@@ -161,7 +161,14 @@ To skip the confirmation:
 
 #### Testing and Code Quality
 
+**Important:** Before running code quality tools:
+1. Make sure `APP_ENV=local` is set in your `.env` file
+2. Run `./run setup` to start the containers and ensure the vendor directory is properly mounted and the binaries are available
+
 ```bash
+# Setup project first (required for code quality tools)
+./run setup
+
 # Run tests
 ./run test
 
@@ -173,6 +180,24 @@ To skip the confirmation:
 
 # Fix code standards (PHPCBF)
 ./run phpcbf
+
+# PHP Insights (code quality analysis)
+./run phpinsights
+
+# Detect duplicated code (PHPCPD)
+./run phpcpd
+
+# Analyze refactoring candidates (Churn)
+./run churn
+
+# PHP Mess Detector
+./run phpmd
+
+# ESLint (JavaScript linting)
+./run eslint
+
+# Prettier (code formatting)
+./run prettier
 
 # Run all tests and checks
 ./run all-tests
