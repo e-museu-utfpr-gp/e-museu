@@ -8,10 +8,9 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 
 class LoginController extends Controller
 {
-
     use AuthenticatesUsers;
 
-    protected $redirectTo = '/admin';
+    protected string $redirectTo = '/admin';
 
     public function __construct()
     {
@@ -19,12 +18,12 @@ class LoginController extends Controller
         $this->middleware('auth')->only('logout');
     }
 
-    public function username()
+    public function username(): string
     {
         return 'username';
     }
 
-    protected function validateLogin(Request $request)
+    protected function validateLogin(Request $request): void
     {
         $request->validate([
             $this->username() => 'required|string',

@@ -2,26 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use Illuminate\Http\Request;
 use App\Http\Requests\ItemTagRequest;
-
 use App\Models\TagItem;
 use App\Models\Category;
 use App\Models\Section;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
-class AdminItemTagController extends Controller
+class AdminItemTagController extends AdminBaseController
 {
-    public function index(Request $request)
-    {
-        $searchColumn = $request->search_column;
-        $search = $request->search;
-        $sort = $request->sort;
-        $order = $request->order;
-        $count = TagItem::count();
+    use BuildsAdminIndexQuery;
 
+    /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
+    private const INDEX_CONFIG = [
+        'baseTable' => 'tag_item',
+        'searchSpecial' => [
+            'item_id' => ['table' => 'items', 'column' => 'name'],
+            'tag_id' => ['table' => 'tags', 'column' => 'name'],
+        ],
+        'sortSpecial' => [
+            'item_id' => 'items.name',
+            'tag_id' => 'tags.name',
+        ],
+    ];
+
+    public function index(Request $request): View
+    {
+        $count = TagItem::count();
         $query = TagItem::query();
         $query->leftJoin('items', 'tag_item.item_id', '=', 'items.id');
         $query->leftJoin('tags', 'tag_item.tag_id', '=', 'tags.id');
@@ -31,54 +40,25 @@ class AdminItemTagController extends Controller
             'tag_item.updated_at AS tag_item_updated',
             'tag_item.validation AS tag_item_validation',
             'items.name AS item_name',
-            'tags.name AS tag_name']);
+            'tags.name AS tag_name',
+        ]);
 
-        if ($searchColumn == 'item_id')
-            $query->where('items.name', 'LIKE', "%{$search}%");
-
-        elseif ($searchColumn == 'tag_id')
-            $query->where('tags.name', 'LIKE', "%{$search}%");
-
-        elseif ($searchColumn && $search) {
-            if ($search == 'sim')
-                $query->where('tag_item.' . $searchColumn, true);
-            elseif ($search == 'não' || $search == 'nao')
-                $query->where('tag_item.' . $searchColumn, false);
-            else
-                $query->where('tag_item.' . $searchColumn, 'LIKE', "%{$search}%");
-        }
-
-        if ($sort && $order) {
-            if ($order == 'asc') {
-                if ($sort == 'item_id')
-                    $query->orderBy('items.name', 'desc');
-                elseif ($sort == 'tag_id')
-                    $query->orderBy('tags.name', 'desc');
-                else
-                    $query->orderBy('tag_item.' . $sort, 'desc');
-            } else {
-                if ($sort == 'item_id')
-                    $query->orderBy('items.name', 'asc');
-                elseif ($sort == 'tag_id')
-                    $query->orderBy('tags.name', 'asc');
-                else
-                    $query->orderBy('tag_item.' . $sort, 'asc');
-            }
-        }
+        $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
+        $this->applyIndexSort($query, $request->sort, $request->order, self::INDEX_CONFIG);
 
         $itemTags = $query->paginate(50)->withQueryString();
 
         return view('admin.item-tags.index', compact('itemTags', 'count'));
     }
 
-    public function show($id)
+    public function show(string $id): View
     {
         $itemTag = TagItem::find($id);
 
         return view('admin.item-tags.show', compact('itemTag'));
     }
 
-    public function create()
+    public function create(): View
     {
         $categories = Category::orderBy('name', 'asc')->get();
         $sections = Section::orderBy('name', 'asc')->get();
@@ -86,38 +66,43 @@ class AdminItemTagController extends Controller
         return view('admin.item-tags.create', compact('categories', 'sections'));
     }
 
-    public function store(ItemTagRequest $request)
+    public function store(ItemTagRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $itemTag = TagItem::create($data);
 
-        return redirect()->route('admin.item-tags.show', $itemTag)->with('success', 'Relacionamento adicionado com sucesso.');
+        $message = 'Relacionamento adicionado com sucesso.';
+
+        return redirect()->route('admin.item-tags.show', $itemTag)->with('success', $message);
     }
 
-    public function edit($id)
+    public function edit(string $id): View
     {
         $categories = Category::orderBy('name', 'asc')->get();
         $sections = Section::orderBy('name', 'asc')->get();
-        $itemTag = TagItem::find($id);
+        $itemTag = TagItem::findOrFail($id);
 
         return view('admin.item-tags.edit', compact('itemTag', 'categories', 'sections'));
     }
 
-    public function update(Request $request, TagItem $itemTag)
+    public function update(Request $request, TagItem $itemTag): RedirectResponse
     {
         $data = $request->all();
 
-        if ($itemTag->validation == true)
+        if ($itemTag->validation === true) {
             $data['validation'] = false;
-        else
+        } else {
             $data['validation'] = true;
+        }
 
         $itemTag->update($data);
 
-        return redirect()->route('admin.item-tags.show', $itemTag)->with('success', 'Relacionamento atualizado com sucesso.');
+        $message = 'Relacionamento atualizado com sucesso.';
+
+        return redirect()->route('admin.item-tags.show', $itemTag)->with('success', $message);
     }
 
-    public function destroy(TagItem $itemTag)
+    public function destroy(TagItem $itemTag): RedirectResponse
     {
         $itemTag->delete();
         return redirect()->route('admin.item-tags.index')->with('success', 'Relacionamento excluído com sucesso.');

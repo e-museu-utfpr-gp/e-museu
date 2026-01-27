@@ -2,89 +2,68 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use App\Http\Middleware\CheckLock;
-use Illuminate\Support\Facades\DB;
-
 use Illuminate\Http\Request;
 use App\Http\Requests\SingleExtraRequest;
-
 use App\Models\Extra;
 use App\Models\Proprietary;
 use App\Models\Section;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
-class AdminExtraController extends Controller
+class AdminExtraController extends AdminBaseController
 {
+    use BuildsAdminIndexQuery;
+
     public function __construct()
     {
         $this->middleware(CheckLock::class)->only(['edit', 'update', 'destroy']);
     }
 
-    public function index(Request $request)
-    {
-        $searchColumn = $request->search_column;
-        $search = $request->search;
-        $sort = $request->sort;
-        $order = $request->order;
-        $count = Extra::count();
+    /** @var array{baseTable: string, searchBaseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
+    private const INDEX_CONFIG = [
+        'baseTable' => 'extras',
+        'searchBaseTable' => 'items',
+        'searchSpecial' => [
+            'proprietary_id' => ['table' => 'proprietaries', 'column' => 'contact'],
+            'item_id' => ['table' => 'items', 'column' => 'name'],
+        ],
+        'sortSpecial' => [
+            'proprietary_id' => 'proprietaries.contact',
+            'item_id' => 'items.name',
+        ],
+    ];
 
+    public function index(Request $request): View
+    {
+        $count = Extra::count();
         $query = Extra::query();
         $query
-        ->leftJoin('proprietaries', 'extras.proprietary_id', '=', 'proprietaries.id')
-        ->leftJoin('items', 'extras.item_id', '=', 'items.id')
-        ->select([
-            'extras.*',
-            'items.name AS item_name',
-            'proprietaries.contact AS proprietary_contact',
-        ]);
+            ->leftJoin('proprietaries', 'extras.proprietary_id', '=', 'proprietaries.id')
+            ->leftJoin('items', 'extras.item_id', '=', 'items.id')
+            ->select([
+                'extras.*',
+                'items.name AS item_name',
+                'proprietaries.contact AS proprietary_contact',
+            ]);
 
-        if ($searchColumn == 'proprietary_id')
-            $query->where('proprietaries.contact', 'LIKE', "%{$search}%");
-
-        elseif ($searchColumn == 'item_id')
-            $query->where('items.name', 'LIKE', "%{$search}%");
-
-        elseif ($searchColumn && $search) {
-            if ($search == 'sim')
-                $query->where('items.' . $searchColumn, true);
-            elseif ($search == 'não' || $search == 'nao')
-                $query->where('items.' . $searchColumn, false);
-            else
-                $query->where('items.' . $searchColumn, 'LIKE', "%{$search}%");
-        }
-
-        if ($sort && $order) {
-            if ($order == 'asc') {
-                if ($sort == 'proprietary_id')
-                    $query->orderBy('proprietaries.contact', 'desc');
-                elseif ($sort == 'item_id')
-                    $query->orderBy('items.name', 'desc');
-                else
-                    $query->orderBy('extras.' . $sort, 'desc');
-            } else {
-                if ($sort == 'proprietary_id')
-                    $query->orderBy('proprietaries.contact', 'asc');
-                elseif ($sort == 'item_id')
-                    $query->orderBy('items.name', 'asc');
-                else
-                    $query->orderBy('extras.' . $sort, 'asc');
-            }
-        }
+        $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
+        $this->applyIndexSort($query, $request->sort, $request->order, self::INDEX_CONFIG);
 
         $extras = $query->paginate(30)->withQueryString();
 
         return view('admin.extras.index', compact('extras', 'count'));
     }
 
-    public function show($id)
+    public function show(string $id): View
     {
         $extra = Extra::find($id);
 
         return view('admin.extras.show', compact('extra'));
     }
 
-    public function create()
+    public function create(): View
     {
         $sections = Section::orderBy('name', 'asc')->get();
         $proprietaries = Proprietary::orderBy('contact', 'asc')->get();
@@ -92,17 +71,19 @@ class AdminExtraController extends Controller
         return view('admin.extras.create', compact('proprietaries', 'sections'));
     }
 
-    public function store(SingleExtraRequest $request)
+    public function store(SingleExtraRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $extra = Extra::create($data);
 
-        return redirect()->route('admin.extras.show', $extra)->with('success', 'Curiosidade extra adicionada com sucesso.');
+        $message = 'Curiosidade extra adicionada com sucesso.';
+
+        return redirect()->route('admin.extras.show', $extra)->with('success', $message);
     }
 
-    public function edit($id)
+    public function edit(string $id): View
     {
-        $extra = Extra::find($id);
+        $extra = Extra::findOrFail($id);
         $proprietaries = Proprietary::orderBy('contact', 'asc')->get();
         $sections = Section::orderBy('name', 'asc')->get();
 
@@ -111,7 +92,7 @@ class AdminExtraController extends Controller
         return view('admin.extras.edit', compact('extra', 'sections', 'proprietaries'));
     }
 
-    public function update(SingleExtraRequest $request, Extra $extra)
+    public function update(SingleExtraRequest $request, Extra $extra): RedirectResponse
     {
         $data = $request->validated();
 
@@ -119,10 +100,12 @@ class AdminExtraController extends Controller
 
         $this->unlock($extra);
 
-        return redirect()->route('admin.extras.show', $extra)->with('success', 'Curiosidade extra atualizada com sucesso.');
+        $message = 'Curiosidade extra atualizada com sucesso.';
+
+        return redirect()->route('admin.extras.show', $extra)->with('success', $message);
     }
 
-    public function destroy(Extra $extra)
+    public function destroy(Extra $extra): RedirectResponse
     {
         $this->unlock($extra);
 

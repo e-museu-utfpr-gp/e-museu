@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\Item;
+use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-
-    public function index()
+    public function index(): View
     {
         $items = Item::where('validation', true)->select('image')->inRandomOrder()->take(5)->get();
 

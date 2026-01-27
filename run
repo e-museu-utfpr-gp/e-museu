@@ -186,22 +186,104 @@ function seed {
 
 function phpstan {
   TEST_PATH="${@:-}"
-  docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpstan analyse --memory-limit 1G ${TEST_PATH}
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpstan analyse --memory-limit=1G --configuration=phpstan.neon
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpstan analyse --memory-limit=1G --configuration=phpstan.neon ${TEST_PATH}
+  fi
 }
 
 function phpcs {
-  if [ $# -eq 0 ]; then
-    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs app routes tests
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs --standard=phpcs.xml
   else
-    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs "$@"
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs --standard=phpcs.xml ${TEST_PATH}
   fi
 }
 
 function phpcbf {
-  if [ $# -eq 0 ]; then
-    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf app routes tests
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf --standard=phpcs.xml
   else
-    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf "$@"
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf --standard=phpcs.xml ${TEST_PATH}
+  fi
+}
+
+function phpinsights {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpinsights
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpinsights ${TEST_PATH}
+  fi
+}
+
+function phpcpd {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app php ./vendor/systemsdk/phpcpd/phpcpd app routes tests
+  else
+    docker compose -f "$(get_compose_file)" run --rm app php ./vendor/systemsdk/phpcpd/phpcpd ${TEST_PATH}
+  fi
+}
+
+function churn {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/churn run app routes tests
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/churn run ${TEST_PATH}
+  fi
+}
+
+function phpmd {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpmd app,routes,tests text phpmd.xml
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpmd ${TEST_PATH} text phpmd.xml
+  fi
+}
+
+function eslint {
+  source .env
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm vite npm run lint
+  else
+    docker compose -f "$(get_compose_file)" run --rm vite npx eslint ${TEST_PATH}
+  fi
+}
+
+function eslint-fix {
+  source .env
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm vite npm run lint:fix
+  else
+    docker compose -f "$(get_compose_file)" run --rm vite npx eslint ${TEST_PATH} --fix
+  fi
+}
+
+function prettier {
+  source .env
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm vite npm run format
+  else
+    docker compose -f "$(get_compose_file)" run --rm vite npx prettier --write ${TEST_PATH}
+  fi
+}
+
+function prettier-check {
+  source .env
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm vite npm run format:check
+  else
+    docker compose -f "$(get_compose_file)" run --rm vite npx prettier --check ${TEST_PATH}
   fi
 }
 
@@ -211,9 +293,34 @@ function test {
 
 function all-tests {
   set -e
+  echo "===="
+  echo ">> Running PHPUnit tests..."
+  echo "===="
   ./run test
+  echo "===="
+  echo ">> Running PHP Code Sniffer (phpcs)..."
+  echo "===="
   ./run phpcs
+  echo "===="
+  echo ">> Running PHP Mess Detector (phpmd)..."
+  echo "===="
+  ./run phpmd
+  echo "===="
+  echo ">> Running PHPStan..."
+  echo "===="
   ./run phpstan
+  echo "===="
+  echo ">> Running PHP Copy/Paste Detector (phpcpd)..."
+  echo "===="
+  ./run phpcpd
+  echo "===="
+  echo ">> Running ESLint..."
+  echo "===="
+  ./run eslint
+  echo "===="
+  echo ">> Running Prettier check..."
+  echo "===="
+  ./run prettier-check
 }
 
 function ps {
@@ -388,11 +495,35 @@ function help {
   echo "  composer           - Install Composer dependencies"
   echo ""
   echo "Testing & Code Quality:"
+  echo "  NOTE: Before running code quality tools:"
+  echo "        1. Ensure APP_ENV=local is set in your .env file"
+  echo "        2. Run './run setup' to start containers and ensure vendor directory is"
+  echo "           properly mounted and binaries are available."
+  echo ""
   echo "  test               - Run PHPUnit tests"
-  echo "  phpstan            - Run PHPStan static analysis (Level 8)"
+  echo "  phpstan            - Run PHPStan static analysis (Level 5 with Larastan)"
+  echo "  phpstan <path>     - Run PHPStan on specific path"
   echo "  phpcs              - Run PHP Code Sniffer (PSR-12 standards)"
+  echo "  phpcs <path>       - Run PHP Code Sniffer on specific path"
   echo "  phpcbf             - Run PHP Code Beautifier and Fixer"
-  echo "  all-tests          - Run all tests and code quality checks (test + phpcs + phpstan)"
+  echo "  phpcbf <path>      - Run PHP Code Beautifier and Fixer on specific path"
+  echo "  phpinsights        - Run PHP Insights code quality analysis"
+  echo "  phpinsights <path> - Run PHP Insights on specific path"
+  echo "  phpcpd             - Detect duplicated PHP code (Copy/Paste Detector)"
+  echo "  phpcpd <path>     - Detect duplicated code on specific path"
+  echo "  churn              - Analyze PHP files for refactoring candidates (files with high change frequency)"
+  echo "  churn <path>      - Analyze specific path for refactoring candidates"
+  echo "  phpmd              - Run PHP Mess Detector (detect code smells and design issues)"
+  echo "  phpmd <path>      - Run PHP Mess Detector on specific path"
+  echo "  eslint            - Run ESLint on JavaScript files"
+  echo "  eslint <path>    - Run ESLint on specific path"
+  echo "  eslint-fix       - Run ESLint with auto-fix on JavaScript files"
+  echo "  eslint-fix <path> - Run ESLint with auto-fix on specific path"
+  echo "  prettier         - Format JavaScript, SASS, and JSON files with Prettier"
+  echo "  prettier <path>  - Format specific path with Prettier"
+  echo "  prettier-check   - Check if files are formatted correctly (without modifying)"
+  echo "  prettier-check <path> - Check specific path formatting"
+  echo "  all-tests          - Run all checks (test, phpcs, phpmd, phpstan, phpcpd, eslint, prettier-check)"
   echo ""
   echo "Utilities:"
   echo "  exec <cmd>         - Execute command inside app container"
@@ -405,7 +536,18 @@ function help {
   echo "  ./run setup-hard -env -y   # Hard reset with new .env file and no confirmation"
   echo "  ./run gen_key -y           # Generate app key without confirmation"
   echo "  ./run test                 # Run tests"
+  echo "  ./run all-tests            # Run all checks (test, phpcs, phpmd, phpstan, phpcpd, eslint, prettier)"
   echo "  ./run phpstan app/Models   # Analyze specific directory"
+  echo "  ./run phpcs app/Models     # Check code style on specific directory"
+  echo "  ./run phpcbf app/Models    # Fix code style on specific directory"
+  echo "  ./run phpinsights app/Models  # Run code quality analysis on specific directory"
+  echo "  ./run phpcpd app/Models       # Detect duplicated code in specific directory"
+  echo "  ./run churn app/Models        # Analyze files for refactoring candidates"
+  echo "  ./run phpmd app/Models        # Detect code smells and design issues"
+  echo "  ./run eslint resources/js    # Lint JavaScript files"
+  echo "  ./run eslint-fix resources/js  # Fix JavaScript code style automatically"
+  echo "  ./run prettier resources/js   # Format JavaScript files"
+  echo "  ./run prettier-check          # Check if files are formatted"
   echo "  ./run exec php artisan tinker  # Open Laravel tinker"
   echo "  ./run remove-all -y        # Remove all without confirmation prompt"
   echo ""
