@@ -1,0 +1,160 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Make run script executable
+        run: chmod +x ./run
+      
+      - name: Setup environment and run tests
+        run: |
+          # Setup environment using run script (creates .env, starts containers, installs deps, runs migrations)
+          ./run setup -env -y
+          
+          # Run unit and feature tests using run script
+          echo "Running tests..."
+          ./run test
+      
+      - name: See containers
+        run: ./run ps
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          ./run down || true
+
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Make run script executable
+        run: chmod +x ./run
+      
+      - name: Setup environment
+        run: |
+          # Setup environment using run script (creates .env, starts containers, installs deps)
+          ./run setup -env -y
+      
+      - name: See containers
+        run: ./run ps
+      
+      - name: Run code quality checks
+        run: |
+          echo "Running PHP CodeSniffer..."
+          ./run phpcs
+          
+          echo "Running PHP Mess Detector..."
+          ./run phpmd
+          
+          echo "Running PHPStan..."
+          ./run phpstan
+          
+          echo "Running PHP Copy/Paste Detector..."
+          ./run phpcpd
+          
+          echo "Running ESLint..."
+          ./run eslint
+          
+          echo "Running Prettier check..."
+          ./run prettier-check
+          
+          echo "✓ All code quality checks passed!"
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          ./run down || true
+
+  test-production-deploy:
+    runs-on: ubuntu-latest
+    env:
+      APP_DEBUG: false
+      APP_ENV: production
+      APP_KEY: base64:p3uYMRjeoU/RPjt+wMOklJIn744PftwasNCVRwjfY60=
+      APP_NAME: E-Museu
+      APP_URL: http://emuseu.com
+      DB_DATABASE: db_production
+      DB_HOST: db-production
+      DB_PASSWORD: password_production
+      DB_ROOT_PASSWORD: password_root_production
+      DB_USERNAME: emuseu_user
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build and start production containers
+        run: |
+          echo "Building production Docker images..."
+          docker compose -f docker-compose.production.test.yml build
+          
+          echo "Starting production containers..."
+          docker compose -f docker-compose.production.test.yml up -d
+          
+          echo "Waiting for containers to be ready..."
+          sleep 10
+          
+          echo "Checking container status..."
+          docker compose -f docker-compose.production.test.yml ps
+      
+      - name: See containers
+        run: docker compose -f docker-compose.production.test.yml ps
+      
+      - name: Validate containers are running
+        run: |
+          echo "Validating containers are running..."
+          docker compose -f docker-compose.production.test.yml ps | grep -q "Up" || exit 1
+          echo "✓ All containers are running"
+      
+      - name: Wait for database and run deployment commands
+        run: |
+          echo "Waiting for database to be ready..."
+          max_attempts=30
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            if docker compose -f docker-compose.production.test.yml exec -T app-production php -r "try { \$pdo = new PDO('mysql:host=db-production;port=3306', 'emuseu_user', 'password_production'); \$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); exit(0); } catch (Exception \$e) { exit(1); }" 2>/dev/null; then
+              echo "✓ Database is ready!"
+              break
+            fi
+            if [ $attempt -lt $max_attempts ]; then
+              echo "Waiting for database... (attempt $attempt/$max_attempts)"
+              sleep 2
+            fi
+            attempt=$((attempt + 1))
+          done
+          
+          if [ $attempt -gt $max_attempts ]; then
+            echo "ERROR: Database did not become ready after $max_attempts attempts"
+            exit 1
+          fi
+          
+          echo "Running Laravel deployment commands..."
+          docker compose -f docker-compose.production.test.yml exec -T app-production php artisan storage:link || true
+          docker compose -f docker-compose.production.test.yml exec -T app-production php artisan config:clear
+          docker compose -f docker-compose.production.test.yml exec -T app-production php artisan config:cache
+          docker compose -f docker-compose.production.test.yml exec -T app-production php artisan route:cache
+          docker compose -f docker-compose.production.test.yml exec -T app-production php artisan migrate --force
+          
+          echo "✓ Production deployment test completed successfully!"
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose -f docker-compose.production.test.yml down -v

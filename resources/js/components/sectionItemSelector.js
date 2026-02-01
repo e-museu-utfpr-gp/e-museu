@@ -38,8 +38,8 @@ $(document).ready(function () {
                         $(itemSelector).val(originalItemId);
                     }
                 },
-                error: function (xhr, status, error) {
-                    console.error('Erro ao carregar items:', error);
+                error: function (_xhr, _status, _error) {
+                    // Error loading items
                 },
             });
         }

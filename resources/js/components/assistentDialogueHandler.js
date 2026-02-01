@@ -17,7 +17,6 @@ $(document).ready(function () {
     function displayDialogue(nodeId) {
         const node = dialogues.find(d => d.id === nodeId);
         if (!node) {
-            console.error('Node not found:', nodeId);
             return;
         }
 
