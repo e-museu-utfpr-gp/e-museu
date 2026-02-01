@@ -36,14 +36,14 @@ export default [
         },
         rules: {
             // Customize rules as needed
-            'no-unused-vars': ['warn', { 
+            'no-unused-vars': ['error', { 
                 argsIgnorePattern: '^_',
                 varsIgnorePattern: '^_',
                 args: 'after-used',
                 ignoreRestSiblings: true,
                 caughtErrors: 'none',
             }],
-            'no-console': 'off', // Allow console in development
+            'no-console': 'error', // Disallow console in CI/production
             'no-undef': 'error',
             // Prettier handles formatting, so we don't need formatting rules here
         },

@@ -12,7 +12,6 @@ function env {
   fi
   cp -f .env.example .env
   chmod 664 .env
-  chown 1000:1000 .env
 }
 
 function get_compose_file {
@@ -56,6 +55,9 @@ function setup {
   up || echo "[warn] Failed to start containers (up); continuing..."
 
   composer || echo "[warn] Composer install failed (composer); continuing..."
+
+  echo ">> Fixing permissions (storage, vendor, bootstrap/cache, .env)..."
+  docker compose -f "$(get_compose_file)" exec -u root app sh -c 'mkdir -p /var/www/storage/logs /var/www/storage/framework/sessions /var/www/storage/framework/views /var/www/storage/framework/cache && chown -R laravel:www-data /var/www/vendor /var/www/bootstrap/cache /var/www/storage && (touch /var/www/.env && chown laravel:www-data /var/www/.env) 2>/dev/null || true'
 
   if [ "$APP_ENV" == "local" ]; then
     echo ">> Starting Vite dev server in background..."
@@ -117,13 +119,13 @@ function npm-local-bg {
   fi
 
   echo ">> Installing Node.js dependencies in container..."
-    docker compose -f "$(get_compose_file)" exec app npm install
-    
-    echo ">> Starting Vite dev server in background..."
-    echo "Access your site at: http://localhost:$(grep WEB_SERVER_PORT_LOCAL .env | cut -d'=' -f2)"
-    echo ""
-    
-    docker compose -f "$(get_compose_file)" exec -d app npm run dev -- --host 0.0.0.0 --port 5173
+  docker compose -f "$(get_compose_file)" exec vite npm install
+
+  echo ">> Starting Vite dev server in background..."
+  echo "Access your site at: http://localhost:$(grep WEB_SERVER_PORT_LOCAL .env | cut -d'=' -f2)"
+  echo ""
+
+  docker compose -f "$(get_compose_file)" exec -d vite npm run dev -- --host 0.0.0.0 --port 5173
     
     echo "Vite dev server started in background!"
     echo "Access Vite at: http://localhost:5173"
@@ -132,13 +134,13 @@ function npm-local-bg {
 function stop-vite-local {
   source .env
   echo ">> Stopping Vite dev server..."
-  
-  echo ">> Restarting app container to stop all Node.js processes..."
-  docker compose -f "$(get_compose_file)" exec app rm -rf public/hot
-  docker compose -f "$(get_compose_file)" restart app
-  
+
+  echo ">> Removing public/hot and restarting vite container..."
+  docker compose -f "$(get_compose_file)" exec app rm -rf public/hot 2>/dev/null || true
+  docker compose -f "$(get_compose_file)" restart vite
+
   if [ $? -eq 0 ]; then
-    echo "Container restarted - Vite dev server stopped!"
+    echo "Vite container restarted - dev server stopped!"
   else
     echo "Failed to restart container"
     return 1
@@ -164,7 +166,7 @@ function start-vite-local {
   echo "Access your site at: http://localhost:$(grep WEB_SERVER_PORT_LOCAL .env | cut -d'=' -f2)"
   echo ""
 
-  docker compose -f "$(get_compose_file)" exec -d app npm run dev -- --host 0.0.0.0 --port $VITE_PORT
+  docker compose -f "$(get_compose_file)" exec -d vite npm run dev -- --host 0.0.0.0 --port $VITE_PORT
   
   echo "Vite dev server started successfully!"
   echo "Access Vite at: http://localhost:$VITE_PORT"
@@ -173,9 +175,9 @@ function start-vite-local {
 function build-vite {
   source .env
   echo ">> Removing old build files..."
-  docker compose -f "$(get_compose_file)" exec app rm -rf public/build public/hot
+  docker compose -f "$(get_compose_file)" exec app rm -rf public/build public/hot 2>/dev/null || true
   echo ">> Building assets with Vite for production..."
-  docker compose -f "$(get_compose_file)" exec app npm run build
+  docker compose -f "$(get_compose_file)" exec vite npm run build
 }
 
 function seed {
@@ -386,8 +388,10 @@ function storage_link {
 
 function composer {
   source .env
-  echo ">> Installing Composer dependencies..."
-  docker compose -f "$(get_compose_file)" exec app composer install --no-interaction --optimize-autoloader
+  echo ">> Configuring Git safe.directory for /var/www..."
+  docker compose -f "$(get_compose_file)" exec app git config --global --add safe.directory /var/www 2>/dev/null || true
+  echo ">> Installing Composer dependencies (as root to avoid permission issues)..."
+  docker compose -f "$(get_compose_file)" exec -u root app sh -c 'php -d error_reporting="E_ALL&~E_DEPRECATED&~E_USER_DEPRECATED" /usr/bin/composer install --no-interaction --optimize-autoloader'
 }
 
 function remove-all {
@@ -459,6 +463,67 @@ function version {
   echo "E-Museu $(cat VERSION)"
 }
 
+function simulate-ci {
+  set -e
+  
+  echo "=========================================="
+  echo "Simulating CI Pipeline"
+  echo "=========================================="
+  echo ""
+  echo "This will run all CI jobs in sequence:"
+  echo "  1. tests"
+  echo "  2. code-quality"
+  echo "  3. test-production-deploy"
+  echo ""
+  
+  if [[ "$1" != "-y" && "$2" != "-y" ]]; then
+    echo -n "Proceed? (y/n): "
+    read confirm
+    if [ "$confirm" != "y" ]; then
+      echo "Aborted."
+      exit 0
+    fi
+  fi
+  
+  echo ""
+  echo "=========================================="
+  echo "Job 1/3: tests"
+  echo "=========================================="
+  if [ -f "./scripts/ci/ci-tests.sh" ]; then
+    ./scripts/ci/ci-tests.sh
+  else
+    echo "ERROR: scripts/ci/ci-tests.sh not found"
+    exit 1
+  fi
+  
+  echo ""
+  echo "=========================================="
+  echo "Job 2/3: code-quality"
+  echo "=========================================="
+  if [ -f "./scripts/ci/ci-code-quality.sh" ]; then
+    ./scripts/ci/ci-code-quality.sh
+  else
+    echo "ERROR: scripts/ci/ci-code-quality.sh not found"
+    exit 1
+  fi
+  
+  echo ""
+  echo "=========================================="
+  echo "Job 3/3: test-production-deploy"
+  echo "=========================================="
+  if [ -f "./scripts/ci/ci-test-production-deploy.sh" ]; then
+    ./scripts/ci/ci-test-production-deploy.sh
+  else
+    echo "ERROR: scripts/ci/ci-test-production-deploy.sh not found"
+    exit 1
+  fi
+  
+  echo ""
+  echo "=========================================="
+  echo "✓ All CI jobs completed successfully!"
+  echo "=========================================="
+}
+
 function help {
   echo "Usage: run [command] [options]"
   echo "Available commands:"
@@ -524,6 +589,8 @@ function help {
   echo "  prettier-check   - Check if files are formatted correctly (without modifying)"
   echo "  prettier-check <path> - Check specific path formatting"
   echo "  all-tests          - Run all checks (test, phpcs, phpmd, phpstan, phpcpd, eslint, prettier-check)"
+  echo "  simulate-ci        - Simulate complete CI pipeline (runs all CI jobs)"
+  echo "  simulate-ci -y     - Simulate CI pipeline without confirmation"
   echo ""
   echo "Utilities:"
   echo "  exec <cmd>         - Execute command inside app container"
@@ -548,6 +615,8 @@ function help {
   echo "  ./run eslint-fix resources/js  # Fix JavaScript code style automatically"
   echo "  ./run prettier resources/js   # Format JavaScript files"
   echo "  ./run prettier-check          # Check if files are formatted"
+  echo "  ./run simulate-ci            # Simulate complete CI pipeline"
+  echo "  ./run simulate-ci -y         # Simulate CI pipeline without confirmation"
   echo "  ./run exec php artisan tinker  # Open Laravel tinker"
   echo "  ./run remove-all -y        # Remove all without confirmation prompt"
   echo ""

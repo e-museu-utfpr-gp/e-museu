@@ -2,7 +2,6 @@ $(document).ready(function () {
     var modal = document.getElementById('myModal');
 
     if (!modal) {
-        console.warn('Image modal not found on this page');
         return;
     }
 
