@@ -12,7 +12,6 @@ function env {
   fi
   cp -f .env.example .env
   chmod 664 .env
-  chown 1000:1000 .env
 }
 
 function get_compose_file {
@@ -56,6 +55,9 @@ function setup {
   up || echo "[warn] Failed to start containers (up); continuing..."
 
   composer || echo "[warn] Composer install failed (composer); continuing..."
+
+  echo ">> Fixing permissions (storage, vendor, bootstrap/cache, .env)..."
+  docker compose -f "$(get_compose_file)" exec -u root app sh -c 'mkdir -p /var/www/storage/logs /var/www/storage/framework/sessions /var/www/storage/framework/views /var/www/storage/framework/cache && chown -R laravel:www-data /var/www/vendor /var/www/bootstrap/cache /var/www/storage && (touch /var/www/.env && chown laravel:www-data /var/www/.env) 2>/dev/null || true'
 
   if [ "$APP_ENV" == "local" ]; then
     echo ">> Starting Vite dev server in background..."
@@ -117,13 +119,13 @@ function npm-local-bg {
   fi
 
   echo ">> Installing Node.js dependencies in container..."
-    docker compose -f "$(get_compose_file)" exec app npm install
-    
-    echo ">> Starting Vite dev server in background..."
-    echo "Access your site at: http://localhost:$(grep WEB_SERVER_PORT_LOCAL .env | cut -d'=' -f2)"
-    echo ""
-    
-    docker compose -f "$(get_compose_file)" exec -d app npm run dev -- --host 0.0.0.0 --port 5173
+  docker compose -f "$(get_compose_file)" exec vite npm install
+
+  echo ">> Starting Vite dev server in background..."
+  echo "Access your site at: http://localhost:$(grep WEB_SERVER_PORT_LOCAL .env | cut -d'=' -f2)"
+  echo ""
+
+  docker compose -f "$(get_compose_file)" exec -d vite npm run dev -- --host 0.0.0.0 --port 5173
     
     echo "Vite dev server started in background!"
     echo "Access Vite at: http://localhost:5173"
@@ -132,13 +134,13 @@ function npm-local-bg {
 function stop-vite-local {
   source .env
   echo ">> Stopping Vite dev server..."
-  
-  echo ">> Restarting app container to stop all Node.js processes..."
-  docker compose -f "$(get_compose_file)" exec app rm -rf public/hot
-  docker compose -f "$(get_compose_file)" restart app
-  
+
+  echo ">> Removing public/hot and restarting vite container..."
+  docker compose -f "$(get_compose_file)" exec app rm -rf public/hot 2>/dev/null || true
+  docker compose -f "$(get_compose_file)" restart vite
+
   if [ $? -eq 0 ]; then
-    echo "Container restarted - Vite dev server stopped!"
+    echo "Vite container restarted - dev server stopped!"
   else
     echo "Failed to restart container"
     return 1
@@ -164,7 +166,7 @@ function start-vite-local {
   echo "Access your site at: http://localhost:$(grep WEB_SERVER_PORT_LOCAL .env | cut -d'=' -f2)"
   echo ""
 
-  docker compose -f "$(get_compose_file)" exec -d app npm run dev -- --host 0.0.0.0 --port $VITE_PORT
+  docker compose -f "$(get_compose_file)" exec -d vite npm run dev -- --host 0.0.0.0 --port $VITE_PORT
   
   echo "Vite dev server started successfully!"
   echo "Access Vite at: http://localhost:$VITE_PORT"
@@ -173,9 +175,9 @@ function start-vite-local {
 function build-vite {
   source .env
   echo ">> Removing old build files..."
-  docker compose -f "$(get_compose_file)" exec app rm -rf public/build public/hot
+  docker compose -f "$(get_compose_file)" exec app rm -rf public/build public/hot 2>/dev/null || true
   echo ">> Building assets with Vite for production..."
-  docker compose -f "$(get_compose_file)" exec app npm run build
+  docker compose -f "$(get_compose_file)" exec vite npm run build
 }
 
 function seed {
@@ -186,22 +188,104 @@ function seed {
 
 function phpstan {
   TEST_PATH="${@:-}"
-  docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpstan analyse --memory-limit 1G ${TEST_PATH}
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpstan analyse --memory-limit=1G --configuration=phpstan.neon
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpstan analyse --memory-limit=1G --configuration=phpstan.neon ${TEST_PATH}
+  fi
 }
 
 function phpcs {
-  if [ $# -eq 0 ]; then
-    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs app routes tests
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs --standard=phpcs.xml
   else
-    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs "$@"
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcs --standard=phpcs.xml ${TEST_PATH}
   fi
 }
 
 function phpcbf {
-  if [ $# -eq 0 ]; then
-    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf app routes tests
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf --standard=phpcs.xml
   else
-    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf "$@"
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpcbf --standard=phpcs.xml ${TEST_PATH}
+  fi
+}
+
+function phpinsights {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpinsights
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpinsights ${TEST_PATH}
+  fi
+}
+
+function phpcpd {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app php ./vendor/systemsdk/phpcpd/phpcpd app routes tests
+  else
+    docker compose -f "$(get_compose_file)" run --rm app php ./vendor/systemsdk/phpcpd/phpcpd ${TEST_PATH}
+  fi
+}
+
+function churn {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/churn run app routes tests
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/churn run ${TEST_PATH}
+  fi
+}
+
+function phpmd {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpmd app,routes,tests text phpmd.xml
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/phpmd ${TEST_PATH} text phpmd.xml
+  fi
+}
+
+function eslint {
+  source .env
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm vite npm run lint
+  else
+    docker compose -f "$(get_compose_file)" run --rm vite npx eslint ${TEST_PATH}
+  fi
+}
+
+function eslint-fix {
+  source .env
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm vite npm run lint:fix
+  else
+    docker compose -f "$(get_compose_file)" run --rm vite npx eslint ${TEST_PATH} --fix
+  fi
+}
+
+function prettier {
+  source .env
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm vite npm run format
+  else
+    docker compose -f "$(get_compose_file)" run --rm vite npx prettier --write ${TEST_PATH}
+  fi
+}
+
+function prettier-check {
+  source .env
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    docker compose -f "$(get_compose_file)" run --rm vite npm run format:check
+  else
+    docker compose -f "$(get_compose_file)" run --rm vite npx prettier --check ${TEST_PATH}
   fi
 }
 
@@ -211,9 +295,34 @@ function test {
 
 function all-tests {
   set -e
+  echo "===="
+  echo ">> Running PHPUnit tests..."
+  echo "===="
   ./run test
+  echo "===="
+  echo ">> Running PHP Code Sniffer (phpcs)..."
+  echo "===="
   ./run phpcs
+  echo "===="
+  echo ">> Running PHP Mess Detector (phpmd)..."
+  echo "===="
+  ./run phpmd
+  echo "===="
+  echo ">> Running PHPStan..."
+  echo "===="
   ./run phpstan
+  echo "===="
+  echo ">> Running PHP Copy/Paste Detector (phpcpd)..."
+  echo "===="
+  ./run phpcpd
+  echo "===="
+  echo ">> Running ESLint..."
+  echo "===="
+  ./run eslint
+  echo "===="
+  echo ">> Running Prettier check..."
+  echo "===="
+  ./run prettier-check
 }
 
 function ps {
@@ -279,8 +388,10 @@ function storage_link {
 
 function composer {
   source .env
-  echo ">> Installing Composer dependencies..."
-  docker compose -f "$(get_compose_file)" exec app composer install --no-interaction --optimize-autoloader
+  echo ">> Configuring Git safe.directory for /var/www..."
+  docker compose -f "$(get_compose_file)" exec app git config --global --add safe.directory /var/www 2>/dev/null || true
+  echo ">> Installing Composer dependencies (as root to avoid permission issues)..."
+  docker compose -f "$(get_compose_file)" exec -u root app sh -c 'php -d error_reporting="E_ALL&~E_DEPRECATED&~E_USER_DEPRECATED" /usr/bin/composer install --no-interaction --optimize-autoloader'
 }
 
 function remove-all {
@@ -352,6 +463,67 @@ function version {
   echo "E-Museu $(cat VERSION)"
 }
 
+function simulate-ci {
+  set -e
+  
+  echo "=========================================="
+  echo "Simulating CI Pipeline"
+  echo "=========================================="
+  echo ""
+  echo "This will run all CI jobs in sequence:"
+  echo "  1. tests"
+  echo "  2. code-quality"
+  echo "  3. test-production-deploy"
+  echo ""
+  
+  if [[ "$1" != "-y" && "$2" != "-y" ]]; then
+    echo -n "Proceed? (y/n): "
+    read confirm
+    if [ "$confirm" != "y" ]; then
+      echo "Aborted."
+      exit 0
+    fi
+  fi
+  
+  echo ""
+  echo "=========================================="
+  echo "Job 1/3: tests"
+  echo "=========================================="
+  if [ -f "./scripts/ci/ci-tests.sh" ]; then
+    ./scripts/ci/ci-tests.sh
+  else
+    echo "ERROR: scripts/ci/ci-tests.sh not found"
+    exit 1
+  fi
+  
+  echo ""
+  echo "=========================================="
+  echo "Job 2/3: code-quality"
+  echo "=========================================="
+  if [ -f "./scripts/ci/ci-code-quality.sh" ]; then
+    ./scripts/ci/ci-code-quality.sh
+  else
+    echo "ERROR: scripts/ci/ci-code-quality.sh not found"
+    exit 1
+  fi
+  
+  echo ""
+  echo "=========================================="
+  echo "Job 3/3: test-production-deploy"
+  echo "=========================================="
+  if [ -f "./scripts/ci/ci-test-production-deploy.sh" ]; then
+    ./scripts/ci/ci-test-production-deploy.sh
+  else
+    echo "ERROR: scripts/ci/ci-test-production-deploy.sh not found"
+    exit 1
+  fi
+  
+  echo ""
+  echo "=========================================="
+  echo "✓ All CI jobs completed successfully!"
+  echo "=========================================="
+}
+
 function help {
   echo "Usage: run [command] [options]"
   echo "Available commands:"
@@ -388,11 +560,37 @@ function help {
   echo "  composer           - Install Composer dependencies"
   echo ""
   echo "Testing & Code Quality:"
+  echo "  NOTE: Before running code quality tools:"
+  echo "        1. Ensure APP_ENV=local is set in your .env file"
+  echo "        2. Run './run setup' to start containers and ensure vendor directory is"
+  echo "           properly mounted and binaries are available."
+  echo ""
   echo "  test               - Run PHPUnit tests"
-  echo "  phpstan            - Run PHPStan static analysis (Level 8)"
+  echo "  phpstan            - Run PHPStan static analysis (Level 5 with Larastan)"
+  echo "  phpstan <path>     - Run PHPStan on specific path"
   echo "  phpcs              - Run PHP Code Sniffer (PSR-12 standards)"
+  echo "  phpcs <path>       - Run PHP Code Sniffer on specific path"
   echo "  phpcbf             - Run PHP Code Beautifier and Fixer"
-  echo "  all-tests          - Run all tests and code quality checks (test + phpcs + phpstan)"
+  echo "  phpcbf <path>      - Run PHP Code Beautifier and Fixer on specific path"
+  echo "  phpinsights        - Run PHP Insights code quality analysis"
+  echo "  phpinsights <path> - Run PHP Insights on specific path"
+  echo "  phpcpd             - Detect duplicated PHP code (Copy/Paste Detector)"
+  echo "  phpcpd <path>     - Detect duplicated code on specific path"
+  echo "  churn              - Analyze PHP files for refactoring candidates (files with high change frequency)"
+  echo "  churn <path>      - Analyze specific path for refactoring candidates"
+  echo "  phpmd              - Run PHP Mess Detector (detect code smells and design issues)"
+  echo "  phpmd <path>      - Run PHP Mess Detector on specific path"
+  echo "  eslint            - Run ESLint on JavaScript files"
+  echo "  eslint <path>    - Run ESLint on specific path"
+  echo "  eslint-fix       - Run ESLint with auto-fix on JavaScript files"
+  echo "  eslint-fix <path> - Run ESLint with auto-fix on specific path"
+  echo "  prettier         - Format JavaScript, SASS, and JSON files with Prettier"
+  echo "  prettier <path>  - Format specific path with Prettier"
+  echo "  prettier-check   - Check if files are formatted correctly (without modifying)"
+  echo "  prettier-check <path> - Check specific path formatting"
+  echo "  all-tests          - Run all checks (test, phpcs, phpmd, phpstan, phpcpd, eslint, prettier-check)"
+  echo "  simulate-ci        - Simulate complete CI pipeline (runs all CI jobs)"
+  echo "  simulate-ci -y     - Simulate CI pipeline without confirmation"
   echo ""
   echo "Utilities:"
   echo "  exec <cmd>         - Execute command inside app container"
@@ -405,7 +603,20 @@ function help {
   echo "  ./run setup-hard -env -y   # Hard reset with new .env file and no confirmation"
   echo "  ./run gen_key -y           # Generate app key without confirmation"
   echo "  ./run test                 # Run tests"
+  echo "  ./run all-tests            # Run all checks (test, phpcs, phpmd, phpstan, phpcpd, eslint, prettier)"
   echo "  ./run phpstan app/Models   # Analyze specific directory"
+  echo "  ./run phpcs app/Models     # Check code style on specific directory"
+  echo "  ./run phpcbf app/Models    # Fix code style on specific directory"
+  echo "  ./run phpinsights app/Models  # Run code quality analysis on specific directory"
+  echo "  ./run phpcpd app/Models       # Detect duplicated code in specific directory"
+  echo "  ./run churn app/Models        # Analyze files for refactoring candidates"
+  echo "  ./run phpmd app/Models        # Detect code smells and design issues"
+  echo "  ./run eslint resources/js    # Lint JavaScript files"
+  echo "  ./run eslint-fix resources/js  # Fix JavaScript code style automatically"
+  echo "  ./run prettier resources/js   # Format JavaScript files"
+  echo "  ./run prettier-check          # Check if files are formatted"
+  echo "  ./run simulate-ci            # Simulate complete CI pipeline"
+  echo "  ./run simulate-ci -y         # Simulate CI pipeline without confirmation"
   echo "  ./run exec php artisan tinker  # Open Laravel tinker"
   echo "  ./run remove-all -y        # Remove all without confirmation prompt"
   echo ""

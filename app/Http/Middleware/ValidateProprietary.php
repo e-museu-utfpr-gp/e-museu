@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-
 use App\Models\Proprietary;
 
 class ValidateProprietary
@@ -17,8 +16,9 @@ class ValidateProprietary
         if ($proprietaryContact) {
             $proprietary = Proprietary::where('contact', $proprietaryContact)->first();
 
-            if ($proprietary && $proprietary->is_admin)
+            if ($proprietary && $proprietary->is_admin) {
                 abort(403, 'Acesso negado.');
+            }
         }
 
         return $next($request);

@@ -4,9 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Tag> $tags
+ */
 class Item extends Model
 {
     use HasFactory;
@@ -26,35 +31,43 @@ class Item extends Model
 
     protected $table = 'items';
 
-    public function proprietary() {
+    public function proprietary(): BelongsTo
+    {
         return $this->belongsTo(Proprietary::class);
     }
 
-    public function tags() {
+    public function tags(): BelongsToMany
+    {
         return $this->belongsToMany(Tag::class, 'tag_item', 'item_id', 'tag_id');
     }
 
-    public function composedOf() {
+    public function composedOf(): BelongsToMany
+    {
         return $this->belongsToMany(Item::class, 'item_component', 'item_id', 'component_id');
     }
 
-    public function composes() {
+    public function composes(): BelongsToMany
+    {
         return $this->belongsToMany(Item::class, 'item_component', 'component_id', 'item_id');
     }
 
-    public function extras() {
+    public function extras(): HasMany
+    {
         return $this->hasMany(Extra::class);
     }
 
-    public function section() {
+    public function section(): BelongsTo
+    {
         return $this->belongsTo(Section::class);
     }
 
-    public function ItemComponents() {
+    public function itemComponents(): HasMany
+    {
         return $this->hasMany(ItemComponent::class);
     }
 
-    public function tagItems() {
+    public function tagItems(): HasMany
+    {
         return $this->hasMany(TagItem::class);
     }
 

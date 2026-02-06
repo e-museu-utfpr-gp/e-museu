@@ -1,7 +1,7 @@
 import $ from 'jquery';
 
-$(document).ready(function() {
-    $('[data-section-item-selector]').each(function() {
+$(document).ready(function () {
+    $('[data-section-item-selector]').each(function () {
         const $container = $(this);
         const sectionSelector = $container.data('section-selector') || '#section_id';
         const itemSelector = $container.data('item-selector') || '#item_id';
@@ -17,38 +17,37 @@ $(document).ready(function() {
 
             $.ajax({
                 url: getItemsUrl,
-                type: "GET",
+                type: 'GET',
                 data: {
-                    section: sectionId
+                    section: sectionId,
                 },
-                success: function(data) {
+                success: function (data) {
                     $(itemSelector).empty();
                     if (Array.isArray(data) && data.length > 0) {
-                        $.each(data, function(index, item) {
+                        $.each(data, function (index, item) {
                             $(itemSelector).append(
                                 $('<option>', {
                                     value: item.id,
-                                    text: item.name
+                                    text: item.name,
                                 })
                             );
                         });
                     }
-                    
+
                     if (originalItemId) {
                         $(itemSelector).val(originalItemId);
                     }
                 },
-                error: function(xhr, status, error) {
-                    console.error('Erro ao carregar items:', error);
-                }
+                error: function (_xhr, _status, _error) {
+                    // Error loading items
+                },
             });
         }
 
         getItems();
 
-        $(sectionSelector).on('change', function() {
+        $(sectionSelector).on('change', function () {
             getItems();
         });
     });
 });
-

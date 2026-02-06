@@ -4,36 +4,45 @@ namespace App\Http\Middleware;
 
 use Closure;
 use App\Models\Lock;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckLock
 {
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
         $routeName = Route::currentRouteName();
+        if (! $routeName) {
+            abort(400, 'Rota inválida');
+        }
         $modelName = $this->getModelClassFromRouteName($routeName);
 
-        if (!$modelName) {
+        if (! $modelName) {
             abort(400, 'Rota ou modelo inválido');
         }
 
         $subjectId = $request->route($modelName[0]);
 
         $lock = Lock::where('lockable_type', $modelName[1])
-                    ->where('lockable_id', $subjectId)
-                    ->first();
+            ->where('lockable_id', $subjectId)
+            ->first();
 
-        if ($lock && $lock->expiresAt() && $lock->user_id != Auth::id()) {
-            return back()->withErrors(['Não é possível fazer alterações enquanto outro administrador estiver editando o mesmo.']);
+        if ($lock && $lock->expiresAt() && $lock->user_id !== Auth::id()) {
+            $message = 'Não é possível fazer alterações enquanto outro administrador estiver editando o mesmo.';
+
+            return back()->withErrors([$message]);
         }
 
         return $next($request);
     }
 
-    private function getModelClassFromRouteName($routeName)
+    /**
+     * @return array{0: string, 1: string}|null
+     */
+    private function getModelClassFromRouteName(string $routeName): ?array
     {
         $routeToModel = [
             'admin.items' => ['item', 'App\Models\Item'],

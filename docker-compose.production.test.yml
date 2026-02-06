@@ -1,0 +1,51 @@
+# Docker Compose for production testing
+# This file is used ONLY for local testing and CI.
+# It's a complete and independent file, doesn't need docker-compose.production.yml
+services:
+  app-production:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      target: app
+    working_dir: /var/www
+    environment:
+      - APP_DEBUG=${APP_DEBUG}
+      - APP_ENV=${APP_ENV}
+      - APP_KEY=${APP_KEY}
+      - APP_NAME=${APP_NAME}
+      - APP_URL=${APP_URL}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_HOST=${DB_HOST}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - DB_USERNAME=${DB_USERNAME}
+    depends_on:
+      - db-production
+    networks:
+      - e_museu_production_test
+
+  web-production:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      target: web
+    depends_on:
+      - app-production
+    networks:
+      - e_museu_production_test
+    expose:
+      - "80"
+
+  db-production:
+    image: mysql:8.0.43-debian
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    networks:
+      - e_museu_production_test
+
+networks:
+  e_museu_production_test:
+    driver: bridge

@@ -10,7 +10,7 @@ class ProprietarySeeder extends Seeder
 {
     public function run(): void
     {
-        if(app()->environment('local')) {
+        if (app()->environment('local')) {
             Proprietary::create([
                 'full_name' => 'UNICENTRO',
                 'contact' => 'unicentro@unicentro.com',

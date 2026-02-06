@@ -8,19 +8,22 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Lock;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 class Controller extends BaseController
 {
-    use AuthorizesRequests, ValidatesRequests;
+    use AuthorizesRequests;
+    use ValidatesRequests;
 
-    public function lock($subject)
+    public function lock(Model $subject): Lock
     {
         $lock = Lock::findByModel($subject);
 
         if (!$lock) {
             $lock = new Lock([
                 'user_id' => Auth::id(),
-                'expiry_date' => Carbon::now()->addHours(1)]);
+                'expiry_date' => Carbon::now()->addHours(1),
+            ]);
 
             Lock::where('user_id', Auth::id())->delete();
             $subject->locks()->save($lock);
@@ -29,7 +32,7 @@ class Controller extends BaseController
         return $lock;
     }
 
-    public static function unlock($subject)
+    public static function unlock(Model $subject): bool
     {
         $lock = Lock::findByModel($subject);
 

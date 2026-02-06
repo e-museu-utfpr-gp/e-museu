@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<ruleset name="Laravel PSR-12">
+    <description>PHP CodeSniffer configuration for Laravel project using PSR-12 standard</description>
+
+    <!-- Display progress -->
+    <arg value="p"/>
+    
+    <!-- Show colors in output -->
+    <arg name="colors"/>
+    
+    <!-- Show sniff codes in all reports -->
+    <arg value="s"/>
+
+    <!-- Directories to check -->
+    <file>app</file>
+    <file>routes</file>
+    <file>tests</file>
+    <file>database</file>
+
+    <!-- Exclude directories -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/bootstrap/cache/*</exclude-pattern>
+    <exclude-pattern>*/storage/*</exclude-pattern>
+    <exclude-pattern>*/public/*</exclude-pattern>
+    <exclude-pattern>*/database/migrations/*</exclude-pattern>
+
+    <!-- Use PSR-12 standard -->
+    <rule ref="PSR12"/>
+
+    <!-- PHPUnit uses snake_case for test method names -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName">
+        <exclude-pattern>*/tests/*</exclude-pattern>
+    </rule>
+
+    <!-- Additional rules -->
+    <!-- Allow long lines for comments and strings -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="140"/>
+        </properties>
+    </rule>
+
+    <!-- Allow trailing whitespace in blank lines (Laravel convention) -->
+    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace">
+        <exclude name="Squiz.WhiteSpace.SuperfluousWhitespace.EmptyLines"/>
+    </rule>
+</ruleset>
+

@@ -29,7 +29,9 @@ class ComponentRequest extends FormRequest
                 'numeric',
                 'exists:items,id',
                 function ($attribute, $value, $fail) {
-                    $ids = collect(request()->input('components'))->pluck('item_id');
+                    /** @var array<int, array<string, mixed>> $components */
+                    $components = request()->input('components', []);
+                    $ids = collect($components)->pluck('item_id');
                     $count = $ids->count();
                     $uniqueCount = $ids->unique()->count();
                     if ($count !== $uniqueCount) {

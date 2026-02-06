@@ -1,5 +1,5 @@
 :root {
-    --bs-body-font-family: 'Inter', sans-serif;
+    --bs-body-font-family: "Inter", sans-serif;
 }
 
 body {
@@ -13,19 +13,19 @@ body {
 }
 
 .navbar-brand {
-    color: #0D233D;
+    color: #0d233d;
 }
 
 .navbar-border {
-    border-bottom: 4px solid #5BE1B9;
+    border-bottom: 4px solid #5be1b9;
 }
 
 .nav-link {
-    color: #0D233D;
+    color: #0d233d;
     position: relative;
-    
+
     &::after {
-        content: '';
+        content: "";
         opacity: 0;
         transition: all 0.2s;
         height: 5px;
@@ -35,50 +35,50 @@ body {
         bottom: 0;
         left: 0;
     }
-    
+
     &:hover::after {
         opacity: 0.4;
     }
 }
 
 .menu-options {
-    color: #0D233D;
+    color: #0d233d;
 }
 
 .explore-button {
-    background-color: #5BE1B9;
+    background-color: #5be1b9;
     border-bottom: 10px;
 }
 
 .active {
     opacity: 1;
     font-weight: bold;
-    color: #ED6E38;
+    color: #ed6e38;
 }
 
 .card-title {
-    color: #ED6E38;
+    color: #ed6e38;
 }
 
 .card {
     background-color: #e6f6f1;
-    border: 3px solid #5BE1B9;
+    border: 3px solid #5be1b9;
     border-radius: 0;
 }
 
 .card-more-details {
     color: #585858;
     transition: 0.5s;
-    
+
     &:hover {
         transform: translate(1rem);
-        color: #F47A7A;
+        color: #f47a7a;
     }
 }
 
 .tag-card {
     background-color: #e6f6f1;
-    border: 3px solid #5BE1B9;
+    border: 3px solid #5be1b9;
     border-radius: 0;
     overflow: hidden;
     height: 4rem;
@@ -86,11 +86,11 @@ body {
 
 .card-anim {
     transition: 0.5s;
-    
+
     &:hover {
         transform: scale(1.05);
         cursor: pointer;
-        border: 3px solid #F47A7A;
+        border: 3px solid #f47a7a;
     }
 }
 
@@ -103,22 +103,22 @@ a {
 }
 
 .cancel-button {
-    color: #0D233D;
-    background-color: #F47A7A;
+    color: #0d233d;
+    background-color: #f47a7a;
     border-radius: 0 0 0 0;
 }
 
 .edit-button {
-    color: #0D233D;
+    color: #0d233d;
     background-color: #f4da7a;
     border-radius: 0 0 0 0;
 }
 
 .button {
-    color: #0D233D;
-    background-color: #5BE1B9;
+    color: #0d233d;
+    background-color: #5be1b9;
     border-radius: 0 0 0 0;
-    
+
     &:disabled {
         background-color: #c4c4c4;
     }
@@ -127,12 +127,12 @@ a {
 .input-form {
     border-radius: 0;
     border: 0;
-    border-bottom: 1px solid #0D233D;
+    border-bottom: 1px solid #0d233d;
     background-color: #e6f6f1;
     padding-bottom: 0;
-    
+
     &:focus {
-        box-shadow: 0 0 0px 0px #5BE1B9;
+        box-shadow: 0 0 0px 0px #5be1b9;
         background-color: #e6f6f1;
     }
 }
@@ -146,34 +146,34 @@ a {
 
 .main-container {
     margin-top: 2rem;
-    border-left: 4px solid #5BE1B9;
+    border-left: 4px solid #5be1b9;
     padding-left: 0;
 }
 
 h1 {
-    color: #ED6E38;
+    color: #ed6e38;
     font-weight: bold;
     padding-left: 1rem;
-    border-left: 20px solid #5BE1B9;
+    border-left: 20px solid #5be1b9;
     margin-bottom: 2rem;
 }
 
 h3 {
     font-weight: bold;
     padding-left: 1rem;
-    border-left: 20px solid #5BE1B9;
+    border-left: 20px solid #5be1b9;
     margin-bottom: 2rem;
 }
 
 h5 {
-    color: #0D233D;
+    color: #0d233d;
     font-weight: bold;
     padding-left: 1rem;
-    border-left: 20px solid #5BE1B9;
+    border-left: 20px solid #5be1b9;
 }
 
 p {
-    color: #0D233D;
+    color: #0d233d;
 }
 
 .content {
@@ -209,7 +209,7 @@ p {
 
 .component-button {
     aspect-ratio: 1 / 1;
-    background-color: #5BE1B9;
+    background-color: #5be1b9;
     cursor: pointer;
 }
 
@@ -220,51 +220,51 @@ textarea {
 .pagination {
     > li > a,
     > li > span {
-        color: #0D233D;
+        color: #0d233d;
     }
-    
+
     > .active > a,
     > .active > a:focus,
     > .active > a:hover,
     > .active > span,
     > .active > span:focus,
     > .active > span:hover {
-        background-color: #5BE1B9;
-        border-color: #5BE1B9;
+        background-color: #5be1b9;
+        border-color: #5be1b9;
     }
 }
 
 .timeline {
-    border-left: 3px solid #ED6E38;
+    border-left: 3px solid #ed6e38;
 }
 
 .timeline-circle {
     width: 1rem;
     height: 1rem;
     border-radius: 100%;
-    background-color: #ED6E38;
+    background-color: #ed6e38;
     margin-left: -1.093rem;
     overflow: visible;
 }
 
 .timeline-item-date {
-    color: #ED6E38;
+    color: #ed6e38;
 }
 
 .division-line {
-    border-bottom: 1px solid #0D233D;
+    border-bottom: 1px solid #0d233d;
 }
 
 .footer-division-line {
-    border-bottom: 1px solid #0D233D;
+    border-bottom: 1px solid #0d233d;
 }
 
 .explore-menu-division-line {
-    border-bottom: 1px solid #0D233D;
+    border-bottom: 1px solid #0d233d;
 }
 
 .vertical-division-line {
-    border-left: 1px solid #0D233D;
+    border-left: 1px solid #0d233d;
 }
 
 .button-icon {
@@ -293,16 +293,16 @@ textarea {
 
 .form-check-input {
     &:checked {
-        background-color: #ED6E38;
+        background-color: #ed6e38;
     }
-    
+
     &:hover {
         cursor: pointer;
     }
 }
 
 .custom-footer {
-    background-color: #5BE1B9;
+    background-color: #5be1b9;
 }
 
 .tecnolixo-footer-logo {
@@ -322,7 +322,7 @@ textarea {
 }
 
 .explore-menu-div {
-    background-color: #5BE1B9;
+    background-color: #5be1b9;
     box-shadow: 0 4px 5px #c4c4c4;
     z-index: 10;
 }
@@ -339,7 +339,7 @@ textarea {
     scrollbar-width: none;
     scroll-behavior: smooth;
     background-color: #e6f6f1;
-    
+
     &::-webkit-scrollbar {
         display: none;
     }
@@ -352,27 +352,27 @@ textarea {
 
 .right-arrow:hover {
     transform: translate(0.5rem);
-    color: #F47A7A;
+    color: #f47a7a;
 }
 
 .left-arrow:hover {
     transform: translate(-0.5rem);
-    color: #F47A7A;
+    color: #f47a7a;
 }
 
 .menu-option-active {
-    color: #F47A7A;
+    color: #f47a7a;
 }
 
 .custom-dropdown {
-    background-color: #5BE1B9;
+    background-color: #5be1b9;
     border: 0;
-    color: #0D233D;
+    color: #0d233d;
     transition: 0.5s;
-    
+
     &:hover {
         transform: translate(0, 0.5rem);
-        color: #ED6E38;
+        color: #ed6e38;
     }
 }
 
@@ -383,7 +383,7 @@ textarea {
 
 .toggle-filter-button {
     border: none;
-    background-color: #5BE1B9;
+    background-color: #5be1b9;
     width: 12rem;
 }
 
@@ -398,7 +398,7 @@ textarea {
 }
 
 .toggle-filter-button-mobile {
-    background-color: #ED6E38;
+    background-color: #ed6e38;
     border-radius: 20rem;
     border: none;
     box-shadow: 0 0 10px #c4c4c4;
@@ -406,9 +406,9 @@ textarea {
     bottom: 1rem;
     left: 1rem;
     z-index: 10;
-    
+
     &:hover {
-        background-color: #ED6E38;
+        background-color: #ed6e38;
     }
 }
 
@@ -451,7 +451,7 @@ footer {
 }
 
 .show-item-link {
-    color: #ED6E38;
+    color: #ed6e38;
 }
 
 .search-form {
@@ -474,7 +474,7 @@ footer {
     width: 98%;
     height: 98%;
     object-fit: cover;
-    
+
     &:hover {
         cursor: pointer;
     }
@@ -499,7 +499,7 @@ footer {
 }
 
 .assistent-title {
-    background-color: #5BE1B9;
+    background-color: #5be1b9;
 }
 
 .dialogue-card {
@@ -507,5 +507,5 @@ footer {
 }
 
 .orange-text {
-    color: #ED6E38;
+    color: #ed6e38;
 }

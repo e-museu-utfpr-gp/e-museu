@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TagItem extends Model
 {
@@ -17,11 +18,13 @@ class TagItem extends Model
 
     protected $table = 'tag_item';
 
-    public function item() {
+    public function item(): BelongsTo
+    {
         return $this->belongsTo(Item::class);
     }
 
-    public function tag() {
+    public function tag(): BelongsTo
+    {
         return $this->belongsTo(Tag::class);
     }
 }

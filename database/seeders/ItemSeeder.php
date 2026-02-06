@@ -11,7 +11,7 @@ class ItemSeeder extends Seeder
 {
     public function run(): void
     {
-        if(app()->environment('local')) {
+        if (app()->environment('local')) {
             Item::factory(100)->create();
             ItemComponent::factory(50)->create();
         }

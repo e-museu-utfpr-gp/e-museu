@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Proprietary extends Model
@@ -15,12 +15,13 @@ class Proprietary extends Model
         'full_name',
         'contact',
         'blocked',
-        'is_admin'
+        'is_admin',
     ];
 
     protected $table = 'proprietaries';
 
-    public function items() {
+    public function items(): HasMany
+    {
         return $this->hasMany(Item::class);
     }
 
