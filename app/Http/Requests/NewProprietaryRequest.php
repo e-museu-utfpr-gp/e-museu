@@ -3,9 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
 use Illuminate\Validation\Rule;
-
 
 class NewProprietaryRequest extends FormRequest
 {
@@ -14,10 +12,15 @@ class NewProprietaryRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, string|array<int, string>>
+     */
     public function rules(): array
     {
-        if ($this->route())
+        $proprietaryId = null;
+        if ($this->route()) {
             $proprietaryId = $this->route()->parameter('proprietary');
+        }
 
         return [
             'full_name' => 'required|string|min:1|max:200',
@@ -33,6 +36,9 @@ class NewProprietaryRequest extends FormRequest
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [

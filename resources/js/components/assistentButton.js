@@ -1,4 +1,4 @@
-$('#assistent-button').on('click', function() {
+$('#assistent-button').on('click', function () {
     this.style.transition = 'transform 0.1s ease';
     this.style.transform = 'scale(0.9)';
 

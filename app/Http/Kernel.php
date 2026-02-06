@@ -47,7 +47,10 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
 
-    protected $commands = [
+    /**
+     * @var array<int, class-string>
+     */
+    protected array $commands = [
         \App\Console\Commands\CreateAdmin::class,
     ];
 

@@ -1,22 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminCategoryController;
+use App\Http\Controllers\AdminComponentController;
+use App\Http\Controllers\AdminExtraController;
+use App\Http\Controllers\AdminItemController;
+use App\Http\Controllers\AdminItemTagController;
+use App\Http\Controllers\AdminProprietaryController;
+use App\Http\Controllers\AdminSectionController;
+use App\Http\Controllers\AdminTagController;
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\QueryController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\AdminItemController;
-use App\Http\Controllers\AdminSectionController;
-use App\Http\Controllers\AdminTagController;
-use App\Http\Controllers\AdminCategoryController;
-use App\Http\Controllers\AdminProprietaryController;
-use App\Http\Controllers\AdminComponentController;
-use App\Http\Controllers\AdminItemTagController;
-use App\Http\Controllers\AdminExtraController;
-use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
-
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -33,7 +30,10 @@ Route::group(['middleware' => 'validate.proprietary'], function () {
     Route::post('/items/store-extra', [ItemController::class, 'storeSingleExtra'])->name('items.store-extra');
 });
 
-Route::get('/component-name-auto-complete', [QueryController::class, 'componentNameAutoComplete'])->name('component-name-auto-complete');
+Route::get(
+    '/component-name-auto-complete',
+    [QueryController::class, 'componentNameAutoComplete']
+)->name('component-name-auto-complete');
 Route::get('/check-component-name', [QueryController::class, 'checkComponentName'])->name('check-component-name');
 Route::get('/tag-name-auto-complete', [QueryController::class, 'tagNameAutoComplete'])->name('tag-name-auto-complete');
 Route::get('/check-tag-name', [QueryController::class, 'checkTagName'])->name('check-tag-name');
@@ -130,11 +130,12 @@ Route::group(['middleware' => 'auth'], function () {
         'destroy' => 'admin.users.destroy',
     ]);
 
-    Route::delete('/admin/users/{id}/delete-lock', [AdminUserController::class, 'destroyLock'])->name('admin.users.delete-lock');
+    Route::delete(
+        '/admin/users/{id}/delete-lock',
+        [AdminUserController::class, 'destroyLock']
+    )->name('admin.users.delete-lock');
 });
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-
-

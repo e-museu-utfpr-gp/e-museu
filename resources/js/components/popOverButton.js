@@ -1,4 +1,4 @@
-$('.info-icon').on('click', function() {
+$('.info-icon').on('click', function () {
     this.style.transition = 'transform 0.1s ease';
     this.style.transform = 'scale(0.8)';
 
@@ -13,11 +13,11 @@ $('.info-icon').on('click', function() {
     }, 100);
 });
 
-const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
+const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+const _popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
 
-$(document).ready(function() {
-    const popover = new bootstrap.Popover('.info-icon', {
-    trigger: 'focus'
+$(document).ready(function () {
+    const _popover = new bootstrap.Popover('.info-icon', {
+        trigger: 'focus',
     });
 });

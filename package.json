@@ -1,20 +1,28 @@
 {
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "vite build"
-    },
-    "devDependencies": {
-        "@popperjs/core": "^2.11.8",
-        "axios": "^1.13.2",
-        "bootstrap": "5.3.8",
-        "laravel-vite-plugin": "2.1.0",
-        "sass": "1.97.3",
-        "vite": "7.3.0"
-    },
-    "dependencies": {
-        "bootstrap-icons": "^1.13.1",
-        "jquery": "^3.7.1"
-    }
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "npx eslint resources/js",
+    "lint:fix": "npx eslint resources/js --fix",
+    "format": "prettier --write \"resources/js/**/*.js\" \"resources/sass/**/*.scss\" \"*.json\"",
+    "format:check": "prettier --check \"resources/js/**/*.js\" \"resources/sass/**/*.scss\" \"*.json\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@popperjs/core": "^2.11.8",
+    "axios": "^1.13.2",
+    "bootstrap": "5.3.8",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "laravel-vite-plugin": "2.1.0",
+    "prettier": "^3.8.1",
+    "sass": "1.97.3",
+    "vite": "7.3.0"
+  },
+  "dependencies": {
+    "bootstrap-icons": "^1.13.1",
+    "jquery": "^3.7.1"
+  }
 }

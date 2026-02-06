@@ -1,0 +1,40 @@
+parameters:
+    level: 8
+    paths:
+        - app
+        - routes
+        - tests
+    excludePaths:
+        - ./*/*/FileToIgnore.php
+    checkUninitializedProperties: true
+    checkPhpDocMethodSignatures: true
+    checkPhpDocMissingReturn: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: false
+    checkTooWideParameterOutInProtectedAndPublicMethods: false
+    ignoreErrors:
+        - '#PHPDoc tag @var#'
+        - '#Access to an undefined property#'
+        - '#Call to an undefined method#'
+        - '#Method .* invoked with .* parameter\(s\)#'
+        - '#Parameter .* of method .* has invalid type#'
+        - '#Return type of method .* has invalid type#'
+        - '#Call to method PHPUnit\\Framework\\Assert::assertTrue\(\) with true will always evaluate to true#'
+        - '#Relation.*tags.*is not found in.*Item model#'
+        - '#Class .* uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types#'
+        - '#return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphMany does not specify its types#'
+        - '#return type with generic class Illuminate\\Database\\Eloquent\\Relations\\MorphTo does not specify its types#'
+        - '#Template type TDeclaringModel on class Illuminate\\Database\\Eloquent\\Relations\\HasMany is not covariant#'
+        - '#Template type TDeclaringModel on class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo is not covariant#'
+        - '#Template type TDeclaringModel on class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany is not covariant#'
+        - '#Method .* should return .* but returns .*\\\$this\\(.*\\)#'
+        - '#return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types#'
+        - '#return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types#'
+        - '#return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany does not specify its types#'
+        - '#Parameter.*\$view of function view expects view-string#'
+        - '#Using nullsafe property access.*on left side of \?\? is unnecessary#'
+        - '#Template type TModel on class Illuminate\\Database\\Eloquent\\Builder is not covariant#'
+        - '#Method .*::build\(\) return type with generic interface Illuminate\\Contracts\\Pagination\\LengthAwarePaginator does not specify its types#'
+        - '#Method App\\Services\\ItemIndexQueryBuilder::baseQuery\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types#'
+        - '#Method App\\Services\\ItemIndexQueryBuilder::apply.*\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types#'
+        - '#.*applyIndex(Search|Sort).*parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types#'
+    reportUnmatchedIgnoredErrors: false

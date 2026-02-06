@@ -1,12 +1,15 @@
-@use 'bootstrap/scss/bootstrap' with (
-  $body-bg: #f8fafc,
-  $font-family-sans-serif: ('Nunito', sans-serif),
-  $font-size-base: 0.9rem,
-  $line-height-base: 1.6
+@use "bootstrap/scss/bootstrap" with (
+    $body-bg: #f8fafc,
+    $font-family-sans-serif: (
+        "Nunito",
+        sans-serif,
+    ),
+    $font-size-base: 0.9rem,
+    $line-height-base: 1.6
 );
 
-@use 'custom';
-@use 'image-modal';
+@use "custom";
+@use "image-modal";
 
-@import url('https://fonts.bunny.net/css?family=Nunito');
-@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import url("https://fonts.bunny.net/css?family=Nunito");
+@import "bootstrap-icons/font/bootstrap-icons.css";

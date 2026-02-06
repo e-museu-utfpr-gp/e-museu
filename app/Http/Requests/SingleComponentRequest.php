@@ -24,8 +24,14 @@ class SingleComponentRequest extends FormRequest
     {
         return [
             'item_id' => 'required|integer|numeric|exists:items,id',
-            'component_id' => ['sometimes','integer','numeric','exists:items,id', new DifferentIds([request('item_id'), request('component_id')])],
-            'validation' => 'sometimes|boolean'
+            'component_id' => [
+                'sometimes',
+                'integer',
+                'numeric',
+                'exists:items,id',
+                new DifferentIds([request('item_id'), request('component_id')]),
+            ],
+            'validation' => 'sometimes|boolean',
         ];
     }
 

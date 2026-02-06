@@ -3,12 +3,10 @@
 namespace Database\Factories;
 
 use App\Models\Item;
-
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ItemComponentFactory extends Factory
 {
-
     public function definition(): array
     {
         return [
