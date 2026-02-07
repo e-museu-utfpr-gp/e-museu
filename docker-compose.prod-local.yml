@@ -5,8 +5,6 @@ services:
       dockerfile: Dockerfile.prod-local
       target: app
     working_dir: /var/www/
-    networks:
-      - e_museu_prod_local_network
     depends_on:
       - db
 
@@ -19,8 +17,6 @@ services:
       - "${WEB_SERVER_PORT_PROD_LOCAL}:80"
     depends_on:
       - app
-    networks:
-      - e_museu_prod_local_network
 
   db:
     image: mysql:8.0.43-debian
@@ -31,9 +27,3 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
       - ./mysql_data:/var/lib/mysql
-    networks:
-      - e_museu_prod_local_network 
-
-networks:
-  e_museu_prod_local_network:
-    driver: bridge
