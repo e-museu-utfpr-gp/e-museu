@@ -21,8 +21,6 @@ services:
       - DB_USERNAME=${DB_USERNAME}
     depends_on:
       - db-production
-    networks:
-      - e_museu_production_test
 
   web-production:
     build:
@@ -31,8 +29,6 @@ services:
       target: web
     depends_on:
       - app-production
-    networks:
-      - e_museu_production_test
     expose:
       - "80"
 
@@ -43,9 +39,3 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    networks:
-      - e_museu_production_test
-
-networks:
-  e_museu_production_test:
-    driver: bridge

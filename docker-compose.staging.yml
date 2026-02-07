@@ -7,8 +7,6 @@ services:
     working_dir: /var/www
     depends_on:
       - db-staging
-    networks:
-      - e_museu_staging
 
   web-staging:
     build:
@@ -17,8 +15,6 @@ services:
       target: web
     depends_on:
       - app-staging
-    networks:
-      - e_museu_staging
     expose:
       - "80"
 
@@ -32,9 +28,3 @@ services:
     volumes:
       # /root/databases/staging/mysql_data_staging (root's home directory when opening console)
       - /root/databases/staging/mysql_data_staging:/var/lib/mysql
-    networks:
-      - e_museu_staging
-
-networks:
-  e_museu_staging:
-    driver: bridge
