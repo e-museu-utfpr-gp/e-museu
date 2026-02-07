@@ -72,6 +72,10 @@ COPY --from=node-build /var/www/public/build /var/www/public/build
 
 COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
 
+# Ensure PHP-FPM listens on 0.0.0.0 to receive connections from Nginx in another container
+RUN sed -i 's/^listen = .*/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf 2>/dev/null || \
+    sed -i 's/^listen = .*/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/zz-docker.conf 2>/dev/null || true
+
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www \
     && chmod -R 775 /var/www/storage \
