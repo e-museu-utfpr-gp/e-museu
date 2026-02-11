@@ -9,7 +9,7 @@ on:
     branches:
       - main
       - develop
-  workflow_dispatch:  # Execução manual em Actions → Continuous Integration → Run workflow
+  workflow_dispatch:
 
 jobs:
   tests:
