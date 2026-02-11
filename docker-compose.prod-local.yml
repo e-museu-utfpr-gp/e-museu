@@ -24,7 +24,7 @@ services:
     depends_on:
       - app
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
       interval: 120s
       timeout: 10s
       retries: 3

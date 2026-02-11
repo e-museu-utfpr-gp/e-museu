@@ -1,8 +1,22 @@
 # Docker Compose for production testing
-# This file is used ONLY for local testing and CI.
-# Database is external: set DATABASE_URL in the environment (no db service).
-# In CI, use a MySQL service container and DATABASE_URL with host.docker.internal.
+# Usado no local e no CI. No local o app usa db-production; no CI injete DATABASE_URL (host.docker.internal).
 services:
+  db-production:
+    image: mysql:8.0-debian
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - ./mysql_data_production_test:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   app-production:
     build:
       context: .
@@ -18,6 +32,13 @@ services:
       - APP_NAME=${APP_NAME}
       - APP_URL=${APP_URL}
       - DATABASE_URL=${DATABASE_URL}
+      - DB_HOST=db-production
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      db-production:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "php-fpm", "-t"]
       interval: 120s
@@ -35,7 +56,7 @@ services:
     expose:
       - "80"
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
       interval: 120s
       timeout: 10s
       retries: 3
