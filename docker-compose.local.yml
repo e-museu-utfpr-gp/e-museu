@@ -8,12 +8,6 @@ services:
       - ./:/var/www
     depends_on:
       - db
-    healthcheck:
-      test: ["CMD", "php-fpm", "-t"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
   vite:
     image: node:25.4.0-alpine3.22
@@ -26,12 +20,6 @@ services:
       - e_museu_node_modules:/var/www/node_modules
     depends_on:
       - db
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:5173/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   web:
     image: nginx:mainline-alpine3.22-perl
@@ -42,12 +30,6 @@ services:
       - ./docker/nginx/local_prod-local/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:80/health || exit 1"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
   db:
     image: mysql:8.0-debian # Image used in staging & production
@@ -60,12 +42,6 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
       - ./mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -76,12 +52,6 @@ services:
         PMA_HOST: db
         PMA_PORT: ${DB_PORT}
         MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-userpass}
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:80/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
 
 volumes:
   e_museu_node_modules:
