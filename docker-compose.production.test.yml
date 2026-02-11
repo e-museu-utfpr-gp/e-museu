@@ -14,6 +14,7 @@ services:
       - APP_KEY=${APP_KEY}
       - APP_NAME=${APP_NAME}
       - APP_URL=${APP_URL}
+      # On staging and production, not local, set the DATABASE_URL in the environment (no db service).
       - DB_DATABASE=${DB_DATABASE}
       - DB_HOST=${DB_HOST}
       - DB_PASSWORD=${DB_PASSWORD}
@@ -33,8 +34,9 @@ services:
       - "80"
 
   db-production:
-    image: mysql:8.0.43-debian
+    image: mysql:8.0-debian # Image used in staging & production
     environment:
+      # On staging and production, not local, set the DATABASE_URL in the environment (no db service).
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
