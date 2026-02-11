@@ -7,12 +7,6 @@ services:
     working_dir: /var/www/
     depends_on:
       - db
-    healthcheck:
-      test: ["CMD", "php-fpm", "-t"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
   web:
     build:
@@ -23,12 +17,6 @@ services:
       - "${WEB_SERVER_PORT_PROD_LOCAL}:80"
     depends_on:
       - app
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
   db:
     image: mysql:8.0-debian # Image used in staging & production
@@ -39,9 +27,3 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
       - ./mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s

@@ -6,12 +6,6 @@ services:
       dockerfile: Dockerfile.staging
       target: app
     working_dir: /var/www
-    healthcheck:
-      test: ["CMD", "php-fpm", "-t"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
   web-staging:
     build:
@@ -22,9 +16,3 @@ services:
       - app-staging
     expose:
       - "80"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
-      interval: 120s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
