@@ -17,6 +17,12 @@ services:
       - "${WEB_SERVER_PORT_PROD_LOCAL}:80"
     depends_on:
       - app
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   db:
     image: mysql:8.0-debian # Image used in staging & production
