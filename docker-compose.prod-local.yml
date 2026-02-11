@@ -7,6 +7,12 @@ services:
     working_dir: /var/www/
     depends_on:
       - db
+    healthcheck:
+      test: ["CMD", "php-fpm", "-t"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   web:
     build:
@@ -33,3 +39,9 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
       - ./mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
