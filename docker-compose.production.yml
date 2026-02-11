@@ -1,3 +1,4 @@
+# Production. Database is external: set DATABASE_URL in the environment (no db service).
 services:
   app-production:
     build:
@@ -5,8 +6,6 @@ services:
       dockerfile: Dockerfile.production
       target: app
     working_dir: /var/www
-    depends_on:
-      - db-production
 
   web-production:
     build:
@@ -17,13 +16,3 @@ services:
       - app-production
     expose:
       - "80"
-
-  db-production:
-    image: mysql:8.0.43-debian
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    volumes:
-      - /root/databases/production/mysql_data_production:/var/lib/mysql
