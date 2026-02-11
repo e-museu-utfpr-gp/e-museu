@@ -32,7 +32,7 @@ services:
       - app
 
   db:
-    image: mysql:8.0.43-debian
+    image: mysql:8.0-debian # Image used in staging & production
     ports:
       - "${DB_PORT}:3306"
     environment:
