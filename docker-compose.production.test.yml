@@ -1,6 +1,7 @@
 # Docker Compose for production testing
 # This file is used ONLY for local testing and CI.
-# It's a complete and independent file, doesn't need docker-compose.production.yml
+# Database is external: set DATABASE_URL in the environment (no db service).
+# In CI, use a MySQL service container and DATABASE_URL with host.docker.internal.
 services:
   app-production:
     build:
@@ -8,20 +9,15 @@ services:
       dockerfile: Dockerfile.production
       target: app
     working_dir: /var/www
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - APP_DEBUG=${APP_DEBUG}
       - APP_ENV=${APP_ENV}
       - APP_KEY=${APP_KEY}
       - APP_NAME=${APP_NAME}
       - APP_URL=${APP_URL}
-      # On staging and production, not local, set the DATABASE_URL in the environment (no db service).
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_HOST=${DB_HOST}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
-      - DB_USERNAME=${DB_USERNAME}
-    depends_on:
-      - db-production
+      - DATABASE_URL=${DATABASE_URL}
 
   web-production:
     build:
@@ -32,12 +28,9 @@ services:
       - app-production
     expose:
       - "80"
-
-  db-production:
-    image: mysql:8.0-debian # Image used in staging & production
-    environment:
-      # On staging and production, not local, set the DATABASE_URL in the environment (no db service).
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/"]
+      interval: 120s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
