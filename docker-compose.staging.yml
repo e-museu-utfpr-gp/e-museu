@@ -1,3 +1,4 @@
+# Staging. Database is external: set DATABASE_URL in the environment (no db service).
 services:
   app-staging:
     build:
@@ -5,8 +6,6 @@ services:
       dockerfile: Dockerfile.staging
       target: app
     working_dir: /var/www
-    depends_on:
-      - db-staging
 
   web-staging:
     build:
@@ -17,14 +16,3 @@ services:
       - app-staging
     expose:
       - "80"
-
-  db-staging:
-    image: mysql:8.0.43-debian
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    volumes:
-      # /root/databases/staging/mysql_data_staging (root's home directory when opening console)
-      - /root/databases/staging/mysql_data_staging:/var/lib/mysql

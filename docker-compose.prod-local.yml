@@ -19,7 +19,7 @@ services:
       - app
 
   db:
-    image: mysql:8.0.43-debian
+    image: mysql:8.0-debian # Image used in staging & production
     environment:
       - MYSQL_DATABASE=${DB_DATABASE}
       - MYSQL_USER=${DB_USERNAME}
