@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - develop
+  push:
+    branches:
+      - main
+      - develop
 
 jobs:
   tests:
@@ -83,17 +87,24 @@ jobs:
 
   test-production-deploy:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0.43-debian
+        env:
+          MYSQL_ROOT_PASSWORD: password_root_production
+          MYSQL_DATABASE: db_production
+          MYSQL_USER: emuseu_user
+          MYSQL_PASSWORD: password_production
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     env:
       APP_DEBUG: false
       APP_ENV: production
       APP_KEY: base64:p3uYMRjeoU/RPjt+wMOklJIn744PftwasNCVRwjfY60=
       APP_NAME: E-Museu
       APP_URL: http://emuseu.com
-      DB_DATABASE: db_production
-      DB_HOST: db-production
-      DB_PASSWORD: password_production
-      DB_ROOT_PASSWORD: password_root_production
-      DB_USERNAME: emuseu_user
+      DATABASE_URL: mysql://emuseu_user:password_production@host.docker.internal:3306/db_production
     steps:
       - uses: actions/checkout@v3
       
@@ -129,7 +140,17 @@ jobs:
           max_attempts=30
           attempt=1
           while [ $attempt -le $max_attempts ]; do
-            if docker compose -f docker-compose.production.test.yml exec -T app-production php -r "try { \$pdo = new PDO('mysql:host=db-production;port=3306', 'emuseu_user', 'password_production'); \$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); exit(0); } catch (Exception \$e) { exit(1); }" 2>/dev/null; then
+            if docker compose -f docker-compose.production.test.yml exec -T app-production php -r "
+              \$url = getenv('DATABASE_URL');
+              if (empty(\$url)) { echo 'DATABASE_URL not set'; exit(1); }
+              \$p = parse_url(\$url);
+              \$host = \$p['host'] ?? 'db';
+              \$port = \$p['port'] ?? 3306;
+              \$user = \$p['user'] ?? getenv('DB_USERNAME') ?: 'user';
+              \$pass = \$p['pass'] ?? getenv('DB_PASSWORD') ?: '';
+              \$dsn = 'mysql:host=' . \$host . ';port=' . \$port;
+              try { \$pdo = new PDO(\$dsn, \$user, \$pass); \$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); exit(0); } catch (Exception \$e) { exit(1); }
+            " 2>/dev/null; then
               echo "✓ Database is ready!"
               break
             fi
