@@ -1,4 +1,4 @@
-# E-Museu
+# E-Museu TEST CI
 
 #### Forked from https://github.com/tankesho/e-museu
 
