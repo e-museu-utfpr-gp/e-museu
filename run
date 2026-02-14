@@ -16,15 +16,16 @@ function env {
 
 function get_compose_file {
   source .env
-  # "docker-compose.production.yml" will never be used in local environment, it's only for production environment
   if [ "$APP_ENV" == "production" ]; then
+    echo "docker-compose.prod-local.yml"
+  elif [ "$APP_ENV" == "staging" ]; then
     echo "docker-compose.prod-local.yml"
   elif [ "$APP_ENV" == "local" ]; then
     echo "docker-compose.local.yml"
   elif [[ "$1" == "--no-check" ]]; then
     echo $APP_ENV
   else
-    echo "Error: APP_ENV must be 'local' or 'prod-local'. Current value: '$APP_ENV'" >&2
+    echo "Error: APP_ENV must be 'local', 'staging' or 'prod-local'. Current value: '$APP_ENV'" >&2
     exit 1
   fi
 }
@@ -36,17 +37,22 @@ function setup {
     env || echo "[warn] Failed to copy .env (env); continuing..."
   fi
 
+  source .env
   compose_file=$(get_compose_file)
   echo ""
   echo "=================================================="
   if [ "$compose_file" == "docker-compose.local.yml" ]; then
     echo "    RUNNING IN LOCAL ENVIRONMENT"
   elif [ "$compose_file" == "docker-compose.prod-local.yml" ]; then
-    echo "    RUNNING IN PRODUCTION SIMULATION (LOCAL)"
+    if [ "$APP_ENV" == "staging" ]; then
+      echo "    RUNNING IN STAGING (same stack as prod-local)"
+    else
+      echo "    RUNNING IN PRODUCTION SIMULATION (LOCAL)"
+    fi
   else
     echo "    ERROR: UNKNOWN ENVIRONMENT"
     echo "    APP_ENV value: $(source .env && echo $APP_ENV)"
-    echo "    Please check your .env file and set APP_ENV to 'local' or 'prod-local'"
+    echo "    Please check your .env file and set APP_ENV to 'local', 'staging' or 'prod-local'"
   fi
   echo "    Docker Compose: $compose_file"
   echo "=================================================="
@@ -526,7 +532,11 @@ function simulate-ci {
 
 function help {
   echo "Usage: run [command] [options]"
-  echo "Available commands:"
+  echo ""
+  echo "Environments (APP_ENV in .env):"
+  echo "  local      - docker-compose.local.yml (Vite dev server, db, seed, phpMyAdmin)"
+  echo "  staging    - Same as prod-local: docker-compose.prod-local.yml (no Vite dev server)"
+  echo "  prod-local - docker-compose.prod-local.yml (production-like stack locally)"
   echo ""
   echo "Environment & Setup:"
   echo "  env                - Copy environment file (.env.example to .env)"
@@ -545,7 +555,7 @@ function help {
   echo "  remove-all-files   - Remove only files (mysql_data, vendor, node_modules, public/hot, public/build)"
   echo "  remove-all-docker  - Remove only Docker containers, images, and volumes"
   echo ""
-  echo "Node.js & Vite:"
+  echo "Node.js & Vite (local only; staging/prod-local use built assets):"
   echo "  npm-local-bg       - Install npm dependencies and start Vite dev server in background"
   echo "  stop-vite-local    - Stop Vite dev server"
   echo "  start-vite-local   - Start Vite dev server in background"

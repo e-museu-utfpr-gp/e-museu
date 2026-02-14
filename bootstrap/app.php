@@ -54,7 +54,9 @@ return Application::configure(basePath: dirname(__DIR__))
         | These middleware are applied to your web routes.
         |
         */
-        $middleware->web(append: [
+        $middleware->web(prepend: [
+            \App\Http\Middleware\StagingBasicAuth::class,
+        ], append: [
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,

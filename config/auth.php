@@ -112,4 +112,20 @@ return [
 
     'password_timeout' => 10800,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Staging HTTP Basic Auth
+    |--------------------------------------------------------------------------
+    |
+    | When APP_ENV=staging, the StagingBasicAuth middleware requires username
+    | and password before accessing the app. Set in .env: STAGING_HTTP_USER
+    | and STAGING_HTTP_PASSWORD.
+    |
+    */
+
+    'staging_basic' => [
+        'user' => env('STAGING_HTTP_USER', ''),
+        'password' => env('STAGING_HTTP_PASSWORD', ''),
+    ],
+
 ];
