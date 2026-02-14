@@ -1,5 +1,5 @@
 # Docker Compose for production testing (local and CI).
-# Local: app uses db service. CI: inject DATABASE_URL with host.docker.internal to use service container MySQL.
+# App uses db-production; set DB_* in .env (local) or in CI job env.
 services:
   db-production:
     image: mysql:8.0-debian
