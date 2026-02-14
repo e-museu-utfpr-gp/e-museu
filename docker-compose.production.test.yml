@@ -1,8 +1,14 @@
-# Docker Compose for production testing
-# This file is used ONLY for local testing and CI.
-# Database is external: set DATABASE_URL in the environment (no db service).
-# In CI, use a MySQL service container and DATABASE_URL with host.docker.internal.
+# Docker Compose for production testing (local and CI).
+# Local: app uses db service. CI: inject DATABASE_URL with host.docker.internal to use service container MySQL.
 services:
+  db-production:
+    image: mysql:8.0-debian
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+
   app-production:
     build:
       context: .
@@ -17,7 +23,12 @@ services:
       - APP_KEY=${APP_KEY}
       - APP_NAME=${APP_NAME}
       - APP_URL=${APP_URL}
-      - DATABASE_URL=${DATABASE_URL}
+      - DB_HOST=db-production
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - db-production
 
   web-production:
     build:
