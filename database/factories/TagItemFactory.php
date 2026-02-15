@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Item;
-use App\Models\Tag;
+use App\Models\Catalog\Item;
+use App\Models\Taxonomy\Tag;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Model>
+ * @extends Factory<\App\Models\Catalog\TagItem>
  */
 class TagItemFactory extends Factory
 {

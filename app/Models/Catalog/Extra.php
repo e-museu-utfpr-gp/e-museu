@@ -1,33 +1,35 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Catalog;
 
+use App\Models\Identity\Lock;
+use App\Models\Proprietary\Proprietary;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class Tag extends Model
+class Extra extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'item_id',
+        'proprietary_id',
+        'info',
         'validation',
-        'category_id',
     ];
 
-    protected $table = 'tags';
+    protected $table = 'extras';
 
-    public function items(): BelongsToMany
+    public function item(): BelongsTo
     {
-        return $this->belongsToMany(Item::class, 'tag_item', 'tag_id', 'item_id');
+        return $this->belongsTo(Item::class);
     }
 
-    public function category(): BelongsTo
+    public function proprietary(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Proprietary::class);
     }
 
     public function locks(): MorphMany

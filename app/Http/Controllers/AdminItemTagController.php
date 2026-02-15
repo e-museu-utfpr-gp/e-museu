@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use Illuminate\Http\Request;
 use App\Http\Requests\ItemTagRequest;
-use App\Models\TagItem;
-use App\Models\Category;
-use App\Models\Section;
+use App\Models\Catalog\Section;
+use App\Models\Catalog\TagItem;
+use App\Models\Taxonomy\Category;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 

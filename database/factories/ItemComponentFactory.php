@@ -2,9 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Item;
+use App\Models\Catalog\Item;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<\App\Models\Catalog\ItemComponent>
+ */
 class ItemComponentFactory extends Factory
 {
     public function definition(): array

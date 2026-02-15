@@ -19,7 +19,7 @@ class UpdateItemRequest extends FormRequest
     {
         $route = $this->route();
         $item = $route ? $route->parameter('item') : null;
-        $itemId = $item instanceof \App\Models\Item ? $item->id : null;
+        $itemId = $item instanceof \App\Models\Catalog\Item ? $item->id : null;
 
         return [
             'name' => [

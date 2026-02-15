@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Tag;
-use App\Models\TagItem;
+use App\Models\Catalog\TagItem;
+use App\Models\Taxonomy\Tag;
 
 class TagSeeder extends Seeder
 {

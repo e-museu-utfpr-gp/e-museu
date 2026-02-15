@@ -8,8 +8,8 @@ use App\Http\Middleware\CheckLock;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Http\Requests\UserRequest;
-use App\Models\User;
-use App\Models\Lock;
+use App\Models\Identity\Lock;
+use App\Models\Identity\User;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 

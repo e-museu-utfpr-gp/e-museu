@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Item;
-use App\Models\Section;
+use App\Models\Catalog\Item;
+use App\Models\Catalog\Section;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;

@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Proprietary;
 
+use App\Models\Catalog\Item;
+use App\Models\Identity\Lock;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;

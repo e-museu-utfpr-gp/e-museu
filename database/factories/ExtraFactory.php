@@ -2,10 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Catalog\Item;
+use App\Models\Proprietary\Proprietary;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\Item;
-use App\Models\Proprietary;
 
+/**
+ * @extends Factory<\App\Models\Catalog\Extra>
+ */
 class ExtraFactory extends Factory
 {
     public function definition(): array

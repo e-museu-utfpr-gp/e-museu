@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdateItemRequest;
 use App\Http\Requests\StoreItemRequest;
-use App\Models\Item;
-use App\Models\Section;
-use App\Models\Proprietary;
-use App\Models\Category;
+use App\Models\Catalog\Item;
+use App\Models\Catalog\Section;
+use App\Models\Proprietary\Proprietary;
+use App\Models\Taxonomy\Category;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 

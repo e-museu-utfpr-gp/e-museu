@@ -6,9 +6,9 @@ use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use App\Http\Middleware\CheckLock;
 use Illuminate\Http\Request;
 use App\Http\Requests\SingleExtraRequest;
-use App\Models\Extra;
-use App\Models\Proprietary;
-use App\Models\Section;
+use App\Models\Catalog\Extra;
+use App\Models\Catalog\Section;
+use App\Models\Proprietary\Proprietary;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 

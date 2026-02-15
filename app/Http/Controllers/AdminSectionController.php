@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\CheckLock;
 use Illuminate\Http\Request;
 use App\Http\Requests\SectionRequest;
-use App\Models\Section;
+use App\Models\Catalog\Section;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 

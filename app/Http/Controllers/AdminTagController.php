@@ -6,8 +6,8 @@ use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use App\Http\Middleware\CheckLock;
 use Illuminate\Http\Request;
 use App\Http\Requests\SingleTagRequest;
-use App\Models\Tag;
-use App\Models\Category;
+use App\Models\Taxonomy\Category;
+use App\Models\Taxonomy\Tag;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 

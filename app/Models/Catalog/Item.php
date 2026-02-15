@@ -1,13 +1,16 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Catalog;
 
+use App\Models\Identity\Lock;
+use App\Models\Proprietary\Proprietary;
+use App\Models\Taxonomy\Tag;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Tag> $tags

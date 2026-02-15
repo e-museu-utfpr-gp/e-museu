@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ItemContributionValidator;
 use App\Http\Requests\SingleExtraRequest;
-use App\Models\Category;
-use App\Models\Item;
-use App\Models\Section;
+use App\Models\Catalog\Item;
+use App\Models\Catalog\Section;
+use App\Models\Taxonomy\Category;
 use App\Services\ItemContributionService;
 use App\Services\ItemIndexQueryBuilder;
 use Illuminate\Http\Request;

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Tag;
-use App\Models\Item;
-use App\Models\Proprietary;
+use App\Models\Catalog\Item;
+use App\Models\Proprietary\Proprietary;
+use App\Models\Taxonomy\Tag;
 use Illuminate\Http\JsonResponse;
 
 class QueryController extends Controller

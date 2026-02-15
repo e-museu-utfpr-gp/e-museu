@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\Models\Lock;
+use App\Models\Identity\Lock;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -44,14 +44,7 @@ class CheckLock
      */
     private function getModelClassFromRouteName(string $routeName): ?array
     {
-        $routeToModel = [
-            'admin.items' => ['item', 'App\Models\Item'],
-            'admin.tags' => ['tag', 'App\Models\Tag'],
-            'admin.categories' => ['category', 'App\Models\Category'],
-            'admin.proprietaries' => ['proprietary', 'App\Models\Proprietary'],
-            'admin.extras' => ['extra', 'App\Models\Extra'],
-            'admin.sections' => ['section', 'App\Models\Section'],
-        ];
+        $routeToModel = config('lockable_routes', []);
 
         foreach ($routeToModel as $routePrefix => $modelClass) {
             if (Str::startsWith($routeName, $routePrefix)) {

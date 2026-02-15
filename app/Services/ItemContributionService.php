@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\Extra;
-use App\Models\Item;
-use App\Models\ItemComponent;
-use App\Models\Proprietary;
-use App\Models\Section;
-use App\Models\Tag;
+use App\Models\Catalog\Extra;
+use App\Models\Catalog\Item;
+use App\Models\Catalog\ItemComponent;
+use App\Models\Catalog\Section;
+use App\Models\Proprietary\Proprietary;
+use App\Models\Taxonomy\Category;
+use App\Models\Taxonomy\Tag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
@@ -15,15 +16,15 @@ use Illuminate\Http\UploadedFile;
 class ItemContributionService
 {
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Category>
+     * @return \Illuminate\Database\Eloquent\Collection<int, Category>
      */
     public function loadCategories(): \Illuminate\Database\Eloquent\Collection
     {
-        return \App\Models\Category::select('name', 'id')->orderBy('name', 'asc')->get();
+        return Category::select('name', 'id')->orderBy('name', 'asc')->get();
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Section>
+     * @return \Illuminate\Database\Eloquent\Collection<int, Section>
      */
     public function loadSections(): \Illuminate\Database\Eloquent\Collection
     {
@@ -31,7 +32,7 @@ class ItemContributionService
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tag>
+     * @return \Illuminate\Database\Eloquent\Collection<int, Tag>
      */
     public function loadTags(string $category): \Illuminate\Database\Eloquent\Collection
     {

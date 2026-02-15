@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Taxonomy;
 
+use App\Models\Identity\Lock;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class Section extends Model
+class Category extends Model
 {
     use HasFactory;
 
@@ -15,11 +16,11 @@ class Section extends Model
         'name',
     ];
 
-    protected $table = 'sections';
+    protected $table = 'categories';
 
-    public function items(): HasMany
+    public function tags(): HasMany
     {
-        return $this->hasMany(Item::class);
+        return $this->hasMany(Tag::class)->orderBy('name', 'asc');
     }
 
     public function locks(): MorphMany

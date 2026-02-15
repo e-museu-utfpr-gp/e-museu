@@ -8,7 +8,7 @@ use App\Http\Middleware\CheckLock;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProprietaryRequest;
 use App\Http\Requests\NewProprietaryRequest;
-use App\Models\Proprietary;
+use App\Models\Proprietary\Proprietary;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 

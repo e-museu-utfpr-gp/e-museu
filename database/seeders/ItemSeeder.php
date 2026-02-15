@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Item;
-use App\Models\ItemComponent;
+use App\Models\Catalog\Item;
+use App\Models\Catalog\ItemComponent;
 
 class ItemSeeder extends Seeder
 {

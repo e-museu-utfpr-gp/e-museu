@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use Illuminate\Http\Request;
 use App\Http\Requests\SingleComponentRequest;
-use App\Models\ItemComponent;
-use App\Models\Section;
+use App\Models\Catalog\ItemComponent;
+use App\Models\Catalog\Section;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 

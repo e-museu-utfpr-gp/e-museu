@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\Models\Item;
+use App\Models\Catalog\Item;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
