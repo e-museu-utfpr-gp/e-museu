@@ -6,7 +6,7 @@ use App\Http\Controllers\AdminBaseController;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use App\Http\Middleware\CheckLock;
 use Illuminate\Http\Request;
-use App\Http\Requests\SingleTagRequest;
+use App\Http\Requests\Catalog\SingleTagRequest;
 use App\Models\Taxonomy\Category;
 use App\Models\Taxonomy\Tag;
 use Illuminate\View\View;

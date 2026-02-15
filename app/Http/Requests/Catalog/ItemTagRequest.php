@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\DifferentIds;
 
-class SingleExtraRequest extends FormRequest
+class ItemTagRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,17 +23,18 @@ class SingleExtraRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'info' => 'required|string|min:1|max:10000',
             'item_id' => 'required|integer|numeric|exists:items,id',
-            'proprietary_id' => 'sometimes|integer|numeric|exists:proprietaries,id',
-            'validation' => 'sometimes|boolean'
+            'tag_id' => 'required|integer|numeric|exists:tags,id',
+            'validation' => 'required|boolean'
         ];
     }
 
     public function messages(): array
     {
         return [
-            'info.required' => 'O campo curiosidade é obrigatório.',
+            'item_id.required' => 'O campo id do item principal é obrigatório.',
+            'tag_id.required' => 'O campo id da etiqueta é obrigatório.',
+            'validation.required' => 'O campo validação é obrigatório.',
         ];
     }
 }

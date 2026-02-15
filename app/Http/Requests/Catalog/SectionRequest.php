@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ExtraRequest extends FormRequest
+class SectionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,7 @@ class ExtraRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'extras.*.info' => 'sometimes|required|string|min:1|max:10000',
-            'extras.*.proprietary_id' => 'sometimes|required|integer|numeric|exists:proprietaries,id',
-            'extras.*.item_id' => 'sometimes|required|integer|numeric|exists:items,id',
+            'name' => 'required|string|min:1|max:200|unique:sections'
         ];
     }
 }

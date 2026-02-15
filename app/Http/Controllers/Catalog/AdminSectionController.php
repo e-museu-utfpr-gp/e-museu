@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Middleware\CheckLock;
-use App\Http\Requests\SectionRequest;
+use App\Http\Requests\Catalog\SectionRequest;
 use App\Models\Catalog\Section;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

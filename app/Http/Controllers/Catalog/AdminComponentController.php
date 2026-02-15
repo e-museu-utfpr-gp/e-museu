@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Catalog;
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use Illuminate\Http\Request;
-use App\Http\Requests\SingleComponentRequest;
+use App\Http\Requests\Catalog\SingleComponentRequest;
 use App\Models\Catalog\ItemComponent;
 use App\Models\Catalog\Section;
 use Illuminate\View\View;

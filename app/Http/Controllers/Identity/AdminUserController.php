@@ -1,18 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Users;
+namespace App\Http\Controllers\Identity;
 
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Middleware\CheckLock;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Request;
-use App\Http\Requests\UserRequest;
+use App\Http\Requests\Identity\UserRequest;
 use App\Models\Identity\Lock;
 use App\Models\Identity\User;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class AdminUserController extends AdminBaseController
 {

@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Catalog;
 
+use App\Http\Requests\Proprietary\ProprietaryRequest;
+use App\Http\Requests\Taxonomy\TagRequest;
 use Illuminate\Http\Request;
 
 class ItemContributionValidator

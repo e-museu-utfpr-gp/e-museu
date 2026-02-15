@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ItemContributionValidator;
-use App\Http\Requests\SingleExtraRequest;
+use App\Http\Requests\Catalog\ItemContributionValidator;
+use App\Http\Requests\Catalog\SingleExtraRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\Section;
 use App\Models\Taxonomy\Category;

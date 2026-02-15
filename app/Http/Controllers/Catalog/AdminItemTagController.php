@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Catalog;
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use Illuminate\Http\Request;
-use App\Http\Requests\ItemTagRequest;
+use App\Http\Requests\Catalog\ItemTagRequest;
 use App\Models\Catalog\Section;
 use App\Models\Catalog\TagItem;
 use App\Models\Taxonomy\Category;

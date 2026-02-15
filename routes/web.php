@@ -12,7 +12,7 @@ use App\Http\Controllers\Proprietary\AdminProprietaryController;
 use App\Http\Controllers\QueryController;
 use App\Http\Controllers\Taxonomy\AdminCategoryController;
 use App\Http\Controllers\Taxonomy\AdminTagController;
-use App\Http\Controllers\Users\AdminUserController;
+use App\Http\Controllers\Identity\AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Taxonomy;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class SectionRequest extends FormRequest
+class TagRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,8 @@ class SectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|min:1|max:200|unique:sections'
+            'tags.*.category_id' => 'sometimes|required|integer|numeric|exists:categories,id',
+            'tags.*.name' => 'sometimes|required|string|min:1|max:200'
         ];
     }
 }

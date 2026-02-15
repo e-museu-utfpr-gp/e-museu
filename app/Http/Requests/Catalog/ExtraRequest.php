@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class TagRequest extends FormRequest
+class ExtraRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,9 @@ class TagRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tags.*.category_id' => 'sometimes|required|integer|numeric|exists:categories,id',
-            'tags.*.name' => 'sometimes|required|string|min:1|max:200'
+            'extras.*.info' => 'sometimes|required|string|min:1|max:10000',
+            'extras.*.proprietary_id' => 'sometimes|required|integer|numeric|exists:proprietaries,id',
+            'extras.*.item_id' => 'sometimes|required|integer|numeric|exists:items,id',
         ];
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Taxonomy;
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Middleware\CheckLock;
 use Illuminate\Http\Request;
-use App\Http\Requests\CategoryRequest;
+use App\Http\Requests\Taxonomy\CategoryRequest;
 use App\Models\Taxonomy\Category;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
