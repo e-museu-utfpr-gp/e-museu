@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Catalog;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ItemContributionValidator;
 use App\Http\Requests\SingleExtraRequest;
 use App\Models\Catalog\Item;

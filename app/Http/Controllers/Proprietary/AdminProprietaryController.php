@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Proprietary;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AdminBaseController;
 use App\Http\Middleware\CheckLock;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProprietaryRequest;
 use App\Http\Requests\NewProprietaryRequest;

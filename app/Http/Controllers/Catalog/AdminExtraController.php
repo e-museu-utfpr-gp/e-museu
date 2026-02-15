@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Catalog;
 
+use App\Http\Controllers\AdminBaseController;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use App\Http\Middleware\CheckLock;
 use Illuminate\Http\Request;

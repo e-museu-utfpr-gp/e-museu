@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Catalog;
 
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AdminBaseController;
 use App\Http\Middleware\CheckLock;
-use Illuminate\Http\Request;
 use App\Http\Requests\SectionRequest;
 use App\Models\Catalog\Section;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class AdminSectionController extends AdminBaseController
 {

@@ -1,21 +1,22 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Catalog;
 
+use App\Http\Controllers\AdminBaseController;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
-use Illuminate\Support\Facades\Validator;
 use App\Http\Middleware\CheckLock;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\Request;
-use App\Http\Requests\UpdateItemRequest;
 use App\Http\Requests\StoreItemRequest;
+use App\Http\Requests\UpdateItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\Section;
 use App\Models\Proprietary\Proprietary;
 use App\Models\Taxonomy\Category;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class AdminItemController extends AdminBaseController
 {

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Taxonomy;
 
+use App\Http\Controllers\AdminBaseController;
 use App\Http\Middleware\CheckLock;
 use Illuminate\Http\Request;
 use App\Http\Requests\CategoryRequest;
