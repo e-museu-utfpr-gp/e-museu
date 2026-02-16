@@ -82,7 +82,7 @@ class ItemContributionService
             if ($contents === false) {
                 throw new RuntimeException('Could not read uploaded file');
             }
-            Storage::put($path, $contents);
+            Storage::disk('public')->put($path, $contents);
             $item->update(['image' => $path]);
         }
 

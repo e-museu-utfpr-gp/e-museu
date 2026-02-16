@@ -25,7 +25,7 @@ class ItemSeeder extends Seeder
         if ($contents !== null) {
             foreach ($items as $item) {
                 $path = Item::buildImagePath($item);
-                Storage::put($path, $contents);
+                Storage::disk('public')->put($path, $contents);
                 $item->update(['image' => $path]);
             }
         }
@@ -43,8 +43,8 @@ class ItemSeeder extends Seeder
             ->where('image', 'not like', 'http%')
             ->first();
 
-        if ($existing !== null && Storage::exists($existing->getRawOriginal('image'))) {
-            return Storage::get($existing->getRawOriginal('image'));
+        if ($existing !== null && Storage::disk('public')->exists($existing->getRawOriginal('image'))) {
+            return Storage::disk('public')->get($existing->getRawOriginal('image'));
         }
 
         $path = public_path(self::DEFAULT_IMAGE_PATH);

@@ -126,7 +126,7 @@ class AdminItemController extends AdminBaseController
         if ($request->image) {
             $ext = $request->image->getClientOriginalExtension() ?: 'png';
             $path = Item::buildImagePath($item, $ext);
-            Storage::put($path, $request->image->get());
+            Storage::disk('public')->put($path, $request->image->get());
             $item->update(['image' => $path]);
         }
 
@@ -152,12 +152,12 @@ class AdminItemController extends AdminBaseController
         if ($request->image) {
             $oldPath = $item->getRawOriginal('image');
             if ($oldPath !== null && $oldPath !== '' && ! str_starts_with((string) $oldPath, 'http')) {
-                Storage::delete($oldPath);
+                Storage::disk('public')->delete($oldPath);
             }
 
             $ext = $request->image->getClientOriginalExtension() ?: 'png';
             $data['image'] = Item::buildImagePath($item, $ext);
-            Storage::put($data['image'], $request->image->get());
+            Storage::disk('public')->put($data['image'], $request->image->get());
         } else {
             unset($data['image']);
         }
@@ -179,12 +179,12 @@ class AdminItemController extends AdminBaseController
 
         $imagePath = $item->getRawOriginal('image');
         if ($imagePath !== null && $imagePath !== '' && ! str_starts_with((string) $imagePath, 'http')) {
-            Storage::delete($imagePath);
+            Storage::disk('public')->delete($imagePath);
         }
 
         $itemFolder = 'items/' . $item->id;
-        if (Storage::exists($itemFolder)) {
-            Storage::deleteDirectory($itemFolder);
+        if (Storage::disk('public')->exists($itemFolder)) {
+            Storage::disk('public')->deleteDirectory($itemFolder);
         }
 
         $item->delete();
