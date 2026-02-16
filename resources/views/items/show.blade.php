@@ -44,11 +44,13 @@
                     <div>
                         <h5>{{ $item->name }}</h5>
                     </div>
-                    <div style="overflow:hidden;">
-                        <img src="{{ url("storage/{$item->image}") }}" class="card-img-top p-1 clickable-image"
-                            style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover"
-                            alt="Imagem do item">
-                    </div>
+                    @if ($item->image_url)
+                        <div style="overflow:hidden;">
+                            <img src="{{ $item->image_url }}" class="card-img-top p-1 clickable-image"
+                                style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover"
+                                alt="Imagem do item">
+                        </div>
+                    @endif
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-5">
@@ -108,10 +110,12 @@
                                 <div class="col-6 p-2">
                                     <a href={{ route('items.show', $ItemComponent->component->id) }}>
                                         <div class="card-anim component-button p-1">
-                                            <div class="">
-                                                <img src="{{ url("storage/{$ItemComponent->component->image}") }}"
-                                                    class="component-img p-1" alt="Imagem do componente">
-                                            </div>
+                                            @if ($ItemComponent->component->image_url)
+                                                <div class="">
+                                                    <img src="{{ $ItemComponent->component->image_url }}"
+                                                        class="component-img p-1" alt="Imagem do componente">
+                                                </div>
+                                            @endif
                                             <div class="p-1">
                                                 <p class="mb-1 fw-bold">
                                                     {{ Str::limit($ItemComponent->component->name, 30) }}</p>
@@ -208,12 +212,14 @@
                                                     @endif
                                                 </div>
                                                 <div class="d-md-flex">
-                                                    <div>
-                                                        <img src="{{ url("storage/{$timelineItem->image}") }}"
-                                                            class="card-img-top p-1 clickable-image"
-                                                            style="width: 12rem; height: 12rem; object-fit: cover"
-                                                            alt="Imagem do item da série">
-                                                    </div>
+                                                    @if ($timelineItem->image_url)
+                                                        <div>
+                                                            <img src="{{ $timelineItem->image_url }}"
+                                                                class="card-img-top p-1 clickable-image"
+                                                                style="width: 12rem; height: 12rem; object-fit: cover"
+                                                                alt="Imagem do item da série">
+                                                        </div>
+                                                    @endif
                                                     <div class="ms-2">
                                                         <p class="fw-bold">{{ $timelineItem->name }}</p>
                                                         <p>{{ $timelineItem->description }}</p>
