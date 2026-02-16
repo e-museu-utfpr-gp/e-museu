@@ -89,7 +89,7 @@ class Item extends Model
             if (str_starts_with($raw, 'http')) {
                 return $raw;
             }
-            return Storage::url($raw);
+            return Storage::disk('public')->url($raw);
         });
     }
 
