@@ -1,0 +1,19 @@
+<?php
+
+namespace Database\Seeders\Catalog;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use App\Models\Catalog\Item;
+use App\Models\Catalog\ItemComponent;
+
+class ItemSeeder extends Seeder
+{
+    public function run(): void
+    {
+        if (app()->environment('local')) {
+            Item::factory(100)->create();
+            ItemComponent::factory(50)->create();
+        }
+    }
+}

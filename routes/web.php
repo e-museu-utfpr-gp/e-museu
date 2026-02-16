@@ -1,18 +1,18 @@
 <?php
 
-use App\Http\Controllers\AdminCategoryController;
-use App\Http\Controllers\AdminComponentController;
-use App\Http\Controllers\AdminExtraController;
-use App\Http\Controllers\AdminItemController;
-use App\Http\Controllers\AdminItemTagController;
-use App\Http\Controllers\AdminProprietaryController;
-use App\Http\Controllers\AdminSectionController;
-use App\Http\Controllers\AdminTagController;
-use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\Catalog\AdminComponentController;
+use App\Http\Controllers\Catalog\AdminExtraController;
+use App\Http\Controllers\Catalog\AdminItemController;
+use App\Http\Controllers\Catalog\AdminItemTagController;
+use App\Http\Controllers\Catalog\AdminSectionController;
+use App\Http\Controllers\Catalog\ItemController;
+use App\Http\Controllers\Catalog\QueryController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ItemController;
-use App\Http\Controllers\QueryController;
+use App\Http\Controllers\Proprietary\AdminProprietaryController;
+use App\Http\Controllers\Taxonomy\AdminCategoryController;
+use App\Http\Controllers\Taxonomy\AdminTagController;
+use App\Http\Controllers\Identity\AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
