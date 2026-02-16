@@ -71,9 +71,11 @@
                         <p class="ms-3">{{ $component->item->id }}</p>
                         <strong>Nome: </strong>
                         <p class="card-text">{{ $component->item->name }}</p>
-                        <img src="{{ url("storage/{$component->item->image}") }}" class="img-thumbnail clickable-image"
-                            alt="Imagem do item"
-                            style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover">
+                        @if ($component->item->image_url)
+                            <img src="{{ $component->item->image_url }}" class="img-thumbnail clickable-image"
+                                alt="Imagem do item"
+                                style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover">
+                        @endif
                         <strong>Descrição: </strong>
                         <p class="ms-3">{{ $component->item->description }}</p>
                         <strong>História: </strong>
@@ -123,9 +125,11 @@
                         <p class="ms-3">{{ $component->component->id }}</p>
                         <strong>Nome: </strong>
                         <p class="card-text">{{ $component->component->name }}</p>
-                        <img src="{{ url("storage/{$component->component->image}") }}"
-                            class="img-thumbnail clickable-image" alt="Imagem do componente"
-                            style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover">
+                        @if ($component->component->image_url)
+                            <img src="{{ $component->component->image_url }}"
+                                class="img-thumbnail clickable-image" alt="Imagem do componente"
+                                style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover">
+                        @endif
                         <strong>Descrição: </strong>
                         <p class="ms-3">{{ $component->component->description }}</p>
                         <strong>História: </strong>

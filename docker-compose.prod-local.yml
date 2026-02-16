@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile.prod-local
       target: app
     working_dir: /var/www/
+    volumes:
+      - e_museu_storage:/var/www/storage
     depends_on:
       - db
 
@@ -15,6 +17,8 @@ services:
       target: web
     ports:
       - "${WEB_SERVER_PORT_PROD_LOCAL}:80"
+    volumes:
+      - e_museu_storage:/var/www/storage
     depends_on:
       - app
 
@@ -27,3 +31,6 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
       - ./mysql_data:/var/lib/mysql
+
+volumes:
+  e_museu_storage:
