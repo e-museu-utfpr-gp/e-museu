@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Identity;
 
 use Illuminate\Console\Command;
 use App\Models\Identity\User;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Http\Middleware\Catalog;
 
 use Closure;
 use App\Models\Catalog\Item;

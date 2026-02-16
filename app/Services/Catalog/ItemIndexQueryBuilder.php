@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Catalog;
 
 use App\Models\Catalog\Item;
 use App\Models\Catalog\Section;
@@ -31,6 +31,9 @@ class ItemIndexQueryBuilder
         return ['items' => $items, 'sectionName' => $sectionName];
     }
 
+    /**
+     * @return Builder<Item>
+     */
     private function baseQuery(): Builder
     {
         return Item::query()
@@ -38,6 +41,9 @@ class ItemIndexQueryBuilder
             ->where('validation', true);
     }
 
+    /**
+     * @param Builder<Item> $query
+     */
     private function applySection(Builder $query, ?string $sectionId): void
     {
         if ($sectionId) {
@@ -45,6 +51,9 @@ class ItemIndexQueryBuilder
         }
     }
 
+    /**
+     * @param Builder<Item> $query
+     */
     private function applySearch(Builder $query, ?string $search): void
     {
         if (isset($search) && $search !== '') {
@@ -53,6 +62,7 @@ class ItemIndexQueryBuilder
     }
 
     /**
+     * @param Builder<Item> $query
      * @param array<int|string>|null $categoryIds
      */
     private function applyCategoryFilter(Builder $query, $categoryIds): void
@@ -66,6 +76,7 @@ class ItemIndexQueryBuilder
     }
 
     /**
+     * @param Builder<Item> $query
      * @param array<int|string>|null $tagIds
      */
     private function applyTagFilter(Builder $query, $tagIds): void
@@ -78,6 +89,9 @@ class ItemIndexQueryBuilder
         });
     }
 
+    /**
+     * @param Builder<Item> $query
+     */
     private function applyOrder(Builder $query, int $order): void
     {
         $orderMap = [

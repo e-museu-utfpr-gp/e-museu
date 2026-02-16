@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Catalog;
 
 use App\Models\Catalog\Extra;
 use App\Models\Catalog\Item;

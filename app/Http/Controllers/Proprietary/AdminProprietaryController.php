@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Proprietary;
 
 use App\Http\Controllers\AdminBaseController;
-use App\Http\Middleware\CheckLock;
+use App\Http\Middleware\Identity\CheckLock;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Http\Middleware\Identity;
 
 use Closure;
 use App\Models\Identity\Lock;

@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Catalog;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\Catalog\Item;
 use App\Models\Proprietary\Proprietary;
 use App\Models\Taxonomy\Tag;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class QueryController extends Controller
 {

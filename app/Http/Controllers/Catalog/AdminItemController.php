@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
-use App\Http\Middleware\CheckLock;
+use App\Http\Middleware\Identity\CheckLock;
 use App\Http\Requests\Catalog\StoreItemRequest;
 use App\Http\Requests\Catalog\UpdateItemRequest;
 use App\Models\Catalog\Item;

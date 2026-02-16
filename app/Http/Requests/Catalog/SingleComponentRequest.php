@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\DifferentIds;
+use App\Rules\Catalog\DifferentIds;
 
 class SingleComponentRequest extends FormRequest
 {

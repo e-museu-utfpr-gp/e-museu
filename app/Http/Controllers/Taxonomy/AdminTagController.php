@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Taxonomy;
 
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
-use App\Http\Middleware\CheckLock;
+use App\Http\Middleware\Identity\CheckLock;
 use Illuminate\Http\Request;
 use App\Http\Requests\Catalog\SingleTagRequest;
 use App\Models\Taxonomy\Category;

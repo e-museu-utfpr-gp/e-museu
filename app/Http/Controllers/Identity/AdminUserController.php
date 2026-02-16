@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Identity;
 
 use App\Http\Controllers\AdminBaseController;
-use App\Http\Middleware\CheckLock;
+use App\Http\Middleware\Identity\CheckLock;
 use App\Http\Requests\Identity\UserRequest;
 use App\Models\Identity\Lock;
 use App\Models\Identity\User;
