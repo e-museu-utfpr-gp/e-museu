@@ -70,7 +70,7 @@ class AdminItemController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $item = Item::find($id);
+        $item = Item::findOrFail($id);
 
         return view('admin.items.show', compact('item'));
     }
