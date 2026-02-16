@@ -9,12 +9,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            ProprietarySeeder::class,
-            CategorySeeder::class,
-            SectionSeeder::class,
-            ItemSeeder::class,
-            ExtraSeeder::class,
-            TagSeeder::class,
+            \Database\Seeders\Proprietary\ProprietarySeeder::class,
+            \Database\Seeders\Taxonomy\CategorySeeder::class,
+            \Database\Seeders\Catalog\SectionSeeder::class,
+            \Database\Seeders\Catalog\ItemSeeder::class,
+            \Database\Seeders\Catalog\ExtraSeeder::class,
+            \Database\Seeders\Taxonomy\TagSeeder::class,
         ]);
     }
 }
