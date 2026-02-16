@@ -37,13 +37,15 @@
                                 <p class="card-text">{{ $item->name }}</p>
                             </div>
                         </div>
-                        <div class="card mb-3">
-                            <h5 class="card-header">Imagem</h5>
-                            <div class="card-body">
-                                <img src="{{ url("storage/{$item->image}") }}" class="img-thumbnail clickable-image myImg"
-                                    alt="Imagem do item">
+                        @if ($item->image_url)
+                            <div class="card mb-3">
+                                <h5 class="card-header">Imagem</h5>
+                                <div class="card-body">
+                                    <img src="{{ $item->image_url }}" class="img-thumbnail clickable-image myImg"
+                                        alt="Imagem do item">
+                                </div>
                             </div>
-                        </div>
+                        @endif
                         <div class="card mb-3">
                             <h5 class="card-header">Descrição</h5>
                             <div class="card-body">
