@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use RuntimeException;
 
 class AdminItemController extends AdminBaseController
 {
@@ -97,25 +98,37 @@ class AdminItemController extends AdminBaseController
             return back()->withErrors($validator)->withInput();
         }
 
-        $data = $request->all();
-
-        if ($request->image) {
-            $data['image'] = $request->image->store('items');
-        }
+        $data = [
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'history' => $request->input('history'),
+            'detail' => $request->input('detail'),
+            'date' => $request->input('date') ?? '0001-01-01 00:00:00',
+            'section_id' => $request->input('section_id'),
+            'proprietary_id' => $request->input('proprietary_id'),
+            'validation' => $request->boolean('validation'),
+        ];
 
         $data['identification_code'] = '000';
 
-        if ($data['date'] === null) {
-            $data['date'] = '0001-01-01 00:00:00';
-        }
-
-        DB::transaction(function () use ($data, $item) {
+        DB::transaction(function () use ($data, &$item) {
             $item = Item::create($data);
 
             $data['identification_code'] = self::createIdentificationCode($item);
 
             $item->update($data);
         });
+
+        if (! $item instanceof Item) {
+            throw new RuntimeException('Item creation failed');
+        }
+
+        if ($request->image) {
+            $ext = $request->image->getClientOriginalExtension() ?: 'png';
+            $path = Item::buildImagePath($item, $ext);
+            Storage::put($path, $request->image->get());
+            $item->update(['image' => $path]);
+        }
 
         return redirect()->route('admin.items.show', $item)->with('success', 'Item adicionado com sucesso.');
     }
@@ -137,11 +150,14 @@ class AdminItemController extends AdminBaseController
         $data = $request->validated();
 
         if ($request->image) {
-            $imagePath = $item->image;
+            $oldPath = $item->getRawOriginal('image');
+            if ($oldPath !== null && $oldPath !== '' && ! str_starts_with((string) $oldPath, 'http')) {
+                Storage::delete($oldPath);
+            }
 
-            Storage::delete($imagePath);
-
-            $data['image'] = $request->image->store('items');
+            $ext = $request->image->getClientOriginalExtension() ?: 'png';
+            $data['image'] = Item::buildImagePath($item, $ext);
+            Storage::put($data['image'], $request->image->get());
         } else {
             unset($data['image']);
         }
@@ -161,9 +177,16 @@ class AdminItemController extends AdminBaseController
     {
         $this->unlock($item);
 
-        $imagePath = $item->image;
+        $imagePath = $item->getRawOriginal('image');
+        if ($imagePath !== null && $imagePath !== '' && ! str_starts_with((string) $imagePath, 'http')) {
+            Storage::delete($imagePath);
+        }
 
-        Storage::delete($imagePath);
+        $itemFolder = 'items/' . $item->id;
+        if (Storage::exists($itemFolder)) {
+            Storage::deleteDirectory($itemFolder);
+        }
+
         $item->delete();
 
         return redirect()->route('admin.items.index')->with('success', 'Item excluído com sucesso.');

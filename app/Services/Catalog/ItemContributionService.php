@@ -10,8 +10,10 @@ use App\Models\Proprietary\Proprietary;
 use App\Models\Taxonomy\Category;
 use App\Models\Taxonomy\Tag;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class ItemContributionService
 {
@@ -68,10 +70,22 @@ class ItemContributionService
         }
 
         if ($image) {
-            $itemData['image'] = $image->store('items');
+            unset($itemData['image']);
         }
 
         $item = $this->storeItem($itemData, $proprietary);
+
+        if ($image) {
+            $ext = $image->getClientOriginalExtension() ?: 'png';
+            $path = Item::buildImagePath($item, $ext);
+            $contents = $image->get();
+            if ($contents === false) {
+                throw new RuntimeException('Could not read uploaded file');
+            }
+            Storage::put($path, $contents);
+            $item->update(['image' => $path]);
+        }
+
         $this->storeMultipleTag($tags, $item);
         $this->storeMultipleExtra($extras, $item, $proprietary);
         $this->storeMultipleComponent($components, $item);

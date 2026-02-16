@@ -43,14 +43,16 @@
                             $imageActive = true;
                         @endphp
                         @foreach ($items as $item)
-                            <div class="carousel-item @if ($imageActive) active @endif">
-                                <img src="storage/{{ $item->image }}" class="p-4 clickable-image"
-                                    style="aspect-ratio: 3 / 2; width: 100%; max-height: 100%; object-fit: cover"
-                                    alt="">
-                            </div>
-                            @php
-                                $imageActive = false;
-                            @endphp
+                            @if ($item->image_url)
+                                <div class="carousel-item @if ($imageActive) active @endif">
+                                    <img src="{{ $item->image_url }}" class="p-4 clickable-image"
+                                        style="aspect-ratio: 3 / 2; width: 100%; max-height: 100%; object-fit: cover"
+                                        alt="">
+                                </div>
+                                @php
+                                    $imageActive = false;
+                                @endphp
+                            @endif
                         @endforeach
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">

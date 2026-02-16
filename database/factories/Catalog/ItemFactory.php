@@ -20,7 +20,7 @@ class ItemFactory extends Factory
             'detail' => $this->faker->text,
             'date' => $this->faker->date,
             'identification_code' => $this->faker->unique()->numberBetween(1, 1000),
-            'image' => $this->faker->imageUrl(500, 500),
+            'image' => null,
             'validation' => $this->faker->boolean,
             'section_id' => Section::pluck('id')->random(),
             'proprietary_id' => Proprietary::pluck('id')->random(),

@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             \Database\Seeders\Proprietary\ProprietarySeeder::class,
+            \Database\Seeders\Identity\UserSeeder::class,
             \Database\Seeders\Taxonomy\CategorySeeder::class,
             \Database\Seeders\Catalog\SectionSeeder::class,
             \Database\Seeders\Catalog\ItemSeeder::class,
