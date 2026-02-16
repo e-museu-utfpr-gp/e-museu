@@ -107,9 +107,11 @@
                                 @error('image')
                                     <div class="invalid-feedback"> {{ $message }} </div>
                                 @enderror
-                                <img src="{{ url("storage/{$item->image}") }}" class="img-thumbnail clickable-image"
-                                    alt="Imagem anterior do item">
-                                <p>Imagem anterior</p>
+                                @if ($item->image_url)
+                                    <img src="{{ $item->image_url }}" class="img-thumbnail clickable-image"
+                                        alt="Imagem anterior do item">
+                                    <p>Imagem anterior</p>
+                                @endif
                             </div>
                         </div>
                     </div>

@@ -112,9 +112,11 @@
                         <p class="ms-3">{{ $extra->item->id }}</p>
                         <strong>Nome: </strong>
                         <p class="card-text">{{ $extra->item->name }}</p>
-                        <img src="{{ url("storage/{$extra->item->image}") }}" class="img-thumbnail clickable-image"
-                            alt="Imagem do item"
-                            style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover">
+                        @if ($extra->item->image_url)
+                            <img src="{{ $extra->item->image_url }}" class="img-thumbnail clickable-image"
+                                alt="Imagem do item"
+                                style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover">
+                        @endif
                         <strong>Descrição: </strong>
                         <p class="ms-3">{{ $extra->item->description }}</p>
                         <strong>História: </strong>

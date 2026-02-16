@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile.production
       target: app
     working_dir: /var/www
+    volumes:
+      - production_e_museu_storage:/var/www/storage
 
   web-production:
     build:
@@ -16,3 +18,8 @@ services:
       - app-production
     expose:
       - "80"
+    volumes:
+      - production_e_museu_storage:/var/www/storage
+
+volumes:
+  production_e_museu_storage:

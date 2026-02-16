@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile.staging
       target: app
     working_dir: /var/www
+    volumes:
+      - staging_e_museu_storage:/var/www/storage
 
   web-staging:
     build:
@@ -16,3 +18,8 @@ services:
       - app-staging
     expose:
       - "80"
+    volumes:
+      - staging_e_museu_storage:/var/www/storage
+
+volumes:
+  staging_e_museu_storage:
