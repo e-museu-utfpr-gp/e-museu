@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Catalog;
 
 use App\Models\Catalog\Section;
 use App\Models\Proprietary\Proprietary;

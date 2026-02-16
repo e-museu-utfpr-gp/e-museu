@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories;
+namespace Database\Factories\Taxonomy;
 
 use App\Models\Catalog\Item;
 use App\Models\Taxonomy\Tag;
