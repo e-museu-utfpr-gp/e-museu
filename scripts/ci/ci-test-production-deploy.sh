@@ -74,7 +74,6 @@ fi
 
 echo ""
 echo ">> Running Laravel deployment commands..."
-docker compose -f docker-compose.production.test.yml exec -T app-production php artisan storage:link || true
 docker compose -f docker-compose.production.test.yml exec -T app-production php artisan config:clear
 docker compose -f docker-compose.production.test.yml exec -T app-production php artisan config:cache
 docker compose -f docker-compose.production.test.yml exec -T app-production php artisan route:cache
