@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use League\Flysystem\UnableToCheckExistence;
+use League\Flysystem\UnableToReadFile;
 
 /**
  * Serves files from the public disk via app URL (domain + /storage/...).
@@ -20,10 +23,20 @@ class StorageProxyController extends Controller
             abort(404);
         }
 
-        if (! Storage::disk('public')->exists($path)) {
+        try {
+            if (! Storage::disk('public')->exists($path)) {
+                abort(404);
+            }
+
+            return Storage::disk('public')->response($path);
+        } catch (UnableToCheckExistence|UnableToReadFile $e) {
+            Log::warning('Storage proxy: could not serve file.', [
+                'path' => $path,
+                'message' => $e->getMessage(),
+                'previous' => $e->getPrevious()?->getMessage(),
+            ]);
+
             abort(404);
         }
-
-        return Storage::disk('public')->response($path);
     }
 }
