@@ -2,7 +2,7 @@
 
 #### Forked from https://github.com/tankesho/e-museu
 
-#### v2.1.0-beta
+#### v3.0.0-beta
 
 # 🚧 Work In Progress 
 
