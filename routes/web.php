@@ -13,7 +13,10 @@ use App\Http\Controllers\Proprietary\AdminProprietaryController;
 use App\Http\Controllers\Taxonomy\AdminCategoryController;
 use App\Http\Controllers\Taxonomy\AdminTagController;
 use App\Http\Controllers\Identity\AdminUserController;
+use App\Http\Controllers\StorageProxyController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/storage/{path}', StorageProxyController::class)->where('path', '.*')->name('storage.proxy');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
