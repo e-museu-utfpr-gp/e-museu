@@ -29,7 +29,7 @@ class StorageProxyController extends Controller
             }
 
             return Storage::disk('public')->response($path);
-        } catch (UnableToCheckExistence|UnableToReadFile $e) {
+        } catch (UnableToCheckExistence | UnableToReadFile $e) {
             Log::warning('Storage proxy: could not serve file.', [
                 'path' => $path,
                 'message' => $e->getMessage(),
