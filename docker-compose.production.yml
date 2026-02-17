@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile.production
       target: app
     working_dir: /var/www
+    # Only for logs, sessions, framework cache. App data (images/files) is in S3 on Coolify (FILESYSTEM_DISK=s3).
     volumes:
       - production_e_museu_storage:/var/www/storage
 
@@ -18,8 +19,10 @@ services:
       - app-production
     expose:
       - "80"
+    # Same volume as app (logs/sessions/cache only; images are in S3 on Coolify).
     volumes:
       - production_e_museu_storage:/var/www/storage
 
+# Named volume for Laravel storage (logs, sessions, framework cache). App data (images/files) is in S3 on Coolify.
 volumes:
   production_e_museu_storage:
