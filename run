@@ -386,12 +386,6 @@ function migrate {
   docker compose -f "$(get_compose_file)" exec app php artisan migrate --force
 }
 
-function storage_link {
-  source .env
-  echo ">> Creating storage symbolic link..."
-  docker compose -f "$(get_compose_file)" exec app php artisan storage:link
-}
-
 function composer {
   source .env
   echo ">> Configuring Git safe.directory for /var/www..."
@@ -566,7 +560,6 @@ function help {
   echo "  gen_key -y         - Generate application key without confirmation (production)"
   echo "  migrate            - Run database migrations"
   echo "  seed               - Seed database with initial data"
-  echo "  storage_link       - Create storage symbolic link"
   echo "  composer           - Install Composer dependencies"
   echo ""
   echo "Testing & Code Quality:"
