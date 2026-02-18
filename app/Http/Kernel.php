@@ -57,6 +57,6 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'validate.item' => \App\Http\Middleware\Catalog\ValidateItem::class,
         'validate.proprietary' => \App\Http\Middleware\Proprietary\ValidateProprietary::class,
-        'check.lock' => \App\Http\Middleware\Identity\CheckLock::class
+        'check.lock' => \App\Http\Middleware\Identity\CheckLock::class,
     ];
 }

@@ -2,12 +2,12 @@
 
 namespace App\Http\Middleware\Identity;
 
-use Closure;
 use App\Models\Identity\Lock;
+use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckLock

@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Identity;
 
 use App\Http\Controllers\AdminBaseController;
-use App\Http\Middleware\Identity\CheckLock;
 use App\Http\Requests\Identity\UserRequest;
 use App\Models\Identity\Lock;
 use App\Models\Identity\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class AdminUserController extends AdminBaseController

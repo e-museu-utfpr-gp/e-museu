@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Catalog\AdminComponentController;
 use App\Http\Controllers\Catalog\AdminExtraController;
 use App\Http\Controllers\Catalog\AdminItemController;
@@ -7,13 +8,12 @@ use App\Http\Controllers\Catalog\AdminItemTagController;
 use App\Http\Controllers\Catalog\AdminSectionController;
 use App\Http\Controllers\Catalog\ItemController;
 use App\Http\Controllers\Catalog\QueryController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Identity\AdminUserController;
 use App\Http\Controllers\Proprietary\AdminProprietaryController;
+use App\Http\Controllers\StorageProxyController;
 use App\Http\Controllers\Taxonomy\AdminCategoryController;
 use App\Http\Controllers\Taxonomy\AdminTagController;
-use App\Http\Controllers\Identity\AdminUserController;
-use App\Http\Controllers\StorageProxyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/storage/{path}', StorageProxyController::class)->where('path', '.*')->name('storage.proxy');

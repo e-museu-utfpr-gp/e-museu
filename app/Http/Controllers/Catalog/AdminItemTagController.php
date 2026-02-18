@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
-use Illuminate\Http\Request;
 use App\Http\Requests\Catalog\ItemTagRequest;
 use App\Models\Catalog\Section;
 use App\Models\Catalog\TagItem;
 use App\Models\Taxonomy\Category;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class AdminItemTagController extends AdminBaseController
 {
@@ -106,6 +106,7 @@ class AdminItemTagController extends AdminBaseController
     public function destroy(TagItem $itemTag): RedirectResponse
     {
         $itemTag->delete();
+
         return redirect()->route('admin.item-tags.index')->with('success', 'Relacionamento excluído com sucesso.');
     }
 }

@@ -10,7 +10,6 @@ use App\Http\Requests\Catalog\UpdateItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\Section;
 use App\Models\Proprietary\Proprietary;
-use App\Models\Taxonomy\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -89,7 +88,7 @@ class AdminItemController extends AdminBaseController
 
         $rules = [
             'proprietary_id' => 'required|integer|numeric|exists:proprietaries,id',
-            'validation' => 'required|boolean'
+            'validation' => 'required|boolean',
         ];
 
         $validator = Validator::make($request->all(), $rules);

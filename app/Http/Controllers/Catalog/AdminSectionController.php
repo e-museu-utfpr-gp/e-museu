@@ -8,7 +8,6 @@ use App\Http\Requests\Catalog\SectionRequest;
 use App\Models\Catalog\Section;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 class AdminSectionController extends AdminBaseController

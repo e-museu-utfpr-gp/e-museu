@@ -33,6 +33,7 @@ class Lock extends Model
 
     /**
      * @return static|null
+     *
      * @phpstan-return static|null
      */
     public static function findByModel(EloquentModel $subject)

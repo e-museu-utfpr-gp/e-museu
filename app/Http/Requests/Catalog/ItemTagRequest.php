@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\Catalog\DifferentIds;
 
 class ItemTagRequest extends FormRequest
 {
@@ -25,7 +24,7 @@ class ItemTagRequest extends FormRequest
         return [
             'item_id' => 'required|integer|numeric|exists:items,id',
             'tag_id' => 'required|integer|numeric|exists:tags,id',
-            'validation' => 'required|boolean'
+            'validation' => 'required|boolean',
         ];
     }
 

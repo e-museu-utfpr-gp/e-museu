@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
-use Illuminate\Http\Request;
 use App\Http\Requests\Catalog\SingleComponentRequest;
 use App\Models\Catalog\ItemComponent;
 use App\Models\Catalog\Section;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class AdminComponentController extends AdminBaseController
 {
@@ -103,6 +103,7 @@ class AdminComponentController extends AdminBaseController
     public function destroy(ItemComponent $component): RedirectResponse
     {
         $component->delete();
+
         return redirect()->route('admin.components.index')->with('success', 'Componente excluído com sucesso.');
     }
 }

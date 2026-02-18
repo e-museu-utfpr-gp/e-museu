@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Identity\Lock;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Identity\Lock;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
 class Controller extends BaseController
 {
@@ -19,7 +19,7 @@ class Controller extends BaseController
     {
         $lock = Lock::findByModel($subject);
 
-        if (!$lock) {
+        if (! $lock) {
             $lock = new Lock([
                 'user_id' => Auth::id(),
                 'expiry_date' => Carbon::now()->addHours(1),
@@ -38,6 +38,7 @@ class Controller extends BaseController
 
         if ($lock) {
             $lock->delete();
+
             return true;
         }
 

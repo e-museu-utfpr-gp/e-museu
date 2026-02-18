@@ -10,9 +10,9 @@ use App\Models\Catalog\Section;
 use App\Models\Taxonomy\Category;
 use App\Services\Catalog\ItemContributionService;
 use App\Services\Catalog\ItemIndexQueryBuilder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class ItemController extends Controller
 {

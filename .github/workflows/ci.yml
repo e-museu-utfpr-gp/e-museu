@@ -59,18 +59,27 @@ jobs:
           echo "Running PHP CodeSniffer..."
           ./run phpcs
           
+          echo ""
+          echo "Running Laravel Pint (style check)..."
+          ./run pint-test
+          
+          echo ""
           echo "Running PHP Mess Detector..."
           ./run phpmd
           
+          echo ""
           echo "Running PHPStan..."
           ./run phpstan
           
+          echo ""
           echo "Running PHP Copy/Paste Detector..."
           ./run phpcpd
           
+          echo ""
           echo "Running ESLint..."
           ./run eslint
           
+          echo ""
           echo "Running Prettier check..."
           ./run prettier-check
           

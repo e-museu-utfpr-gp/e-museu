@@ -4,14 +4,13 @@ namespace App\Http\Controllers\Proprietary;
 
 use App\Http\Controllers\AdminBaseController;
 use App\Http\Middleware\Identity\CheckLock;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
 use App\Http\Requests\Proprietary\NewProprietaryRequest;
 use App\Http\Requests\Proprietary\ProprietaryRequest;
 use App\Models\Proprietary\Proprietary;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 class AdminProprietaryController extends AdminBaseController
 {

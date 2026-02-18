@@ -46,11 +46,11 @@ class ItemContributionService
     }
 
     /**
-     * @param array<string, mixed> $proprietaryData
-     * @param array<string, mixed> $itemData
-     * @param array<int, array<string, mixed>> $tags
-     * @param array<int, array<string, mixed>> $extras
-     * @param array<int, array<string, mixed>> $components
+     * @param  array<string, mixed>  $proprietaryData
+     * @param  array<string, mixed>  $itemData
+     * @param  array<int, array<string, mixed>>  $tags
+     * @param  array<int, array<string, mixed>>  $extras
+     * @param  array<int, array<string, mixed>>  $components
      */
     public function store(
         array $proprietaryData,
@@ -61,7 +61,7 @@ class ItemContributionService
         ?UploadedFile $image
     ): RedirectResponse {
         $proprietary = Proprietary::where('contact', '=', $proprietaryData['contact'])->first();
-        if (!$proprietary) {
+        if (! $proprietary) {
             $proprietary = $this->storeProprietary($proprietaryData);
         }
 
@@ -97,13 +97,13 @@ class ItemContributionService
     }
 
     /**
-     * @param array<string, mixed> $proprietaryData
-     * @param array<string, mixed> $extraData
+     * @param  array<string, mixed>  $proprietaryData
+     * @param  array<string, mixed>  $extraData
      */
     public function storeSingleExtra(array $proprietaryData, array $extraData): RedirectResponse
     {
         $proprietary = Proprietary::where('contact', $proprietaryData['contact'])->first();
-        if (!$proprietary) {
+        if (! $proprietary) {
             $proprietary = $this->storeProprietary($proprietaryData);
         }
 
@@ -121,7 +121,7 @@ class ItemContributionService
     }
 
     /**
-     * @param array<string, mixed> $proprietaryData
+     * @param  array<string, mixed>  $proprietaryData
      */
     private function storeProprietary(array $proprietaryData): Proprietary
     {
@@ -129,7 +129,7 @@ class ItemContributionService
     }
 
     /**
-     * @param array<string, mixed> $itemData
+     * @param  array<string, mixed>  $itemData
      */
     private function storeItem(array $itemData, Proprietary $proprietary): Item
     {
@@ -149,7 +149,7 @@ class ItemContributionService
     }
 
     /**
-     * @param array<int, array<string, mixed>> $tags
+     * @param  array<int, array<string, mixed>>  $tags
      */
     private function storeMultipleTag(array $tags, Item $item): void
     {
@@ -165,7 +165,7 @@ class ItemContributionService
     }
 
     /**
-     * @param array<int, array<string, mixed>> $extras
+     * @param  array<int, array<string, mixed>>  $extras
      */
     private function storeMultipleExtra(array $extras, Item $item, Proprietary $proprietary): void
     {
@@ -177,7 +177,7 @@ class ItemContributionService
     }
 
     /**
-     * @param array<int, array<string, mixed>> $components
+     * @param  array<int, array<string, mixed>>  $components
      */
     private function storeMultipleComponent(array $components, Item $item): void
     {
@@ -185,7 +185,7 @@ class ItemContributionService
             $component = Item::where('section_id', '=', $componentItemData['category_id'])
                 ->where('name', '=', $componentItemData['name'])
                 ->first();
-            if (!$component) {
+            if (! $component) {
                 continue;
             }
             $componentItemData['component_id'] = $component->id;
