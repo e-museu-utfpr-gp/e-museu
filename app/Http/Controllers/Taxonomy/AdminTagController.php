@@ -2,24 +2,20 @@
 
 namespace App\Http\Controllers\Taxonomy;
 
-use App\Http\Controllers\AdminBaseController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
-use App\Http\Middleware\Identity\CheckLock;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Concerns\LocksSubject;
 use App\Http\Requests\Catalog\SingleTagRequest;
 use App\Models\Taxonomy\Category;
 use App\Models\Taxonomy\Tag;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
-class AdminTagController extends AdminBaseController
+class AdminTagController extends Controller
 {
     use BuildsAdminIndexQuery;
-
-    public function __construct()
-    {
-        $this->middleware(CheckLock::class)->only(['edit', 'update', 'destroy']);
-    }
+    use LocksSubject;
 
     /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
     private const INDEX_CONFIG = [
@@ -55,7 +51,7 @@ class AdminTagController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $tag = Tag::find($id);
+        $tag = Tag::findOrFail($id);
 
         return view('admin.tags.show', compact('tag'));
     }
@@ -78,6 +74,7 @@ class AdminTagController extends AdminBaseController
     public function edit(string $id): View
     {
         $tag = Tag::findOrFail($id);
+        $this->requireUnlocked($tag);
 
         $categories = Category::orderBy('name', 'asc')->get();
 
@@ -88,6 +85,8 @@ class AdminTagController extends AdminBaseController
 
     public function update(SingleTagRequest $request, Tag $tag): RedirectResponse
     {
+        $this->requireUnlocked($tag);
+
         $data = $request->validated();
 
         $tag->update($data);
@@ -99,6 +98,8 @@ class AdminTagController extends AdminBaseController
 
     public function destroy(Tag $tag): RedirectResponse
     {
+        $this->requireUnlocked($tag);
+
         $this->unlock($tag);
 
         $tag->delete();

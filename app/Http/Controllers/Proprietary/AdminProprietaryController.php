@@ -2,23 +2,19 @@
 
 namespace App\Http\Controllers\Proprietary;
 
-use App\Http\Controllers\AdminBaseController;
-use App\Http\Middleware\Identity\CheckLock;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\LocksSubject;
 use App\Http\Requests\Proprietary\NewProprietaryRequest;
 use App\Http\Requests\Proprietary\ProprietaryRequest;
 use App\Models\Proprietary\Proprietary;
-use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
-class AdminProprietaryController extends AdminBaseController
+class AdminProprietaryController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(CheckLock::class)->only(['edit', 'update', 'destroy']);
-    }
+    use LocksSubject;
 
     public function index(Request $request): View
     {
@@ -41,11 +37,7 @@ class AdminProprietaryController extends AdminBaseController
         }
 
         if ($sort && $order) {
-            if ($order === 'asc') {
-                $query->orderBy($sort, 'desc');
-            } else {
-                $query->orderBy($sort, 'asc');
-            }
+            $query->orderBy($sort, $order);
         }
 
         $proprietaries = $query->paginate(10)->withQueryString();
@@ -55,7 +47,7 @@ class AdminProprietaryController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $proprietary = Proprietary::find($id);
+        $proprietary = Proprietary::findOrFail($id);
 
         return view('admin.proprietaries.show', compact('proprietary'));
     }
@@ -80,7 +72,7 @@ class AdminProprietaryController extends AdminBaseController
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
-            return back()->withErrors($messages)->withInput();
+            return back()->withErrors($validator)->withInput();
         }
 
         $proprietary = Proprietary::create($data);
@@ -93,6 +85,7 @@ class AdminProprietaryController extends AdminBaseController
     public function edit(string $id): View
     {
         $proprietary = Proprietary::findOrFail($id);
+        $this->requireUnlocked($proprietary);
 
         $this->lock($proprietary);
 
@@ -101,6 +94,8 @@ class AdminProprietaryController extends AdminBaseController
 
     public function update(NewProprietaryRequest $request, Proprietary $proprietary): RedirectResponse
     {
+        $this->requireUnlocked($proprietary);
+
         $data = $request->validated();
 
         $rules = [
@@ -114,7 +109,7 @@ class AdminProprietaryController extends AdminBaseController
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
-            return back()->withErrors($messages)->withInput();
+            return back()->withErrors($validator)->withInput();
         }
 
         $proprietary->update($data);
@@ -128,6 +123,8 @@ class AdminProprietaryController extends AdminBaseController
 
     public function destroy(Proprietary $proprietary): RedirectResponse
     {
+        $this->requireUnlocked($proprietary);
+
         $this->unlock($proprietary);
 
         $proprietary->delete();

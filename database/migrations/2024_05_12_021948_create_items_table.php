@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('image');
             $table->boolean('validation')->default(0);
             $table->foreignId('section_id')->constrained()->onDelete('cascade');
-            $table->foreignId('proprietary_id')->constrained('proprietaries')->onDelete('cascade');;
+            $table->foreignId('proprietary_id')->constrained('proprietaries')->onDelete('cascade');
             $table->timestamps();
         });
     }

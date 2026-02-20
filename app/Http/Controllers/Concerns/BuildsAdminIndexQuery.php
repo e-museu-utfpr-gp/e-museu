@@ -19,12 +19,11 @@ use Illuminate\Database\Eloquent\Builder;
 trait BuildsAdminIndexQuery
 {
     /**
-     * @param Builder $query
-     * @param IndexConfig $config
+     * @param  IndexConfig  $config
      */
     protected function applyIndexSearch(Builder $query, ?string $searchColumn, ?string $search, array $config): void
     {
-        if (!$searchColumn || !$search) {
+        if (! $searchColumn || ! $search) {
             return;
         }
 
@@ -35,27 +34,29 @@ trait BuildsAdminIndexQuery
             $referencedTable = $searchSpecialColumns[$searchColumn]['table'];
             $referencedColumn = $searchSpecialColumns[$searchColumn]['column'];
             $query->where("{$referencedTable}.{$referencedColumn}", 'LIKE', "%{$search}%");
+
             return;
         }
 
         if ($search === 'sim') {
             $query->where("{$baseTable}.{$searchColumn}", true);
+
             return;
         }
         if ($search === 'não' || $search === 'nao') {
             $query->where("{$baseTable}.{$searchColumn}", false);
+
             return;
         }
         $query->where("{$baseTable}.{$searchColumn}", 'LIKE', "%{$search}%");
     }
 
     /**
-     * @param Builder $query
-     * @param IndexConfig $config
+     * @param  IndexConfig  $config
      */
     protected function applyIndexSort(Builder $query, ?string $sort, ?string $order, array $config): void
     {
-        if (!$sort || !$order) {
+        if (! $sort || ! $order) {
             return;
         }
 
@@ -65,7 +66,6 @@ trait BuildsAdminIndexQuery
             ? $sortSpecialColumns[$sort]
             : "{$baseTable}.{$sort}";
 
-        $direction = $order === 'asc' ? 'desc' : 'asc';
-        $query->orderBy($orderColumn, $direction);
+        $query->orderBy($orderColumn, $order);
     }
 }

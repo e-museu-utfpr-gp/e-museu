@@ -48,7 +48,7 @@ class UpdateItemRequest extends FormRequest
     {
         return [
             'name.required' => 'O campo nome é obrigatório.',
-            'data.required' => 'O campo data é obrigatório.',
+            'date.required' => 'O campo data é obrigatório.',
             'description.required' => 'O campo descrição é obrigatório.',
             'section_id.required' => 'O campo categoria de item é obrigatório.',
             'validation.required' => 'O campo validado é obrigatório.',

@@ -32,4 +32,5 @@
             </div>
         </form>
     </div>
+    <x-release-lock-on-leave type="categories" :id="$category->id" />
 @endsection

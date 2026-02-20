@@ -16,7 +16,7 @@ class ProprietaryFactory extends Factory
     {
         return [
             'full_name' => $this->faker->word,
-            'contact' => $this->faker->unique()->email
+            'contact' => $this->faker->unique()->email,
         ];
     }
 }

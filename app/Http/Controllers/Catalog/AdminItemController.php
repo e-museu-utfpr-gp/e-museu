@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Http\Controllers\AdminBaseController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
-use App\Http\Middleware\Identity\CheckLock;
+use App\Http\Controllers\Concerns\LocksSubject;
 use App\Http\Requests\Catalog\StoreItemRequest;
 use App\Http\Requests\Catalog\UpdateItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\Section;
 use App\Models\Proprietary\Proprietary;
-use App\Models\Taxonomy\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,14 +18,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use RuntimeException;
 
-class AdminItemController extends AdminBaseController
+class AdminItemController extends Controller
 {
     use BuildsAdminIndexQuery;
-
-    public function __construct()
-    {
-        $this->middleware(CheckLock::class)->only(['edit', 'update', 'destroy']);
-    }
+    use LocksSubject;
 
     /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
     private const INDEX_CONFIG = [
@@ -89,7 +84,7 @@ class AdminItemController extends AdminBaseController
 
         $rules = [
             'proprietary_id' => 'required|integer|numeric|exists:proprietaries,id',
-            'validation' => 'required|boolean'
+            'validation' => 'required|boolean',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -136,6 +131,7 @@ class AdminItemController extends AdminBaseController
     public function edit(string $id): View
     {
         $item = Item::findOrFail($id);
+        $this->requireUnlocked($item);
 
         $this->lock($item);
 
@@ -147,6 +143,8 @@ class AdminItemController extends AdminBaseController
 
     public function update(UpdateItemRequest $request, Item $item): RedirectResponse
     {
+        $this->requireUnlocked($item);
+
         $data = $request->validated();
 
         if ($request->image) {
@@ -175,6 +173,8 @@ class AdminItemController extends AdminBaseController
 
     public function destroy(Item $item): RedirectResponse
     {
+        $this->requireUnlocked($item);
+
         $this->unlock($item);
 
         $imagePath = $item->getRawOriginal('image');

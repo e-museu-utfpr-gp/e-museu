@@ -57,6 +57,7 @@ class Item extends Model
                 if ($value === null || $value === '') {
                     return null;
                 }
+
                 return $value;
             },
         );
@@ -89,6 +90,7 @@ class Item extends Model
             if (str_starts_with($raw, 'http')) {
                 return $raw;
             }
+
             return Storage::disk('public')->url($raw);
         });
     }
@@ -99,6 +101,7 @@ class Item extends Model
         if ($value === '' || ! str_starts_with($value, 'http')) {
             return $value;
         }
+
         return '';
     }
 

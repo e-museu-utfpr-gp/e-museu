@@ -2,9 +2,8 @@
 
 namespace Database\Seeders\Proprietary;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Proprietary\Proprietary;
+use Illuminate\Database\Seeder;
 
 class ProprietarySeeder extends Seeder
 {
@@ -15,14 +14,14 @@ class ProprietarySeeder extends Seeder
                 'full_name' => 'UNICENTRO',
                 'contact' => 'unicentro@unicentro.com',
                 'blocked' => '0',
-                'is_admin' => '1'
+                'is_admin' => '1',
             ]);
 
             Proprietary::create([
                 'full_name' => 'UTFPR',
                 'contact' => 'utfpr@utfpr.com',
                 'blocked' => '0',
-                'is_admin' => '1'
+                'is_admin' => '1',
             ]);
 
             Proprietary::factory(30)->create();

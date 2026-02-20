@@ -219,6 +219,26 @@ function phpcbf {
   fi
 }
 
+function pint {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    # Limit Pint to source directories to avoid scanning mysql_data and other volumes
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/pint app config database routes tests
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/pint ${TEST_PATH}
+  fi
+}
+
+function pint-test {
+  TEST_PATH="${@:-}"
+  if [ -z "$TEST_PATH" ]; then
+    # Same limited scope for test mode
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/pint --test app config database routes tests
+  else
+    docker compose -f "$(get_compose_file)" run --rm app ./vendor/bin/pint --test ${TEST_PATH}
+  fi
+}
+
 function phpinsights {
   TEST_PATH="${@:-}"
   if [ -z "$TEST_PATH" ]; then
@@ -310,6 +330,10 @@ function all-tests {
   echo "===="
   ./run phpcs
   echo "===="
+  echo ">> Running Laravel Pint (style check)..."
+  echo "===="
+  ./run pint-test
+  echo "===="
   echo ">> Running PHP Mess Detector (phpmd)..."
   echo "===="
   ./run phpmd
@@ -384,12 +408,6 @@ function migrate {
   wait-for-db
   echo ">> Running database migrations..."
   docker compose -f "$(get_compose_file)" exec app php artisan migrate --force
-}
-
-function storage_link {
-  source .env
-  echo ">> Creating storage symbolic link..."
-  docker compose -f "$(get_compose_file)" exec app php artisan storage:link
 }
 
 function composer {
@@ -566,7 +584,6 @@ function help {
   echo "  gen_key -y         - Generate application key without confirmation (production)"
   echo "  migrate            - Run database migrations"
   echo "  seed               - Seed database with initial data"
-  echo "  storage_link       - Create storage symbolic link"
   echo "  composer           - Install Composer dependencies"
   echo ""
   echo "Testing & Code Quality:"
@@ -582,6 +599,10 @@ function help {
   echo "  phpcs <path>       - Run PHP Code Sniffer on specific path"
   echo "  phpcbf             - Run PHP Code Beautifier and Fixer"
   echo "  phpcbf <path>      - Run PHP Code Beautifier and Fixer on specific path"
+  echo "  pint               - Run Laravel Pint (PHP code style fixer, including unused imports)"
+  echo "  pint <path>        - Run Laravel Pint on specific path"
+  echo "  pint-test          - Run Laravel Pint in test mode (check only, no changes)"
+  echo "  pint-test <path>   - Run Laravel Pint test on specific path"
   echo "  phpinsights        - Run PHP Insights code quality analysis"
   echo "  phpinsights <path> - Run PHP Insights on specific path"
   echo "  phpcpd             - Detect duplicated PHP code (Copy/Paste Detector)"
@@ -598,7 +619,7 @@ function help {
   echo "  prettier <path>  - Format specific path with Prettier"
   echo "  prettier-check   - Check if files are formatted correctly (without modifying)"
   echo "  prettier-check <path> - Check specific path formatting"
-  echo "  all-tests          - Run all checks (test, phpcs, phpmd, phpstan, phpcpd, eslint, prettier-check)"
+  echo "  all-tests          - Run all checks (test, phpcs, pint-test, phpmd, phpstan, phpcpd, eslint, prettier-check)"
   echo "  simulate-ci        - Simulate complete CI pipeline (runs all CI jobs)"
   echo "  simulate-ci -y     - Simulate CI pipeline without confirmation"
   echo ""
@@ -613,7 +634,7 @@ function help {
   echo "  ./run setup-hard -env -y   # Hard reset with new .env file and no confirmation"
   echo "  ./run gen_key -y           # Generate app key without confirmation"
   echo "  ./run test                 # Run tests"
-  echo "  ./run all-tests            # Run all checks (test, phpcs, phpmd, phpstan, phpcpd, eslint, prettier)"
+  echo "  ./run all-tests            # Run all checks (test, phpcs, pint-test, phpmd, phpstan, phpcpd, eslint, prettier)"
   echo "  ./run phpstan app/Models   # Analyze specific directory"
   echo "  ./run phpcs app/Models     # Check code style on specific directory"
   echo "  ./run phpcbf app/Models    # Fix code style on specific directory"

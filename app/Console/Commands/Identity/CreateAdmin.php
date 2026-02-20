@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Identity;
 
-use Illuminate\Console\Command;
 use App\Models\Identity\User;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 
 class CreateAdmin extends Command

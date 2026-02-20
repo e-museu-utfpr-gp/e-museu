@@ -29,6 +29,10 @@ echo "Running PHP CodeSniffer..."
 ./run phpcs
 
 echo ""
+echo "Running Laravel Pint (style check)..."
+./run pint-test
+
+echo ""
 echo "Running PHP Mess Detector..."
 ./run phpmd
 
