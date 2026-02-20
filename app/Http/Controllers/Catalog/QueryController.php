@@ -13,14 +13,14 @@ class QueryController extends Controller
 {
     public function tagNameAutoComplete(Request $request): JsonResponse
     {
-        $query = $request->input('query', '');
-        $category = $request->input('category');
+        $query = (string) ($request->input('query') ?? '');
+        $category = (string) ($request->input('category') ?? '');
 
         $data = Tag::select('name')
             ->where('category_id', 'LIKE', $category)
             ->where('validation', true);
 
-        if ($query !== null && $query !== '') {
+        if ($query !== '') {
             $data = $data->where('name', 'LIKE', '%' . $query . '%');
         }
 
@@ -31,14 +31,14 @@ class QueryController extends Controller
 
     public function componentNameAutoComplete(Request $request): JsonResponse
     {
-        $query = $request->input('query', '');
-        $category = $request->input('category');
+        $query = (string) ($request->input('query') ?? '');
+        $category = (string) ($request->input('category') ?? '');
 
         $data = Item::select('name')
             ->where('section_id', 'LIKE', $category)
             ->where('validation', true);
 
-        if ($query !== null && $query !== '') {
+        if ($query !== '') {
             $data = $data->where('name', 'LIKE', '%' . $query . '%');
         }
 
@@ -49,8 +49,11 @@ class QueryController extends Controller
 
     public function checkTagName(Request $request): JsonResponse
     {
-        $data = Tag::where('category_id', 'LIKE', $request->input('category'))
-            ->where('name', 'LIKE', $request->input('name'))
+        $category = (string) ($request->input('category') ?? '');
+        $name = (string) ($request->input('name') ?? '');
+
+        $data = Tag::where('category_id', 'LIKE', $category)
+            ->where('name', 'LIKE', $name)
             ->where('validation', true)
             ->count();
 
@@ -59,8 +62,11 @@ class QueryController extends Controller
 
     public function checkComponentName(Request $request): JsonResponse
     {
-        $data = Item::where('section_id', 'LIKE', $request->input('category'))
-            ->where('name', 'LIKE', $request->input('name'))
+        $category = (string) ($request->input('category') ?? '');
+        $name = (string) ($request->input('name') ?? '');
+
+        $data = Item::where('section_id', 'LIKE', $category)
+            ->where('name', 'LIKE', $name)
             ->where('validation', true)
             ->count();
 
@@ -72,7 +78,9 @@ class QueryController extends Controller
      */
     public function checkContact(Request $request)
     {
-        $data = Proprietary::where('contact', 'LIKE', $request->input('contact'))
+        $contact = (string) ($request->input('contact') ?? '');
+
+        $data = Proprietary::where('contact', 'LIKE', $contact)
             ->where('blocked', false)
             ->where('is_admin', false)
             ->first();
@@ -86,16 +94,9 @@ class QueryController extends Controller
 
     public function getTags(Request $request): JsonResponse
     {
-        $data = Tag::where('category_id', 'LIKE', $request->input('category'))
-            ->orderBy('name', 'asc')
-            ->get();
+        $category = (string) ($request->input('category') ?? '');
 
-        return response()->json($data);
-    }
-
-    public function getItems(Request $request): JsonResponse
-    {
-        $data = Item::where('section_id', 'LIKE', $request->input('section'))
+        $data = Tag::where('category_id', 'LIKE', $category)
             ->orderBy('name', 'asc')
             ->get();
 

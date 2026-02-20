@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers\Identity;
 
-use App\Http\Controllers\AdminBaseController;
-use App\Http\Middleware\Identity\CheckLock;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Identity\UserRequest;
 use App\Models\Identity\Lock;
 use App\Models\Identity\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
-class AdminUserController extends AdminBaseController
+class AdminUserController extends Controller
 {
     public function index(Request $request): View
     {
@@ -25,11 +23,7 @@ class AdminUserController extends AdminBaseController
         }
 
         if ($request->sort && $request->order) {
-            if ($request->order === 'asc') {
-                $query->orderBy($request->sort, 'desc');
-            } else {
-                $query->orderBy($request->sort, 'asc');
-            }
+            $query->orderBy($request->sort, $request->order);
         }
 
         $users = $query->paginate(50)->withQueryString();
@@ -39,7 +33,7 @@ class AdminUserController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
 
         return view('admin.users.show', compact('user'));
     }

@@ -31,4 +31,5 @@
             </div>
         </form>
     </div>
+    <x-release-lock-on-leave type="sections" :id="$section->id" />
 @endsection

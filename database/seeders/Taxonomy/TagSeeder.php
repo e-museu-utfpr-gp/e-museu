@@ -2,10 +2,9 @@
 
 namespace Database\Seeders\Taxonomy;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Catalog\TagItem;
 use App\Models\Taxonomy\Tag;
+use Illuminate\Database\Seeder;
 
 class TagSeeder extends Seeder
 {

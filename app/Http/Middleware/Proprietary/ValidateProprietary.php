@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware\Proprietary;
 
+use App\Models\Proprietary\Proprietary;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\Proprietary\Proprietary;
 
 class ValidateProprietary
 {

@@ -2,7 +2,7 @@ $(document).ready(function () {
     function getItems() {
         var sectionId = $('#section_id').val();
         $.ajax({
-            url: '/get-items',
+            url: '/items/by-section',
             type: 'GET',
             data: { section: sectionId },
             success: function (data) {

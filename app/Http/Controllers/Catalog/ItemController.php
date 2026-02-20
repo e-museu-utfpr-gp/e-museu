@@ -10,9 +10,10 @@ use App\Models\Catalog\Section;
 use App\Models\Taxonomy\Category;
 use App\Services\Catalog\ItemContributionService;
 use App\Services\Catalog\ItemIndexQueryBuilder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
 
 class ItemController extends Controller
 {
@@ -61,7 +62,7 @@ class ItemController extends Controller
 
     public function show(string $id): View
     {
-        $item = Item::find($id);
+        $item = Item::findOrFail($id);
         $sections = Section::get();
         $categories = Category::get();
 
@@ -81,5 +82,16 @@ class ItemController extends Controller
             $validatedData['proprietary'],
             $validatedData['extra']
         );
+    }
+
+    public function bySection(Request $request): JsonResponse
+    {
+        $section = (string) ($request->input('section') ?? '');
+
+        $data = Item::where('section_id', 'LIKE', $section)
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return response()->json($data);
     }
 }

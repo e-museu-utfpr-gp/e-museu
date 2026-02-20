@@ -55,4 +55,5 @@
             </div>
         </form>
     </div>
+    <x-release-lock-on-leave type="tags" :id="$tag->id" />
 @endsection

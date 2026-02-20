@@ -2,7 +2,7 @@ $(document).ready(function () {
     function getComponents() {
         var componentSectionId = $('#component_section_id').val();
         $.ajax({
-            url: '/get-items',
+            url: '/items/by-section',
             type: 'GET',
             data: { section: componentSectionId },
             success: function (data) {

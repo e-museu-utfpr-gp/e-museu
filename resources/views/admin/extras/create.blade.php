@@ -27,7 +27,7 @@
                          data-section-selector="#section_id" 
                          data-item-selector="#item_id" 
                          data-original-item-id="{{ request()->query('id') }}"
-                         data-get-items-url="/get-items">
+                         data-get-items-url="{{ route('items.bySection') }}">
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="section_id" class="form-label">Categoria do Item</label>

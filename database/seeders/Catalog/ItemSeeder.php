@@ -2,11 +2,10 @@
 
 namespace Database\Seeders\Catalog;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemComponent;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class ItemSeeder extends Seeder
 {

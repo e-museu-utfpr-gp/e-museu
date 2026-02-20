@@ -28,7 +28,7 @@
                          data-section-selector="#section_id" 
                          data-item-selector="#item_id" 
                          data-original-item-id="{{ $extra->item->id }}"
-                         data-get-items-url="/get-items">
+                         data-get-items-url="{{ route('items.bySection') }}">
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="section_id" class="form-label">Categoria do Item</label>
@@ -89,5 +89,5 @@
             </div>
         </form>
     </div>
-
+    <x-release-lock-on-leave type="extras" :id="$extra->id" />
 @endsection

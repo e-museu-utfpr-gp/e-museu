@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware\Catalog;
 
-use Closure;
 use App\Models\Catalog\Item;
+use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 

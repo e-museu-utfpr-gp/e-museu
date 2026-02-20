@@ -18,7 +18,7 @@ class TagItemFactory extends Factory
     {
         return [
             'tag_id' => Tag::pluck('id')->random(),
-            'item_id' => Item::pluck('id')->random()
+            'item_id' => Item::pluck('id')->random(),
         ];
     }
 }

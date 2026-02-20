@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Catalog;
 
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
-use App\Rules\Catalog\DifferentIds;
 
 class SingleComponentRequest extends FormRequest
 {
@@ -29,7 +29,11 @@ class SingleComponentRequest extends FormRequest
                 'integer',
                 'numeric',
                 'exists:items,id',
-                new DifferentIds([request('item_id'), request('component_id')]),
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ((string) request('item_id') === (string) request('component_id')) {
+                        $fail('O item e o componente precisam ser diferentes.');
+                    }
+                },
             ],
             'validation' => 'sometimes|boolean',
         ];

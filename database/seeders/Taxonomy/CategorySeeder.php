@@ -2,9 +2,8 @@
 
 namespace Database\Seeders\Taxonomy;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Taxonomy\Category;
+use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {

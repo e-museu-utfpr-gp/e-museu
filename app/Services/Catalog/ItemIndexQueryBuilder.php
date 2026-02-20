@@ -5,8 +5,8 @@ namespace App\Services\Catalog;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\Section;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 class ItemIndexQueryBuilder
 {
@@ -42,7 +42,7 @@ class ItemIndexQueryBuilder
     }
 
     /**
-     * @param Builder<Item> $query
+     * @param  Builder<Item>  $query
      */
     private function applySection(Builder $query, ?string $sectionId): void
     {
@@ -52,7 +52,7 @@ class ItemIndexQueryBuilder
     }
 
     /**
-     * @param Builder<Item> $query
+     * @param  Builder<Item>  $query
      */
     private function applySearch(Builder $query, ?string $search): void
     {
@@ -62,12 +62,12 @@ class ItemIndexQueryBuilder
     }
 
     /**
-     * @param Builder<Item> $query
-     * @param array<int|string>|null $categoryIds
+     * @param  Builder<Item>  $query
+     * @param  array<int|string>|null  $categoryIds
      */
     private function applyCategoryFilter(Builder $query, $categoryIds): void
     {
-        if (!isset($categoryIds) || $categoryIds === []) {
+        if (! isset($categoryIds) || $categoryIds === []) {
             return;
         }
         $query->whereHas('tags', function (Builder $tagRelationQuery) use ($categoryIds): void {
@@ -76,12 +76,12 @@ class ItemIndexQueryBuilder
     }
 
     /**
-     * @param Builder<Item> $query
-     * @param array<int|string>|null $tagIds
+     * @param  Builder<Item>  $query
+     * @param  array<int|string>|null  $tagIds
      */
     private function applyTagFilter(Builder $query, $tagIds): void
     {
-        if (!isset($tagIds) || $tagIds === []) {
+        if (! isset($tagIds) || $tagIds === []) {
             return;
         }
         $query->whereHas('tags', function (Builder $tagRelationQuery) use ($tagIds): void {
@@ -90,7 +90,7 @@ class ItemIndexQueryBuilder
     }
 
     /**
-     * @param Builder<Item> $query
+     * @param  Builder<Item>  $query
      */
     private function applyOrder(Builder $query, int $order): void
     {
@@ -108,7 +108,7 @@ class ItemIndexQueryBuilder
 
     private function resolveSectionName(?string $sectionId): string
     {
-        if (!$sectionId) {
+        if (! $sectionId) {
             return '';
         }
         $section = Section::find($sectionId);

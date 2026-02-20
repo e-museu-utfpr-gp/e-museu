@@ -2,21 +2,17 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Http\Controllers\AdminBaseController;
-use App\Http\Middleware\Identity\CheckLock;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\LocksSubject;
 use App\Http\Requests\Catalog\SectionRequest;
 use App\Models\Catalog\Section;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
-class AdminSectionController extends AdminBaseController
+class AdminSectionController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(CheckLock::class)->only(['edit', 'update', 'destroy']);
-    }
+    use LocksSubject;
 
     public function index(Request $request): View
     {
@@ -28,11 +24,7 @@ class AdminSectionController extends AdminBaseController
         }
 
         if ($request->sort && $request->order) {
-            if ($request->order === 'asc') {
-                $query->orderBy($request->sort, 'desc');
-            } else {
-                $query->orderBy($request->sort, 'asc');
-            }
+            $query->orderBy($request->sort, $request->order);
         }
 
         $sections = $query->paginate(50)->withQueryString();
@@ -42,7 +34,7 @@ class AdminSectionController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $section = Section::find($id);
+        $section = Section::findOrFail($id);
 
         return view('admin.sections.show', compact('section'));
     }
@@ -63,6 +55,7 @@ class AdminSectionController extends AdminBaseController
     public function edit(string $id): View
     {
         $section = Section::findOrFail($id);
+        $this->requireUnlocked($section);
 
         $this->lock($section);
 
@@ -71,6 +64,8 @@ class AdminSectionController extends AdminBaseController
 
     public function update(SectionRequest $request, Section $section): RedirectResponse
     {
+        $this->requireUnlocked($section);
+
         $data = $request->validated();
 
         $section->update($data);
@@ -82,6 +77,8 @@ class AdminSectionController extends AdminBaseController
 
     public function destroy(Section $section): RedirectResponse
     {
+        $this->requireUnlocked($section);
+
         $this->unlock($section);
 
         $section->delete();

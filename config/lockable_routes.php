@@ -3,7 +3,7 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Route prefix to lockable model (for CheckLock middleware)
+    | Route prefix to lockable model (used by LocksSubject trait and ReleaseLockController)
     | Key: route name prefix (e.g. admin.items)
     | Value: [route parameter name, model class]
     |--------------------------------------------------------------------------
