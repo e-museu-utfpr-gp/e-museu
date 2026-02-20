@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
+use App\Providers\Concerns\GuessesFactoryName;
+use App\Providers\Concerns\GuessesModelName;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,32 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $factoryMap = config('factory_model_map', []);
-
-        /** @phpstan-ignore argument.type (callback return type is class-string in practice) */
-        Factory::guessFactoryNamesUsing(function (string $modelName) use ($factoryMap): string {
-            if (isset($factoryMap[$modelName])) {
-                return $factoryMap[$modelName];
-            }
-
-            $modelBasename = Str::after($modelName, 'App\Models\\');
-
-            return 'Database\Factories\\' . $modelBasename . 'Factory';
-        });
-
-        $modelMap = array_flip($factoryMap);
-
-        /** @phpstan-ignore argument.type (callback return type is class-string in practice) */
-        Factory::guessModelNamesUsing(function (Factory $factory) use ($modelMap): string {
-            $factoryClass = $factory::class;
-
-            if (isset($modelMap[$factoryClass])) {
-                return $modelMap[$factoryClass];
-            }
-
-            $factoryBasename = Str::replaceLast('Factory', '', class_basename($factory));
-
-            return 'App\Models\\' . $factoryBasename;
-        });
+        Factory::guessFactoryNamesUsing([GuessesFactoryName::class, 'forModel']);
+        Factory::guessModelNamesUsing([GuessesModelName::class, 'forFactory']);
     }
 }

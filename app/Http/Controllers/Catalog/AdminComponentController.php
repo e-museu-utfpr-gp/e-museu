@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Http\Controllers\AdminBaseController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use App\Http\Requests\Catalog\SingleComponentRequest;
 use App\Models\Catalog\ItemComponent;
@@ -11,7 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class AdminComponentController extends AdminBaseController
+class AdminComponentController extends Controller
 {
     use BuildsAdminIndexQuery;
 
@@ -53,7 +53,7 @@ class AdminComponentController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $component = ItemComponent::find($id);
+        $component = ItemComponent::findOrFail($id);
 
         return view('admin.components.show', compact('component'));
     }
@@ -75,25 +75,11 @@ class AdminComponentController extends AdminBaseController
         return redirect()->route('admin.components.show', $component)->with('success', $message);
     }
 
-    public function edit(string $id): View
-    {
-        $sections = Section::orderBy('name', 'asc')->get();
-        $component = ItemComponent::findOrFail($id);
-
-        return view('admin.components.edit', compact('component', 'sections'));
-    }
-
     public function update(Request $request, ItemComponent $component): RedirectResponse
     {
-        $data = $request->all();
-
-        if ($component->validation === true) {
-            $data['validation'] = false;
-        } else {
-            $data['validation'] = true;
-        }
-
-        $component->update($data);
+        $component->update([
+            'validation' => ! $component->validation,
+        ]);
 
         $message = 'Componente atualizado com sucesso.';
 

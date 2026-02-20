@@ -2,20 +2,17 @@
 
 namespace App\Http\Controllers\Taxonomy;
 
-use App\Http\Controllers\AdminBaseController;
-use App\Http\Middleware\Identity\CheckLock;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\LocksSubject;
 use App\Http\Requests\Taxonomy\CategoryRequest;
 use App\Models\Taxonomy\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class AdminCategoryController extends AdminBaseController
+class AdminCategoryController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(CheckLock::class)->only(['edit', 'update', 'destroy']);
-    }
+    use LocksSubject;
 
     public function index(Request $request): View
     {
@@ -27,11 +24,7 @@ class AdminCategoryController extends AdminBaseController
         }
 
         if ($request->sort && $request->order) {
-            if ($request->order === 'asc') {
-                $query->orderBy($request->sort, 'desc');
-            } else {
-                $query->orderBy($request->sort, 'asc');
-            }
+            $query->orderBy($request->sort, $request->order);
         }
 
         $categories = $query->paginate(30)->withQueryString();
@@ -56,7 +49,7 @@ class AdminCategoryController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $category = Category::find($id);
+        $category = Category::findOrFail($id);
 
         return view('admin.categories.show', compact('category'));
     }
@@ -64,6 +57,7 @@ class AdminCategoryController extends AdminBaseController
     public function edit(string $id): View
     {
         $category = Category::findOrFail($id);
+        $this->requireUnlocked($category);
 
         $this->lock($category);
 
@@ -72,6 +66,8 @@ class AdminCategoryController extends AdminBaseController
 
     public function update(CategoryRequest $request, Category $category): RedirectResponse
     {
+        $this->requireUnlocked($category);
+
         $data = $request->validated();
 
         $category->update($data);
@@ -85,6 +81,8 @@ class AdminCategoryController extends AdminBaseController
 
     public function destroy(Category $category): RedirectResponse
     {
+        $this->requireUnlocked($category);
+
         $this->unlock($category);
 
         $category->delete();

@@ -134,4 +134,5 @@
     </div>
 
     @include('image-modal.img-modal')
+    <x-release-lock-on-leave type="items" :id="$item->id" />
 @endsection

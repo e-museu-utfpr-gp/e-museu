@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SectionRequest extends FormRequest
 {
@@ -22,7 +23,13 @@ class SectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|min:1|max:200|unique:sections',
+            'name' => [
+                'required',
+                'string',
+                'min:1',
+                'max:200',
+                Rule::unique('sections')->ignore($this->route('section')),
+            ],
         ];
     }
 }

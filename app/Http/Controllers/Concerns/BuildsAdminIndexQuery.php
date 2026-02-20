@@ -66,7 +66,6 @@ trait BuildsAdminIndexQuery
             ? $sortSpecialColumns[$sort]
             : "{$baseTable}.{$sort}";
 
-        $direction = $order === 'asc' ? 'desc' : 'asc';
-        $query->orderBy($orderColumn, $direction);
+        $query->orderBy($orderColumn, $order);
     }
 }

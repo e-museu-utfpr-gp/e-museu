@@ -66,4 +66,5 @@
             </div>
         </form>
     </div>
+    <x-release-lock-on-leave type="proprietaries" :id="$proprietary->id" />
 @endsection

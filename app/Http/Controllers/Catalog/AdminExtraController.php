@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Http\Controllers\AdminBaseController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
-use App\Http\Middleware\Identity\CheckLock;
+use App\Http\Controllers\Concerns\LocksSubject;
 use App\Http\Requests\Catalog\SingleExtraRequest;
 use App\Models\Catalog\Extra;
 use App\Models\Catalog\Section;
@@ -13,14 +13,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class AdminExtraController extends AdminBaseController
+class AdminExtraController extends Controller
 {
     use BuildsAdminIndexQuery;
-
-    public function __construct()
-    {
-        $this->middleware(CheckLock::class)->only(['edit', 'update', 'destroy']);
-    }
+    use LocksSubject;
 
     /** @var array{baseTable: string, searchBaseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
     private const INDEX_CONFIG = [
@@ -59,7 +55,7 @@ class AdminExtraController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $extra = Extra::find($id);
+        $extra = Extra::findOrFail($id);
 
         return view('admin.extras.show', compact('extra'));
     }
@@ -85,6 +81,8 @@ class AdminExtraController extends AdminBaseController
     public function edit(string $id): View
     {
         $extra = Extra::findOrFail($id);
+        $this->requireUnlocked($extra);
+
         $proprietaries = Proprietary::orderBy('contact', 'asc')->get();
         $sections = Section::orderBy('name', 'asc')->get();
 
@@ -95,6 +93,8 @@ class AdminExtraController extends AdminBaseController
 
     public function update(SingleExtraRequest $request, Extra $extra): RedirectResponse
     {
+        $this->requireUnlocked($extra);
+
         $data = $request->validated();
 
         $extra->update($data);
@@ -108,6 +108,8 @@ class AdminExtraController extends AdminBaseController
 
     public function destroy(Extra $extra): RedirectResponse
     {
+        $this->requireUnlocked($extra);
+
         $this->unlock($extra);
 
         $extra->delete();

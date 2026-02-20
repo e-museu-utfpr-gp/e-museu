@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Http\Controllers\AdminBaseController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\BuildsAdminIndexQuery;
 use App\Http\Requests\Catalog\ItemTagRequest;
 use App\Models\Catalog\Section;
@@ -12,7 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class AdminItemTagController extends AdminBaseController
+class AdminItemTagController extends Controller
 {
     use BuildsAdminIndexQuery;
 
@@ -54,7 +54,7 @@ class AdminItemTagController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $itemTag = TagItem::find($id);
+        $itemTag = TagItem::findOrFail($id);
 
         return view('admin.item-tags.show', compact('itemTag'));
     }
@@ -77,26 +77,11 @@ class AdminItemTagController extends AdminBaseController
         return redirect()->route('admin.item-tags.show', $itemTag)->with('success', $message);
     }
 
-    public function edit(string $id): View
-    {
-        $categories = Category::orderBy('name', 'asc')->get();
-        $sections = Section::orderBy('name', 'asc')->get();
-        $itemTag = TagItem::findOrFail($id);
-
-        return view('admin.item-tags.edit', compact('itemTag', 'categories', 'sections'));
-    }
-
     public function update(Request $request, TagItem $itemTag): RedirectResponse
     {
-        $data = $request->all();
-
-        if ($itemTag->validation === true) {
-            $data['validation'] = false;
-        } else {
-            $data['validation'] = true;
-        }
-
-        $itemTag->update($data);
+        $itemTag->update([
+            'validation' => ! $itemTag->validation,
+        ]);
 
         $message = 'Relacionamento atualizado com sucesso.';
 

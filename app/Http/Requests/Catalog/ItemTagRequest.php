@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Catalog;
 
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ItemTagRequest extends FormRequest
@@ -23,7 +24,17 @@ class ItemTagRequest extends FormRequest
     {
         return [
             'item_id' => 'required|integer|numeric|exists:items,id',
-            'tag_id' => 'required|integer|numeric|exists:tags,id',
+            'tag_id' => [
+                'required',
+                'integer',
+                'numeric',
+                'exists:tags,id',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ((string) request('item_id') === (string) request('tag_id')) {
+                        $fail('O item e a etiqueta precisam ser diferentes.');
+                    }
+                },
+            ],
             'validation' => 'required|boolean',
         ];
     }

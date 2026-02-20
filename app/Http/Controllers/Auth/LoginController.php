@@ -12,12 +12,6 @@ class LoginController extends Controller
 
     protected string $redirectTo = '/admin';
 
-    public function __construct()
-    {
-        $this->middleware('guest')->except('logout');
-        $this->middleware('auth')->only('logout');
-    }
-
     public function username(): string
     {
         return 'username';
