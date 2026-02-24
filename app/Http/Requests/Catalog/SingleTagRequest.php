@@ -27,13 +27,4 @@ class SingleTagRequest extends FormRequest
             'validation' => 'sometimes|boolean',
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'O campo nome é obrigatório.',
-            'category_id.required' => 'O campo categoria é obrigatório.',
-            'validation.required' => 'O campo validado é obrigatório.',
-        ];
-    }
 }

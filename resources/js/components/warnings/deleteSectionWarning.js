@@ -1,8 +1,9 @@
+import i18next from 'i18next';
+
 $(document).ready(function () {
-    $('.deleteSectionButton').click(function () {
-        var confirmation = confirm(
-            'Tem certeza que deseja excluir a catagoria de item e todas as vezes que é referenciada em outros registros?'
-        );
+    $('.deleteSectionButton').click(function (event) {
+        const message = $(this).data('confirm-message') || i18next.t('warnings.delete_section');
+        const confirmation = confirm(message);
 
         if (!confirmation) event.preventDefault();
     });

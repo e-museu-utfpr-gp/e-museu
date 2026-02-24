@@ -29,65 +29,65 @@
             <hr>
             <a role="button" class="btn btn-secondary d-block d-md-none mb-3" type="button" data-bs-toggle="collapse"
                 data-bs-target="#sidebarCollapse" aria-expanded="false" aria-controls="sidebarCollapse">
-                Menu
+                {{ __('view.admin.layout.menu') }}
             </a>
             <div class="collapse d-md-block" id="sidebarCollapse">
                 <ul class="nav nav-pills flex-column mb-auto">
                     <li>
                         <a href="{{ route('admin.sections.index') }}"
                             class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.sections')) active @endif" aria-current="page">
-                            Categorias de Item
+                            {{ __('view.admin.layout.nav.item_categories') }}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.items.index') }}"
                             class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.items')) active @endif" aria-current="page">
-                            Itens do Museu
+                            {{ __('view.admin.layout.nav.items') }}
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.components.index') }}"
                             class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.components')) active @endif" aria-current="page">
-                            Associações de Item a Componente
+                            {{ __('view.admin.layout.nav.item_components') }}
                         </a>
                     </li>
                     <hr/>
                     <li>
                         <a href="{{ route('admin.categories.index') }}"
                             class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.categories')) active @endif" aria-current="page">
-                            Categorias de Etiqueta
+                            {{ __('view.admin.layout.nav.tag_categories') }}
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.tags.index') }}"
                             class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.tags')) active @endif" aria-current="page">
-                            Etiquetas
+                            {{ __('view.admin.layout.nav.tags') }}
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.item-tags.index') }}"
                             class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.item-tags')) active @endif" aria-current="page">
-                            Associações de Item a Etiqueta
+                            {{ __('view.admin.layout.nav.item_tags') }}
                         </a>
                     </li>
                     <hr/>
                     <li>
                         <a href="{{ route('admin.extras.index') }}"
                             class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.extras')) active @endif" aria-current="page">
-                            Informações Extra
+                            {{ __('view.admin.layout.nav.extras') }}
                         </a>
                     </li>
                     <hr/>
                     <li>
                         <a href="{{ route('admin.proprietaries.index') }}"
                             class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.proprietaries')) active @endif" aria-current="page">
-                            Colaboradores
+                            {{ __('view.admin.layout.nav.collaborators') }}
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.users.index') }}"
                             class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.users')) active @endif" aria-current="page">
-                            Administradores
+                            {{ __('view.admin.layout.nav.administrators') }}
                         </a>
                     </li>
                 </ul>
@@ -104,7 +104,7 @@
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button
-                                    class="btn border-0 bg-transparent px-0 py-0 dropdown-item ms-2"type="submit">Sair</button>
+                                    class="btn border-0 bg-transparent px-0 py-0 dropdown-item ms-2" type="submit">{{ __('view.admin.layout.logout') }}</button>
                             </form>
                         </li>
                     </ul>

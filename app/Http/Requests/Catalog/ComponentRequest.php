@@ -35,7 +35,7 @@ class ComponentRequest extends FormRequest
                     $count = $ids->count();
                     $uniqueCount = $ids->unique()->count();
                     if ($count !== $uniqueCount) {
-                        $fail('Os itens precisam ser diferentes.');
+                        $fail(__('validation.catalog.components_items_different'));
                     }
                 },
             ],

@@ -1,15 +1,21 @@
 <?php
 
+/*
+| Laravel framework language file. Keys and structure are defined by the framework.
+| Do not rename keys. Keep this file in sync with the same file in other locales (e.g. en).
+*/
+
 return [
 
     /*
     |--------------------------------------------------------------------------
-    | Validation Language Lines
+    | Validation messages (framework)
     |--------------------------------------------------------------------------
     |
-    | The following language lines contain the default error messages used by
-    | the validator class. Some of these rules have multiple versions such
-    | as the size rules. Feel free to tweak each of these messages here.
+    | Messages shown when validation fails. Each key maps to a Validator rule
+    | (required, email, min, etc.). Placeholders: :attribute, :min, :max,
+    | :value, :other, :values, :date, :format, etc.
+    | Keep this file in sync with lang/pt_BR/validation.php (same keys).
     |
     */
 
@@ -21,6 +27,7 @@ return [
     'alpha' => 'The :attribute field must only contain letters.',
     'alpha_dash' => 'The :attribute field must only contain letters, numbers, dashes, and underscores.',
     'alpha_num' => 'The :attribute field must only contain letters and numbers.',
+    'any_of' => 'The :attribute field is invalid.',
     'array' => 'The :attribute field must be an array.',
     'ascii' => 'The :attribute field must only contain single-byte alphanumeric characters and symbols.',
     'before' => 'The :attribute field must be a date before :date.',
@@ -34,6 +41,7 @@ return [
     'boolean' => 'The :attribute field must be true or false.',
     'can' => 'The :attribute field contains an unauthorized value.',
     'confirmed' => 'The :attribute field confirmation does not match.',
+    'contains' => 'The :attribute field is missing a required value.',
     'current_password' => 'The password is incorrect.',
     'date' => 'The :attribute field must be a valid date.',
     'date_equals' => 'The :attribute field must be a date equal to :date.',
@@ -46,9 +54,11 @@ return [
     'digits_between' => 'The :attribute field must be between :min and :max digits.',
     'dimensions' => 'The :attribute field has invalid image dimensions.',
     'distinct' => 'The :attribute field has a duplicate value.',
+    'doesnt_contain' => 'The :attribute field must not contain any of the following: :values.',
     'doesnt_end_with' => 'The :attribute field must not end with one of the following: :values.',
     'doesnt_start_with' => 'The :attribute field must not start with one of the following: :values.',
     'email' => 'The :attribute field must be a valid email address.',
+    'encoding' => 'The :attribute field must be encoded in :encoding.',
     'ends_with' => 'The :attribute field must end with one of the following: :values.',
     'enum' => 'The selected :attribute is invalid.',
     'exists' => 'The selected :attribute is invalid.',
@@ -71,11 +81,13 @@ return [
     'image' => 'The :attribute field must be an image.',
     'in' => 'The selected :attribute is invalid.',
     'in_array' => 'The :attribute field must exist in :other.',
+    'in_array_keys' => 'The :attribute field must contain at least one of the following keys: :values.',
     'integer' => 'The :attribute field must be an integer.',
     'ip' => 'The :attribute field must be a valid IP address.',
     'ipv4' => 'The :attribute field must be a valid IPv4 address.',
     'ipv6' => 'The :attribute field must be a valid IPv6 address.',
     'json' => 'The :attribute field must be a valid JSON string.',
+    'list' => 'The :attribute field must be a list.',
     'lowercase' => 'The :attribute field must be lowercase.',
     'lt' => [
         'array' => 'The :attribute field must have less than :value items.',
@@ -105,14 +117,14 @@ return [
         'numeric' => 'The :attribute field must be at least :min.',
         'string' => 'The :attribute field must be at least :min characters.',
     ],
+    'missing_with' => 'The :attribute field must be missing when :values is present.',
     'min_digits' => 'The :attribute field must have at least :min digits.',
     'missing' => 'The :attribute field must be missing.',
     'missing_if' => 'The :attribute field must be missing when :other is :value.',
     'missing_unless' => 'The :attribute field must be missing unless :other is :value.',
-    'missing_with' => 'The :attribute field must be missing when :values is present.',
     'missing_with_all' => 'The :attribute field must be missing when :values are present.',
-    'multiple_of' => 'The :attribute field must be a multiple of :value.',
     'not_in' => 'The selected :attribute is invalid.',
+    'multiple_of' => 'The :attribute field must be a multiple of :value.',
     'not_regex' => 'The :attribute field format is invalid.',
     'numeric' => 'The :attribute field must be a number.',
     'password' => [
@@ -129,6 +141,8 @@ return [
     'present_with_all' => 'The :attribute field must be present when :values are present.',
     'prohibited' => 'The :attribute field is prohibited.',
     'prohibited_if' => 'The :attribute field is prohibited when :other is :value.',
+    'prohibited_if_accepted' => 'The :attribute field is prohibited when :other is accepted.',
+    'prohibited_if_declined' => 'The :attribute field is prohibited when :other is declined.',
     'prohibited_unless' => 'The :attribute field is prohibited unless :other is in :values.',
     'prohibits' => 'The :attribute field prohibits :other from being present.',
     'regex' => 'The :attribute field format is invalid.',
@@ -136,6 +150,7 @@ return [
     'required_array_keys' => 'The :attribute field must contain entries for: :values.',
     'required_if' => 'The :attribute field is required when :other is :value.',
     'required_if_accepted' => 'The :attribute field is required when :other is accepted.',
+    'required_if_declined' => 'The :attribute field is required when :other is declined.',
     'required_unless' => 'The :attribute field is required unless :other is in :values.',
     'required_with' => 'The :attribute field is required when :values is present.',
     'required_with_all' => 'The :attribute field is required when :values are present.',
@@ -160,12 +175,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Custom Validation Language Lines
+    | Custom messages per attribute and rule
     |--------------------------------------------------------------------------
     |
-    | Here you may specify custom validation messages for attributes using the
-    | convention "attribute.rule" to name the lines. This makes it quick to
-    | specify a specific custom language line for a given attribute rule.
+    | Use the "attribute_name.rule_name" convention to override the default
+    | message for a specific field only.
+    | E.g.: 'email.required' => 'The email is required.'
     |
     */
 
@@ -173,19 +188,90 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+        'image' => [
+            'mimes' => 'The image extension must be: jpeg, png, jpg or webp.',
+            'max' => 'The image must be at most 10 MB.',
+        ],
+    ],
+
+    'catalog' => [
+        'item_component_different' => 'The item and the component must be different.',
+        'item_tag_different' => 'The item and the tag must be different.',
+        'components_items_different' => 'The items must be different.',
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Custom Validation Attributes
+    | Friendly attribute names
     |--------------------------------------------------------------------------
     |
-    | The following language lines are used to swap our attribute placeholder
-    | with something more reader friendly such as "E-Mail Address" instead
-    | of "email". This simply helps us make our message more expressive.
+    | Replaces the :attribute placeholder in messages with a readable name
+    | (e.g. "email" becomes "Email address"). Add your form field names here
+    | for clearer validation messages.
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'address' => 'address',
+        'age' => 'age',
+        'body' => 'body',
+        'cell' => 'cell',
+        'city' => 'city',
+        'country' => 'country',
+        'date' => 'date',
+        'day' => 'day',
+        'excerpt' => 'excerpt',
+        'first_name' => 'first name',
+        'gender' => 'gender',
+        'marital_status' => 'marital status',
+        'profession' => 'profession',
+        'nationality' => 'nationality',
+        'hour' => 'hour',
+        'last_name' => 'last name',
+        'message' => 'message',
+        'minute' => 'minute',
+        'mobile' => 'mobile',
+        'month' => 'month',
+        'name' => 'name',
+        'zipcode' => 'zip code',
+        'company_name' => 'company name',
+        'neighborhood' => 'neighborhood',
+        'number' => 'number',
+        'password' => 'password',
+        'phone' => 'phone',
+        'second' => 'second',
+        'sex' => 'sex',
+        'state' => 'state',
+        'street' => 'street',
+        'subject' => 'subject',
+        'text' => 'text',
+        'time' => 'time',
+        'title' => 'title',
+        'username' => 'username',
+        'year' => 'year',
+        'description' => 'description',
+        'password_confirmation' => 'password confirmation',
+        'current_password' => 'current password',
+        'complement' => 'complement',
+        'modality' => 'modality',
+        'category' => 'category',
+        'blood_type' => 'blood type',
+        'birth_date' => 'birth date',
+        'category_id' => 'category',
+        'validation' => 'validation',
+        'item_id' => 'item id',
+        'component_id' => 'component id',
+        'tag_id' => 'tag id',
+        'section_id' => 'item category',
+        'full_name' => 'full name',
+        'contact' => 'email',
+        'info' => 'extra information',
+        'image' => 'image',
+        'identification_code' => 'identification code',
+        'proprietary_id' => 'proprietary',
+        'detail' => 'detail',
+        'history' => 'history',
+        'is_admin' => 'administrator',
+    ],
 
 ];
