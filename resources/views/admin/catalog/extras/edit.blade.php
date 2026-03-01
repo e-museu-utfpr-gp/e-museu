@@ -25,22 +25,22 @@
                         @enderror
                     </div>
                     <div class="row" data-section-item-selector 
-                         data-section-selector="#section_id" 
+                         data-section-selector="#category_id" 
                          data-item-selector="#item_id" 
                          data-original-item-id="{{ $extra->item->id }}"
                          data-get-items-url="{{ route('items.bySection') }}">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="section_id" class="form-label">{{ __('view.admin.catalog.extras.edit.section') }}</label>
-                                <select class="form-select @error('section_id') is-invalid @enderror" id="section_id"
-                                    name="section_id">
+                                <label for="category_id" class="form-label">{{ __('view.admin.catalog.extras.edit.item_category') }}</label>
+                                <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
+                                    name="category_id">
                                     @foreach ($sections as $section)
                                         <option value="{{ $section->id }}"
-                                            {{ $extra->item->section->id == $section->id ? 'selected' : '' }}>
+                                            {{ $extra->item->category?->id == $section->id ? 'selected' : '' }}>
                                             {{ $section->name }}</option>
                                     @endforeach
                                 </select>
-                                @error('section_id')
+                                @error('category_id')
                                     <div class="invalid-feedback"> {{ $message }} </div>
                                 @enderror
                             </div>
@@ -58,16 +58,16 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="proprietary_id" class="form-label">{{ __('view.admin.catalog.extras.edit.collaborator') }}</label>
-                        <select class="form-select @error('proprietary_id') is-invalid @enderror" id="proprietary_id"
-                            name="proprietary_id">
-                            @foreach ($proprietaries as $proprietary)
-                                <option value="{{ $proprietary->id }}"
-                                    {{ $extra->proprietary->id == $proprietary->id ? 'selected' : '' }}>
-                                    {{ $proprietary->contact }}</option>
+                        <label for="collaborator_id" class="form-label">{{ __('view.admin.catalog.extras.edit.collaborator') }}</label>
+                        <select class="form-select @error('collaborator_id') is-invalid @enderror" id="collaborator_id"
+                            name="collaborator_id">
+                            @foreach ($collaborators as $collaborator)
+                                <option value="{{ $collaborator->id }}"
+                                    {{ $extra->collaborator->id == $collaborator->id ? 'selected' : '' }}>
+                                    {{ $collaborator->contact }}</option>
                             @endforeach
                         </select>
-                        @error('proprietary_id')
+                        @error('collaborator_id')
                             <div class="invalid-feedback"> {{ $message }} </div>
                         @enderror
                     </div>

@@ -3,13 +3,14 @@
     "delete_item_tag": "Tem certeza que deseja desassociar o item da etiqueta?",
     "delete_extra": "Tem certeza que deseja excluir a curiosidade extra?",
     "delete_category": "Tem certeza que deseja excluir a categoria e todas as vezes que é referenciada em outros registros?",
-    "delete_section": "Tem certeza que deseja excluir a categoria de item e todas as vezes que é referenciada em outros registros?",
+    "delete_item_category": "Tem certeza que deseja excluir a categoria de item e todas as vezes que é referenciada em outros registros?",
     "delete_item": "Tem certeza que deseja excluir o item e todas as vezes que é referenciado em outros registros?",
     "delete_user": "Tem certeza que deseja excluir o administrador?",
+    "delete_admin": "Tem certeza que deseja excluir o administrador?",
     "delete_component": "Tem certeza que deseja desassociar o item do componente?",
     "delete_contribution": "Tem certeza que deseja excluir a contribuição?",
     "delete_tag": "Tem certeza que deseja excluir a etiqueta e todas as vezes que é referenciada em outros registros?",
-    "delete_proprietary": "Tem certeza que deseja excluir o proprietário e todas as vezes que é referenciado em outros registros?"
+    "delete_collaborator": "Tem certeza que deseja excluir o colaborador e todas as vezes que é referenciado em outros registros?"
   },
   "assistant": {
     "goodbye": "Até logo!",

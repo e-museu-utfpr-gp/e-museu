@@ -3,7 +3,7 @@
 namespace Database\Factories\Catalog;
 
 use App\Models\Catalog\Item;
-use App\Models\Proprietary\Proprietary;
+use App\Models\Collaborator\Collaborator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -15,7 +15,7 @@ class ExtraFactory extends Factory
     {
         return [
             'item_id' => Item::pluck('id')->random(),
-            'proprietary_id' => Proprietary::pluck('id')->random(),
+            'collaborator_id' => Collaborator::pluck('id')->random(),
             'info' => $this->faker->paragraph,
             'validation' => $this->faker->boolean,
         ];

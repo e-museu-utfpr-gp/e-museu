@@ -43,7 +43,7 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-                            <label for="section_id">
+                            <label for="category_id">
                                 <h5>{{ __('view.catalog.items.create.category_label') }}
                                     <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
                                         data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
@@ -55,11 +55,11 @@
                             </label>
                             <div class="input-div rounded-top">
                                 <select required class="form-select me-2 input-form  @error('section') is-invalid @enderror"
-                                    name="section_id" id="section_id">
+                                    name="category_id" id="category_id">
                                     <option selected="selected" value="">-</option>
                                     @foreach ($sections as $section)
                                         <option value="{{ $section->id }}"
-                                            {{ old('section_id') == $section->id ? 'selected' : '' }}>{{ $section->name }}
+                                            {{ old('category_id') == $section->id ? 'selected' : '' }}>{{ $section->name }}
                                         </option>
                                     @endforeach
                                 </select>

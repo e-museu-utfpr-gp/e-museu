@@ -30,8 +30,8 @@
                         <option value="date" @if (request()->query('search_column') == 'date') selected @endif>{{ __('view.admin.catalog.items.index.search_option_date') }}</option>
                         <option value="identification_code" @if (request()->query('search_column') == 'identification_code') selected @endif>{{ __('view.admin.catalog.items.index.search_option_identification_code') }}</option>
                         <option value="validation" @if (request()->query('search_column') == 'validation') selected @endif>{{ __('view.admin.catalog.items.index.search_option_validation') }}</option>
-                        <option value="proprietary_id" @if (request()->query('search_column') == 'proprietary_id') selected @endif>{{ __('view.admin.catalog.items.index.search_option_proprietary') }}</option>
-                        <option value="section_id" @if (request()->query('search_column') == 'section_id') selected @endif>{{ __('view.admin.catalog.items.index.search_option_section') }}</option>
+                        <option value="collaborator_id" @if (request()->query('search_column') == 'collaborator_id') selected @endif>{{ __('view.admin.catalog.items.index.search_option_collaborator') }}</option>
+                        <option value="category_id" @if (request()->query('search_column') == 'category_id') selected @endif>{{ __('view.admin.catalog.items.index.search_option_item_category') }}</option>
                         <option value="created_at" @if (request()->query('search_column') == 'created_at') selected @endif>{{ __('view.admin.catalog.items.index.search_option_created_at') }}</option>
                         <option value="updated_at" @if (request()->query('search_column') == 'updated_at') selected @endif>{{ __('view.admin.catalog.items.index.search_option_updated_at') }}</option>
                     </select>
@@ -64,9 +64,9 @@
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
                                         name="sort" value="validation">{{ __('view.admin.catalog.items.index.sort_validation') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
-                                        name="sort" value="section_id">{{ __('view.admin.catalog.items.index.sort_section') }}</button></th>
+                                        name="sort" value="category_id">{{ __('view.admin.catalog.items.index.sort_item_category') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
-                                        name="sort" value="proprietary_id">{{ __('view.admin.catalog.items.index.sort_collaborator') }}</button></th>
+                                        name="sort" value="collaborator_id">{{ __('view.admin.catalog.items.index.sort_collaborator') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
                                         name="sort" value="created_at">{{ __('view.admin.catalog.items.index.created_at') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
@@ -97,7 +97,7 @@
                                     @endif
                                 </td>
                                 <td>{{ $item->section_name }}</td>
-                                <td>{{ $item->proprietary_contact }}</td>
+                                <td>{{ $item->collaborator_contact }}</td>
                                 <td>{{ date('d-m-Y H:i:s', strtotime($item->item_created)) }}</td>
                                 <td>{{ date('d-m-Y H:i:s', strtotime($item->item_updated)) }}</td>
                                 <td>

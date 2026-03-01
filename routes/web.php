@@ -1,19 +1,19 @@
 <?php
 
 use App\Http\Controllers\Admin\Auth\AdminLoginController;
-use App\Http\Controllers\Admin\Catalog\AdminComponentController;
+use App\Http\Controllers\Admin\Catalog\AdminItemComponentController;
 use App\Http\Controllers\Admin\Catalog\AdminExtraController;
 use App\Http\Controllers\Admin\Catalog\AdminItemController;
 use App\Http\Controllers\Admin\Catalog\AdminItemTagController;
-use App\Http\Controllers\Admin\Catalog\AdminSectionController;
+use App\Http\Controllers\Admin\Catalog\AdminItemCategoryController;
 use App\Http\Controllers\Catalog\ItemController;
 use App\Http\Controllers\Catalog\QueryController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Admin\Identity\AdminUserController;
+use App\Http\Controllers\Admin\Identity\AdminController;
 use App\Http\Controllers\Admin\Identity\ReleaseLockController;
-use App\Http\Controllers\Admin\Proprietary\AdminProprietaryController;
+use App\Http\Controllers\Admin\Collaborator\AdminCollaboratorController;
 use App\Http\Controllers\StorageProxyController;
-use App\Http\Controllers\Admin\Taxonomy\AdminCategoryController;
+use App\Http\Controllers\Admin\Taxonomy\AdminTagCategoryController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,7 +30,7 @@ Route::get('items/create', [ItemController::class, 'create'])->name('items.creat
 Route::get('items/by-section', [ItemController::class, 'bySection'])->name('items.bySection');
 Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show')->middleware('validate.item');
 
-Route::middleware('validate.proprietary')->group(function () {
+Route::middleware('validate.collaborator')->group(function () {
     Route::post('items', [ItemController::class, 'store'])->name('items.store');
     Route::post('items/extras', [ItemController::class, 'storeSingleExtra'])->name('items.store-extra');
 });
@@ -48,29 +48,29 @@ Route::group(['middleware' => 'auth'], function () {
     Route::redirect('/admin', '/admin/items');
 
     Route::resource('admin/items', AdminItemController::class)->names('admin.items');
-    Route::resource('admin/sections', AdminSectionController::class)->names('admin.sections');
+    Route::resource('admin/item-categories', AdminItemCategoryController::class)->names('admin.item-categories');
     Route::resource('admin/tags', AdminTagController::class)->names('admin.tags');
-    Route::resource('admin/categories', AdminCategoryController::class)->names('admin.categories');
-    Route::resource('admin/proprietaries', AdminProprietaryController::class)->names('admin.proprietaries');
+    Route::resource('admin/tag-categories', AdminTagCategoryController::class)->names('admin.tag-categories');
+    Route::resource('admin/collaborators', AdminCollaboratorController::class)->names('admin.collaborators');
     Route::resource('admin/extras', AdminExtraController::class)->names('admin.extras');
 
-    Route::resource('admin/components', AdminComponentController::class)
+    Route::resource('admin/item-components', AdminItemComponentController::class)
         ->only(['index', 'create', 'store', 'show', 'update', 'destroy'])
-        ->names('admin.components');
+        ->names('admin.item-components');
     Route::resource('admin/item-tags', AdminItemTagController::class)
         ->only(['index', 'create', 'store', 'show', 'update', 'destroy'])
         ->names('admin.item-tags');
 
     Route::post('admin/release-lock', ReleaseLockController::class)->name('admin.release-lock');
 
-    Route::resource('admin/users', AdminUserController::class)
+    Route::resource('admin/admins', AdminController::class)
         ->only(['index', 'create', 'store', 'show', 'destroy'])
-        ->names('admin.users');
+        ->names('admin.admins');
 
     Route::delete(
-        '/admin/users/{id}/delete-lock',
-        [AdminUserController::class, 'destroyLock']
-    )->name('admin.users.delete-lock');
+        '/admin/admins/{id}/delete-lock',
+        [AdminController::class, 'destroyLock']
+    )->name('admin.admins.delete-lock');
 });
 
 Route::middleware('redirectIfAuthenticated')->group(function () {

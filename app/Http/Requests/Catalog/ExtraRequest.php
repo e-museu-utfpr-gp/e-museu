@@ -23,7 +23,7 @@ class ExtraRequest extends FormRequest
     {
         return [
             'extras.*.info' => 'sometimes|required|string|min:1|max:10000',
-            'extras.*.proprietary_id' => 'sometimes|required|integer|numeric|exists:proprietaries,id',
+            'extras.*.collaborator_id' => 'sometimes|required|integer|numeric|exists:collaborators,id',
             'extras.*.item_id' => 'sometimes|required|integer|numeric|exists:items,id',
         ];
     }

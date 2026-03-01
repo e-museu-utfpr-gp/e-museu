@@ -67,23 +67,23 @@
                             <h5 class="card-header">{{ __('view.admin.taxonomy.tags.show.category') }}</h5>
                             <div class="card-body">
                                 <strong>{{ __('view.admin.taxonomy.tags.show.id') }}: </strong>
-                                <p class="ms-3">{{ $tag->category->id }}</p>
+                                <p class="ms-3">{{ $tag->tagCategory->id }}</p>
                                 <strong>{{ __('view.admin.taxonomy.tags.show.name') }}: </strong>
-                                <p class="card-text">{{ $tag->category->name }}</p>
+                                <p class="card-text">{{ $tag->tagCategory->name }}</p>
                                 <strong>{{ __('view.admin.taxonomy.tags.show.created_at') }}: </strong>
-                                <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($tag->category->created_at)) }}</p>
+                                <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($tag->tagCategory->created_at)) }}</p>
                                 <strong>{{ __('view.admin.taxonomy.tags.show.updated_at') }}: </strong>
-                                <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($tag->category->updated_at)) }}</p>
+                                <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($tag->tagCategory->updated_at)) }}</p>
                                 <div class="d-flex">
-                                    <a href="{{ route('admin.categories.show', $tag->category->id) }}" type="button"
+                                    <a href="{{ route('admin.tag-categories.show', $tag->tagCategory->id) }}" type="button"
                                         class="btn btn-primary me-1"><i class="bi bi-eye-fill"></i> {{ __('view.admin.taxonomy.tags.show.view') }}</a>
-                                    <a href="{{ route('admin.categories.edit', $tag->category->id) }}" type="button"
+                                    <a href="{{ route('admin.tag-categories.edit', $tag->tagCategory->id) }}" type="button"
                                         class="btn btn-warning me-1"><i class="bi bi-pencil-fill"></i> {{ __('view.admin.taxonomy.tags.show.edit') }}</a>
-                                    <form action="{{ route('admin.categories.destroy', $tag->category->id) }}"
+                                    <form action="{{ route('admin.tag-categories.destroy', $tag->tagCategory->id) }}"
                                         method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="deleteCategoryButton btn btn-danger" type="submit" data-confirm-message="{{ __('view.admin.taxonomy.categories.delete_confirm') }}"><i
+                                        <button class="deleteCategoryButton btn btn-danger" type="submit" data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}"><i
                                                 class="bi bi-trash-fill"></i> {{ __('view.admin.taxonomy.tags.show.delete') }}
                                     </form>
                                 </div>

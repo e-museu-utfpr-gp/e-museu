@@ -40,11 +40,11 @@
                         <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
                             name="category_id">
                             @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" @if ($tag->category_id == $category->id) selected @endif>
+                                <option value="{{ $category->id }}" @if ($tag->tag_category_id == $category->id) selected @endif>
                                     {{ $category->name }}</option>
                             @endforeach
                         </select>
-                        @error('section_id')
+                        @error('category_id')
                             <div class="invalid-feedback"> {{ $message }} </div>
                         @enderror
                     </div>

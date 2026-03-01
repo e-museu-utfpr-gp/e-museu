@@ -5,9 +5,10 @@ namespace App\Services\Catalog;
 use App\Models\Catalog\Extra;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemComponent;
-use App\Models\Catalog\Section;
-use App\Models\Proprietary\Proprietary;
-use App\Models\Taxonomy\Category;
+use App\Models\Catalog\ItemCategory;
+use App\Enums\CollaboratorRole;
+use App\Models\Collaborator\Collaborator;
+use App\Models\Taxonomy\TagCategory;
 use App\Models\Taxonomy\Tag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
@@ -18,19 +19,19 @@ use RuntimeException;
 class ItemContributionService
 {
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Category>
+     * @return \Illuminate\Database\Eloquent\Collection<int, TagCategory>
      */
     public function loadCategories(): \Illuminate\Database\Eloquent\Collection
     {
-        return Category::select('name', 'id')->orderBy('name', 'asc')->get();
+        return TagCategory::select('name', 'id')->orderBy('name', 'asc')->get();
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Section>
+     * @return \Illuminate\Database\Eloquent\Collection<int, ItemCategory>
      */
     public function loadSections(): \Illuminate\Database\Eloquent\Collection
     {
-        return Section::select('name', 'id')->orderBy('name', 'asc')->get();
+        return ItemCategory::select('name', 'id')->orderBy('name', 'asc')->get();
     }
 
     /**
@@ -40,40 +41,44 @@ class ItemContributionService
     {
         return Tag::select('name', 'id')
             ->where('validation', true)
-            ->where('category_id', $category)
+            ->where('tag_category_id', $category)
             ->orderBy('name', 'asc')
             ->get();
     }
 
     /**
-     * @param  array<string, mixed>  $proprietaryData
+     * @param  array<string, mixed>  $collaboratorData
      * @param  array<string, mixed>  $itemData
      * @param  array<int, array<string, mixed>>  $tags
      * @param  array<int, array<string, mixed>>  $extras
      * @param  array<int, array<string, mixed>>  $components
      */
     public function store(
-        array $proprietaryData,
+        array $collaboratorData,
         array $itemData,
         array $tags,
         array $extras,
         array $components,
         ?UploadedFile $image
     ): RedirectResponse {
-        $proprietary = Proprietary::where('contact', '=', $proprietaryData['contact'])->first();
-        if (! $proprietary) {
-            $proprietary = $this->storeProprietary($proprietaryData);
+        $collaborator = Collaborator::where('contact', '=', $collaboratorData['contact'])->first();
+        if (! $collaborator) {
+            $collaborator = $this->storeCollaborator($collaboratorData);
         }
 
-        if ($proprietary->blocked === true) {
-            return back()->withErrors(['blocked' => __('app.proprietary.blocked_from_registering')]);
+        if ($collaborator->role === CollaboratorRole::INTERNAL) {
+            return back()->withErrors(['contact' => __('app.collaborator.contact_reserved_for_internal')]);
+        }
+
+        if ($collaborator->blocked === true) {
+            return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
         }
 
         if ($image) {
             unset($itemData['image']);
         }
 
-        $item = $this->storeItem($itemData, $proprietary);
+        $item = $this->storeItem($itemData, $collaborator);
 
         if ($image) {
             $ext = $image->getClientOriginalExtension() ?: 'png';
@@ -87,47 +92,53 @@ class ItemContributionService
         }
 
         $this->storeMultipleTag($tags, $item);
-        $this->storeMultipleExtra($extras, $item, $proprietary);
+        $this->storeMultipleExtra($extras, $item, $collaborator);
         $this->storeMultipleComponent($components, $item);
 
         return redirect()->route('items.create')->with('success', __('app.catalog.item.contribution_success'));
     }
 
     /**
-     * @param  array<string, mixed>  $proprietaryData
+     * @param  array<string, mixed>  $collaboratorData
      * @param  array<string, mixed>  $extraData
      */
-    public function storeSingleExtra(array $proprietaryData, array $extraData): RedirectResponse
+    public function storeSingleExtra(array $collaboratorData, array $extraData): RedirectResponse
     {
-        $proprietary = Proprietary::where('contact', $proprietaryData['contact'])->first();
-        if (! $proprietary) {
-            $proprietary = $this->storeProprietary($proprietaryData);
+        $collaborator = Collaborator::where('contact', $collaboratorData['contact'])->first();
+        if (! $collaborator) {
+            $collaborator = $this->storeCollaborator($collaboratorData);
         }
 
-        if ($proprietary->blocked === true) {
-            return back()->withErrors(['blocked' => __('app.proprietary.blocked_from_registering')]);
+        if ($collaborator->role === CollaboratorRole::INTERNAL) {
+            return back()->withErrors(['contact' => __('app.collaborator.contact_reserved_for_internal')]);
         }
 
-        $extraData['proprietary_id'] = $proprietary->id;
+        if ($collaborator->blocked === true) {
+            return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
+        }
+
+        $extraData['collaborator_id'] = $collaborator->id;
         Extra::create($extraData);
 
         return back()->with('success', __('app.catalog.extra.contribution_success'));
     }
 
     /**
-     * @param  array<string, mixed>  $proprietaryData
+     * @param  array<string, mixed>  $collaboratorData
      */
-    private function storeProprietary(array $proprietaryData): Proprietary
+    private function storeCollaborator(array $collaboratorData): Collaborator
     {
-        return Proprietary::create($proprietaryData);
+        $collaboratorData['role'] = CollaboratorRole::EXTERNAL;
+
+        return Collaborator::create($collaboratorData);
     }
 
     /**
      * @param  array<string, mixed>  $itemData
      */
-    private function storeItem(array $itemData, Proprietary $proprietary): Item
+    private function storeItem(array $itemData, Collaborator $collaborator): Item
     {
-        $itemData['proprietary_id'] = $proprietary->id;
+        $itemData['collaborator_id'] = $collaborator->id;
         $itemData['identification_code'] = '000';
         if (array_key_exists('date', $itemData) && $itemData['date'] === null) {
             $itemData['date'] = '0001-01-01 00:00:00';
@@ -148,11 +159,15 @@ class ItemContributionService
     private function storeMultipleTag(array $tags, Item $item): void
     {
         foreach ($tags as $tagData) {
-            $tag = Tag::where('category_id', '=', $tagData['category_id'])
+            $tagCategoryId = $tagData['tag_category_id'] ?? $tagData['category_id'] ?? null;
+            $tag = Tag::where('tag_category_id', '=', $tagCategoryId)
                 ->where('name', '=', $tagData['name'])
                 ->first();
             if ($tag === null) {
-                $tag = Tag::create($tagData);
+                $createData = $tagData;
+                $createData['tag_category_id'] = $tagCategoryId;
+                unset($createData['category_id']);
+                $tag = Tag::create($createData);
             }
             $item->tags()->attach($tag->id);
         }
@@ -161,10 +176,10 @@ class ItemContributionService
     /**
      * @param  array<int, array<string, mixed>>  $extras
      */
-    private function storeMultipleExtra(array $extras, Item $item, Proprietary $proprietary): void
+    private function storeMultipleExtra(array $extras, Item $item, Collaborator $collaborator): void
     {
         foreach ($extras as $extraItemData) {
-            $extraItemData['proprietary_id'] = $proprietary->id;
+            $extraItemData['collaborator_id'] = $collaborator->id;
             $extraItemData['item_id'] = $item->id;
             Extra::create($extraItemData);
         }
@@ -176,7 +191,7 @@ class ItemContributionService
     private function storeMultipleComponent(array $components, Item $item): void
     {
         foreach ($components as $componentItemData) {
-            $component = Item::where('section_id', '=', $componentItemData['category_id'])
+            $component = Item::where('category_id', '=', $componentItemData['category_id'])
                 ->where('name', '=', $componentItemData['name'])
                 ->first();
             if (! $component) {
@@ -190,8 +205,8 @@ class ItemContributionService
 
     private function createIdentificationCode(Item $item): string
     {
-        $sectionModel = Section::findOrFail($item->section_id);
-        $sectionNameNormalized = $this->removeAccent($sectionModel->name);
+        $categoryModel = ItemCategory::findOrFail($item->category_id);
+        $sectionNameNormalized = $this->removeAccent($categoryModel->name);
         $words = explode(' ', $sectionNameNormalized);
         if (count($words) === 1) {
             $words = explode('-', $words[0]);

@@ -16,22 +16,22 @@
                         <h2 class="card-header">{{ __('view.admin.catalog.item_tags.create.heading') }}</h2>
                     </div>
                     <div class="row" data-section-item-selector 
-                         data-section-selector="#section_id" 
+                         data-section-selector="#section" 
                          data-item-selector="#item_id" 
                          data-original-item-id="{{ request()->query('id') }}"
                          data-get-items-url="{{ route('items.bySection') }}">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="section_id" class="form-label">{{ __('view.admin.catalog.item_tags.create.section') }}</label>
-                                <select class="form-select @error('section_id') is-invalid @enderror" id="section_id"
-                                    name="section_id">
+                                <label for="section" class="form-label">{{ __('view.admin.catalog.item_tags.create.item_category') }}</label>
+                                <select class="form-select @error('section') is-invalid @enderror" id="section"
+                                    name="section">
                                     @foreach ($sections as $section)
                                         <option value="{{ $section->id }}"
-                                            {{ old('section_id', request()->query('section')) == $section->id ? 'selected' : '' }}>
+                                            {{ old('section', request()->query('section')) == $section->id ? 'selected' : '' }}>
                                             {{ $section->name }}</option>
                                     @endforeach
                                 </select>
-                                @error('section_id')
+                                @error('section')
                                     <div class="invalid-feedback"> {{ $message }} </div>
                                 @enderror
                             </div>
@@ -51,8 +51,8 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="category_id" class="form-label">{{ __('view.admin.catalog.item_tags.create.category') }}</label>
-                                <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
+                                <label for="tag_category_id" class="form-label">{{ __('view.admin.catalog.item_tags.create.category') }}</label>
+                                <select class="form-select @error('category_id') is-invalid @enderror" id="tag_category_id"
                                     name="category_id">
                                     @foreach ($categories as $category)
                                         <option value="{{ $category->id }}"

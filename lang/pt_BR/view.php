@@ -12,6 +12,6 @@ return [
         'identity' => require __DIR__ . '/view/admin/identity.php',
         'auth' => require __DIR__ . '/view/admin/auth.php',
         'layout' => require __DIR__ . '/view/admin/layout.php',
-        'proprietary' => require __DIR__ . '/view/admin/proprietary.php',
+        'collaborator' => require __DIR__ . '/view/admin/collaborator.php',
     ],
 ];
