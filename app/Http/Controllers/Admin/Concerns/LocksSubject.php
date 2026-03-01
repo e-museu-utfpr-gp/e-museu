@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 trait LocksSubject
 {
-    protected static string $lockBlockedMessage =
-        'Não é possível fazer alterações enquanto outro administrador estiver editando o mesmo.';
-
     /**
      * Ensure the subject is not locked by another user. Throws if it is.
      *
@@ -22,7 +19,7 @@ trait LocksSubject
     {
         $user = Auth::user();
         if ($user && Lock::isLockedByOtherUser($user, $subject)) {
-            throw new AuthorizationException(static::$lockBlockedMessage);
+            throw new AuthorizationException(__('app.identity.lock_blocked'));
         }
     }
 

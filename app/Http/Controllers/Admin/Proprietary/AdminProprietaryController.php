@@ -66,7 +66,7 @@ class AdminProprietaryController extends AdminBaseController
         ];
 
         $messages = [
-            'contact.unique:proprietaries' => 'O campo Email já está sendo utilizado',
+            'contact.unique:proprietaries' => __('app.proprietary.contact_unique'),
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -103,7 +103,7 @@ class AdminProprietaryController extends AdminBaseController
         ];
 
         $messages = [
-            'contact.unique:proprietaries' => 'O campo Email já está sendo utilizado',
+            'contact.unique:proprietaries' => __('app.proprietary.contact_unique'),
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);

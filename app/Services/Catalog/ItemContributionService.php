@@ -66,7 +66,7 @@ class ItemContributionService
         }
 
         if ($proprietary->blocked === true) {
-            return back()->withErrors(['Este usuário não possui permissão para registrar itens.']);
+            return back()->withErrors(['blocked' => __('app.proprietary.blocked_from_registering')]);
         }
 
         if ($image) {
@@ -80,7 +80,7 @@ class ItemContributionService
             $path = Item::buildImagePath($item, $ext);
             $contents = $image->get();
             if ($contents === false) {
-                throw new RuntimeException('Could not read uploaded file');
+                throw new RuntimeException(__('app.catalog.item.upload_read_failed'));
             }
             Storage::disk('public')->put($path, $contents);
             $item->update(['image' => $path]);
@@ -90,10 +90,7 @@ class ItemContributionService
         $this->storeMultipleExtra($extras, $item, $proprietary);
         $this->storeMultipleComponent($components, $item);
 
-        $successMessage = 'Agradecemos pelo seu tempo! Analisaremos sua colaboração '
-            . 'antes de adicionarmos ao nosso museu.';
-
-        return redirect()->route('items.create')->with('success', $successMessage);
+        return redirect()->route('items.create')->with('success', __('app.catalog.item.contribution_success'));
     }
 
     /**
@@ -108,16 +105,13 @@ class ItemContributionService
         }
 
         if ($proprietary->blocked === true) {
-            return back()->withErrors(['Este usuário não possui permissão para registrar itens.']);
+            return back()->withErrors(['blocked' => __('app.proprietary.blocked_from_registering')]);
         }
 
         $extraData['proprietary_id'] = $proprietary->id;
         Extra::create($extraData);
 
-        $successMessage = 'Curiosidade extra enviada com sucesso! Agradecemos pelo seu tempo, '
-            . 'analisaremos sua proposta antes de adicionarmos ao nosso museu.';
-
-        return back()->with('success', $successMessage);
+        return back()->with('success', __('app.catalog.extra.contribution_success'));
     }
 
     /**

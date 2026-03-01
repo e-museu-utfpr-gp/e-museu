@@ -17,7 +17,7 @@ class ValidateProprietary
             $proprietary = Proprietary::where('contact', $proprietaryContact)->first();
 
             if ($proprietary && $proprietary->is_admin) {
-                abort(403, 'Acesso negado.');
+                abort(403, __('app.proprietary.access_denied'));
             }
         }
 
