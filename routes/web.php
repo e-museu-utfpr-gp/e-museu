@@ -48,6 +48,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::redirect('/admin', '/admin/items');
 
     Route::resource('admin/items', AdminItemController::class)->names('admin.items');
+    Route::delete('admin/items/{item}/images/{image}', [AdminItemController::class, 'destroyImage'])
+        ->name('admin.items.images.destroy');
     Route::resource('admin/item-categories', AdminItemCategoryController::class)->names('admin.item-categories');
     Route::resource('admin/tags', AdminTagController::class)->names('admin.tags');
     Route::resource('admin/tag-categories', AdminTagCategoryController::class)->names('admin.tag-categories');

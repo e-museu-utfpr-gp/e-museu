@@ -9,6 +9,11 @@ return [
         'updated' => 'Item updated successfully.',
         'deleted' => 'Item deleted successfully.',
     ],
+    'item_image' => [
+        'deleted' => 'Image deleted successfully.',
+        'cover' => 'Cover',
+        'gallery' => 'Gallery',
+    ],
     'item_category' => [
         'created' => 'Item category added successfully.',
         'updated' => 'Item category updated successfully.',

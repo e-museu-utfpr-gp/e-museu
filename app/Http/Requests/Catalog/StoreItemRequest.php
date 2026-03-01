@@ -17,6 +17,9 @@ class StoreItemRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
+     * Public item contribution: cover_image is the required main image (stored as type "cover");
+     * gallery_images is an optional array of extra images (stored as type "gallery"). Max 10MB per file.
+     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -28,7 +31,9 @@ class StoreItemRequest extends FormRequest
             'detail' => 'nullable|max:10000',
             'history' => 'nullable|max:100000',
             'category_id' => 'required|integer|numeric|exists:item_categories,id',
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'gallery_images' => 'sometimes|array',
+            'gallery_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:10240',
         ];
     }
 }

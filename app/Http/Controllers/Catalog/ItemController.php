@@ -50,19 +50,30 @@ class ItemController extends Controller
     {
         $validatedData = $this->itemContributionValidator->validateStore($request);
 
+        $galleryFiles = $request->file('gallery_images');
+        if (is_array($galleryFiles)) {
+            /** @var array<int, \Illuminate\Http\UploadedFile> $galleryFiles */
+            $galleryFiles = array_values(array_filter($galleryFiles, function (mixed $f): bool {
+                return $f instanceof \Illuminate\Http\UploadedFile && $f->isValid();
+            }));
+        } else {
+            $galleryFiles = null;
+        }
+
         return $this->itemContributionService->store(
             $validatedData['collaborator'],
             $validatedData['item'],
             $validatedData['tags'],
             $validatedData['extras'],
             $validatedData['components'],
-            $request->file('image')
+            $request->file('cover_image'),
+            $galleryFiles ?: null
         );
     }
 
     public function show(string $id): View
     {
-        $item = Item::findOrFail($id);
+        $item = Item::with('images')->findOrFail($id);
         $sections = ItemCategory::get();
         $categories = TagCategory::get();
 

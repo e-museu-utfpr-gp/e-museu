@@ -16,7 +16,7 @@
                 </div>
             @endif
         </div>
-        <form action="{{ route('items.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('items.store') }}" method="POST" enctype="multipart/form-data" id="item-create-form">
             @csrf
             <div class="row">
                 <div class="col-md-6">
@@ -148,26 +148,52 @@
                             @enderror
                         </div>
                     </div>
-                    <div>
-                        <label for="image">
-                            <h5>{{ __('view.catalog.items.create.image_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.image_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1"
-                                        style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
-                            </h5>
-                        </label>
-                        <div class="input-div nav-link">
-                            <input
-                                class="form-control me-2 image-form input-form p-2  @error('image') is-invalid @enderror"
-                                type="file" name="image" placeholder="" required>
-                            @error('image')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
+                    <div class="mb-3">
+                        <h5 class="mb-2">{{ __('view.catalog.items.create.cover_label') }} <span class="text-danger">*</span>
+                            <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
+                                data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
+                                data-bs-content="{{ __('view.catalog.items.create.cover_help') }}">
+                                <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
+                            </button>
+                        </h5>
+                        <div id="cover-drop-zone" class="upload-drop-zone rounded-3 border-2 border-dashed d-flex flex-column align-items-center justify-content-center p-4 text-center" style="min-height: 140px; border-color: #c8e6c9; background: #f1f8e9; cursor: pointer;">
+                            <input type="file" name="cover_image" id="cover_image" accept="image/jpeg,image/png,image/jpg,image/webp" class="d-none">
+                            <div id="cover-placeholder">
+                                <i class="bi bi-image text-secondary mb-2" style="font-size: 2rem;"></i>
+                                <p class="text-muted small mb-0">{{ __('view.catalog.items.create.cover_drop_here') }}</p>
+                            </div>
+                            <div id="cover-preview" class="d-none position-relative">
+                                <img id="cover-preview-img" src="" alt="" class="rounded shadow-sm" style="max-height: 120px; max-width: 100%; object-fit: contain;">
+                                <span class="badge bg-primary position-absolute top-0 start-0 m-1">{{ __('app.catalog.item_image.cover') }}</span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary position-absolute bottom-0 end-0 m-1" id="cover-replace-btn">{{ __('view.catalog.items.create.replace_image') }}</button>
+                            </div>
+                        </div>
+                        <p id="cover-required-msg" class="text-danger small mt-1 d-none">{{ __('view.catalog.items.create.cover_required') }}</p>
+                        @error('cover_image')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <h5 class="mb-2">{{ __('view.catalog.items.create.gallery_label') }}
+                            <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
+                                data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
+                                data-bs-content="{{ __('view.catalog.items.create.gallery_help') }}">
+                                <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
+                            </button>
+                        </h5>
+                        <div id="gallery-drop-zone" class="upload-drop-zone rounded-3 border-2 border-dashed d-flex flex-column align-items-center justify-content-center p-4 text-center" style="min-height: 100px; border-color: #c8e6c9; background: #f1f8e9; cursor: pointer;">
+                            <input type="file" name="gallery_images[]" id="gallery_input" accept="image/jpeg,image/png,image/jpg,image/webp" class="d-none" multiple>
+                            <i class="bi bi-images text-secondary mb-2" style="font-size: 1.5rem;"></i>
+                            <p class="text-muted small mb-0">{{ __('view.catalog.items.create.gallery_drop_here') }}</p>
+                        </div>
+                        @error('gallery_images.*')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-4 rounded-3 p-3 mt-3" style="background-color: #e8f5e9;">
+                        <h5 class="mb-3">{{ __('view.catalog.items.create.images_preview_title') }}</h5>
+                        <div id="images-preview" class="d-flex flex-wrap gap-3 align-items-start">
+                            <p class="text-muted mb-0" id="images-preview-empty">{{ __('view.catalog.items.create.images_preview_empty') }}</p>
                         </div>
                     </div>
                     <div>
@@ -336,6 +362,199 @@
 
     @include('catalog.items.create-modals.tag-modal')
 
+    <script type="text/javascript">
+        (function() {
+            var coverLabel = @json(__('app.catalog.item_image.cover'));
+            var galleryLabel = @json(__('app.catalog.item_image.gallery'));
+            var removeLabel = @json(__('view.catalog.items.create.remove_image'));
+            var acceptTypes = 'image/jpeg,image/png,image/jpg,image/webp';
+
+            var galleryFiles = [];
+
+            function isImage(file) { return file && file.type && file.type.indexOf('image/') === 0; }
+
+            function setCoverFromFile(file) {
+                if (!isImage(file)) return;
+                var input = document.getElementById('cover_image');
+                if (input && typeof DataTransfer !== 'undefined') {
+                    var dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                }
+                var placeholder = document.getElementById('cover-placeholder');
+                var preview = document.getElementById('cover-preview');
+                var img = document.getElementById('cover-preview-img');
+                if (placeholder && preview && img) {
+                    placeholder.classList.add('d-none');
+                    preview.classList.remove('d-none');
+                    img.src = URL.createObjectURL(file);
+                }
+                renderPreviews();
+            }
+
+            function setupCover() {
+                var zone = document.getElementById('cover-drop-zone');
+                var input = document.getElementById('cover_image');
+                var replaceBtn = document.getElementById('cover-replace-btn');
+                if (!zone || !input) return;
+                zone.addEventListener('click', function(e) { if (!e.target.closest('#cover-replace-btn')) input.click(); });
+                input.addEventListener('change', function() {
+                    if (input.files && input.files[0]) setCoverFromFile(input.files[0]);
+                });
+                if (replaceBtn) replaceBtn.addEventListener('click', function(e) { e.stopPropagation(); input.click(); });
+                ['dragenter', 'dragover'].forEach(function(ev) {
+                    zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.add('upload-drop-zone--over'); });
+                });
+                ['dragleave', 'drop'].forEach(function(ev) {
+                    zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.remove('upload-drop-zone--over'); });
+                });
+                zone.addEventListener('drop', function(e) {
+                    var f = e.dataTransfer.files[0];
+                    if (isImage(f)) setCoverFromFile(f);
+                });
+            }
+
+            function addGalleryFiles(files) {
+                for (var i = 0; i < files.length; i++) {
+                    if (isImage(files[i])) galleryFiles.push(files[i]);
+                }
+                renderPreviews();
+            }
+
+            function removeGalleryIndex(i) {
+                galleryFiles.splice(i, 1);
+                renderPreviews();
+            }
+
+            function setupGallery() {
+                var zone = document.getElementById('gallery-drop-zone');
+                var input = document.getElementById('gallery_input');
+                if (!zone || !input) return;
+                zone.addEventListener('click', function() { input.click(); });
+                input.addEventListener('change', function() {
+                    if (input.files && input.files.length) {
+                        addGalleryFiles(Array.from(input.files));
+                        input.value = '';
+                    }
+                });
+                ['dragenter', 'dragover'].forEach(function(ev) {
+                    zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.add('upload-drop-zone--over'); });
+                });
+                ['dragleave', 'drop'].forEach(function(ev) {
+                    zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.remove('upload-drop-zone--over'); });
+                });
+                zone.addEventListener('drop', function(e) {
+                    addGalleryFiles(Array.from(e.dataTransfer.files));
+                });
+            }
+
+            function renderPreviews() {
+                var container = document.getElementById('images-preview');
+                var emptyEl = document.getElementById('images-preview-empty');
+                if (!container || !emptyEl) return;
+                var existing = container.querySelectorAll('.image-preview-thumb');
+                existing.forEach(function(el) { el.remove(); });
+                emptyEl.style.display = 'block';
+
+                var coverInput = document.getElementById('cover_image');
+                var coverFile = coverInput && coverInput.files && coverInput.files[0];
+                var hasAny = !!coverFile || galleryFiles.length > 0;
+                if (!hasAny) return;
+
+                function thumb(file, label, onRemove) {
+                    var wrap = document.createElement('div');
+                    wrap.className = 'image-preview-thumb position-relative d-inline-block rounded-2 overflow-hidden shadow-sm';
+                    wrap.style.width = '88px'; wrap.style.height = '88px';
+                    var img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.alt = '';
+                    img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
+                    wrap.appendChild(img);
+                    if (label) {
+                        var badge = document.createElement('span');
+                        badge.className = 'badge bg-primary position-absolute top-0 start-0 m-1';
+                        badge.style.fontSize = '10px';
+                        badge.textContent = label;
+                        wrap.appendChild(badge);
+                    }
+                    if (onRemove) {
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-danger btn-sm position-absolute bottom-0 end-0 m-1 p-1';
+                        btn.style.fontSize = '10px';
+                        btn.innerHTML = '&times;';
+                        btn.title = removeLabel;
+                        btn.addEventListener('click', onRemove);
+                        wrap.appendChild(btn);
+                    }
+                    container.appendChild(wrap);
+                    emptyEl.style.display = 'none';
+                }
+
+                if (coverFile) thumb(coverFile, coverLabel, null);
+                galleryFiles.forEach(function(file, i) {
+                    (function(idx) {
+                        thumb(file, galleryLabel, function() { removeGalleryIndex(idx); });
+                    })(i);
+                });
+            }
+
+            function injectGalleryInputs() {
+                var form = document.getElementById('item-create-form');
+                if (!form) return;
+                form.querySelectorAll('input[name="gallery_images[]"]').forEach(function(inp) { inp.remove(); });
+                galleryFiles.forEach(function(file) {
+                    if (typeof DataTransfer === 'undefined') return;
+                    var inp = document.createElement('input');
+                    inp.type = 'file';
+                    inp.name = 'gallery_images[]';
+                    inp.className = 'd-none';
+                    var dt = new DataTransfer();
+                    dt.items.add(file);
+                    inp.files = dt.files;
+                    form.appendChild(inp);
+                });
+            }
+
+            function validateAndSubmit(e) {
+                var form = document.getElementById('item-create-form');
+                var coverInput = document.getElementById('cover_image');
+                if (!coverInput || !coverInput.files || !coverInput.files[0]) {
+                    e.preventDefault();
+                    var zone = document.getElementById('cover-drop-zone');
+                    if (zone) {
+                        zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        zone.classList.add('upload-drop-zone--invalid');
+                        setTimeout(function() { zone.classList.remove('upload-drop-zone--invalid'); }, 2000);
+                    }
+                    var msg = document.getElementById('cover-required-msg');
+                    if (msg) msg.classList.remove('d-none');
+                    return false;
+                }
+                var msg = document.getElementById('cover-required-msg');
+                if (msg) msg.classList.add('d-none');
+                injectGalleryInputs();
+            }
+
+            function init() {
+                setupCover();
+                setupGallery();
+                var form = document.getElementById('item-create-form');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        validateAndSubmit(e);
+                    });
+                }
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+            else init();
+        })();
+    </script>
+    <style>
+        .upload-drop-zone--over { border-color: #81c784 !important; background: #c8e6c9 !important; }
+        .upload-drop-zone:hover { border-color: #a5d6a7 !important; }
+        .upload-drop-zone--invalid { border-color: #e57373 !important; background: #ffebee !important; }
+    </style>
     <script type="text/javascript">
         // Disponibiliza a rota para o componente checkContact.js
         window.checkContactRoute = "{{ route('check-contact') }}";
