@@ -3,7 +3,7 @@
 namespace App\Models\Catalog;
 
 use App\Models\Identity\Lock;
-use App\Models\Proprietary\Proprietary;
+use App\Models\Collaborator\Collaborator;
 use App\Models\Taxonomy\Tag;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,8 +32,8 @@ class Item extends Model
         'identification_code',
         'validation',
         'image',
-        'section_id',
-        'proprietary_id',
+        'category_id',
+        'collaborator_id',
     ];
 
     protected $table = 'items';
@@ -105,14 +105,14 @@ class Item extends Model
         return '';
     }
 
-    public function proprietary(): BelongsTo
+    public function collaborator(): BelongsTo
     {
-        return $this->belongsTo(Proprietary::class);
+        return $this->belongsTo(Collaborator::class);
     }
 
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Tag::class, 'tag_item', 'item_id', 'tag_id');
+        return $this->belongsToMany(Tag::class, 'item_tag', 'item_id', 'tag_id');
     }
 
     public function composedOf(): BelongsToMany
@@ -130,9 +130,9 @@ class Item extends Model
         return $this->hasMany(Extra::class);
     }
 
-    public function section(): BelongsTo
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(Section::class);
+        return $this->belongsTo(ItemCategory::class);
     }
 
     public function itemComponents(): HasMany
@@ -140,9 +140,9 @@ class Item extends Model
         return $this->hasMany(ItemComponent::class);
     }
 
-    public function tagItems(): HasMany
+    public function itemTags(): HasMany
     {
-        return $this->hasMany(TagItem::class);
+        return $this->hasMany(ItemTag::class);
     }
 
     public function locks(): MorphMany

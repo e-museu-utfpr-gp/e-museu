@@ -34,8 +34,8 @@
             <div class="collapse d-md-block" id="sidebarCollapse">
                 <ul class="nav nav-pills flex-column mb-auto">
                     <li>
-                        <a href="{{ route('admin.sections.index') }}"
-                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.sections')) active @endif" aria-current="page">
+                        <a href="{{ route('admin.item-categories.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.item-categories')) active @endif" aria-current="page">
                             {{ __('view.admin.layout.nav.item_categories') }}
                         </a>
                     </li>
@@ -46,15 +46,15 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.components.index') }}"
-                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.components')) active @endif" aria-current="page">
+                        <a href="{{ route('admin.item-components.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.item-components')) active @endif" aria-current="page">
                             {{ __('view.admin.layout.nav.item_components') }}
                         </a>
                     </li>
                     <hr/>
                     <li>
-                        <a href="{{ route('admin.categories.index') }}"
-                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.categories')) active @endif" aria-current="page">
+                        <a href="{{ route('admin.tag-categories.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.tag-categories')) active @endif" aria-current="page">
                             {{ __('view.admin.layout.nav.tag_categories') }}
                         </a>
                     </li>
@@ -79,14 +79,14 @@
                     </li>
                     <hr/>
                     <li>
-                        <a href="{{ route('admin.proprietaries.index') }}"
-                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.proprietaries')) active @endif" aria-current="page">
+                        <a href="{{ route('admin.collaborators.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.collaborators')) active @endif" aria-current="page">
                             {{ __('view.admin.layout.nav.collaborators') }}
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.users.index') }}"
-                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.users')) active @endif" aria-current="page">
+                        <a href="{{ route('admin.admins.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.admins')) active @endif" aria-current="page">
                             {{ __('view.admin.layout.nav.administrators') }}
                         </a>
                     </li>

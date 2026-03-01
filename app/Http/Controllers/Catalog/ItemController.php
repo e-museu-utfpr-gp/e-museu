@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\ItemContributionValidator;
 use App\Http\Requests\Catalog\SingleExtraRequest;
 use App\Models\Catalog\Item;
-use App\Models\Catalog\Section;
-use App\Models\Taxonomy\Category;
+use App\Models\Catalog\ItemCategory;
+use App\Models\Taxonomy\TagCategory;
 use App\Services\Catalog\ItemContributionService;
 use App\Services\Catalog\ItemIndexQueryBuilder;
 use Illuminate\Http\JsonResponse;
@@ -40,8 +40,8 @@ class ItemController extends Controller
 
     public function create(): View
     {
-        $categories = Category::all();
-        $sections = Section::all();
+        $categories = TagCategory::all();
+        $sections = ItemCategory::all();
 
         return view('catalog.items.create', compact('categories', 'sections'));
     }
@@ -51,7 +51,7 @@ class ItemController extends Controller
         $validatedData = $this->itemContributionValidator->validateStore($request);
 
         return $this->itemContributionService->store(
-            $validatedData['proprietary'],
+            $validatedData['collaborator'],
             $validatedData['item'],
             $validatedData['tags'],
             $validatedData['extras'],
@@ -63,8 +63,8 @@ class ItemController extends Controller
     public function show(string $id): View
     {
         $item = Item::findOrFail($id);
-        $sections = Section::get();
-        $categories = Category::get();
+        $sections = ItemCategory::get();
+        $categories = TagCategory::get();
 
         return view('catalog.items.show', compact('item', 'sections', 'categories'));
     }
@@ -79,7 +79,7 @@ class ItemController extends Controller
         $validatedData = $this->itemContributionValidator->validateSingleExtra($request);
 
         return $this->itemContributionService->storeSingleExtra(
-            $validatedData['proprietary'],
+            $validatedData['collaborator'],
             $validatedData['extra']
         );
     }
@@ -88,7 +88,7 @@ class ItemController extends Controller
     {
         $section = (string) ($request->input('section') ?? '');
 
-        $data = Item::where('section_id', 'LIKE', $section)
+        $data = Item::where('category_id', 'LIKE', $section)
             ->orderBy('name', 'asc')
             ->get();
 

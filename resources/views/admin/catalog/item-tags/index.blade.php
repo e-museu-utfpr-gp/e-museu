@@ -62,14 +62,14 @@
                                 <td>{{ $itemTag->item_name }}</td>
                                 <td>{{ $itemTag->tag_name }}</td>
                                 <td>
-                                    @if ($itemTag->tag_item_validation == 1)
+                                    @if ($itemTag->item_tag_validation == 1)
                                         {{ __('view.admin.catalog.item_tags.index.yes') }}
                                     @else
                                         {{ __('view.admin.catalog.item_tags.index.no') }}
                                     @endif
                                 </td>
-                                <td>{{ date('d-m-Y H:i:s', strtotime($itemTag->tag_item_created)) }}</td>
-                                <td>{{ date('d-m-Y H:i:s', strtotime($itemTag->tag_item_updated)) }}</td>
+                                <td>{{ date('d-m-Y H:i:s', strtotime($itemTag->item_tag_created)) }}</td>
+                                <td>{{ date('d-m-Y H:i:s', strtotime($itemTag->item_tag_updated)) }}</td>
                                 <td>
                                     <div class="d-flex justify-content-center align-items-center">
                                         <a href="{{ route('admin.item-tags.show', $itemTag->id) }}" type="button"

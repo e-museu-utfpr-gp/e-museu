@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\CollaboratorRole;
 use App\Http\Controllers\Controller;
-use App\Models\Proprietary\Proprietary;
+use App\Models\Collaborator\Collaborator;
 use Illuminate\Contracts\Validation\Validator as ValidatorContract;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Validator;
@@ -36,7 +37,7 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:proprietaries,contact'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:collaborators,contact'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
     }
@@ -46,12 +47,12 @@ class RegisterController extends Controller
      *
      * @param  array<string, mixed>  $data
      */
-    protected function create(array $data): Proprietary
+    protected function create(array $data): Collaborator
     {
-        return Proprietary::create([
+        return Collaborator::create([
             'full_name' => $data['name'],
             'contact' => $data['email'],
-            'is_admin' => true,
+            'role' => CollaboratorRole::INTERNAL,
         ]);
     }
 }

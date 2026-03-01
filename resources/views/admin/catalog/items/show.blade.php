@@ -97,27 +97,27 @@
                             </div>
                         </div>
                         <div class="card mb-3">
-                            <h5 class="card-header">{{ __('view.admin.catalog.items.show.section') }}</h5>
+                            <h5 class="card-header">{{ __('view.admin.catalog.items.show.item_category') }}</h5>
                             <div class="card-body">
                                 <strong>{{ __('view.admin.catalog.items.show.id') }}: </strong>
-                                <p class="ms-3">{{ $item->section->id }}</p>
+                                <p class="ms-3">{{ $item->category?->id }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.name') }}: </strong>
-                                <p class="card-text">{{ $item->section->name }}</p>
+                                <p class="card-text">{{ $item->category?->name }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.created_at') }}: </strong>
                                 <p class="ms-2">{{ date('d-m-Y', strtotime($item->created_at)) }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.updated_at') }}: </strong>
                                 <p class="ms-2">{{ date('d-m-Y', strtotime($item->updated_at)) }}</p>
                                 <div class="d-flex">
-                                    <a href="{{ route('admin.sections.show', $item->section->id) }}" type="button"
+                                    <a href="{{ route('admin.item-categories.show', $item->category?->id) }}" type="button"
                                         class="btn btn-primary me-1"><i class="bi bi-eye-fill"></i> {{ __('view.admin.catalog.items.show.view') }}</a>
-                                    <a href="{{ route('admin.sections.edit', $item->section->id) }}" type="button"
+                                    <a href="{{ route('admin.item-categories.edit', $item->category?->id) }}" type="button"
                                         class="btn btn-warning me-1"><i class="bi bi-pencil-fill"></i> {{ __('view.admin.catalog.items.show.edit') }}</a>
-                                    <form action="{{ route('admin.sections.destroy', $item->section->id) }}"
+                                    <form action="{{ route('admin.item-categories.destroy', $item->category?->id) }}"
                                         method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button id="deleteSectionButton" class="deleteSectionButton btn btn-danger"
-                                            type="submit" data-confirm-message="{{ __('view.admin.catalog.sections.delete_confirm') }}"><i class="bi bi-trash-fill"></i> {{ __('view.admin.catalog.items.show.delete') }}
+                                        <button id="deleteItemCategoryButton" class="deleteItemCategoryButton btn btn-danger"
+                                            type="submit" data-confirm-message="{{ __('view.admin.catalog.item_categories.delete_confirm') }}"><i class="bi bi-trash-fill"></i> {{ __('view.admin.catalog.items.show.delete') }}
                                     </form>
                                 </div>
                             </div>
@@ -126,36 +126,36 @@
                             <h5 class="card-header">{{ __('view.admin.catalog.items.show.collaborator') }}</h5>
                             <div class="card-body">
                                 <strong>{{ __('view.admin.catalog.items.show.id') }}: </strong>
-                                <p class="ms-3">{{ $item->proprietary->id }}</p>
+                                <p class="ms-3">{{ $item->collaborator->id }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.full_name') }}: </strong>
-                                <p class="ms-3">{{ $item->proprietary->full_name }}</p>
+                                <p class="ms-3">{{ $item->collaborator->full_name }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.contact') }}: </strong>
-                                <p class="ms-3">{{ $item->proprietary->contact }}</p>
+                                <p class="ms-3">{{ $item->collaborator->contact }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.blocked') }}: </strong>
                                 <p class="ms-3">
-                                    @if ($item->proprietary->blocked == 1)
+                                    @if ($item->collaborator->blocked == 1)
                                         {{ __('view.admin.catalog.items.show.yes') }}
                                     @else
                                         {{ __('view.admin.catalog.items.show.no') }}
                                     @endif
                                 </p>
                                 <strong>{{ __('view.admin.catalog.items.show.created_at') }}: </strong>
-                                <p class="ms-3">{{ date('d-m-Y', strtotime($item->proprietary->created_at)) }}</p>
+                                <p class="ms-3">{{ date('d-m-Y', strtotime($item->collaborator->created_at)) }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.updated_at') }}: </strong>
-                                <p class="ms-3">{{ date('d-m-Y', strtotime($item->proprietary->updated_at)) }}</p>
+                                <p class="ms-3">{{ date('d-m-Y', strtotime($item->collaborator->updated_at)) }}</p>
                                 <div class="d-flex">
-                                    <a href="{{ route('admin.proprietaries.show', $item->proprietary->id) }}"
+                                    <a href="{{ route('admin.collaborators.show', $item->collaborator->id) }}"
                                         type="button" class="btn btn-primary me-1"><i class="bi bi-eye-fill"></i>
                                         {{ __('view.admin.catalog.items.show.view') }}</a>
-                                    <a href="{{ route('admin.proprietaries.edit', $item->proprietary->id) }}"
+                                    <a href="{{ route('admin.collaborators.edit', $item->collaborator->id) }}"
                                         type="button" class="btn btn-warning me-1"><i class="bi bi-pencil-fill"></i>
                                         {{ __('view.admin.catalog.items.show.edit') }}</a>
-                                    <form action="{{ route('admin.proprietaries.destroy', $item->proprietary->id) }}"
+                                    <form action="{{ route('admin.collaborators.destroy', $item->collaborator->id) }}"
                                         method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button id="deleteProprietaryButton"
-                                            class="deleteProprietaryButton btn btn-danger" type="submit"><i
+                                        <button id="deleteCollaboratorButton"
+                                            class="deleteCollaboratorButton btn btn-danger" type="submit"><i
                                                 class="bi bi-trash-fill"></i> {{ __('view.admin.catalog.items.show.delete') }}
                                     </form>
                                 </div>
@@ -176,7 +176,7 @@
                         <div class="card mb-3">
                             <h5 class="card-header d-flex justify-content-between">{{ __('view.admin.catalog.items.show.extra_info') }} <a type="button"
                                     class="btn btn-success"
-                                    href="{{ route('admin.extras.create', ['id' => $item->id, 'section' => $item->section]) }}"><i
+                                    href="{{ route('admin.extras.create', ['id' => $item->id, 'section' => $item->category?->id]) }}"><i
                                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.items.show.add_extra') }}</a></h5>
                             <div class="card-body">
                                 <ul class="list-group list-group-flush">
@@ -197,7 +197,7 @@
                                             <strong>{{ __('view.admin.catalog.items.show.item_label') }}: </strong>
                                             <p class="ms-3">{{ $extra->item->name }}</p>
                                             <strong>{{ __('view.admin.catalog.items.show.collaborator') }}: </strong>
-                                            <p class="ms-3">{{ $extra->proprietary->full_name }}</p>
+                                            <p class="ms-3">{{ $extra->collaborator->full_name }}</p>
                                             <strong>{{ __('view.admin.catalog.items.show.created_at') }}: </strong>
                                             <p class="ms-3">{{ date('d-m-Y', strtotime($extra->created_at)) }}</p>
                                             <strong>{{ __('view.admin.catalog.items.show.updated_at') }}: </strong>
@@ -227,11 +227,11 @@
                         <div class="card mb-3">
                             <h5 class="card-header d-flex justify-content-between">{{ __('view.admin.catalog.items.show.related_tags') }}<a type="button"
                                     class="btn btn-success"
-                                    href="{{ route('admin.item-tags.create', ['id' => $item->id, 'section' => $item->section]) }}"><i
+                                    href="{{ route('admin.item-tags.create', ['id' => $item->id, 'section' => $item->category?->id]) }}"><i
                                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.items.show.add_tag') }}</a></h5>
                             <div class="card-body">
                                 <ul class="list-group list-group-flush">
-                                    @foreach ($item->tagItems as $tagItem)
+                                    @foreach ($item->itemTags as $tagItem)
                                         <li class="list-group-item">
                                             <strong>{{ __('view.admin.catalog.items.show.id') }}: </strong>
                                             <p class="ms-3">{{ $tagItem->id }}</p>
@@ -282,7 +282,7 @@
                         <div class="card mb-3">
                             <h5 class="card-header d-flex justify-content-between">{{ __('view.admin.catalog.items.show.related_components') }}<a
                                     type="button" class="btn btn-success"
-                                    href="{{ route('admin.components.create', ['id' => $item->id, 'section' => $item->section]) }}"><i
+                                    href="{{ route('admin.item-components.create', ['id' => $item->id, 'section' => $item->category?->id]) }}"><i
                                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.items.show.add_component') }}</a></h5>
                             <div class="card-body">
                                 <ul class="list-group list-group-flush">
@@ -309,17 +309,17 @@
                                             <p class="ms-3">
                                                 {{ date('d-m-Y H:i:s', strtotime($itemComponent->updated_at)) }}</p>
                                             <div class="d-flex">
-                                                <a href="{{ route('admin.components.show', $itemComponent->id) }}"
+                                                <a href="{{ route('admin.item-components.show', $itemComponent->id) }}"
                                                     type="button" class="btn btn-primary me-1"><i
                                                         class="bi bi-eye-fill"></i> {{ __('view.admin.catalog.items.show.view') }}</a>
-                                                <form action="{{ route('admin.components.update', $itemComponent->id) }}"
+                                                <form action="{{ route('admin.item-components.update', $itemComponent->id) }}"
                                                     method="POST">
                                                     @csrf
                                                     @method('PATCH')
                                                     <button type="submit" class="btn btn-warning me-1"><i
                                                             class="bi bi-check2-circle h6"></i> {{ __('view.admin.catalog.items.show.validate_invalidate') }}</a>
                                                 </form>
-                                                <form action="{{ route('admin.components.destroy', $itemComponent->id) }}"
+                                                <form action="{{ route('admin.item-components.destroy', $itemComponent->id) }}"
                                                     method="POST">
                                                     @csrf
                                                     @method('DELETE')

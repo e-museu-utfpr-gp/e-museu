@@ -45,7 +45,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        @error('section_id')
+                        @error('category_id')
                             <div class="invalid-feedback"> {{ $message }} </div>
                         @enderror
                     </div>

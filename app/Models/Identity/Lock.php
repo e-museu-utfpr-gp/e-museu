@@ -18,7 +18,7 @@ class Lock extends Model
         'lockable_id',
         'lockable_type',
         'expiry_date',
-        'user_id',
+        'admin_id',
     ];
 
     protected $table = 'locks';
@@ -28,9 +28,9 @@ class Lock extends Model
         return $this->morphTo();
     }
 
-    public function user(): BelongsTo
+    public function admin(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Admin::class);
     }
 
     /**
@@ -73,6 +73,6 @@ class Lock extends Model
             return false;
         }
 
-        return (string) $lock->user_id !== (string) $user->getAuthIdentifier();
+        return (string) $lock->admin_id !== (string) $user->getAuthIdentifier();
     }
 }

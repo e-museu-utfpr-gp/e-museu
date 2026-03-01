@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'categories' => [
+    'tag_categories' => [
         'delete_confirm' => 'Tem certeza que deseja excluir a categoria e todas as vezes que é referenciada em outros registros?',
         'index' => [
             'title' => 'Listar categorias de etiqueta',
             'heading' => 'Categorias de Etiqueta - :count Cadastrados',
-            'add_category' => 'Adicionar Categoria de Etiqueta',
+            'add_tag_category' => 'Adicionar Categoria de Etiqueta',
             'search_placeholder' => 'Buscar',
             'search_button' => 'Buscar',
             'id' => 'Id',

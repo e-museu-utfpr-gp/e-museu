@@ -97,7 +97,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'redirectIfAuthenticated' => \App\Http\Middleware\Auth\RedirectIfAuthenticated::class,
             'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
             'validate.item' => \App\Http\Middleware\Catalog\ValidateItem::class,
-            'validate.proprietary' => \App\Http\Middleware\Proprietary\ValidateProprietary::class,
+            'validate.collaborator' => \App\Http\Middleware\Collaborator\ValidateCollaborator::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
