@@ -31,20 +31,11 @@ class SingleComponentRequest extends FormRequest
                 'exists:items,id',
                 function (string $attribute, mixed $value, Closure $fail): void {
                     if ((string) request('item_id') === (string) request('component_id')) {
-                        $fail('O item e o componente precisam ser diferentes.');
+                        $fail(__('validation.catalog.item_component_different'));
                     }
                 },
             ],
             'validation' => 'sometimes|boolean',
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'item_id.required' => 'O campo id do item principal é obrigatório.',
-            'component_id.required' => 'O campo id do componente é obrigatório.',
-            'validation.required' => 'O campo validação é obrigatório.',
         ];
     }
 }

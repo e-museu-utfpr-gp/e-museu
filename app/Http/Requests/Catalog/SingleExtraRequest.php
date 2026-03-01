@@ -28,11 +28,4 @@ class SingleExtraRequest extends FormRequest
             'validation' => 'sometimes|boolean',
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'info.required' => 'O campo curiosidade é obrigatório.',
-        ];
-    }
 }

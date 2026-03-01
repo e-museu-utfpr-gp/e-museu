@@ -1,18 +1,24 @@
 <?php
 
+/*
+| Laravel framework language file. Keys and structure are defined by the framework.
+| Do not rename keys. Keep this file in sync with the same file in other locales (e.g. en).
+*/
+
 return [
 
     /*
     |--------------------------------------------------------------------------
-    | Password Reset Language Lines
+    | Password reset (framework)
     |--------------------------------------------------------------------------
     |
-    | The following language lines are the default lines which match reasons
-    | that are given by the password broker for a password update attempt
-    | has failed, such as for an invalid token or invalid new password.
+    | Password broker messages: reset (success), sent (link emailed), throttled
+    | (wait before retry), token (invalid token), user (email not found).
+    | The "password" key is used for password confirmation validation.
     |
     */
 
+    'password' => 'The password confirmation must match and be at least six characters.',
     'reset' => 'Your password has been reset.',
     'sent' => 'We have emailed your password reset link.',
     'throttled' => 'Please wait before retrying.',

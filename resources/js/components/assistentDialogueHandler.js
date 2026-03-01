@@ -1,18 +1,27 @@
+import $ from 'jquery';
+import i18next from 'i18next';
+import { getHomeDialogues } from './assistant-dialogues/homeDialogue';
+import { getAboutDialogues } from './assistant-dialogues/aboutDialogue';
+import { getCreateDialogues } from './assistant-dialogues/createDialogue';
+import { getIndexDialogues } from './assistant-dialogues/indexDialogue';
+import { getShowDialogues } from './assistant-dialogues/showDialogue';
+
 $(document).ready(function () {
-    let dialogues = window.homeDialogues;
-
     const path = window.location.pathname;
+    let getDialogues = getHomeDialogues;
     if (path === '/about') {
-        dialogues = window.aboutDialogues || window.homeDialogues;
+        getDialogues = getAboutDialogues;
     } else if (path.includes('/items/create')) {
-        dialogues = window.createDialogues || window.homeDialogues;
+        getDialogues = getCreateDialogues;
     } else if (path.includes('/items') && !path.includes('/create')) {
-        dialogues = window.indexDialogues || window.homeDialogues;
+        if (path.match(/^\/items\/\d+/)) {
+            getDialogues = getShowDialogues;
+        } else {
+            getDialogues = getIndexDialogues;
+        }
     }
 
-    if (!dialogues) {
-        return;
-    }
+    const dialogues = getDialogues(i18next.t.bind(i18next));
 
     function displayDialogue(nodeId) {
         const node = dialogues.find(d => d.id === nodeId);
@@ -34,7 +43,7 @@ $(document).ready(function () {
                 } else if (choice.url) {
                     window.location.href = choice.url;
                 } else {
-                    $('#dialogue').text('Goodbye!');
+                    $('#dialogue').text(i18next.t('assistant.goodbye'));
                     $('#choices').empty();
                 }
             });

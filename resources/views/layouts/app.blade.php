@@ -28,39 +28,39 @@
             </div>
             <button class="button navbar-toggler p-1 nav-link" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
+                aria-label="{{ __('view.layout.toggle_navigation') }}">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse flex-grow-0 mt-2" id="navbarSupportedContent">
                 <ul class="navbar-nav mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'home') explore-button @endif"
-                            href="{{ route('home') }}">PÁGINA INICIAL</a>
+                            href="{{ route('home') }}">{{ __('view.layout.nav.home') }}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'items.index' || Route::currentRouteName() == 'items.show') explore-button @endif"
-                            href="{{ route('items.index') }}"><i class="bi bi-search h6 me-1"></i>EXPLORAR</a>
+                            href="{{ route('items.index') }}"><i class="bi bi-search h6 me-1"></i>{{ __('view.layout.nav.explore') }}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'items.create') explore-button @endif"
-                            href={{ route('items.create') }}>COLABORAÇÃO</a>
+                            href="{{ route('items.create') }}">{{ __('view.layout.nav.contribute') }}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'about') explore-button @endif"
-                            href={{ route('about') }}>SOBRE</a>
+                            href="{{ route('about') }}">{{ __('view.layout.nav.about') }}</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
     @if (request()->routeIs('items.index'))
-        @include('items.explore-menu')
+        @include('catalog.items.explore-menu')
     @endif
     @include('assistent.assistent')
     @yield('content')
     <div>
         <footer class="d-md-flex custom-footer px-md-5 justify-content-between fixed align-items-center  py-5 mt-2">
-            <p class="custom-nav mb-0 d-flex justify-content-center col-md-4"><strong class="me-1">Contato:
+            <p class="custom-nav mb-0 d-flex justify-content-center col-md-4"><strong class="me-1">{{ __('view.layout.footer.contact') }}
                 </strong>emuseuvirtual@gmail.com</p>
 
             <a href="/"
@@ -70,7 +70,7 @@
                 <img class="tecnolixo-footer-logo" src="/img/tecnolixo-footer-logo.png" alt="">
             </a>
 
-            <p class="col-md-4 mb-0 d-flex justify-content-center">2024 - UTFPR - Unicentro</p>
+            <p class="col-md-4 mb-0 d-flex justify-content-center">{{ __('view.layout.footer.copyright') }}</p>
         </footer>
     </div>
 </body>

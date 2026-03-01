@@ -1,15 +1,20 @@
 <?php
 
+/*
+| Laravel framework language file. Keys and structure are defined by the framework.
+| Do not rename keys. Keep this file in sync with the same file in other locales (e.g. en).
+*/
+
 return [
 
     /*
     |--------------------------------------------------------------------------
-    | Authentication Language Lines
+    | Authentication (framework)
     |--------------------------------------------------------------------------
     |
-    | The following language lines are used during authentication for various
-    | messages that we need to display to the user. You are free to modify
-    | these language lines according to your application's requirements.
+    | Messages shown by Laravel's authentication component. Keys: failed (invalid
+    | credentials), password (incorrect password), throttle (too many login
+    | attempts). Placeholder: :seconds.
     |
     */
 

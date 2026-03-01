@@ -1,0 +1,78 @@
+{
+  "warnings": {
+    "delete_item_tag": "Tem certeza que deseja desassociar o item da etiqueta?",
+    "delete_extra": "Tem certeza que deseja excluir a curiosidade extra?",
+    "delete_category": "Tem certeza que deseja excluir a categoria e todas as vezes que é referenciada em outros registros?",
+    "delete_section": "Tem certeza que deseja excluir a categoria de item e todas as vezes que é referenciada em outros registros?",
+    "delete_item": "Tem certeza que deseja excluir o item e todas as vezes que é referenciado em outros registros?",
+    "delete_user": "Tem certeza que deseja excluir o administrador?",
+    "delete_component": "Tem certeza que deseja desassociar o item do componente?",
+    "delete_contribution": "Tem certeza que deseja excluir a contribuição?",
+    "delete_tag": "Tem certeza que deseja excluir a etiqueta e todas as vezes que é referenciada em outros registros?",
+    "delete_proprietary": "Tem certeza que deseja excluir o proprietário e todas as vezes que é referenciado em outros registros?"
+  },
+  "assistant": {
+    "goodbye": "Até logo!",
+    "greeting": "Olá, sou Ada, sua assistente virtual. Como posso te ajudar?",
+    "show_options": "Disponibilizar opções",
+    "what_help": "O que gostaria de saber?",
+    "about_page": "Saber mais sobre a página atual",
+    "go_home": "Ir para a página inicial do museu >",
+    "explore_items": "Explorar itens do museu >",
+    "explore_other_items": "Explorar outros itens do museu >",
+    "contribute": "Contribuir com o museu >",
+    "contribute_question": "Contribuir com o museu? >",
+    "about_museum": "Saber mais sobre o museu >",
+    "contact": "Entrar em contato com o museu >",
+    "back_to_options": "Voltar para as opções",
+    "contact_email": "Caso tenha alguma dúvida ou outros assuntos a tratar conosco, envie um email para emuseuvirtual@gmail.com.",
+    "home": {
+      "page_intro": "Nesta página te contamos um pouco sobre o nosso projeto de museu para itens eletrônicos. E na parte de baixo estão disponibilizados algumas opções de páginas para navegar. Dê uma olhada!"
+    },
+    "about": {
+      "page_intro": "Nesta página contaremos um pouco mais sobre o nosso projeto e as entidades envolvidas na criação do E-museu."
+    },
+    "create": {
+      "page_intro": "Com está página você pode compartilhar as informações de um item seu que ainda não temos no nosso museu. Por favor, esteja ciente de que este item estará disponibilizado no nosso museu para ser visualizado por outras pessoas.",
+      "instructions": "Instruções de cadastro",
+      "email_and_name": "Sobre o envio de email e nome completo",
+      "remove_item": "Gostaria de remover um item do museu",
+      "other_questions": "Outras dúvidas",
+      "instructions_text": "Acima de cada campo haverá um ícone em laranja com um 'i' no interior. Ao selecionar o ícone, instruções de cadastro para o campo específico serão disponibilizados. Por favor, leia as instruções antes de inserir os dados. Note que, os títulos de campo com um '*' são obrigatórios. Após inserir as informações, confira se cumpriu os requisitos e selecione 'enviar'!",
+      "email_name_text": "Precisamos de seu email para podermos entrar em contato, caso algum imprevisto ocorra. O seu nome completo será usado para podermos creditar a sua contribuição com nosso museu. Precisamos apenas destas informações, nenhum tipo de senha é necessária!",
+      "remove_item_text": "Caso queira remover algum item que tenha cadastrado no nosso museu, por favor, envie um email para emuseuvirtual@gmail.com, com do email que utilizou para o cadastro do item."
+    },
+    "index": {
+      "page_intro": "Esta é a página em que encontrará todos os itens disponíveis no nosso museu. Com a ajuda do sistema de busca, filtragem por etiquetas e organização por categoria, poderá encontrar todo tipo de item com bastante facilidade. Selecione um item para mais detalhes especifícos!",
+      "by_category": "Organização por categorias",
+      "search": "Sistema de busca",
+      "by_tags": "Filtragem por etiquetas",
+      "categories_text": "Os itens do nosso museu são organizados por categoria. Ao selecionar uma categoria, na parte superior da página, você estará fazendo uma busca por todos os itens pertencentes a categoria escolhida.",
+      "search_text": "A barra de busca se localiza na parte superior da página. Lá, você pode pesquisar algum item pelo nome. Se deseja uma pesquisa mais minunciosa, selecione uma categoria, logo a direita da barra de pesquisa, para assim então, buscar por um item dentro da categoria escolhida.",
+      "tags_text": "Além das categorias, alguns itens também recebem uma ou mais etiquetas, que têm o propósito de organizar com mais precisão os itens do nosso museu. À esquerda do conteúdo central da página, ou em um botão flutuante no canto inferior esquerdo se estiver usando um aparelho mobile, você econtrará as opções de filtragem por etiqueta, ordenação por data e ordem alfabética. Com este sistema, você poderá filtrar itens por marca e série!"
+    },
+    "show": {
+      "page_intro": "Nesta página você pode conferir todas as informações disponíveis sobre o item específico. Saiba mais sobre a aparência, história, data de lançamento, detalhes técnicos, linhas do tempo, categoria, componentes, etiquetas associadas e informações extra deste item!",
+      "appearance": "Aparência",
+      "release_date": "Data de lançamento",
+      "category": "Categoria",
+      "tags_associated": "Etiquetas associadas",
+      "short_description": "Descrição breve",
+      "history": "História",
+      "timelines": "Linhas do tempo",
+      "technical_details": "Detalhes técnicos",
+      "components": "Componentes",
+      "extra_info": "Informações extra",
+      "appearance_text": "Você pode conferir a aparência do item através da imagem na parte superior da página. Você também pode aproximar a imagem um pouco mais, ao selecioná-la.",
+      "release_date_text": "A data de lançamento compreende o dia, mês e ano em que o item foi disponibilizado para uso.",
+      "category_text": "Todo item faz parte de apenas uma categoria. Selecionando a categoria, você pode navegar para uma página listando todos os itens que fazem parte dela.",
+      "tags_text": "Além das categorias, alguns itens também recebem uma ou mais etiquetas, que têm o propósito de organizar com mais precisão os itens do nosso museu. Com este sistema, podemos filtrar itens por marca, série, e muito mais! Selecione uma etiqueta para buscar mais itens pertencentes a ela.",
+      "short_description_text": "A descrição breve apresenta o item de uma forma concisa, podendo considerar aspectos físicos, e também sua funcionalidade.",
+      "history_text": "Nessa seção do museu contaremos mais detalhadamente a história do item. Tudo o que pudemos juntar de informações interessantes sobre sua criação e funcionamento colocaremos aqui! Caso tenha alguma informação que não tenha encontrado nesta página, e que gostaria de compartilhar conosco, por favor, envie uma informação extra utilizando o botão acima da imagem do item!",
+      "timelines_text": "Através das linhas do tempo você pode acompanhar a evolução de itens pertencentes a mesma etiqueta de categoria 'série'. Você pode também visualizar o item com mais detalhes selecionando a opção 'mais detalhes'.",
+      "technical_details_text": "Os detalhes técnicos apresentam características mais minunciosas sobre a aparência, componentes internos e especificações do item.",
+      "components_text": "Dependendo do item, ele pode ser composto por outros itens do museu. Selecionando um deles, você navega para a página do item.",
+      "extra_info_text": "Todas as informações que não se encaixarem nas outras seções, ou que foram adicionados por outros colaboradores, serão agrupados como 'informações extra'. Se tiver alguma informação que queria compartilhar conosco sobre o item da página, por favor, nos envie através do botão no topo da página!"
+    }
+  }
+}

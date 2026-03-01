@@ -35,16 +35,4 @@ class NewProprietaryRequest extends FormRequest
             'is_admin' => 'sometimes|boolean',
         ];
     }
-
-    /**
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'full_name.required' => 'O campo Nome Completo é obrigatório.',
-            'contact.required' => 'O campo Email é obrigatório.',
-            'is_admin' => 'O campo Administrador é obrigatório.',
-        ];
-    }
 }

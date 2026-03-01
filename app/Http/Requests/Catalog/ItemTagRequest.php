@@ -31,20 +31,11 @@ class ItemTagRequest extends FormRequest
                 'exists:tags,id',
                 function (string $attribute, mixed $value, Closure $fail): void {
                     if ((string) request('item_id') === (string) request('tag_id')) {
-                        $fail('O item e a etiqueta precisam ser diferentes.');
+                        $fail(__('validation.catalog.item_tag_different'));
                     }
                 },
             ],
             'validation' => 'required|boolean',
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'item_id.required' => 'O campo id do item principal é obrigatório.',
-            'tag_id.required' => 'O campo id da etiqueta é obrigatório.',
-            'validation.required' => 'O campo validação é obrigatório.',
         ];
     }
 }

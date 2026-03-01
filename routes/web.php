@@ -1,20 +1,20 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Catalog\AdminComponentController;
-use App\Http\Controllers\Catalog\AdminExtraController;
-use App\Http\Controllers\Catalog\AdminItemController;
-use App\Http\Controllers\Catalog\AdminItemTagController;
-use App\Http\Controllers\Catalog\AdminSectionController;
+use App\Http\Controllers\Admin\Auth\AdminLoginController;
+use App\Http\Controllers\Admin\Catalog\AdminComponentController;
+use App\Http\Controllers\Admin\Catalog\AdminExtraController;
+use App\Http\Controllers\Admin\Catalog\AdminItemController;
+use App\Http\Controllers\Admin\Catalog\AdminItemTagController;
+use App\Http\Controllers\Admin\Catalog\AdminSectionController;
 use App\Http\Controllers\Catalog\ItemController;
 use App\Http\Controllers\Catalog\QueryController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Identity\AdminUserController;
-use App\Http\Controllers\Identity\ReleaseLockController;
-use App\Http\Controllers\Proprietary\AdminProprietaryController;
+use App\Http\Controllers\Admin\Identity\AdminUserController;
+use App\Http\Controllers\Admin\Identity\ReleaseLockController;
+use App\Http\Controllers\Admin\Proprietary\AdminProprietaryController;
 use App\Http\Controllers\StorageProxyController;
-use App\Http\Controllers\Taxonomy\AdminCategoryController;
-use App\Http\Controllers\Taxonomy\AdminTagController;
+use App\Http\Controllers\Admin\Taxonomy\AdminCategoryController;
+use App\Http\Controllers\Admin\Taxonomy\AdminTagController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/storage/{path}', StorageProxyController::class)->where('path', '.*')->name('storage.proxy');
@@ -74,7 +74,7 @@ Route::group(['middleware' => 'auth'], function () {
 });
 
 Route::middleware('redirectIfAuthenticated')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login']);
+    Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AdminLoginController::class, 'login']);
 });
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout')->middleware('auth');
