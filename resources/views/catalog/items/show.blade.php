@@ -46,10 +46,18 @@
                     </div>
                     @if ($item->image_url)
                         <div style="overflow:hidden;">
-                            <img src="{{ $item->image_url }}" class="card-img-top p-1 clickable-image"
+                            <img src="{{ $item->image_url }}" class="card-img-top p-1 clickable-image myImg"
                                 style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover"
                                 alt="{{ __('view.catalog.items.show.image_alt') }}">
                         </div>
+                        @if ($item->images->count() > 1)
+                            <div class="d-flex flex-wrap gap-1 p-1">
+                                @foreach ($item->images as $img)
+                                    <img src="{{ $img->image_url }}" class="clickable-image myImg rounded" alt=""
+                                        style="width: 48px; height: 48px; object-fit: cover;">
+                                @endforeach
+                            </div>
+                        @endif
                     @endif
                     <div class="card-body">
                         <div class="row">

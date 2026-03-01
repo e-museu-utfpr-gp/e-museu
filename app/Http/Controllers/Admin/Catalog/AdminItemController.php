@@ -9,9 +9,11 @@ use App\Http\Requests\Catalog\StoreItemRequest;
 use App\Http\Requests\Catalog\UpdateItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemCategory;
+use App\Models\Catalog\ItemImage;
 use App\Models\Collaborator\Collaborator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -40,6 +42,7 @@ class AdminItemController extends AdminBaseController
     {
         $count = Item::count();
         $query = Item::query();
+        $query->with('coverImage');
         $query->leftJoin('collaborators', 'items.collaborator_id', '=', 'collaborators.id');
         $query->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id');
         $query->select([
@@ -65,7 +68,7 @@ class AdminItemController extends AdminBaseController
 
     public function show(string $id): View
     {
-        $item = Item::findOrFail($id);
+        $item = Item::with('images')->findOrFail($id);
 
         return view('admin.catalog.items.show', compact('item'));
     }
@@ -120,10 +123,16 @@ class AdminItemController extends AdminBaseController
 
         if ($request->image) {
             $ext = $request->image->getClientOriginalExtension() ?: 'png';
-            $path = Item::buildImagePath($item, $ext);
+            $path = ItemImage::buildPath($item, $ext);
             Storage::disk('public')->put($path, $request->image->get());
-            $item->update(['image' => $path]);
+            $item->images()->create([
+                'path' => $path,
+                'type' => 'cover',
+                'sort_order' => 0,
+            ]);
         }
+
+        $item->normalizeSingleCover();
 
         return redirect()->route('admin.items.show', $item)->with('success', __('app.catalog.item.created'));
     }
@@ -146,29 +155,98 @@ class AdminItemController extends AdminBaseController
         $this->requireUnlocked($item);
 
         $data = $request->validated();
+        unset($data['image'], $data['gallery_images'], $data['delete_image_ids'], $data['set_cover_image_id']);
 
-        if ($request->image) {
-            $oldPath = $item->getRawOriginal('image');
-            if ($oldPath !== null && $oldPath !== '' && ! str_starts_with((string) $oldPath, 'http')) {
-                Storage::disk('public')->delete($oldPath);
-            }
-
-            $ext = $request->image->getClientOriginalExtension() ?: 'png';
-            $data['image'] = Item::buildImagePath($item, $ext);
-            Storage::disk('public')->put($data['image'], $request->image->get());
-        } else {
-            unset($data['image']);
-        }
+        $this->processDeleteImageIds($item, $request);
+        $this->processCoverImage($item, $request);
+        $this->processGalleryImages($item, $request);
 
         if ($data['date'] === null) {
             $data['date'] = '0001-01-01 00:00:00';
         }
-
         $item->update($data);
-
+        $item->normalizeSingleCover();
         $this->unlock($item);
 
         return redirect()->route('admin.items.show', $item)->with('success', __('app.catalog.item.updated'));
+    }
+
+    private function processDeleteImageIds(Item $item, UpdateItemRequest $request): void
+    {
+        $deleteIds = array_filter(array_map('intval', (array) $request->input('delete_image_ids', [])));
+        if ($deleteIds === []) {
+            return;
+        }
+        /** @var \Illuminate\Support\Collection<int, ItemImage> $toDelete */
+        $toDelete = $item->images()->whereIn('id', $deleteIds)->get();
+        $toDelete->each(fn (ItemImage $img) => $this->deleteItemImageFromStorage($img));
+    }
+
+    private function processCoverImage(Item $item, UpdateItemRequest $request): void
+    {
+        if ($request->image) {
+            /** @var \Illuminate\Support\Collection<int, ItemImage> $currentCovers */
+            $currentCovers = $item->images()->where('type', 'cover')->get();
+            $currentCovers->each(fn (ItemImage $img) => $this->deleteItemImageFromStorage($img));
+            $this->storeNewCoverImage($item, $request->image);
+            return;
+        }
+        if ($request->filled('set_cover_image_id')) {
+            $this->promoteImageToCover($item, (int) $request->input('set_cover_image_id'));
+        }
+    }
+
+    private function processGalleryImages(Item $item, UpdateItemRequest $request): void
+    {
+        $galleryFiles = $request->file('gallery_images');
+        if (! is_array($galleryFiles)) {
+            return;
+        }
+        $maxOrder = (int) $item->images()->max('sort_order');
+        foreach ($galleryFiles as $file) {
+            if (! $file->isValid()) {
+                continue;
+            }
+            $contents = $file->get();
+            if ($contents === false) {
+                continue;
+            }
+            $ext = $file->getClientOriginalExtension() ?: 'png';
+            $path = ItemImage::buildPath($item, $ext);
+            Storage::disk('public')->put($path, $contents);
+            $item->images()->create(['path' => $path, 'type' => 'gallery', 'sort_order' => ++$maxOrder]);
+        }
+    }
+
+    private function deleteItemImageFromStorage(ItemImage $img): void
+    {
+        $path = $img->getRawOriginal('path');
+        if ($path !== null && $path !== '' && ! str_starts_with((string) $path, 'http')) {
+            Storage::disk('public')->delete($path);
+        }
+        $img->delete();
+    }
+
+    private function storeNewCoverImage(Item $item, UploadedFile $file): void
+    {
+        $ext = $file->getClientOriginalExtension() ?: 'png';
+        $path = ItemImage::buildPath($item, $ext);
+        $contents = $file->get();
+        if ($contents === false) {
+            return;
+        }
+        Storage::disk('public')->put($path, $contents);
+        $item->images()->create(['path' => $path, 'type' => 'cover', 'sort_order' => 0]);
+    }
+
+    private function promoteImageToCover(Item $item, int $newCoverId): void
+    {
+        $newCover = $item->images()->find($newCoverId);
+        if ($newCover === null) {
+            return;
+        }
+        $item->images()->where('type', 'cover')->update(['type' => 'gallery']);
+        $newCover->update(['type' => 'cover', 'sort_order' => 0]);
     }
 
     public function destroy(Item $item): RedirectResponse
@@ -177,10 +255,13 @@ class AdminItemController extends AdminBaseController
 
         $this->unlock($item);
 
-        $imagePath = $item->getRawOriginal('image');
-        if ($imagePath !== null && $imagePath !== '' && ! str_starts_with((string) $imagePath, 'http')) {
-            Storage::disk('public')->delete($imagePath);
+        foreach ($item->images as $img) {
+            $path = $img->getRawOriginal('path');
+            if ($path !== null && $path !== '' && ! str_starts_with((string) $path, 'http')) {
+                Storage::disk('public')->delete($path);
+            }
         }
+        $item->images()->delete();
 
         $itemFolder = 'items/' . $item->id;
         if (Storage::disk('public')->exists($itemFolder)) {
@@ -190,6 +271,21 @@ class AdminItemController extends AdminBaseController
         $item->delete();
 
         return redirect()->route('admin.items.index')->with('success', __('app.catalog.item.deleted'));
+    }
+
+    public function destroyImage(Item $item, ItemImage $image): RedirectResponse
+    {
+        $this->requireUnlocked($item);
+        if ($image->item_id !== (int) $item->id) {
+            abort(404);
+        }
+        $path = $image->getRawOriginal('path');
+        if ($path !== null && $path !== '' && ! str_starts_with((string) $path, 'http')) {
+            Storage::disk('public')->delete($path);
+        }
+        $image->delete();
+
+        return redirect()->route('admin.items.edit', $item)->with('success', __('app.catalog.item_image.deleted'));
     }
 
     public function createIdentificationCode(Item $item): string

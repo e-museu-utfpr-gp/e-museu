@@ -37,7 +37,8 @@ class ItemIndexQueryBuilder
     private function baseQuery(): Builder
     {
         return Item::query()
-            ->select('id', 'name', 'date', 'category_id', 'description', 'identification_code', 'image')
+            ->with('coverImage')
+            ->select('id', 'name', 'date', 'category_id', 'description', 'identification_code')
             ->where('validation', true);
     }
 

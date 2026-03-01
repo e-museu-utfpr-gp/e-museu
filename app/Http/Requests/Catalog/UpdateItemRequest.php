@@ -38,6 +38,11 @@ class UpdateItemRequest extends FormRequest
             'identification_code' => 'required|string|min:1|max:50',
             'validation' => 'required|boolean',
             'image' => 'sometimes|image|max:10240',
+            'gallery_images' => 'sometimes|array',
+            'gallery_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:10240',
+            'delete_image_ids' => 'sometimes|array',
+            'delete_image_ids.*' => 'integer|exists:item_images,id',
+            'set_cover_image_id' => 'sometimes|nullable|integer|exists:item_images,id',
         ];
     }
 }
