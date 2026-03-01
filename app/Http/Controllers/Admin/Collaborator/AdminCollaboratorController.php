@@ -18,36 +18,57 @@ class AdminCollaboratorController extends AdminBaseController
 
     public function index(Request $request): View
     {
-        $searchColumn = $request->search_column;
-        $search = $request->search;
-        $sort = $request->sort;
-        $order = $request->order;
         $count = Collaborator::count();
-
         $query = Collaborator::query();
 
-        if ($searchColumn && $search) {
-            if ($searchColumn === 'role' && in_array(strtolower($search), [
-                CollaboratorRole::INTERNAL->value,
-                CollaboratorRole::EXTERNAL->value,
-            ], true)) {
-                $query->where($searchColumn, strtolower($search));
-            } elseif ($search === 'sim') {
-                $query->where($searchColumn, true);
-            } elseif ($search === 'não' || $search === 'nao') {
-                $query->where($searchColumn, false);
-            } else {
-                $query->where($searchColumn, 'LIKE', "%{$search}%");
-            }
-        }
+        $this->applySearchFilter($query, $request->search_column, $request->search);
 
-        if ($sort && $order) {
-            $query->orderBy($sort, $order);
+        if ($request->sort && $request->order) {
+            $query->orderBy($request->sort, $request->order);
         }
 
         $collaborators = $query->paginate(10)->withQueryString();
 
         return view('admin.collaborators.index', compact('collaborators', 'count'));
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Collaborator>  $query
+     */
+    private function applySearchFilter($query, ?string $searchColumn, ?string $search): void
+    {
+        if (! $searchColumn || ! $search) {
+            return;
+        }
+
+        if (
+            $searchColumn === 'role' && in_array(
+                strtolower($search),
+                [
+                    CollaboratorRole::INTERNAL->value,
+                    CollaboratorRole::EXTERNAL->value,
+                ],
+                true
+            )
+        ) {
+            $query->where($searchColumn, strtolower($search));
+
+            return;
+        }
+
+        if ($search === 'sim') {
+            $query->where($searchColumn, true);
+
+            return;
+        }
+
+        if ($search === 'não' || $search === 'nao') {
+            $query->where($searchColumn, false);
+
+            return;
+        }
+
+        $query->where($searchColumn, 'LIKE', "%{$search}%");
     }
 
     public function show(string $id): View
