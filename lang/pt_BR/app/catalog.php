@@ -9,6 +9,11 @@ return [
         'updated' => 'Item atualizado com sucesso.',
         'deleted' => 'Item excluído com sucesso.',
     ],
+    'item_image' => [
+        'deleted' => 'Imagem excluída com sucesso.',
+        'cover' => 'Capa',
+        'gallery' => 'Galeria',
+    ],
     'item_category' => [
         'created' => 'Categoria de item adicionada com sucesso.',
         'updated' => 'Categoria de item atualizada com sucesso.',

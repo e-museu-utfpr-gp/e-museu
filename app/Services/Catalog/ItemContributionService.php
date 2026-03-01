@@ -4,6 +4,7 @@ namespace App\Services\Catalog;
 
 use App\Models\Catalog\Extra;
 use App\Models\Catalog\Item;
+use App\Models\Catalog\ItemImage;
 use App\Models\Catalog\ItemComponent;
 use App\Models\Catalog\ItemCategory;
 use App\Enums\CollaboratorRole;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
+/** @SuppressWarnings(PHPMD.CouplingBetweenObjects) */
 class ItemContributionService
 {
     /**
@@ -52,6 +54,7 @@ class ItemContributionService
      * @param  array<int, array<string, mixed>>  $tags
      * @param  array<int, array<string, mixed>>  $extras
      * @param  array<int, array<string, mixed>>  $components
+     * @param  array<int, UploadedFile>|null  $galleryImages
      */
     public function store(
         array $collaboratorData,
@@ -59,43 +62,81 @@ class ItemContributionService
         array $tags,
         array $extras,
         array $components,
-        ?UploadedFile $image
+        ?UploadedFile $image,
+        ?array $galleryImages = null
     ): RedirectResponse {
-        $collaborator = Collaborator::where('contact', '=', $collaboratorData['contact'])->first();
-        if (! $collaborator) {
-            $collaborator = $this->storeCollaborator($collaboratorData);
-        }
-
+        $collaborator = $this->resolveCollaborator($collaboratorData);
         if ($collaborator->role === CollaboratorRole::INTERNAL) {
             return back()->withErrors(['contact' => __('app.collaborator.contact_reserved_for_internal')]);
         }
-
         if ($collaborator->blocked === true) {
             return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
         }
-
         if ($image) {
-            unset($itemData['image']);
+            unset($itemData['image'], $itemData['cover_image']);
         }
-
         $item = $this->storeItem($itemData, $collaborator);
-
-        if ($image) {
-            $ext = $image->getClientOriginalExtension() ?: 'png';
-            $path = Item::buildImagePath($item, $ext);
-            $contents = $image->get();
-            if ($contents === false) {
-                throw new RuntimeException(__('app.catalog.item.upload_read_failed'));
-            }
-            Storage::disk('public')->put($path, $contents);
-            $item->update(['image' => $path]);
-        }
-
+        $this->storeItemImages($item, $image, $galleryImages ?? []);
+        $item->normalizeSingleCover();
         $this->storeMultipleTag($tags, $item);
         $this->storeMultipleExtra($extras, $item, $collaborator);
         $this->storeMultipleComponent($components, $item);
 
         return redirect()->route('items.create')->with('success', __('app.catalog.item.contribution_success'));
+    }
+
+    /**
+     * @param  array<string, mixed>  $collaboratorData
+     */
+    private function resolveCollaborator(array $collaboratorData): Collaborator
+    {
+        $collaborator = Collaborator::where('contact', '=', $collaboratorData['contact'])->first();
+
+        return $collaborator ?? $this->storeCollaborator($collaboratorData);
+    }
+
+    /**
+     * @param  array<int, UploadedFile>  $galleryImages
+     */
+    private function storeItemImages(Item $item, ?UploadedFile $coverImage, array $galleryImages): void
+    {
+        if ($coverImage !== null) {
+            $this->storeCoverImage($item, $coverImage);
+        }
+        $this->storeGalleryImages($item, $galleryImages);
+    }
+
+    private function storeCoverImage(Item $item, UploadedFile $image): void
+    {
+        $ext = $image->getClientOriginalExtension() ?: 'png';
+        $path = ItemImage::buildPath($item, $ext);
+        $contents = $image->get();
+        if ($contents === false) {
+            throw new RuntimeException(__('app.catalog.item.upload_read_failed'));
+        }
+        Storage::disk('public')->put($path, $contents);
+        $item->images()->create(['path' => $path, 'type' => 'cover', 'sort_order' => 0]);
+    }
+
+    /**
+     * @param  array<int, UploadedFile>  $galleryFiles
+     */
+    private function storeGalleryImages(Item $item, array $galleryFiles): void
+    {
+        $sortOrder = 1;
+        foreach ($galleryFiles as $file) {
+            if (! $file->isValid()) {
+                continue;
+            }
+            $contents = $file->get();
+            if ($contents === false) {
+                continue;
+            }
+            $ext = $file->getClientOriginalExtension() ?: 'png';
+            $path = ItemImage::buildPath($item, $ext);
+            Storage::disk('public')->put($path, $contents);
+            $item->images()->create(['path' => $path, 'type' => 'gallery', 'sort_order' => $sortOrder++]);
+        }
     }
 
     /**

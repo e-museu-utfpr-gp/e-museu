@@ -9,7 +9,7 @@ class HomeController extends Controller
 {
     public function index(): View
     {
-        $items = Item::where('validation', true)->select('image')->inRandomOrder()->take(5)->get();
+        $items = Item::with('coverImage')->where('validation', true)->inRandomOrder()->take(5)->get();
 
         return view('home', compact('items'));
     }

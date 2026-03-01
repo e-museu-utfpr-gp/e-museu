@@ -8,6 +8,7 @@ return [
     |--------------------------------------------------------------------------
     */
     \App\Models\Catalog\Item::class => \Database\Factories\Catalog\ItemFactory::class,
+    \App\Models\Catalog\ItemImage::class => \Database\Factories\Catalog\ItemImageFactory::class,
     \App\Models\Catalog\ItemCategory::class => \Database\Factories\Catalog\ItemCategoryFactory::class,
     \App\Models\Catalog\ItemComponent::class => \Database\Factories\Catalog\ItemComponentFactory::class,
     \App\Models\Catalog\Extra::class => \Database\Factories\Catalog\ExtraFactory::class,

@@ -27,7 +27,6 @@ class CollaboratorRequest extends FormRequest
                 'email:rfc,dns',
                 'min:1',
                 'max:200',
-                'unique:collaborators,contact',
                 function (string $attribute, string $value, \Closure $fail): void {
                     if (Collaborator::where('contact', $value)->where('role', CollaboratorRole::INTERNAL)->exists()) {
                         $fail(__('app.collaborator.contact_reserved_for_internal'));
