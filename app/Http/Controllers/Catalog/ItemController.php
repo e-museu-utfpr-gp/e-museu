@@ -30,7 +30,7 @@ class ItemController extends Controller
         $sections = $this->itemContributionService->loadSections();
         $categories = $this->itemContributionService->loadCategories();
 
-        return view('items/index', [
+        return view('catalog.items.index', [
             'items' => $indexResult['items'],
             'sectionName' => $indexResult['sectionName'],
             'sections' => $sections,
@@ -43,7 +43,7 @@ class ItemController extends Controller
         $categories = Category::all();
         $sections = Section::all();
 
-        return view('items/create', compact('categories', 'sections'));
+        return view('catalog.items.create', compact('categories', 'sections'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -66,7 +66,7 @@ class ItemController extends Controller
         $sections = Section::get();
         $categories = Category::get();
 
-        return view('items.show', compact('item', 'sections', 'categories'));
+        return view('catalog.items.show', compact('item', 'sections', 'categories'));
     }
 
     public function edit(Item $item): never

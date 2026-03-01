@@ -1,8 +1,9 @@
+import i18next from 'i18next';
+
 $(document).ready(function () {
     $('.deleteItemButton').click(function (event) {
-        var confirmation = confirm(
-            'Tem certeza que deseja excluir o item e todas as vezes que é referenciado em outros registros?'
-        );
+        const message = $(this).data('confirm-message') || i18next.t('warnings.delete_item');
+        const confirmation = confirm(message);
 
         if (!confirmation) event.preventDefault();
     });

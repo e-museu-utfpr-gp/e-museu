@@ -1,0 +1,78 @@
+{
+  "warnings": {
+    "delete_item_tag": "Are you sure you want to unlink the item from the tag?",
+    "delete_extra": "Are you sure you want to delete this extra information?",
+    "delete_category": "Are you sure you want to delete this category and all references to it in other records?",
+    "delete_section": "Are you sure you want to delete this item category and all references to it in other records?",
+    "delete_item": "Are you sure you want to delete this item and all references to it in other records?",
+    "delete_user": "Are you sure you want to delete this administrator?",
+    "delete_component": "Are you sure you want to unlink the item from the component?",
+    "delete_contribution": "Are you sure you want to delete this contribution?",
+    "delete_tag": "Are you sure you want to delete this tag and all references to it in other records?",
+    "delete_proprietary": "Are you sure you want to delete this proprietary and all references in other records?"
+  },
+  "assistant": {
+    "goodbye": "Goodbye!",
+    "greeting": "Hello, I'm Ada, your virtual assistant. How can I help you?",
+    "show_options": "Show options",
+    "what_help": "What would you like to know?",
+    "about_page": "Learn more about this page",
+    "go_home": "Go to museum home >",
+    "explore_items": "Explore museum items >",
+    "explore_other_items": "Explore other museum items >",
+    "contribute": "Contribute to the museum >",
+    "contribute_question": "Contribute to the museum? >",
+    "about_museum": "Learn more about the museum >",
+    "contact": "Contact the museum >",
+    "back_to_options": "Back to options",
+    "contact_email": "If you have any questions or other matters to discuss with us, send an email to emuseuvirtual@gmail.com.",
+    "home": {
+      "page_intro": "On this page we tell you a bit about our electronic items museum project. Below you will find some page options to navigate. Take a look!"
+    },
+    "about": {
+      "page_intro": "On this page we will tell you more about our project and the entities involved in creating E-museu."
+    },
+    "create": {
+      "page_intro": "With this page you can share information about an item you have that we don't yet have in our museum. Please be aware that this item will be made available in our museum for others to view.",
+      "instructions": "Registration instructions",
+      "email_and_name": "About email and full name",
+      "remove_item": "I would like to remove an item from the museum",
+      "other_questions": "Other questions",
+      "instructions_text": "Above each field there will be an orange icon with an 'i' inside. When you select the icon, registration instructions for that field will be shown. Please read the instructions before entering data. Note that fields with a '*' are required. After entering the information, check that you have met the requirements and click 'submit'!",
+      "email_name_text": "We need your email so we can contact you if needed. Your full name will be used to credit your contribution to our museum. We only need this information; no password is required!",
+      "remove_item_text": "If you want to remove an item you have registered from our museum, please send an email to emuseuvirtual@gmail.com from the same email you used to register the item."
+    },
+    "index": {
+      "page_intro": "This is the page where you will find all items available in our museum. With the search system, tag filters and category organization, you can easily find all kinds of items. Select an item for more details!",
+      "by_category": "Category organization",
+      "search": "Search system",
+      "by_tags": "Tag filtering",
+      "categories_text": "Our museum items are organized by category. When you select a category at the top of the page, you will search for all items in that category.",
+      "search_text": "The search bar is at the top of the page. There you can search for an item by name. For a more detailed search, select a category to the right of the search bar, then search for an item within that category.",
+      "tags_text": "In addition to categories, some items also have one or more tags to organize our museum items more precisely. On the left of the main content, or in a floating button on the bottom left on mobile, you will find tag filters, date and alphabetical sorting. With this you can filter items by brand and series!"
+    },
+    "show": {
+      "page_intro": "On this page you can see all available information about this item. Learn about its appearance, history, release date, technical details, timelines, category, components, associated tags and extra information!",
+      "appearance": "Appearance",
+      "release_date": "Release date",
+      "category": "Category",
+      "tags_associated": "Associated tags",
+      "short_description": "Short description",
+      "history": "History",
+      "timelines": "Timelines",
+      "technical_details": "Technical details",
+      "components": "Components",
+      "extra_info": "Extra information",
+      "appearance_text": "You can see the item's appearance in the image at the top of the page. You can also zoom in on the image by selecting it.",
+      "release_date_text": "The release date is the day, month and year when the item was made available for use.",
+      "category_text": "Every item belongs to one category. By selecting the category, you can go to a page listing all items in that category.",
+      "tags_text": "In addition to categories, some items have one or more tags to organize our museum more precisely. With this system we can filter items by brand, series and more! Select a tag to find more items with that tag.",
+      "short_description_text": "The short description presents the item concisely, including physical aspects and functionality.",
+      "history_text": "In this section we tell the item's history in more detail. We will put everything we could gather about its creation and use here! If you have information not found on this page that you would like to share, please send it using the button above the item image!",
+      "timelines_text": "Through timelines you can follow the evolution of items in the same 'series' category tag. You can also view the item in more detail by selecting 'more details'.",
+      "technical_details_text": "Technical details describe the appearance, internal components and specifications of the item in more depth.",
+      "components_text": "Depending on the item, it may be composed of other museum items. By selecting one, you go to that item's page.",
+      "extra_info_text": "All information that does not fit in other sections, or that was added by other contributors, is grouped as 'extra information'. If you have information to share about this item, please send it using the button at the top of the page!"
+    }
+  }
+}

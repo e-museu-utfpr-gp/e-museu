@@ -40,20 +40,4 @@ class UpdateItemRequest extends FormRequest
             'image' => 'sometimes|image|max:10240',
         ];
     }
-
-    /**
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'O campo nome é obrigatório.',
-            'date.required' => 'O campo data é obrigatório.',
-            'description.required' => 'O campo descrição é obrigatório.',
-            'section_id.required' => 'O campo categoria de item é obrigatório.',
-            'validation.required' => 'O campo validado é obrigatório.',
-            'identification_code.required' => 'O campo código de identificação é obrigatório.',
-            'proprietary_id.required' => 'O campo proprietário é obrigatório.',
-        ];
-    }
 }

@@ -31,16 +31,4 @@ class StoreItemRequest extends FormRequest
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
         ];
     }
-
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'O campo nome é obrigatório.',
-            'description.required' => 'O campo descrição é obrigatório.',
-            'section_id.required' => 'O campo categoria de item é obrigatório.',
-            'image.required' => 'O campo imagem é obrigatório.',
-            'image.mimes:jpeg,png,jpg,webp' => 'A extensão da imagem deve ser: jpeg, png ou webp.',
-            'image.max:10240' => 'A imagem deve ter no máximo 10MB.',
-        ];
-    }
 }

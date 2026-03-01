@@ -36,8 +36,6 @@
     <rule ref="rulesets/design.xml">
         <!-- Override defined below with maximum=15 -->
         <exclude name="CouplingBetweenObjects" />
-        <!-- Exclude NumberOfChildren - base Controller having many children is normal in Laravel -->
-        <exclude name="NumberOfChildren" />
     </rule>
     <rule ref="rulesets/naming.xml">
         <!-- Allow short variable names in some contexts -->

@@ -17,7 +17,7 @@ class ValidateItem
             $item = Item::find($itemId);
 
             if ($item && $item->validation === false) {
-                abort(403, 'Acesso negado.');
+                abort(403, __('app.catalog.item.access_denied'));
             }
         }
 

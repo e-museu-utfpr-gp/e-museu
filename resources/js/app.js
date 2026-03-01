@@ -1,4 +1,5 @@
 import './bootstrap';
+import './i18n';
 
 import './components/img-modal';
 import './components/assistentButton';
@@ -10,6 +11,8 @@ import './components/getTagsByCategory';
 import './components/sectionItemSelector';
 import './components/assistentPortrait';
 import './components/checkContact';
+
+import './components/releaseLockOnLeave';
 
 import './components/warnings/deleteCategoryWarning';
 import './components/warnings/deleteComponentWarning';

@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home')
+@section('title', __('view.home.title'))
 
 @section('content')
     <div class="container-fluid headline">
@@ -7,33 +7,21 @@
         <div class="container headline-content">
             <div class="row">
                 <div class="col-md-6">
-                    <p class="h1 fw-bold text-shadow">SEJA BEM-VINDO AO E-MUSEU</p>
-                    <p class="h2 text-shadow">SEU MUSEU VIRTUAL DE INFORMÁTICA</p>
+                    <p class="h1 fw-bold text-shadow">{{ __('view.home.headline.welcome') }}</p>
+                    <p class="h2 text-shadow">{{ __('view.home.headline.subtitle') }}</p>
                     <h6 class="text-shadow">
-                        Explore e descubra o que o mundo dos computadores, periféricos, componentes eletrônicos e muitos
-                        outros dispositivos têm a oferecer!
+                        {{ __('view.home.headline.description') }}
                     </h6>
                 </div>
             </div>
         </div>
     </div>
     <div class="container main-container mb-auto">
-        <h1>SOBRE O NOSSO MUSEU</h1>
+        <h1>{{ __('view.home.about.title') }}</h1>
         <div class="row">
             <div class="col-md-6">
                 <p class="p-4">
-                    Desde muito tempo atrás, o homem, por ser curioso e ter interesse no passado, coleciona objetos que
-                    fazem parte da cultura e do passado de um povo. Muitas vezes, esses objetos não possuem valor monetário,
-                    mas um valor histórico imensurável. Por conta disso, foram criados os museus, locais
-                    sem fins lucrativos que tem como objetivo apresentar, toda ou em partes, a história e a cultura de um
-                    povo.
-                    <br>
-                    O objetivo do nosso projeto é de aprender sobre o passado e compreender o presente, tanto em questões
-                    culturais
-                    como também em questões tecnológicas, de forma a evitar erros cometidos. Nosso museu de informática
-                    existe para preservar a história de diversos itens de informática, e então, mostrar para as pessoas o
-                    passado dos computadores, ensinar
-                    e registrar tudo o que foi criado de mais marcante até o momento atual.
+                    {!! nl2br(__('view.home.about.paragraph1')) !!}
                 </p>
             </div>
             <div class="col-md-6 ">
@@ -57,11 +45,11 @@
                     </div>
                     <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Previous</span>
+                        <span class="visually-hidden">{{ __('view.home.carousel.prev') }}</span>
                     </button>
                     <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Next</span>
+                        <span class="visually-hidden">{{ __('view.home.carousel.next') }}</span>
                     </button>
                 </div>
             </div>
@@ -72,33 +60,17 @@
                 </div>
                 <div class="col-md-6">
                     <p class="p-4">
-                        A Universidade Tecnológica Federal do Paraná (UTFPR) e a Universidade Estadual do Centro-Oeste
-                        (Unicentro) possuem projetos relacionados a lixo eletrônico. A <a
-                            href="https://www.utfpr.edu.br" target="_blank">UTFPR</a>
-                        possui o projeto Tecno-Lixo:
-                        Oficina do
-                        Aprender e a <a href="https://www3.unicentro.br" target="_blank">Unicentro</a> o projeto E-Lixo. Os projetos recebem
-                        peças de
-                        computadores que as pessoas não
-                        utilizam
-                        mais. Para que as informações obre essas peças não sejam perdidas, a ideia para este museu emergiu.
-                        <br>
-                        Nosso museu conta com itens adicionados ao acervo pelas próprias pessoas responsáveis pelo projeto,
-                        e
-                        também, por pessoas que tenham interesse em colaborar conosco. Você também pode fazer parte!
-                        <br>
-                        <br>
-                        <strong>Se tiver quaisquer dúvidas em relação ao nosso site, temos uma assistente virtual que pode
-                            te
-                            auxiliar.
-                            Apenas clique (ou toque) sobre ela para interagir com o recurso.</strong>
-                        <br>
-                        <br>
-                        Logo abaixo disponilizamos alguns pontos de partida para começar a explorar nosso site. Boa visita!
+                        {!! __('view.home.about.paragraph2') !!}
+                        <br><br>
+                        {{ __('view.home.about.paragraph2_cont') }}
+                        <br><br>
+                        <strong>{{ __('view.home.about.assistant_note') }}</strong>
+                        <br><br>
+                        {{ __('view.home.about.cta') }}
                     </p>
                 </div>
             </div>
-            <h3>Opções de páginas para começar sua exploração</h3>
+            <h3>{{ __('view.home.exploration_title') }}</h3>
             <div class="row p-4">
                 <div class="col-md-4 ">
                     <div class="col-md pb-1 d-flex justify-content-center">
@@ -109,8 +81,8 @@
                                         <img class="p-2" src="/img/compass.png" style="width: 7rem;" alt="...">
                                     </div>
                                     <div class="col-md-8">
-                                        <h6 class="card-title fw-bold">Explorar itens do museu</h6>
-                                        <p>Se deseja explorar os itens do nosso scervo virtual, esta é a opção que procura!
+                                        <h6 class="card-title fw-bold">{{ __('view.home.cards.explore.title') }}</h6>
+                                        <p>{{ __('view.home.cards.explore.description') }}
                                         </p>
                                     </div>
                                 </div>
@@ -128,8 +100,8 @@
                                         <img class="p-2" src="/img/form.png" style="width: 7rem;" alt="...">
                                     </div>
                                     <div class="col-md-8">
-                                        <h6 class="card-title fw-bold">Colabore com o museu</h6>
-                                        <p>Quer colaborar com o nosso museu enviando um item ao nosso acervo virtual?
+                                        <h6 class="card-title fw-bold">{{ __('view.home.cards.contribute.title') }}</h6>
+                                        <p>{{ __('view.home.cards.contribute.description') }}
                                         </p>
                                     </div>
                                 </div>
@@ -147,9 +119,8 @@
                                         <img class="p-2" src="/img/info.png" style="width: 7rem;" alt="...">
                                     </div>
                                     <div class="col-md-8">
-                                        <h6 class="card-title fw-bold">Sobre o museu</h6>
-                                        <p>Gostaria de saber mais sobre o nosso projeto e as entidades envolvidas na criação
-                                            dele?
+                                        <h6 class="card-title fw-bold">{{ __('view.home.cards.about.title') }}</h6>
+                                        <p>{{ __('view.home.cards.about.description') }}
                                         </p>
                                     </div>
                                 </div>
