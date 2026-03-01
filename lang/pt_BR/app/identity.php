@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'user' => [
+    'admin' => [
         'created' => 'Administrador adicionado com sucesso.',
         'deleted' => 'Administrador excluído com sucesso.',
     ],

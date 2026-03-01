@@ -8,8 +8,8 @@ use App\Http\Controllers\Admin\Concerns\LocksSubject;
 use App\Http\Requests\Catalog\StoreItemRequest;
 use App\Http\Requests\Catalog\UpdateItemRequest;
 use App\Models\Catalog\Item;
-use App\Models\Catalog\Section;
-use App\Models\Proprietary\Proprietary;
+use App\Models\Catalog\ItemCategory;
+use App\Models\Collaborator\Collaborator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,12 +27,12 @@ class AdminItemController extends AdminBaseController
     private const INDEX_CONFIG = [
         'baseTable' => 'items',
         'searchSpecial' => [
-            'proprietary_id' => ['table' => 'proprietaries', 'column' => 'contact'],
-            'section_id' => ['table' => 'sections', 'column' => 'name'],
+            'collaborator_id' => ['table' => 'collaborators', 'column' => 'contact'],
+            'category_id' => ['table' => 'item_categories', 'column' => 'name'],
         ],
         'sortSpecial' => [
-            'proprietary_id' => 'proprietaries.contact',
-            'section_id' => 'sections.name',
+            'collaborator_id' => 'collaborators.contact',
+            'category_id' => 'item_categories.name',
         ],
     ];
 
@@ -40,8 +40,8 @@ class AdminItemController extends AdminBaseController
     {
         $count = Item::count();
         $query = Item::query();
-        $query->leftJoin('proprietaries', 'items.proprietary_id', '=', 'proprietaries.id');
-        $query->leftJoin('sections', 'items.section_id', '=', 'sections.id');
+        $query->leftJoin('collaborators', 'items.collaborator_id', '=', 'collaborators.id');
+        $query->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id');
         $query->select([
             'items.*',
             'items.name AS item_name',
@@ -51,8 +51,8 @@ class AdminItemController extends AdminBaseController
             DB::raw('LEFT(items.history, 300) as history'),
             DB::raw('LEFT(items.description, 150) as description'),
             DB::raw('LEFT(items.detail, 150) as detail'),
-            'sections.name AS section_name',
-            'proprietaries.contact AS proprietary_contact',
+            'item_categories.name AS section_name',
+            'collaborators.contact AS collaborator_contact',
         ]);
 
         $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
@@ -72,10 +72,10 @@ class AdminItemController extends AdminBaseController
 
     public function create(): View
     {
-        $sections = Section::orderBy('name')->get();
-        $proprietaries = Proprietary::orderBy('full_name')->get();
+        $sections = ItemCategory::orderBy('name')->get();
+        $collaborators = Collaborator::orderBy('full_name')->get();
 
-        return view('admin.catalog.items.create', compact('proprietaries', 'sections'));
+        return view('admin.catalog.items.create', compact('collaborators', 'sections'));
     }
 
     public function store(StoreItemRequest $request): RedirectResponse
@@ -83,7 +83,7 @@ class AdminItemController extends AdminBaseController
         $item = false;
 
         $rules = [
-            'proprietary_id' => 'required|integer|numeric|exists:proprietaries,id',
+            'collaborator_id' => 'required|integer|numeric|exists:collaborators,id',
             'validation' => 'required|boolean',
         ];
 
@@ -99,8 +99,8 @@ class AdminItemController extends AdminBaseController
             'history' => $request->input('history'),
             'detail' => $request->input('detail'),
             'date' => $request->input('date') ?? '0001-01-01 00:00:00',
-            'section_id' => $request->input('section_id'),
-            'proprietary_id' => $request->input('proprietary_id'),
+            'category_id' => $request->input('category_id'),
+            'collaborator_id' => $request->input('collaborator_id'),
             'validation' => $request->boolean('validation'),
         ];
 
@@ -135,10 +135,10 @@ class AdminItemController extends AdminBaseController
 
         $this->lock($item);
 
-        $sections = Section::orderBy('name')->get();
-        $proprietaries = Proprietary::orderBy('full_name')->get();
+        $sections = ItemCategory::orderBy('name')->get();
+        $collaborators = Collaborator::orderBy('full_name')->get();
 
-        return view('admin.catalog.items.edit', compact('item', 'sections', 'proprietaries'));
+        return view('admin.catalog.items.edit', compact('item', 'sections', 'collaborators'));
     }
 
     public function update(UpdateItemRequest $request, Item $item): RedirectResponse
@@ -194,7 +194,7 @@ class AdminItemController extends AdminBaseController
 
     public function createIdentificationCode(Item $item): string
     {
-        $sectionModel = Section::findOrFail($item->section_id);
+        $sectionModel = ItemCategory::findOrFail($item->category_id);
         $section = self::removeAccent($sectionModel->name);
 
         $words = explode(' ', $section);
@@ -203,7 +203,16 @@ class AdminItemController extends AdminBaseController
             $words = explode('-', $words[0]);
         }
 
-        $proprietaryCode = '';
+        $collaboratorCode = '';
+        $collaborator = $item->collaborator;
+        if ($collaborator) {
+            $initials = collect(explode(' ', $collaborator->full_name))
+                ->map(fn (string $w): string => mb_substr($w, 0, 1))
+                ->implode('');
+            $collaboratorCode = $initials !== '' ? strtoupper($initials) : 'COL';
+        } else {
+            $collaboratorCode = 'COL';
+        }
 
         if (count($words) > 1) {
             $section = strtoupper(substr($words[0], 0, 2));
@@ -212,14 +221,7 @@ class AdminItemController extends AdminBaseController
             $section = strtoupper(substr($words[0], 0, 4));
         }
 
-        $proprietary = $item->proprietary;
-        if ($proprietary && $proprietary->is_admin) {
-            $proprietaryCode = strtoupper($proprietary->full_name);
-        } else {
-            $proprietaryCode = 'EXT';
-        }
-
-        return $proprietaryCode . '_' . $section . '_' . $item->id;
+        return $collaboratorCode . '_' . $section . '_' . $item->id;
     }
 
     public function removeAccent(string $string): string

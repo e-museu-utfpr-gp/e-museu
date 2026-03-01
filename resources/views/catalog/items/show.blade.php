@@ -2,7 +2,7 @@
 @section('title', $item->name)
 
 @php
-    $hasSeries = $item->tagItems
+    $hasSeries = $item->itemTags
         ->filter(function ($tagItem) {
             return $tagItem->tag->category->name == 'Série' && $tagItem->validation == true;
         })
@@ -63,8 +63,8 @@
                                 <p class="fw-bold">{{ __('view.catalog.items.show.category') }}</p>
                             </div>
                             <div class="col-md-7">
-                                <a href={{ route('items.index', ['section' => $item->section->id]) }}>
-                                    <p class="show-item-link">{{ $item->section->name }}</p>
+                                <a href={{ route('items.index', ['section' => $item->category?->id]) }}>
+                                    <p class="show-item-link">{{ $item->category?->name }}</p>
                                 </a>
                             </div>
                         </div>
@@ -80,7 +80,7 @@
                                 @endif
                             </div>
                         </div>
-                        @foreach ($item->tagItems as $tagItem)
+                        @foreach ($item->itemTags as $tagItem)
                             @if ($tagItem->validation == true && $tagItem->tag->validation == true)
                                 <div class="row">
                                     <div class="col-md-5">
@@ -120,7 +120,7 @@
                                                 <p class="mb-1 fw-bold">
                                                     {{ Str::limit($ItemComponent->component->name, 30) }}</p>
                                                 <p class="mb-0">
-                                                    {{ Str::limit($ItemComponent->component->section->name) }}</p>
+                                                    {{ Str::limit($ItemComponent->component->category?->name) }}</p>
                                             </div>
                                         </div>
                                     </a>
@@ -141,11 +141,8 @@
                             <p class="fw-bold">{{ __('view.catalog.items.show.added_by') }}</p>
                         </div>
                         <div class="col-md-7">
-                            <p>{{ $item->proprietary->full_name }}</p>
+                            <p>{{ $item->collaborator->full_name }}</p>
                         </div>
-                        @if ($item->proprietary->is_admin)
-                        <small class="fw-bold show-item-link">{{ __('view.catalog.items.show.physical_collection', ['name' => $item->proprietary->full_name]) }}</small>
-                    @endif
                     </div>
                     @if (!$hasExtras)
                         <div class="dropdown">
@@ -163,7 +160,7 @@
                                                         <p class="fw-bold">{{ __('view.catalog.items.show.collaborator') }}</p>
                                                     </div>
                                                     <div class="col-md-7">
-                                                        <p>{{ $extra->proprietary->full_name }}</p>
+                                                        <p>{{ $extra->collaborator->full_name }}</p>
                                                     </div>
                                                 </div>
                                             @endif
@@ -193,7 +190,7 @@
                     @endif
                 </div>
                 <h3>{{ __('view.catalog.items.show.timelines') }}</h3>
-                @foreach ($item->tagItems as $tagItem)
+                @foreach ($item->itemTags as $tagItem)
                     @if ($tagItem->validation == true && $tagItem->tag->validation == true)
                         @if ($tagItem->tag->category->name == 'Série')
                             <div class="mx-4 my-5">
@@ -250,7 +247,7 @@
                                 <p>{{ $extra->info }}</p>
                                 <div class="row">
                                     <p class="fw-bold col-2">{{ __('view.catalog.items.show.added_by') }} </p>
-                                    <p class="col-10">{{ $extra->proprietary->full_name }}</p>
+                                    <p class="col-10">{{ $extra->collaborator->full_name }}</p>
                                 </div>
                                 <div class="division-line my-1"></div>
                             </div>

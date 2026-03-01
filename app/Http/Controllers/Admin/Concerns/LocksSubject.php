@@ -31,7 +31,7 @@ trait LocksSubject
 
         if ($lock) {
             $isExpired = $lock->expiresAt() && Carbon::parse($lock->expiry_date)->isPast();
-            $isOwnLock = (string) $lock->user_id === (string) Auth::id();
+            $isOwnLock = (string) $lock->admin_id === (string) Auth::id();
 
             if ($isExpired || ! $isOwnLock) {
                 $lock->delete();
@@ -43,9 +43,9 @@ trait LocksSubject
             }
         }
 
-        Lock::where('user_id', Auth::id())->delete();
+        Lock::where('admin_id', Auth::id())->delete();
         $lock = $subject->locks()->create([
-            'user_id' => Auth::id(),
+            'admin_id' => Auth::id(),
             'expiry_date' => $newExpiry,
         ]);
 

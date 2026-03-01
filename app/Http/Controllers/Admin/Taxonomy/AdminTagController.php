@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Controllers\Admin\Concerns\BuildsAdminIndexQuery;
 use App\Http\Controllers\Admin\Concerns\LocksSubject;
 use App\Http\Requests\Catalog\SingleTagRequest;
-use App\Models\Taxonomy\Category;
+use App\Models\Taxonomy\TagCategory;
 use App\Models\Taxonomy\Tag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,10 +21,10 @@ class AdminTagController extends AdminBaseController
     private const INDEX_CONFIG = [
         'baseTable' => 'tags',
         'searchSpecial' => [
-            'category_id' => ['table' => 'categories', 'column' => 'name'],
+            'tag_category_id' => ['table' => 'tag_categories', 'column' => 'name'],
         ],
         'sortSpecial' => [
-            'category_id' => 'categories.name',
+            'tag_category_id' => 'tag_categories.name',
         ],
     ];
 
@@ -32,13 +32,13 @@ class AdminTagController extends AdminBaseController
     {
         $count = Tag::count();
         $query = Tag::query();
-        $query->leftJoin('categories', 'tags.category_id', '=', 'categories.id');
+        $query->leftJoin('tag_categories', 'tags.tag_category_id', '=', 'tag_categories.id');
         $query->select([
             'tags.*',
             'tags.name AS tag_name',
             'tags.created_at AS tag_created',
             'tags.updated_at AS tag_updated',
-            'categories.name AS category_name',
+            'tag_categories.name AS category_name',
         ]);
 
         $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
@@ -58,7 +58,7 @@ class AdminTagController extends AdminBaseController
 
     public function create(): View
     {
-        $categories = Category::orderBy('name', 'asc')->get();
+        $categories = TagCategory::orderBy('name', 'asc')->get();
 
         return view('admin.taxonomy.tags.create', compact('categories'));
     }
@@ -66,6 +66,8 @@ class AdminTagController extends AdminBaseController
     public function store(SingleTagRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        $data['tag_category_id'] = $data['category_id'];
+        unset($data['category_id']);
         $tag = Tag::create($data);
 
         return redirect()->route('admin.tags.show', $tag)->with('success', __('app.taxonomy.tag.created'));
@@ -76,7 +78,7 @@ class AdminTagController extends AdminBaseController
         $tag = Tag::findOrFail($id);
         $this->requireUnlocked($tag);
 
-        $categories = Category::orderBy('name', 'asc')->get();
+        $categories = TagCategory::orderBy('name', 'asc')->get();
 
         $this->lock($tag);
 
@@ -88,6 +90,8 @@ class AdminTagController extends AdminBaseController
         $this->requireUnlocked($tag);
 
         $data = $request->validated();
+        $data['tag_category_id'] = $data['category_id'];
+        unset($data['category_id']);
 
         $tag->update($data);
 

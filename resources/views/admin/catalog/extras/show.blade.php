@@ -67,35 +67,35 @@
                             <h5 class="card-header">{{ __('view.admin.catalog.extras.show.collaborator') }}</h5>
                             <div class="card-body">
                                 <strong>{{ __('view.admin.catalog.extras.show.id') }}: </strong>
-                                <p class="ms-3">{{ $extra->proprietary->id }}</p>
+                                <p class="ms-3">{{ $extra->collaborator->id }}</p>
                                 <strong>{{ __('view.admin.catalog.extras.show.full_name') }}: </strong>
-                                <p class="ms-3">{{ $extra->proprietary->full_name }}</p>
+                                <p class="ms-3">{{ $extra->collaborator->full_name }}</p>
                                 <strong>{{ __('view.admin.catalog.extras.show.contact') }}: </strong>
-                                <p class="ms-3">{{ $extra->proprietary->contact }}</p>
+                                <p class="ms-3">{{ $extra->collaborator->contact }}</p>
                                 <strong>{{ __('view.admin.catalog.extras.show.blocked') }}: </strong>
                                 <p class="ms-3">
-                                    @if ($extra->proprietary->blocked == 1)
+                                    @if ($extra->collaborator->blocked == 1)
                                         {{ __('view.admin.catalog.extras.show.yes') }}
                                     @else
                                         {{ __('view.admin.catalog.extras.show.no') }}
                                     @endif
                                 </p>
                                 <strong>{{ __('view.admin.catalog.extras.show.created_at') }}: </strong>
-                                <p class="ms-3">{{ date('d-m-Y H:i:s', strtotime($extra->proprietary->created_at)) }}</p>
+                                <p class="ms-3">{{ date('d-m-Y H:i:s', strtotime($extra->collaborator->created_at)) }}</p>
                                 <strong>{{ __('view.admin.catalog.extras.show.updated_at') }}: </strong>
-                                <p class="ms-3">{{ date('d-m-Y H:i:s', strtotime($extra->proprietary->updated_at)) }}</p>
+                                <p class="ms-3">{{ date('d-m-Y H:i:s', strtotime($extra->collaborator->updated_at)) }}</p>
                                 <div class="d-flex">
-                                    <a href="{{ route('admin.proprietaries.show', $extra->proprietary->id) }}"
+                                    <a href="{{ route('admin.collaborators.show', $extra->collaborator->id) }}"
                                         type="button" class="btn btn-primary me-1"><i class="bi bi-eye-fill"></i>
                                         {{ __('view.admin.catalog.extras.show.view') }}</a>
-                                    <a href="{{ route('admin.proprietaries.edit', $extra->proprietary->id) }}"
+                                    <a href="{{ route('admin.collaborators.edit', $extra->collaborator->id) }}"
                                         type="button" class="btn btn-warning me-1"><i class="bi bi-pencil-fill"></i>
                                         {{ __('view.admin.catalog.extras.show.edit') }}</a>
-                                    <form action="{{ route('admin.proprietaries.destroy', $extra->proprietary->id) }}"
+                                    <form action="{{ route('admin.collaborators.destroy', $extra->collaborator->id) }}"
                                         method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="deleteProprietaryButton btn btn-danger" type="submit"><i
+                                        <button class="deleteCollaboratorButton btn btn-danger" type="submit"><i
                                                 class="bi bi-trash-fill"></i> {{ __('view.admin.catalog.extras.show.delete') }}
                                     </form>
                                 </div>
@@ -135,8 +135,8 @@
                                 {{ __('view.admin.catalog.items.show.no') }}
                             @endif
                         </p>
-                        <strong>{{ __('view.admin.catalog.items.show.section') }}: </strong>
-                        <p class="card-text">{{ $extra->item->section->name }}</p>
+                        <strong>{{ __('view.admin.catalog.items.show.item_category') }}: </strong>
+                        <p class="card-text">{{ $extra->item->category?->name }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.collaborator') }}: </strong>
                         <p class="card-text">{{ $extra->item->proprietary->name }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.created_at') }}: </strong>

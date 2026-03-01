@@ -7,8 +7,8 @@ use App\Http\Controllers\Admin\Concerns\BuildsAdminIndexQuery;
 use App\Http\Controllers\Admin\Concerns\LocksSubject;
 use App\Http\Requests\Catalog\SingleExtraRequest;
 use App\Models\Catalog\Extra;
-use App\Models\Catalog\Section;
-use App\Models\Proprietary\Proprietary;
+use App\Models\Catalog\ItemCategory;
+use App\Models\Collaborator\Collaborator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,11 +23,11 @@ class AdminExtraController extends AdminBaseController
         'baseTable' => 'extras',
         'searchBaseTable' => 'items',
         'searchSpecial' => [
-            'proprietary_id' => ['table' => 'proprietaries', 'column' => 'contact'],
+            'collaborator_id' => ['table' => 'collaborators', 'column' => 'contact'],
             'item_id' => ['table' => 'items', 'column' => 'name'],
         ],
         'sortSpecial' => [
-            'proprietary_id' => 'proprietaries.contact',
+            'collaborator_id' => 'collaborators.contact',
             'item_id' => 'items.name',
         ],
     ];
@@ -37,12 +37,12 @@ class AdminExtraController extends AdminBaseController
         $count = Extra::count();
         $query = Extra::query();
         $query
-            ->leftJoin('proprietaries', 'extras.proprietary_id', '=', 'proprietaries.id')
+            ->leftJoin('collaborators', 'extras.collaborator_id', '=', 'collaborators.id')
             ->leftJoin('items', 'extras.item_id', '=', 'items.id')
             ->select([
                 'extras.*',
                 'items.name AS item_name',
-                'proprietaries.contact AS proprietary_contact',
+                'collaborators.contact AS collaborator_contact',
             ]);
 
         $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
@@ -62,10 +62,10 @@ class AdminExtraController extends AdminBaseController
 
     public function create(): View
     {
-        $sections = Section::orderBy('name', 'asc')->get();
-        $proprietaries = Proprietary::orderBy('contact', 'asc')->get();
+        $sections = ItemCategory::orderBy('name', 'asc')->get();
+        $collaborators = Collaborator::orderBy('contact', 'asc')->get();
 
-        return view('admin.catalog.extras.create', compact('proprietaries', 'sections'));
+        return view('admin.catalog.extras.create', compact('collaborators', 'sections'));
     }
 
     public function store(SingleExtraRequest $request): RedirectResponse
@@ -81,12 +81,12 @@ class AdminExtraController extends AdminBaseController
         $extra = Extra::findOrFail($id);
         $this->requireUnlocked($extra);
 
-        $proprietaries = Proprietary::orderBy('contact', 'asc')->get();
-        $sections = Section::orderBy('name', 'asc')->get();
+        $collaborators = Collaborator::orderBy('contact', 'asc')->get();
+        $sections = ItemCategory::orderBy('name', 'asc')->get();
 
         $this->lock($extra);
 
-        return view('admin.catalog.extras.edit', compact('extra', 'sections', 'proprietaries'));
+        return view('admin.catalog.extras.edit', compact('extra', 'sections', 'collaborators'));
     }
 
     public function update(SingleExtraRequest $request, Extra $extra): RedirectResponse

@@ -128,10 +128,10 @@
                                 {{ __('view.admin.catalog.items.show.no') }}
                             @endif
                         </p>
-                        <strong>{{ __('view.admin.catalog.items.show.section') }}: </strong>
-                        <p class="card-text">{{ $itemTag->item->section->name }}</p>
+                        <strong>{{ __('view.admin.catalog.items.show.item_category') }}: </strong>
+                        <p class="card-text">{{ $itemTag->item->category?->name }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.collaborator') }}: </strong>
-                        <p class="card-text">{{ $itemTag->item->proprietary->name }}</p>
+                        <p class="card-text">{{ $itemTag->item->collaborator?->full_name }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.created_at') }}: </strong>
                         <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($itemTag->item->created_at)) }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.updated_at') }}: </strong>

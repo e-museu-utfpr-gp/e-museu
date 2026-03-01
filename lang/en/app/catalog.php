@@ -9,10 +9,10 @@ return [
         'updated' => 'Item updated successfully.',
         'deleted' => 'Item deleted successfully.',
     ],
-    'section' => [
-        'created' => 'Section added successfully.',
-        'updated' => 'Section updated successfully.',
-        'deleted' => 'Section deleted successfully.',
+    'item_category' => [
+        'created' => 'Item category added successfully.',
+        'updated' => 'Item category updated successfully.',
+        'deleted' => 'Item category deleted successfully.',
     ],
     'extra' => [
         'contribution_success' => 'Extra information submitted successfully! Thank you for your time; we will review your submission before adding it to our museum.',

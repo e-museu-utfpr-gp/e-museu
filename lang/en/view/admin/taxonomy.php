@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'categories' => [
+    'tag_categories' => [
         'delete_confirm' => 'Are you sure you want to delete this category and all references to it in other records?',
         'index' => [
             'title' => 'List tag categories',
             'heading' => 'Tag Categories - :count Registered',
-            'add_category' => 'Add Tag Category',
+            'add_tag_category' => 'Add Tag Category',
             'search_placeholder' => 'Search',
             'search_button' => 'Search',
             'id' => 'Id',

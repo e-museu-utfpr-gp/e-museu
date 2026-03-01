@@ -3,7 +3,7 @@
 namespace App\Services\Catalog;
 
 use App\Models\Catalog\Item;
-use App\Models\Catalog\Section;
+use App\Models\Catalog\ItemCategory;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class ItemIndexQueryBuilder
     private function baseQuery(): Builder
     {
         return Item::query()
-            ->select('id', 'name', 'date', 'section_id', 'description', 'identification_code', 'image')
+            ->select('id', 'name', 'date', 'category_id', 'description', 'identification_code', 'image')
             ->where('validation', true);
     }
 
@@ -47,7 +47,7 @@ class ItemIndexQueryBuilder
     private function applySection(Builder $query, ?string $sectionId): void
     {
         if ($sectionId) {
-            $query->where('section_id', $sectionId);
+            $query->where('category_id', $sectionId);
         }
     }
 
@@ -71,7 +71,7 @@ class ItemIndexQueryBuilder
             return;
         }
         $query->whereHas('tags', function (Builder $tagRelationQuery) use ($categoryIds): void {
-            $tagRelationQuery->whereIn('category_id', $categoryIds)->where('tag_item.validation', true);
+            $tagRelationQuery->whereIn('tag_category_id', $categoryIds)->where('item_tag.validation', true);
         });
     }
 
@@ -85,7 +85,7 @@ class ItemIndexQueryBuilder
             return;
         }
         $query->whereHas('tags', function (Builder $tagRelationQuery) use ($tagIds): void {
-            $tagRelationQuery->whereIn('tag_id', $tagIds)->where('tag_item.validation', true);
+            $tagRelationQuery->whereIn('tag_id', $tagIds)->where('item_tag.validation', true);
         });
     }
 
@@ -111,8 +111,8 @@ class ItemIndexQueryBuilder
         if (! $sectionId) {
             return '';
         }
-        $section = Section::find($sectionId);
+        $category = ItemCategory::find($sectionId);
 
-        return $section !== null ? $section->name : '';
+        return $category !== null ? $category->name : '';
     }
 }

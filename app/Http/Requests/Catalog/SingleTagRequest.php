@@ -23,7 +23,7 @@ class SingleTagRequest extends FormRequest
     {
         return [
             'name' => 'required|string|min:1|max:200',
-            'category_id' => 'required|integer|numeric|exists:categories,id',
+            'category_id' => 'required|integer|numeric|exists:tag_categories,id',
             'validation' => 'sometimes|boolean',
         ];
     }

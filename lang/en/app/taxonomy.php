@@ -1,10 +1,10 @@
 <?php
 
 return [
-    'category' => [
-        'created' => 'Category added successfully.',
-        'updated' => 'Category updated successfully.',
-        'deleted' => 'Category deleted successfully.',
+    'tag_category' => [
+        'created' => 'Tag category added successfully.',
+        'updated' => 'Tag category updated successfully.',
+        'deleted' => 'Tag category deleted successfully.',
     ],
     'tag' => [
         'created' => 'Tag added successfully.',

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Catalog;
 
+use App\Enums\CollaboratorRole;
 use App\Http\Controllers\Controller;
 use App\Models\Catalog\Item;
-use App\Models\Proprietary\Proprietary;
+use App\Models\Collaborator\Collaborator;
 use App\Models\Taxonomy\Tag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -74,15 +75,15 @@ class QueryController extends Controller
     }
 
     /**
-     * @return Proprietary|false
+     * @return Collaborator|false
      */
     public function checkContact(Request $request)
     {
         $contact = (string) ($request->input('contact') ?? '');
 
-        $data = Proprietary::where('contact', 'LIKE', $contact)
+        $data = Collaborator::where('contact', 'LIKE', $contact)
+            ->where('role', CollaboratorRole::EXTERNAL)
             ->where('blocked', false)
-            ->where('is_admin', false)
             ->first();
 
         if ($data) {

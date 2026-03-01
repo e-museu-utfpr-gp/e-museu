@@ -1,11 +1,11 @@
 <?php
 
 return [
-    'users' => [
+    'admins' => [
         'index' => [
-            'title' => 'List administrator users',
+            'title' => 'List administrators',
             'heading' => 'Administrators - :count Registered',
-            'add_user' => 'Add Administrator',
+            'add_admin' => 'Add Administrator',
             'search_placeholder' => 'Search',
             'search_button' => 'Search',
             'id' => 'Id',

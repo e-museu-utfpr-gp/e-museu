@@ -25,7 +25,7 @@
                         <option value="id" @if (request()->query('search_column') == 'id') selected @endif>{{ __('view.admin.taxonomy.tags.index.id') }}</option>
                         <option value="name" @if (request()->query('search_column') == 'name') selected @endif>{{ __('view.admin.taxonomy.tags.index.name') }}</option>
                         <option value="validation" @if (request()->query('search_column') == 'validation') selected @endif>{{ __('view.admin.taxonomy.tags.index.validation') }}</option>
-                        <option value="category_id" @if (request()->query('search_column') == 'category_id') selected @endif>{{ __('view.admin.taxonomy.tags.index.category') }}</option>
+                        <option value="tag_category_id" @if (request()->query('search_column') == 'tag_category_id') selected @endif>{{ __('view.admin.taxonomy.tags.index.category') }}</option>
                         <option value="created_at" @if (request()->query('search_column') == 'created_at') selected @endif>{{ __('view.admin.taxonomy.tags.index.created_at') }}</option>
                         <option value="updated_at" @if (request()->query('search_column') == 'updated_at') selected @endif>{{ __('view.admin.taxonomy.tags.index.updated_at') }}</option>
                     </select>
@@ -48,7 +48,7 @@
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
                                         name="sort" value="validation">{{ __('view.admin.taxonomy.tags.index.validation') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
-                                        name="sort" value="category_id">{{ __('view.admin.taxonomy.tags.index.category') }}</button></th>
+                                        name="sort" value="tag_category_id">{{ __('view.admin.taxonomy.tags.index.category') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
                                         name="sort" value="created_at">{{ __('view.admin.taxonomy.tags.index.created_at') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"

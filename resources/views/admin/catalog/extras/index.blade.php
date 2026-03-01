@@ -26,7 +26,7 @@
                         <option value="id" @if (request()->query('search_column') == 'id') selected @endif>{{ __('view.admin.catalog.extras.index.id') }}</option>
                         <option value="info" @if (request()->query('search_column') == 'info') selected @endif>{{ __('view.admin.catalog.extras.index.info') }}</option>
                         <option value="item_id" @if (request()->query('search_column') == 'item_id') selected @endif>{{ __('view.admin.catalog.extras.index.item') }}</option>
-                        <option value="proprietary_id" @if (request()->query('search_column') == 'proprietary_id') selected @endif>{{ __('view.admin.catalog.extras.index.collaborator') }}
+                        <option value="collaborator_id" @if (request()->query('search_column') == 'collaborator_id') selected @endif>{{ __('view.admin.catalog.extras.index.collaborator') }}
                         </option>
                         <option value="validation" @if (request()->query('search_column') == 'validation') selected @endif>{{ __('view.admin.catalog.extras.index.validation') }}</option>
                         <option value="created_at" @if (request()->query('search_column') == 'created_at') selected @endif>{{ __('view.admin.catalog.extras.index.created_at') }}</option>
@@ -51,7 +51,7 @@
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
                                         name="sort" value="item_id">{{ __('view.admin.catalog.extras.index.item') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
-                                        name="sort" value="proprietary_id">{{ __('view.admin.catalog.extras.index.collaborator') }}</button></th>
+                                        name="sort" value="collaborator_id">{{ __('view.admin.catalog.extras.index.collaborator') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
                                         name="sort" value="validation">{{ __('view.admin.catalog.extras.index.validation') }}</button></th>
                                 <th scope="col"><button class="btn border-0 bg-transparent px-0 py-0" type="submit"
@@ -70,7 +70,7 @@
                                 <th scope="row">{{ $extra->id }}</th>
                                 <td>{{ $extra->info }}</td>
                                 <td>{{ $extra->item_name }}</td>
-                                <td>{{ $extra->proprietary_contact }}</td>
+                                <td>{{ $extra->collaborator_contact }}</td>
                                 <td>
                                     @if ($extra->extra_validation == 1)
                                         {{ __('view.admin.catalog.extras.index.yes') }}

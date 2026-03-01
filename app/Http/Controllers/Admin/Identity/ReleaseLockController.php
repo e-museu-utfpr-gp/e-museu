@@ -17,7 +17,7 @@ class ReleaseLockController extends AdminBaseController
     public function __invoke(Request $request): Response
     {
         $request->validate([
-            'type' => 'required|string|in:items,sections,tags,categories,proprietaries,extras',
+            'type' => 'required|string|in:items,item-categories,tag-categories,tags,collaborators,extras',
             'id' => 'required|integer|min:1',
         ]);
 
@@ -35,7 +35,7 @@ class ReleaseLockController extends AdminBaseController
         }
 
         $lock = Lock::findByModel($subject);
-        if ($lock && (string) $lock->user_id === (string) Auth::id()) {
+        if ($lock && (string) $lock->admin_id === (string) Auth::id()) {
             $lock->delete();
         }
 

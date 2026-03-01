@@ -43,29 +43,29 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="section_id" class="form-label">{{ __('view.admin.catalog.items.edit.section') }}</label>
-                                <select class="form-select @error('section_id') is-invalid @enderror" id="section_id"
-                                    name="section_id">
+                                <label for="category_id" class="form-label">{{ __('view.admin.catalog.items.edit.item_category') }}</label>
+                                <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
+                                    name="category_id">
                                     @foreach ($sections as $section)
                                         <option value="{{ $section->id }}"
-                                            @if ($item->section_id == $section->id) selected @endif>{{ $section->name }}</option>
+                                            @if ($item->category_id == $section->id) selected @endif>{{ $section->name }}</option>
                                     @endforeach
                                 </select>
-                                @error('section_id')
+                                @error('category_id')
                                     <div class="invalid-feedback"> {{ $message }} </div>
                                 @enderror
                             </div>
                             <div class="mb-3">
-                                <label for="proprietary_id" class="form-label">{{ __('view.admin.catalog.items.edit.collaborator') }}</label>
-                                <select class="form-select @error('proprietary_id') is-invalid @enderror"
-                                    id="proprietary_id" name="proprietary_id">
-                                    @foreach ($proprietaries as $proprietary)
-                                        <option value="{{ $proprietary->id }}"
-                                            @if ($item->proprietary_id == $proprietary->id) selected @endif>{{ $proprietary->contact }} -
-                                            {{ $proprietary->full_name }}</option>
+                                <label for="collaborator_id" class="form-label">{{ __('view.admin.catalog.items.edit.collaborator') }}</label>
+                                <select class="form-select @error('collaborator_id') is-invalid @enderror"
+                                    id="collaborator_id" name="collaborator_id">
+                                    @foreach ($collaborators as $collaborator)
+                                        <option value="{{ $collaborator->id }}"
+                                            @if ($item->collaborator_id == $collaborator->id) selected @endif>{{ $collaborator->contact }} -
+                                            {{ $collaborator->full_name }}</option>
                                     @endforeach
                                 </select>
-                                @error('proprietary_id')
+                                @error('collaborator_id')
                                     <div class="invalid-feedback"> {{ $message }} </div>
                                 @enderror
                             </div>

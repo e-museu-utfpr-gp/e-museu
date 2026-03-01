@@ -24,7 +24,7 @@ class SingleExtraRequest extends FormRequest
         return [
             'info' => 'required|string|min:1|max:10000',
             'item_id' => 'required|integer|numeric|exists:items,id',
-            'proprietary_id' => 'sometimes|integer|numeric|exists:proprietaries,id',
+            'collaborator_id' => 'sometimes|integer|numeric|exists:collaborators,id',
             'validation' => 'sometimes|boolean',
         ];
     }
