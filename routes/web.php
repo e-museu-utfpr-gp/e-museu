@@ -42,7 +42,7 @@ Route::get('/tag-name-auto-complete', [QueryController::class, 'tagNameAutoCompl
 Route::get('/check-tag-name', [QueryController::class, 'checkTagName'])->name('check-tag-name');
 Route::get('/check-contact', [QueryController::class, 'checkContact'])->name('check-contact');
 Route::get('/get-tags', [QueryController::class, 'getTags'])->name('get-tags');
-Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => 'authenticate'], function () {
     Route::redirect('/admin', '/admin/items');
 
     Route::resource('admin/items', AdminItemController::class)->names('admin.items');
@@ -77,4 +77,4 @@ Route::middleware('redirectIfAuthenticated')->group(function () {
     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AdminLoginController::class, 'login']);
 });
-Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout')->middleware('authenticate');
