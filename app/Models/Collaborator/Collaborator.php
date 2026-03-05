@@ -2,7 +2,7 @@
 
 namespace App\Models\Collaborator;
 
-use App\Enums\CollaboratorRole;
+use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Catalog\Extra;
 use App\Models\Catalog\Item;
 use App\Models\Identity\Lock;

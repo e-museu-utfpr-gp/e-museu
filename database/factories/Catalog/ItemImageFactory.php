@@ -2,7 +2,7 @@
 
 namespace Database\Factories\Catalog;
 
-use App\Enums\ItemImageType;
+use App\Enums\Catalog\ItemImageType;
 use App\Models\Catalog\Item;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;

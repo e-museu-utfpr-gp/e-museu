@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Collaborator;
 
-use App\Enums\CollaboratorRole;
+use App\Enums\Collaborator\CollaboratorRole;
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Controllers\Admin\Concerns\LocksSubject;
 use App\Http\Requests\Collaborator\StoreCollaboratorRequest;

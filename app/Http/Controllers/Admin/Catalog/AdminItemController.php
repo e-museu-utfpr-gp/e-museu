@@ -11,6 +11,7 @@ use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemCategory;
 use App\Models\Catalog\ItemImage;
 use App\Models\Collaborator\Collaborator;
+use App\Services\Catalog\ItemContributionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use RuntimeException;
 
+/**
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class AdminItemController extends AdminBaseController
 {
     use BuildsAdminIndexQuery;
@@ -81,10 +86,8 @@ class AdminItemController extends AdminBaseController
         return view('admin.catalog.items.create', compact('collaborators', 'sections'));
     }
 
-    public function store(StoreItemRequest $request): RedirectResponse
+    public function store(StoreItemRequest $request, ItemContributionService $itemContributionService): RedirectResponse
     {
-        $item = null;
-
         $rules = [
             'collaborator_id' => 'required|integer|numeric|exists:collaborators,id',
             'validation' => 'required|boolean',
@@ -96,57 +99,8 @@ class AdminItemController extends AdminBaseController
             return back()->withErrors($validator)->withInput();
         }
 
-        $data = [
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'history' => $request->input('history'),
-            'detail' => $request->input('detail'),
-            'date' => $request->input('date') ?? '0001-01-01 00:00:00',
-            'category_id' => $request->input('category_id'),
-            'collaborator_id' => $request->input('collaborator_id'),
-            'validation' => $request->boolean('validation'),
-        ];
-
-        $data['identification_code'] = '000';
-
-        DB::transaction(function () use ($data, &$item) {
-            $item = Item::create($data);
-
-            $data['identification_code'] = self::createIdentificationCode($item);
-
-            $item->update($data);
-        });
-
-        if (! $item instanceof Item) {
-            throw new RuntimeException('Item creation failed');
-        }
-
-        $coverFile = $request->file('cover_image');
-        if ($coverFile instanceof UploadedFile && $coverFile->isValid()) {
-            $this->storeNewCoverImage($item, $coverFile);
-        }
-
-        $galleryFiles = $request->file('gallery_images');
-        if (is_array($galleryFiles)) {
-            $maxOrder = (int) $item->images()->max('sort_order');
-            foreach ($galleryFiles as $file) {
-                if (! $file instanceof UploadedFile || ! $file->isValid()) {
-                    continue;
-                }
-                $contents = $file->get();
-                if ($contents === false) {
-                    continue;
-                }
-                $ext = $file->getClientOriginalExtension() ?: 'png';
-                $path = ItemImage::buildPath($item, $ext);
-                Storage::disk('public')->put($path, $contents);
-                $item->images()->create([
-                    'path' => $path,
-                    'type' => 'gallery',
-                    'sort_order' => ++$maxOrder,
-                ]);
-            }
-        }
+        $item = $this->createItemFromRequest($request, $itemContributionService);
+        $this->handleImagesForStore($item, $request);
 
         $item->normalizeSingleCover();
 
@@ -304,59 +258,69 @@ class AdminItemController extends AdminBaseController
         return redirect()->route('admin.items.edit', $item)->with('success', __('app.catalog.item_image.deleted'));
     }
 
-    public function createIdentificationCode(Item $item): string
-    {
-        $sectionModel = ItemCategory::findOrFail($item->category_id);
-        $section = self::removeAccent($sectionModel->name);
+    private function createItemFromRequest(
+        StoreItemRequest $request,
+        ItemContributionService $itemContributionService
+    ): Item {
+        $data = [
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'history' => $request->input('history'),
+            'detail' => $request->input('detail'),
+            'date' => $request->input('date') ?? '0001-01-01 00:00:00',
+            'category_id' => $request->input('category_id'),
+            'collaborator_id' => $request->input('collaborator_id'),
+            'validation' => $request->boolean('validation'),
+            'identification_code' => '000',
+        ];
 
-        $words = explode(' ', $section);
+        $item = null;
 
-        if (count($words) === 1) {
-            $words = explode('-', $words[0]);
+        DB::transaction(function () use ($data, &$item, $itemContributionService): void {
+            $item = Item::create($data);
+
+            $updateData = $data;
+            $updateData['identification_code'] = $itemContributionService->createIdentificationCode($item);
+
+            $item->update($updateData);
+        });
+
+        if (! $item instanceof Item) {
+            throw new RuntimeException('Item creation failed');
         }
 
-        $collaboratorCode = '';
-        $collaborator = $item->collaborator;
-        if ($collaborator) {
-            $initials = collect(explode(' ', $collaborator->full_name))
-                ->map(fn (string $w): string => mb_substr($w, 0, 1))
-                ->implode('');
-            $collaboratorCode = $initials !== '' ? strtoupper($initials) : 'COL';
-        } else {
-            $collaboratorCode = 'COL';
-        }
-
-        if (count($words) > 1) {
-            $section = strtoupper(substr($words[0], 0, 2));
-            $section .= strtoupper(substr(end($words), 0, 2));
-        } else {
-            $section = strtoupper(substr($words[0], 0, 4));
-        }
-
-        return $collaboratorCode . '_' . $section . '_' . $item->id;
+        return $item;
     }
 
-    public function removeAccent(string $string): string
+    private function handleImagesForStore(Item $item, StoreItemRequest $request): void
     {
-        $result = preg_replace(
-            [
-                '/(á|à|ã|â|ä)/',
-                '/(Á|À|Ã|Â|Ä)/',
-                '/(é|è|ê|ë)/',
-                '/(É|È|Ê|Ë)/',
-                '/(í|ì|î|ï)/',
-                '/(Í|Ì|Î|Ï)/',
-                '/(ó|ò|õ|ô|ö)/',
-                '/(Ó|Ò|Õ|Ô|Ö)/',
-                '/(ú|ù|û|ü)/',
-                '/(Ú|Ù|Û|Ü)/',
-                '/(ñ)/',
-                '/(Ñ)/',
-            ],
-            explode(' ', 'a A e E i I o O u U n N'),
-            $string
-        );
+        $coverFile = $request->file('cover_image');
+        if ($coverFile instanceof UploadedFile && $coverFile->isValid()) {
+            $this->storeNewCoverImage($item, $coverFile);
+        }
 
-        return $result ?? $string;
+        $galleryFiles = $request->file('gallery_images');
+        if (! is_array($galleryFiles)) {
+            return;
+        }
+
+        $maxOrder = (int) $item->images()->max('sort_order');
+        foreach ($galleryFiles as $file) {
+            if (! $file instanceof UploadedFile || ! $file->isValid()) {
+                continue;
+            }
+            $contents = $file->get();
+            if ($contents === false) {
+                continue;
+            }
+            $ext = $file->getClientOriginalExtension() ?: 'png';
+            $path = ItemImage::buildPath($item, $ext);
+            Storage::disk('public')->put($path, $contents);
+            $item->images()->create([
+                'path' => $path,
+                'type' => 'gallery',
+                'sort_order' => ++$maxOrder,
+            ]);
+        }
     }
 }

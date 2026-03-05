@@ -21,4 +21,3 @@ import './components/warnings/deleteProprietaryWarning';
 import './components/warnings/deleteSectionWarning';
 import './components/warnings/deleteTagWarning';
 import './components/warnings/deleteUserWarning';
-

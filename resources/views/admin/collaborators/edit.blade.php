@@ -44,7 +44,7 @@
                         </label>
                         <select class="form-select @error('role') is-invalid @enderror" id="role" name="role">
                             @php
-                                use App\Enums\CollaboratorRole;
+                                use App\Enums\Collaborator\CollaboratorRole;
                                 $roleValue = optional($collaborator->role)?->value ?? CollaboratorRole::EXTERNAL->value;
                             @endphp
                             <option value="{{ CollaboratorRole::EXTERNAL->value }}" @if ($roleValue === CollaboratorRole::EXTERNAL->value) selected @endif>
