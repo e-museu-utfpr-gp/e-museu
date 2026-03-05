@@ -64,8 +64,6 @@
                         <br><br>
                         {{ __('view.home.about.paragraph2_cont') }}
                         <br><br>
-                        <strong>{{ __('view.home.about.assistant_note') }}</strong>
-                        <br><br>
                         {{ __('view.home.about.cta') }}
                     </p>
                 </div>

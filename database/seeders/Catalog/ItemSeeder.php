@@ -2,7 +2,7 @@
 
 namespace Database\Seeders\Catalog;
 
-use App\Enums\ItemImageType;
+use App\Enums\Catalog\ItemImageType;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemComponent;
 use App\Models\Catalog\ItemImage;

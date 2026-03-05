@@ -42,7 +42,7 @@
                             {{ __('view.admin.collaborator.collaborators.create.role') }}
                         </label>
                         <select class="form-select @error('role') is-invalid @enderror" id="role" name="role">
-                            @php use App\Enums\CollaboratorRole; @endphp
+                            @php use App\Enums\Collaborator\CollaboratorRole; @endphp
                             <option value="{{ CollaboratorRole::EXTERNAL->value }}" {{ old('role', CollaboratorRole::EXTERNAL->value) === CollaboratorRole::EXTERNAL->value ? 'selected' : '' }}>
                                 {{ __('app.collaborator.role.external') }}
                             </option>

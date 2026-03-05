@@ -1,16 +1,5 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Create The Application
-|--------------------------------------------------------------------------
-|
-| The first thing we will do is create a new Laravel application instance
-| which serves as the "glue" for all the components of Laravel, and is
-| the IoC container for the system binding all of the various parts.
-|
-*/
-
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -35,14 +24,6 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Console/Commands',
     ])
     ->withMiddleware(function (Middleware $middleware) {
-        /*
-        |--------------------------------------------------------------------------
-        | Global Middleware
-        |--------------------------------------------------------------------------
-        |
-        | These middleware are run during every request to your application.
-        |
-        */
         $middleware->append([
             \Illuminate\Http\Middleware\TrustProxies::class,
             \Illuminate\Http\Middleware\HandleCors::class,
@@ -52,14 +33,6 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Web Middleware
-        |--------------------------------------------------------------------------
-        |
-        | These middleware are applied to your web routes.
-        |
-        */
         $middleware->web(prepend: [
             \App\Http\Middleware\StagingBasicAuth::class,
         ], append: [
@@ -71,33 +44,14 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | API Middleware
-        |--------------------------------------------------------------------------
-        |
-        | These middleware are applied to your API routes.
-        |
-        */
         $middleware->api(prepend: [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Middleware Aliases
-        |--------------------------------------------------------------------------
-        |
-        | These middleware aliases may be assigned to groups or used individually.
-        |
-        */
         $middleware->alias([
             'auth' => \App\Http\Middleware\Auth\Authenticate::class,
             'redirectIfAuthenticated' => \App\Http\Middleware\Auth\RedirectIfAuthenticated::class,
-            'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-            'validate.item' => \App\Http\Middleware\Catalog\ValidateItem::class,
-            'validate.collaborator' => \App\Http\Middleware\Collaborator\ValidateCollaborator::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

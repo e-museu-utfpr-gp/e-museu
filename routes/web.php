@@ -28,12 +28,10 @@ Route::get('/about', function () {
 Route::get('items', [ItemController::class, 'index'])->name('items.index');
 Route::get('items/create', [ItemController::class, 'create'])->name('items.create');
 Route::get('items/by-section', [ItemController::class, 'bySection'])->name('items.bySection');
-Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show')->middleware('validate.item');
+Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show');
 
-Route::middleware('validate.collaborator')->group(function () {
-    Route::post('items', [ItemController::class, 'store'])->name('items.store');
-    Route::post('items/extras', [ItemController::class, 'storeSingleExtra'])->name('items.store-extra');
-});
+Route::post('items', [ItemController::class, 'store'])->name('items.store');
+Route::post('items/extras', [ItemController::class, 'storeSingleExtra'])->name('items.store-extra');
 
 Route::get(
     '/component-name-auto-complete',

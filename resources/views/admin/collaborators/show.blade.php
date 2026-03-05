@@ -2,7 +2,7 @@
 @section('title', __('view.admin.collaborator.collaborators.show.title', ['id' => $collaborator->id]))
 
 @section('content')
-    @php use App\Enums\CollaboratorRole; @endphp
+    @php use App\Enums\Collaborator\CollaboratorRole; @endphp
     <div class="mb-auto container-fluid">
         @if (session('success'))
             <div class="alert alert-success" role="alert">

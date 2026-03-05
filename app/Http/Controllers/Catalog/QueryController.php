@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Enums\CollaboratorRole;
+use App\Enums\Collaborator\CollaboratorRole;
 use App\Http\Controllers\Controller;
 use App\Models\Catalog\Item;
 use App\Models\Collaborator\Collaborator;

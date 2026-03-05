@@ -2,7 +2,7 @@
 
 namespace Database\Factories\Collaborator;
 
-use App\Enums\CollaboratorRole;
+use App\Enums\Collaborator\CollaboratorRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

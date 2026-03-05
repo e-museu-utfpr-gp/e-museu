@@ -2,7 +2,7 @@
 
 namespace Database\Seeders\Collaborator;
 
-use App\Enums\CollaboratorRole;
+use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Collaborator\Collaborator;
 use Illuminate\Database\Seeder;
 

@@ -74,6 +74,10 @@ class ItemController extends Controller
     public function show(string $id): View
     {
         $item = Item::with('images')->findOrFail($id);
+
+        if ($item->validation === false) {
+            abort(403, __('app.catalog.item.access_denied'));
+        }
         $sections = ItemCategory::get();
         $categories = TagCategory::get();
 

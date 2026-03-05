@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Collaborator;
 
-use App\Enums\CollaboratorRole;
+use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Collaborator\Collaborator;
 use Illuminate\Foundation\Http\FormRequest;
 
