@@ -56,7 +56,6 @@
     @if (request()->routeIs('items.index'))
         @include('catalog.items.explore-menu')
     @endif
-    @include('assistent.assistent')
     @yield('content')
     <div>
         <footer class="d-md-flex custom-footer px-md-5 justify-content-between fixed align-items-center  py-5 mt-2">
