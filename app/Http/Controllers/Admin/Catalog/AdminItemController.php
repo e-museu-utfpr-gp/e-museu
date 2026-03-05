@@ -83,7 +83,7 @@ class AdminItemController extends AdminBaseController
 
     public function store(StoreItemRequest $request): RedirectResponse
     {
-        $item = false;
+        $item = null;
 
         $rules = [
             'collaborator_id' => 'required|integer|numeric|exists:collaborators,id',
@@ -121,15 +121,31 @@ class AdminItemController extends AdminBaseController
             throw new RuntimeException('Item creation failed');
         }
 
-        if ($request->image) {
-            $ext = $request->image->getClientOriginalExtension() ?: 'png';
-            $path = ItemImage::buildPath($item, $ext);
-            Storage::disk('public')->put($path, $request->image->get());
-            $item->images()->create([
-                'path' => $path,
-                'type' => 'cover',
-                'sort_order' => 0,
-            ]);
+        $coverFile = $request->file('cover_image');
+        if ($coverFile instanceof UploadedFile && $coverFile->isValid()) {
+            $this->storeNewCoverImage($item, $coverFile);
+        }
+
+        $galleryFiles = $request->file('gallery_images');
+        if (is_array($galleryFiles)) {
+            $maxOrder = (int) $item->images()->max('sort_order');
+            foreach ($galleryFiles as $file) {
+                if (! $file instanceof UploadedFile || ! $file->isValid()) {
+                    continue;
+                }
+                $contents = $file->get();
+                if ($contents === false) {
+                    continue;
+                }
+                $ext = $file->getClientOriginalExtension() ?: 'png';
+                $path = ItemImage::buildPath($item, $ext);
+                Storage::disk('public')->put($path, $contents);
+                $item->images()->create([
+                    'path' => $path,
+                    'type' => 'gallery',
+                    'sort_order' => ++$maxOrder,
+                ]);
+            }
         }
 
         $item->normalizeSingleCover();
