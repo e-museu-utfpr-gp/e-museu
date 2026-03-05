@@ -2,12 +2,12 @@
 
 namespace App\Services\Catalog;
 
+use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Catalog\Extra;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemImage;
 use App\Models\Catalog\ItemComponent;
 use App\Models\Catalog\ItemCategory;
-use App\Enums\CollaboratorRole;
 use App\Models\Collaborator\Collaborator;
 use App\Models\Taxonomy\TagCategory;
 use App\Models\Taxonomy\Tag;
@@ -187,8 +187,9 @@ class ItemContributionService
 
         return DB::transaction(function () use ($itemData): Item {
             $item = Item::create($itemData);
-            $itemData['identification_code'] = $this->createIdentificationCode($item);
-            $item->update($itemData);
+            $updateData = $itemData;
+            $updateData['identification_code'] = $this->createIdentificationCode($item);
+            $item->update($updateData);
 
             return $item;
         });
@@ -244,7 +245,7 @@ class ItemContributionService
         }
     }
 
-    private function createIdentificationCode(Item $item): string
+    public function createIdentificationCode(Item $item): string
     {
         $categoryModel = ItemCategory::findOrFail($item->category_id);
         $sectionNameNormalized = $this->removeAccent($categoryModel->name);

@@ -5,7 +5,6 @@ return [
     'home' => require __DIR__ . '/view/home.php',
     'layout' => require __DIR__ . '/view/layout.php',
     'about' => require __DIR__ . '/view/about.php',
-    'auth' => require __DIR__ . '/view/auth.php',
     'admin' => [
         'catalog' => require __DIR__ . '/view/admin/catalog.php',
         'taxonomy' => require __DIR__ . '/view/admin/taxonomy.php',
