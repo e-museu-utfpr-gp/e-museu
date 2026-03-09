@@ -48,7 +48,7 @@
                                     <div class="division-line my-1"></div>
                                     <div class="d-flex justify-content-between pt-1">
                                         <p class="card-subtitle border- fw-bold">{{ $item->category?->name }}</p>
-                                        @if (\Carbon\Carbon::parse($item->date)->format('Y') != '0001')
+                                        @if ($item->date)
                                             <p class="card-subtitle">{{ date('d/m/Y', strtotime($item->date)) }}</p>
                                         @else
                                             <p class="card-subtitle">

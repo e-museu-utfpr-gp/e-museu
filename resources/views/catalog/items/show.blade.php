@@ -81,7 +81,7 @@
                                 <p class="fw-bold">{{ __('view.catalog.items.show.date') }}</p>
                             </div>
                             <div class="col-md-7">
-                                @if (\Carbon\Carbon::parse($item->date)->format('Y') != '0001')
+                                @if ($item->date)
                                     <p>{{ date('d/m/Y', strtotime($item->date)) }}</p>
                                 @else
                                     <p>{{ __('view.catalog.items.show.date_unknown') }}</p>
@@ -209,7 +209,7 @@
                                             <div class="my-4">
                                                 <div class="d-flex align-items-start">
                                                     <div class="timeline-circle me-2"></div>
-                                                    @if (\Carbon\Carbon::parse($timelineItem->date)->format('Y') != '0001')
+                                                    @if ($timelineItem->date)
                                                         <h6 class="fw-bold timeline-item-date">
                                                             {{ date('d/m/Y', strtotime($timelineItem->date)) }}</h6>
                                                     @else

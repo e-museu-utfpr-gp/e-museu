@@ -5,7 +5,6 @@ namespace App\Services\Catalog;
 use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Catalog\Extra;
 use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemImage;
 use App\Models\Catalog\ItemComponent;
 use App\Models\Catalog\ItemCategory;
 use App\Models\Collaborator\Collaborator;
@@ -14,8 +13,6 @@ use App\Models\Taxonomy\Tag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 
 /** @SuppressWarnings(PHPMD.CouplingBetweenObjects) */
 class ItemContributionService
@@ -54,6 +51,8 @@ class ItemContributionService
      * @param  array<int, array<string, mixed>>  $tags
      * @param  array<int, array<string, mixed>>  $extras
      * @param  array<int, array<string, mixed>>  $components
+     * @param  UploadedFile|null  $image
+     * @param  ItemImagesService  $itemImagesService
      * @param  array<int, UploadedFile>|null  $galleryImages
      */
     public function store(
@@ -63,6 +62,7 @@ class ItemContributionService
         array $extras,
         array $components,
         ?UploadedFile $image,
+        ItemImagesService $itemImagesService,
         ?array $galleryImages = null
     ): RedirectResponse {
         $collaborator = $this->resolveCollaborator($collaboratorData);
@@ -76,7 +76,10 @@ class ItemContributionService
             unset($itemData['image'], $itemData['cover_image']);
         }
         $item = $this->storeItem($itemData, $collaborator);
-        $this->storeItemImages($item, $image, $galleryImages ?? []);
+        if ($image !== null) {
+            $itemImagesService->storeCoverImage($item, $image);
+        }
+        $itemImagesService->storeGalleryImages($item, $galleryImages ?? []);
         $item->normalizeSingleCover();
         $this->storeMultipleTag($tags, $item);
         $this->storeMultipleExtra($extras, $item, $collaborator);
@@ -93,50 +96,6 @@ class ItemContributionService
         $collaborator = Collaborator::where('contact', '=', $collaboratorData['contact'])->first();
 
         return $collaborator ?? $this->storeCollaborator($collaboratorData);
-    }
-
-    /**
-     * @param  array<int, UploadedFile>  $galleryImages
-     */
-    private function storeItemImages(Item $item, ?UploadedFile $coverImage, array $galleryImages): void
-    {
-        if ($coverImage !== null) {
-            $this->storeCoverImage($item, $coverImage);
-        }
-        $this->storeGalleryImages($item, $galleryImages);
-    }
-
-    private function storeCoverImage(Item $item, UploadedFile $image): void
-    {
-        $ext = $image->getClientOriginalExtension() ?: 'png';
-        $path = ItemImage::buildPath($item, $ext);
-        $contents = $image->get();
-        if ($contents === false) {
-            throw new RuntimeException(__('app.catalog.item.upload_read_failed'));
-        }
-        Storage::disk('public')->put($path, $contents);
-        $item->images()->create(['path' => $path, 'type' => 'cover', 'sort_order' => 0]);
-    }
-
-    /**
-     * @param  array<int, UploadedFile>  $galleryFiles
-     */
-    private function storeGalleryImages(Item $item, array $galleryFiles): void
-    {
-        $sortOrder = 1;
-        foreach ($galleryFiles as $file) {
-            if (! $file->isValid()) {
-                continue;
-            }
-            $contents = $file->get();
-            if ($contents === false) {
-                continue;
-            }
-            $ext = $file->getClientOriginalExtension() ?: 'png';
-            $path = ItemImage::buildPath($item, $ext);
-            Storage::disk('public')->put($path, $contents);
-            $item->images()->create(['path' => $path, 'type' => 'gallery', 'sort_order' => $sortOrder++]);
-        }
     }
 
     /**
@@ -181,9 +140,6 @@ class ItemContributionService
     {
         $itemData['collaborator_id'] = $collaborator->id;
         $itemData['identification_code'] = '000';
-        if (array_key_exists('date', $itemData) && $itemData['date'] === null) {
-            $itemData['date'] = '0001-01-01 00:00:00';
-        }
 
         return DB::transaction(function () use ($itemData): Item {
             $item = Item::create($itemData);

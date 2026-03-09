@@ -9,6 +9,7 @@ use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemCategory;
 use App\Models\Taxonomy\TagCategory;
 use App\Services\Catalog\ItemContributionService;
+use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemIndexQueryBuilder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -46,7 +47,7 @@ class ItemController extends Controller
         return view('catalog.items.create', compact('categories', 'sections'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ItemImagesService $itemImagesService): RedirectResponse
     {
         $validatedData = $this->itemContributionValidator->validateStore($request);
 
@@ -67,6 +68,7 @@ class ItemController extends Controller
             $validatedData['extras'],
             $validatedData['components'],
             $request->file('cover_image'),
+            $itemImagesService,
             $galleryFiles ?: null
         );
     }

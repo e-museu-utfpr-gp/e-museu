@@ -87,7 +87,7 @@
                                 <td>{{ $item->description}}</td>
                                 <td>{{ $item->history }}</td>
                                 <td>{{ $item->detail }}</td>
-                                <td>{{ date('d-m-Y', strtotime($item->date)) }}</td>
+                                <td>{{ $item->date ? date('d-m-Y', strtotime($item->date)) : '—' }}</td>
                                 <td>{{ $item->identification_code }}</td>
                                 <td>
                                     @if ($item->item_validation == 1)

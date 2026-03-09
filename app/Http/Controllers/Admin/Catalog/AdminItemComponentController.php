@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\BuildsAdminIndexQuery;
-use App\Http\Requests\Catalog\SingleComponentRequest;
+use App\Http\Requests\Admin\Catalog\AdminSingleComponentRequest;
+use App\Support\AdminIndexQuery;
 use App\Models\Catalog\ItemComponent;
 use App\Models\Catalog\ItemCategory;
 use Illuminate\Http\RedirectResponse;
@@ -13,8 +13,6 @@ use Illuminate\View\View;
 
 class AdminItemComponentController extends AdminBaseController
 {
-    use BuildsAdminIndexQuery;
-
     /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
     private const INDEX_CONFIG = [
         'baseTable' => 'item_component',
@@ -43,8 +41,8 @@ class AdminItemComponentController extends AdminBaseController
             'component.name AS component_name',
         ]);
 
-        $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
-        $this->applyIndexSort($query, $request->sort, $request->order, self::INDEX_CONFIG);
+        AdminIndexQuery::applySearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
+        AdminIndexQuery::applySort($query, $request->sort, $request->order, self::INDEX_CONFIG);
 
         $itemComponents = $query->paginate(30)->withQueryString();
 
@@ -65,7 +63,7 @@ class AdminItemComponentController extends AdminBaseController
         return view('admin.catalog.item-components.create', compact('sections'));
     }
 
-    public function store(SingleComponentRequest $request): RedirectResponse
+    public function store(AdminSingleComponentRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $itemComponent = ItemComponent::create($data);

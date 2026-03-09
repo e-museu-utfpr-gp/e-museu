@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Controllers\Admin\Concerns\LocksSubject;
-use App\Http\Requests\Catalog\ItemCategoryRequest;
+use App\Http\Requests\Admin\Catalog\AdminItemCategoryRequest;
 use App\Models\Catalog\ItemCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -44,7 +44,7 @@ class AdminItemCategoryController extends AdminBaseController
         return view('admin.catalog.item-categories.create');
     }
 
-    public function store(ItemCategoryRequest $request): RedirectResponse
+    public function store(AdminItemCategoryRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $itemCategory = ItemCategory::create($data);
@@ -64,7 +64,7 @@ class AdminItemCategoryController extends AdminBaseController
         return view('admin.catalog.item-categories.edit', compact('itemCategory'));
     }
 
-    public function update(ItemCategoryRequest $request, ItemCategory $itemCategory): RedirectResponse
+    public function update(AdminItemCategoryRequest $request, ItemCategory $itemCategory): RedirectResponse
     {
         $this->requireUnlocked($itemCategory);
 

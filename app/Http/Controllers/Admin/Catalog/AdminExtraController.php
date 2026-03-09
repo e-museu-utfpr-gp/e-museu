@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\BuildsAdminIndexQuery;
 use App\Http\Controllers\Admin\Concerns\LocksSubject;
+use App\Support\AdminIndexQuery;
 use App\Http\Requests\Catalog\SingleExtraRequest;
 use App\Models\Catalog\Extra;
 use App\Models\Catalog\ItemCategory;
@@ -15,7 +15,6 @@ use Illuminate\View\View;
 
 class AdminExtraController extends AdminBaseController
 {
-    use BuildsAdminIndexQuery;
     use LocksSubject;
 
     /** @var array{baseTable: string, searchBaseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
@@ -45,8 +44,8 @@ class AdminExtraController extends AdminBaseController
                 'collaborators.contact AS collaborator_contact',
             ]);
 
-        $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
-        $this->applyIndexSort($query, $request->sort, $request->order, self::INDEX_CONFIG);
+        AdminIndexQuery::applySearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
+        AdminIndexQuery::applySort($query, $request->sort, $request->order, self::INDEX_CONFIG);
 
         $extras = $query->paginate(30)->withQueryString();
 

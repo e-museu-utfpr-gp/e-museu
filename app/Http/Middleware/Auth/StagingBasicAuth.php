@@ -35,4 +35,3 @@ class StagingBasicAuth
         return $next($request);
     }
 }
-

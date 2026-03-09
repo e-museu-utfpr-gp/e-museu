@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Taxonomy;
+namespace App\Http\Requests\Admin\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class TagCategoryRequest extends FormRequest
+class AdminItemCategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -13,7 +13,7 @@ class TagCategoryRequest extends FormRequest
     }
 
     /**
-     * @return array<string, string|array<int, string|\Illuminate\Validation\Rule>>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -23,7 +23,7 @@ class TagCategoryRequest extends FormRequest
                 'string',
                 'min:1',
                 'max:200',
-                Rule::unique('tag_categories')->ignore($this->route('tag_category')),
+                Rule::unique('item_categories')->ignore($this->route('item_category')),
             ],
         ];
     }

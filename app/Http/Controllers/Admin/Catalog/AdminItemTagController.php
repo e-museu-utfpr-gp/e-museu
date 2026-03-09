@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\BuildsAdminIndexQuery;
-use App\Http\Requests\Catalog\ItemTagRequest;
+use App\Http\Requests\Admin\Catalog\AdminItemTagRequest;
+use App\Support\AdminIndexQuery;
 use App\Models\Catalog\ItemCategory;
 use App\Models\Catalog\ItemTag;
 use App\Models\Taxonomy\TagCategory;
@@ -14,8 +14,6 @@ use Illuminate\View\View;
 
 class AdminItemTagController extends AdminBaseController
 {
-    use BuildsAdminIndexQuery;
-
     /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
     private const INDEX_CONFIG = [
         'baseTable' => 'item_tag',
@@ -44,8 +42,8 @@ class AdminItemTagController extends AdminBaseController
             'tags.name AS tag_name',
         ]);
 
-        $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
-        $this->applyIndexSort($query, $request->sort, $request->order, self::INDEX_CONFIG);
+        AdminIndexQuery::applySearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
+        AdminIndexQuery::applySort($query, $request->sort, $request->order, self::INDEX_CONFIG);
 
         $itemTags = $query->paginate(50)->withQueryString();
 
@@ -67,7 +65,7 @@ class AdminItemTagController extends AdminBaseController
         return view('admin.catalog.item-tags.create', compact('categories', 'sections'));
     }
 
-    public function store(ItemTagRequest $request): RedirectResponse
+    public function store(AdminItemTagRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $itemTag = ItemTag::create($data);

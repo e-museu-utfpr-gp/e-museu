@@ -87,7 +87,7 @@
                         <div class="card mb-3">
                             <h5 class="card-header">{{ __('view.admin.catalog.items.show.date') }}</h5>
                             <div class="card-body">
-                                <p class="card-text">{{ date('d-m-Y', strtotime($item->date)) }}</p>
+                                <p class="card-text">{{ $item->date ? date('d-m-Y', strtotime($item->date)) : '—' }}</p>
                             </div>
                         </div>
                     </div>

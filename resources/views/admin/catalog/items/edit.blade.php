@@ -74,7 +74,7 @@
                             <div class="mb-3">
                                 <label for="date" class="form-label">{{ __('view.admin.catalog.items.edit.date') }}</label>
                                 <input type="date" class="form-control @error('date') is-invalid @enderror"
-                                    id="date" name="date" value="{{ $item->date }}">
+                                    id="date" name="date" value="{{ $item->date?->format('Y-m-d') }}">
                                 @error('date')
                                     <div class="invalid-feedback"> {{ $message }} </div>
                                 @enderror

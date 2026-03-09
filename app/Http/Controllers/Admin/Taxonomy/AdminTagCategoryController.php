@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Taxonomy;
 
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Controllers\Admin\Concerns\LocksSubject;
-use App\Http\Requests\Taxonomy\TagCategoryRequest;
+use App\Http\Requests\Admin\Taxonomy\AdminTagCategoryRequest;
 use App\Models\Taxonomy\TagCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class AdminTagCategoryController extends AdminBaseController
         return view('admin.taxonomy.tag-categories.create');
     }
 
-    public function store(TagCategoryRequest $request): RedirectResponse
+    public function store(AdminTagCategoryRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $tagCategory = TagCategory::create($data);
@@ -64,7 +64,7 @@ class AdminTagCategoryController extends AdminBaseController
         return view('admin.taxonomy.tag-categories.edit', compact('tagCategory'));
     }
 
-    public function update(TagCategoryRequest $request, TagCategory $tagCategory): RedirectResponse
+    public function update(AdminTagCategoryRequest $request, TagCategory $tagCategory): RedirectResponse
     {
         $this->requireUnlocked($tagCategory);
 

@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Concerns;
+namespace App\Support;
 
 use Illuminate\Database\Eloquent\Builder;
 
 /**
+ * Applies search and sort to an Eloquent query for admin index listings.
+ *
  * Config: baseTable, searchBaseTable (optional, defaults to baseTable),
  * searchSpecial: [ 'col' => ['table'=>'...','column'=>'...'] ],
  * sortSpecial: [ 'col' => 'table.column' ].
@@ -16,12 +18,14 @@ use Illuminate\Database\Eloquent\Builder;
  *   sortSpecial?: array<string, string>
  * }
  */
-trait BuildsAdminIndexQuery
+class AdminIndexQuery
 {
     /**
+     * @template T of \Illuminate\Database\Eloquent\Model
+     * @param  Builder<T>  $query
      * @param  IndexConfig  $config
      */
-    protected function applyIndexSearch(Builder $query, ?string $searchColumn, ?string $search, array $config): void
+    public static function applySearch(Builder $query, ?string $searchColumn, ?string $search, array $config): void
     {
         if (! $searchColumn || ! $search) {
             return;
@@ -52,9 +56,11 @@ trait BuildsAdminIndexQuery
     }
 
     /**
+     * @template T of \Illuminate\Database\Eloquent\Model
+     * @param  Builder<T>  $query
      * @param  IndexConfig  $config
      */
-    protected function applyIndexSort(Builder $query, ?string $sort, ?string $order, array $config): void
+    public static function applySort(Builder $query, ?string $sort, ?string $order, array $config): void
     {
         if (! $sort || ! $order) {
             return;

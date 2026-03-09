@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description');
             $table->text('history')->nullable();
             $table->text('detail')->nullable();
-            $table->date('date');
+            $table->date('date')->nullable();
             $table->string('identification_code');
             $table->string('image')->nullable();
             $table->boolean('validation')->default(0);
