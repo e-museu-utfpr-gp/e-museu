@@ -25,6 +25,7 @@ class AdminItemTagController extends AdminBaseController
             'item_id' => 'items.name',
             'tag_id' => 'tags.name',
         ],
+        'booleanColumns' => ['validation'],
     ];
 
     public function index(Request $request): View
@@ -60,9 +61,9 @@ class AdminItemTagController extends AdminBaseController
     public function create(): View
     {
         $categories = TagCategory::orderBy('name', 'asc')->get();
-        $sections = ItemCategory::orderBy('name', 'asc')->get();
+        $itemCategories = ItemCategory::orderBy('name', 'asc')->get();
 
-        return view('admin.catalog.item-tags.create', compact('categories', 'sections'));
+        return view('admin.catalog.item-tags.create', compact('categories', 'itemCategories'));
     }
 
     public function store(AdminItemTagRequest $request): RedirectResponse

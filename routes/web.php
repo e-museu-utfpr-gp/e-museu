@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Catalog\AdminExtraController;
 use App\Http\Controllers\Admin\Catalog\AdminItemController;
 use App\Http\Controllers\Admin\Catalog\AdminItemTagController;
 use App\Http\Controllers\Admin\Catalog\AdminItemCategoryController;
+use App\Http\Controllers\Catalog\ExtraController;
 use App\Http\Controllers\Catalog\ItemController;
 use App\Http\Controllers\Catalog\QueryController;
 use App\Http\Controllers\HomeController;
@@ -27,11 +28,11 @@ Route::get('/about', function () {
 
 Route::get('items', [ItemController::class, 'index'])->name('items.index');
 Route::get('items/create', [ItemController::class, 'create'])->name('items.create');
-Route::get('items/by-section', [ItemController::class, 'bySection'])->name('items.bySection');
+Route::get('items/by-category', [ItemController::class, 'byCategory'])->name('items.byCategory');
 Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show');
 
 Route::post('items', [ItemController::class, 'store'])->name('items.store');
-Route::post('items/extras', [ItemController::class, 'storeSingleExtra'])->name('items.store-extra');
+Route::post('extras', [ExtraController::class, 'store'])->name('extras.store');
 
 Route::get(
     '/component-name-auto-complete',

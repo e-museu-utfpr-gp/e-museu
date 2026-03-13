@@ -126,19 +126,19 @@
                             <h5 class="card-header">{{ __('view.admin.catalog.items.show.item_category') }}</h5>
                             <div class="card-body">
                                 <strong>{{ __('view.admin.catalog.items.show.id') }}: </strong>
-                                <p class="ms-3">{{ $item->category?->id }}</p>
+                                <p class="ms-3">{{ $item->itemCategory?->id }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.name') }}: </strong>
-                                <p class="card-text">{{ $item->category?->name }}</p>
+                                <p class="card-text">{{ $item->itemCategory?->name }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.created_at') }}: </strong>
                                 <p class="ms-2">{{ date('d-m-Y', strtotime($item->created_at)) }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.updated_at') }}: </strong>
                                 <p class="ms-2">{{ date('d-m-Y', strtotime($item->updated_at)) }}</p>
                                 <div class="d-flex">
-                                    <a href="{{ route('admin.item-categories.show', $item->category?->id) }}" type="button"
+                                    <a href="{{ route('admin.item-categories.show', $item->itemCategory?->id) }}" type="button"
                                         class="btn btn-primary me-1"><i class="bi bi-eye-fill"></i> {{ __('view.admin.catalog.items.show.view') }}</a>
-                                    <a href="{{ route('admin.item-categories.edit', $item->category?->id) }}" type="button"
+                                    <a href="{{ route('admin.item-categories.edit', $item->itemCategory?->id) }}" type="button"
                                         class="btn btn-warning me-1"><i class="bi bi-pencil-fill"></i> {{ __('view.admin.catalog.items.show.edit') }}</a>
-                                    <form action="{{ route('admin.item-categories.destroy', $item->category?->id) }}"
+                                    <form action="{{ route('admin.item-categories.destroy', $item->itemCategory?->id) }}"
                                         method="POST">
                                         @csrf
                                         @method('DELETE')
@@ -202,7 +202,7 @@
                         <div class="card mb-3">
                             <h5 class="card-header d-flex justify-content-between">{{ __('view.admin.catalog.items.show.extra_info') }} <a type="button"
                                     class="btn btn-success"
-                                    href="{{ route('admin.extras.create', ['id' => $item->id, 'section' => $item->category?->id]) }}"><i
+                                    href="{{ route('admin.extras.create', ['id' => $item->id, 'item_category' => $item->itemCategory?->id]) }}"><i
                                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.items.show.add_extra') }}</a></h5>
                             <div class="card-body">
                                 <ul class="list-group list-group-flush">
@@ -253,7 +253,7 @@
                         <div class="card mb-3">
                             <h5 class="card-header d-flex justify-content-between">{{ __('view.admin.catalog.items.show.related_tags') }}<a type="button"
                                     class="btn btn-success"
-                                    href="{{ route('admin.item-tags.create', ['id' => $item->id, 'section' => $item->category?->id]) }}"><i
+                                    href="{{ route('admin.item-tags.create', ['id' => $item->id, 'item_category' => $item->itemCategory?->id]) }}"><i
                                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.items.show.add_tag') }}</a></h5>
                             <div class="card-body">
                                 <ul class="list-group list-group-flush">
@@ -308,7 +308,7 @@
                         <div class="card mb-3">
                             <h5 class="card-header d-flex justify-content-between">{{ __('view.admin.catalog.items.show.related_components') }}<a
                                     type="button" class="btn btn-success"
-                                    href="{{ route('admin.item-components.create', ['id' => $item->id, 'section' => $item->category?->id]) }}"><i
+                                    href="{{ route('admin.item-components.create', ['id' => $item->id, 'item_category' => $item->itemCategory?->id]) }}"><i
                                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.items.show.add_component') }}</a></h5>
                             <div class="card-body">
                                 <ul class="list-group list-group-flush">

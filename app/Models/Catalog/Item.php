@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Tag> $tags
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ItemImage> $images
  * @property-read ItemImage|null $coverImage
+ * @property-read ItemCategory|null $itemCategory
+ * @property-read string|null $item_category_name
  * @property-read string $image_url
  *
  * @SuppressWarnings(PHPMD.TooManyPublicMethods)
@@ -97,9 +99,9 @@ class Item extends Model
         return $this->hasMany(Extra::class);
     }
 
-    public function category(): BelongsTo
+    public function itemCategory(): BelongsTo
     {
-        return $this->belongsTo(ItemCategory::class);
+        return $this->belongsTo(ItemCategory::class, 'category_id');
     }
 
     public function itemComponents(): HasMany
@@ -137,7 +139,7 @@ class Item extends Model
                 DB::raw('LEFT(items.history, 300) as history'),
                 DB::raw('LEFT(items.description, 150) as description'),
                 DB::raw('LEFT(items.detail, 150) as detail'),
-                'item_categories.name AS section_name',
+                'item_categories.name AS item_category_name',
                 'collaborators.contact AS collaborator_contact',
             ]);
 

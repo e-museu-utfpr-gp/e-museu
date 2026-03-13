@@ -94,7 +94,7 @@
                             @endif
                         </p>
                         <strong>{{ __('view.admin.catalog.components.show.item_category') }}: </strong>
-                        <p class="card-text">{{ $itemComponent->item->category?->name }}</p>
+                        <p class="card-text">{{ $itemComponent->item->itemCategory?->name }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.collaborator') }}: </strong>
                         <p class="card-text">{{ $itemComponent->item->collaborator?->full_name }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.created_at') }}: </strong>
@@ -148,7 +148,7 @@
                             @endif
                         </p>
                         <strong>{{ __('view.admin.catalog.components.show.item_category') }}: </strong>
-                        <p class="card-text">{{ $itemComponent->component->category?->name }}</p>
+                        <p class="card-text">{{ $itemComponent->component->itemCategory?->name }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.collaborator') }}: </strong>
                         <p class="card-text">{{ $itemComponent->component->collaborator?->full_name }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.created_at') }}: </strong>

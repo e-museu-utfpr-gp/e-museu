@@ -48,9 +48,9 @@
                                 <label for="category_id" class="form-label">{{ __('view.admin.catalog.items.edit.item_category') }}</label>
                                 <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
                                     name="category_id">
-                                    @foreach ($sections as $section)
-                                        <option value="{{ $section->id }}"
-                                            @if ($item->category_id == $section->id) selected @endif>{{ $section->name }}</option>
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            @if ($item->category_id == $itemCategory->id) selected @endif>{{ $itemCategory->name }}</option>
                                     @endforeach
                                 </select>
                                 @error('category_id')

@@ -25,6 +25,7 @@ class AdminTagController extends AdminBaseController
         'sortSpecial' => [
             'tag_category_id' => 'tag_categories.name',
         ],
+        'booleanColumns' => ['validation'],
     ];
 
     public function index(Request $request): View

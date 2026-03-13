@@ -5,16 +5,17 @@ namespace App\Services\Catalog;
 use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemCategory;
-use App\Models\Collaborator\Collaborator;
 use App\Support\AdminIndexQuery;
+use App\Support\StringHelper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class ItemService
 {
-    /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
+    /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>, booleanColumns: array<int, string>} */
     private const ADMIN_INDEX_CONFIG = [
         'baseTable' => 'items',
         'searchSpecial' => [
@@ -25,6 +26,7 @@ class ItemService
             'collaborator_id' => 'collaborators.contact',
             'category_id' => 'item_categories.name',
         ],
+        'booleanColumns' => ['validation'],
     ];
 
     /**
@@ -46,27 +48,11 @@ class ItemService
     }
 
     /**
-     * Get sections (item categories) and collaborators for create/edit forms.
-     *
-     * @return array{sections: \Illuminate\Database\Eloquent\Collection<int, ItemCategory>,
-     *               collaborators: \Illuminate\Database\Eloquent\Collection<int, Collaborator>}
-     */
-    public function getSectionsAndCollaborators(): array
-    {
-        return [
-            'sections' => ItemCategory::orderBy('name')->get(),
-            'collaborators' => Collaborator::orderBy('full_name')->get(),
-        ];
-    }
-
-    /**
      * Create an item from the admin store request and set its identification code in a single transaction.
      */
-    public function createItemWithIdentificationCode(
-        AdminStoreItemRequest $request,
-        ItemContributionService $itemContributionService
-    ): Item {
-        $data = [
+    public function createItemWithIdentificationCode(AdminStoreItemRequest $request): Item
+    {
+        $itemAttributes = [
             'name' => $request->input('name'),
             'description' => $request->input('description'),
             'history' => $request->input('history'),
@@ -80,14 +66,14 @@ class ItemService
 
         $item = null;
 
-        DB::transaction(function () use ($data, &$item, $itemContributionService): void {
-            $item = Item::create($data);
+        DB::transaction(function () use ($itemAttributes, &$item): void {
+            $item = Item::create($itemAttributes);
 
-            $updateData = array_merge($data, [
-                'identification_code' => $itemContributionService->createIdentificationCode($item),
+            $attributesWithIdentificationCode = array_merge($itemAttributes, [
+                'identification_code' => $this->createIdentificationCode($item),
             ]);
 
-            $item->update($updateData);
+            $item->update($attributesWithIdentificationCode);
         });
 
         if (! $item instanceof Item) {
@@ -98,13 +84,33 @@ class ItemService
     }
 
     /**
-     * Update an item with the given data and normalize its cover image.
-     *
-     * @param  array<string, mixed>  $data
+     * Generate identification code for an item (e.g. EXT_ABCD_123).
      */
-    public function updateItem(Item $item, array $data): void
+    public function createIdentificationCode(Item $item): string
     {
-        $item->update($data);
+        $itemCategory = ItemCategory::findOrFail($item->category_id);
+        $normalizedItemCategoryName = StringHelper::removeAccent($itemCategory->name);
+        $nameParts = explode(' ', $normalizedItemCategoryName);
+        if (count($nameParts) === 1) {
+            $nameParts = explode('-', $nameParts[0]);
+        }
+        if (count($nameParts) > 1) {
+            $itemCategoryCode = strtoupper(substr($nameParts[0], 0, 2)) . strtoupper(substr(end($nameParts), 0, 2));
+        } else {
+            $itemCategoryCode = strtoupper(substr($nameParts[0], 0, 4));
+        }
+
+        return 'EXT_' . $itemCategoryCode . '_' . $item->id;
+    }
+
+    /**
+     * Update an item with the given attributes and normalize its cover image.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function updateItem(Item $item, array $attributes): void
+    {
+        $item->update($attributes);
         $item->normalizeSingleCover();
     }
 
@@ -115,5 +121,32 @@ class ItemService
     public function deleteItem(Item $item): void
     {
         $item->delete();
+    }
+
+    /**
+     * Get a single validated item for public show page (with images eager loaded).
+     */
+    public function getPublicItemForShow(string $id): Item
+    {
+        $item = Item::with('images')->findOrFail($id);
+
+        if (! $item->validation) {
+            abort(403, __('app.catalog.item.access_denied'));
+        }
+
+        return $item;
+    }
+
+    /**
+     * Get validated items for public listing filtered by item category.
+     *
+     * @return Collection<int, Item>
+     */
+    public function getPublicItemsByCategory(string $itemCategoryId): Collection
+    {
+        return Item::where('category_id', 'LIKE', $itemCategoryId)
+            ->where('validation', true)
+            ->orderBy('name', 'asc')
+            ->get();
     }
 }

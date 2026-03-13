@@ -29,6 +29,7 @@ class AdminExtraController extends AdminBaseController
             'collaborator_id' => 'collaborators.contact',
             'item_id' => 'items.name',
         ],
+        'booleanColumns' => ['validation'],
     ];
 
     public function index(Request $request): View
@@ -61,10 +62,10 @@ class AdminExtraController extends AdminBaseController
 
     public function create(): View
     {
-        $sections = ItemCategory::orderBy('name', 'asc')->get();
+        $itemCategories = ItemCategory::orderBy('name', 'asc')->get();
         $collaborators = Collaborator::orderBy('contact', 'asc')->get();
 
-        return view('admin.catalog.extras.create', compact('collaborators', 'sections'));
+        return view('admin.catalog.extras.create', compact('collaborators', 'itemCategories'));
     }
 
     public function store(SingleExtraRequest $request): RedirectResponse
@@ -81,11 +82,11 @@ class AdminExtraController extends AdminBaseController
         $this->requireUnlocked($extra);
 
         $collaborators = Collaborator::orderBy('contact', 'asc')->get();
-        $sections = ItemCategory::orderBy('name', 'asc')->get();
+        $itemCategories = ItemCategory::orderBy('name', 'asc')->get();
 
         $this->lock($extra);
 
-        return view('admin.catalog.extras.edit', compact('extra', 'sections', 'collaborators'));
+        return view('admin.catalog.extras.edit', compact('extra', 'itemCategories', 'collaborators'));
     }
 
     public function update(SingleExtraRequest $request, Extra $extra): RedirectResponse

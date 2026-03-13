@@ -15,19 +15,23 @@
             <div class="container-fluid">
                 <a href="{{ route('admin.item-tags.create') }}" type="button" class="btn btn-success"><i
                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.item_tags.index.add') }}</a>
-                <form action="{{ route('admin.item-tags.index') }}" class="d-flex" method="GET">
-                    <select class="form-select me-2" id="search_column" name="search_column">
-                        <option value="id" @if (request()->query('search_column') == 'id') selected @endif>{{ __('view.admin.catalog.item_tags.index.id') }}</option>
-                        <option value="item_id" @if (request()->query('search_column') == 'item_id') selected @endif>{{ __('view.admin.catalog.item_tags.index.item') }}</option>
-                        <option value="tag_id" @if (request()->query('search_column') == 'tag_id') selected @endif>{{ __('view.admin.catalog.item_tags.index.tag') }}</option>
-                        <option value="validation" @if (request()->query('search_column') == 'validation') selected @endif>{{ __('view.admin.catalog.item_tags.index.validation') }}</option>
-                        <option value="created_at" @if (request()->query('search_column') == 'created_at') selected @endif>{{ __('view.admin.catalog.item_tags.index.created_at') }}</option>
-                        <option value="updated_at" @if (request()->query('search_column') == 'updated_at') selected @endif>{{ __('view.admin.catalog.item_tags.index.updated_at') }}</option>
-                    </select>
-                    <input id="search" name="search" class="form-control me-2" type="search" placeholder="{{ __('view.admin.catalog.item_tags.index.search_placeholder') }}"
-                        aria-label="Search">
-                    <button class="btn btn-secondary" type="submit">{{ __('view.admin.catalog.item_tags.index.search_button') }}</button>
-                </form>
+                @php
+                    $searchOptions = [
+                        ['value' => 'id', 'label' => __('view.admin.catalog.item_tags.index.id')],
+                        ['value' => 'item_id', 'label' => __('view.admin.catalog.item_tags.index.item')],
+                        ['value' => 'tag_id', 'label' => __('view.admin.catalog.item_tags.index.tag')],
+                        ['value' => 'validation', 'label' => __('view.admin.catalog.item_tags.index.validation')],
+                        ['value' => 'created_at', 'label' => __('view.admin.catalog.item_tags.index.created_at')],
+                        ['value' => 'updated_at', 'label' => __('view.admin.catalog.item_tags.index.updated_at')],
+                    ];
+                @endphp
+                <x-admin.search-form
+                    :action="route('admin.item-tags.index')"
+                    :options="$searchOptions"
+                    :placeholder="__('view.admin.catalog.item_tags.index.search_placeholder')"
+                    :buttonLabel="__('view.admin.catalog.item_tags.index.search_button')"
+                    :booleanColumns="['validation']"
+                />
             </div>
         </nav>
         <div class="row">

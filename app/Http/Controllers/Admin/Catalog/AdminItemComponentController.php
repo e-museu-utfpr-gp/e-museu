@@ -24,6 +24,7 @@ class AdminItemComponentController extends AdminBaseController
             'item_id' => 'item.name',
             'component_id' => 'component.name',
         ],
+        'booleanColumns' => ['validation'],
     ];
 
     public function index(Request $request): View
@@ -58,9 +59,9 @@ class AdminItemComponentController extends AdminBaseController
 
     public function create(): View
     {
-        $sections = ItemCategory::orderBy('name', 'asc')->get();
+        $itemCategories = ItemCategory::orderBy('name', 'asc')->get();
 
-        return view('admin.catalog.item-components.create', compact('sections'));
+        return view('admin.catalog.item-components.create', compact('itemCategories'));
     }
 
     public function store(AdminSingleComponentRequest $request): RedirectResponse

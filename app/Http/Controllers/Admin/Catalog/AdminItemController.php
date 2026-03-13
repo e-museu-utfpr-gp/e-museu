@@ -8,9 +8,10 @@ use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
 use App\Http\Requests\Admin\Catalog\AdminUpdateItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemImage;
+use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemImagesService;
-use App\Services\Catalog\ItemContributionService;
 use App\Services\Catalog\ItemService;
+use App\Services\Collaborator\CollaboratorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -41,41 +42,39 @@ class AdminItemController extends AdminBaseController
         return view('admin.catalog.items.show', compact('item'));
     }
 
-    public function create(ItemService $itemService): View
+    public function create(ItemCategoryService $itemCategoryService, CollaboratorService $collaboratorService): View
     {
-        $data = $itemService->getSectionsAndCollaborators();
-
         return view('admin.catalog.items.create', [
-            'sections' => $data['sections'],
-            'collaborators' => $data['collaborators'],
+            'itemCategories' => $itemCategoryService->getForForm(),
+            'collaborators' => $collaboratorService->getForForm(),
         ]);
     }
 
     public function store(
         AdminStoreItemRequest $request,
         ItemService $itemService,
-        ItemContributionService $itemContributionService,
         ItemImagesService $itemImagesService
     ): RedirectResponse {
-        $item = $itemService->createItemWithIdentificationCode($request, $itemContributionService);
+        $item = $itemService->createItemWithIdentificationCode($request);
         $itemImagesService->storeImagesFromStoreRequest($item, $request);
 
         return redirect()->route('admin.items.show', $item->id)->with('success', __('app.catalog.item.created'));
     }
 
-    public function edit(Item $item, ItemService $itemService): View
-    {
+    public function edit(
+        Item $item,
+        ItemCategoryService $itemCategoryService,
+        CollaboratorService $collaboratorService
+    ): View {
         $item->load(['images', 'coverImage']);
         $this->requireUnlocked($item);
 
         $this->lock($item);
 
-        $data = $itemService->getSectionsAndCollaborators();
-
         return view('admin.catalog.items.edit', [
             'item' => $item,
-            'sections' => $data['sections'],
-            'collaborators' => $data['collaborators'],
+            'itemCategories' => $itemCategoryService->getForForm(),
+            'collaborators' => $collaboratorService->getForForm(),
         ]);
     }
 

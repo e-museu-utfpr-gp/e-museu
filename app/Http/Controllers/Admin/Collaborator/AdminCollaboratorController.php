@@ -56,14 +56,8 @@ class AdminCollaboratorController extends AdminBaseController
             return;
         }
 
-        if ($search === 'sim') {
-            $query->where($searchColumn, true);
-
-            return;
-        }
-
-        if ($search === 'não' || $search === 'nao') {
-            $query->where($searchColumn, false);
+        if ($searchColumn === 'blocked') {
+            $query->where($searchColumn, (string) $search === '1');
 
             return;
         }

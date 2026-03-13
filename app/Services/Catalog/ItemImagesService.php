@@ -25,11 +25,8 @@ class ItemImagesService
 
         $galleryFiles = $request->file('gallery_images');
         if (is_array($galleryFiles)) {
-            $validFiles = array_values(array_filter(
-                $galleryFiles,
-                fn ($f) => $f instanceof UploadedFile && $f->isValid()
-            ));
-            $this->storeGalleryImages($item, $validFiles);
+            $validGalleryFiles = $this->filterValidGalleryFiles($galleryFiles);
+            $this->storeGalleryImages($item, $validGalleryFiles);
         }
 
         $item->normalizeSingleCover();
@@ -66,6 +63,22 @@ class ItemImagesService
         if (is_array($galleryFiles)) {
             $this->storeGalleryImages($item, $galleryFiles);
         }
+    }
+
+    /**
+     * @param  array<int, UploadedFile>|null  $galleryFiles
+     * @return array<int, UploadedFile>
+     */
+    public function filterValidGalleryFiles(?array $galleryFiles): array
+    {
+        if (! is_array($galleryFiles)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $galleryFiles,
+            static fn (mixed $file): bool => $file instanceof UploadedFile && $file->isValid()
+        ));
     }
 
     public function storeCoverImage(Item $item, UploadedFile $file): void

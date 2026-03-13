@@ -136,7 +136,7 @@
                             @endif
                         </p>
                         <strong>{{ __('view.admin.catalog.items.show.item_category') }}: </strong>
-                        <p class="card-text">{{ $extra->item->category?->name }}</p>
+                        <p class="card-text">{{ $extra->item->itemCategory?->name }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.collaborator') }}: </strong>
                         <p class="card-text">{{ $extra->item->proprietary->name }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.created_at') }}: </strong>

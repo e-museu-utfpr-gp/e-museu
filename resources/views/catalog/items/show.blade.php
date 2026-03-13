@@ -71,8 +71,8 @@
                                 <p class="fw-bold">{{ __('view.catalog.items.show.category') }}</p>
                             </div>
                             <div class="col-md-7">
-                                <a href={{ route('items.index', ['section' => $item->category?->id]) }}>
-                                    <p class="show-item-link">{{ $item->category?->name }}</p>
+                                <a href={{ route('items.index', ['item_category' => $item->itemCategory?->id]) }}>
+                                    <p class="show-item-link">{{ $item->itemCategory?->name }}</p>
                                 </a>
                             </div>
                         </div>
@@ -128,7 +128,7 @@
                                                 <p class="mb-1 fw-bold">
                                                     {{ Str::limit($ItemComponent->component->name, 30) }}</p>
                                                 <p class="mb-0">
-                                                    {{ Str::limit($ItemComponent->component->category?->name) }}</p>
+                                                    {{ Str::limit($ItemComponent->component->itemCategory?->name) }}</p>
                                             </div>
                                         </div>
                                     </a>
