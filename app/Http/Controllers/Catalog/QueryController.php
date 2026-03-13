@@ -18,7 +18,7 @@ class QueryController extends Controller
         $category = (string) ($request->input('category') ?? '');
 
         $data = Tag::select('name')
-            ->where('category_id', 'LIKE', $category)
+            ->where('tag_category_id', 'LIKE', $category)
             ->where('validation', true);
 
         if ($query !== '') {
@@ -36,7 +36,7 @@ class QueryController extends Controller
         $category = (string) ($request->input('category') ?? '');
 
         $data = Item::select('name')
-            ->where('section_id', 'LIKE', $category)
+            ->where('category_id', 'LIKE', $category)
             ->where('validation', true);
 
         if ($query !== '') {
@@ -53,7 +53,7 @@ class QueryController extends Controller
         $category = (string) ($request->input('category') ?? '');
         $name = (string) ($request->input('name') ?? '');
 
-        $data = Tag::where('category_id', 'LIKE', $category)
+        $data = Tag::where('tag_category_id', 'LIKE', $category)
             ->where('name', 'LIKE', $name)
             ->where('validation', true)
             ->count();
@@ -66,7 +66,7 @@ class QueryController extends Controller
         $category = (string) ($request->input('category') ?? '');
         $name = (string) ($request->input('name') ?? '');
 
-        $data = Item::where('section_id', 'LIKE', $category)
+        $data = Item::where('category_id', 'LIKE', $category)
             ->where('name', 'LIKE', $name)
             ->where('validation', true)
             ->count();
@@ -97,7 +97,7 @@ class QueryController extends Controller
     {
         $category = (string) ($request->input('category') ?? '');
 
-        $data = Tag::where('category_id', 'LIKE', $category)
+        $data = Tag::where('tag_category_id', 'LIKE', $category)
             ->orderBy('name', 'asc')
             ->get();
 

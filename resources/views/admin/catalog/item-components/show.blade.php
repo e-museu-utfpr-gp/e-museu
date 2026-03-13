@@ -82,7 +82,7 @@
                         <strong>{{ __('view.admin.catalog.components.show.detail') }}: </strong>
                         <p class="ms-3">{!! nl2br($itemComponent->item->detail) !!}</p>
                         <strong>{{ __('view.admin.catalog.components.show.date') }}: </strong>
-                        <p class="card-text">{{ date('d-m-Y', strtotime($itemComponent->item->date)) }}</p>
+                        <p class="card-text">{{ $itemComponent->item->date ? date('d-m-Y', strtotime($itemComponent->item->date)) : '—' }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.identification_code') }}: </strong>
                         <p class="ms-3">{{ $itemComponent->item->identification_code }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.validated') }}: </strong>
@@ -94,7 +94,7 @@
                             @endif
                         </p>
                         <strong>{{ __('view.admin.catalog.components.show.item_category') }}: </strong>
-                        <p class="card-text">{{ $itemComponent->item->category?->name }}</p>
+                        <p class="card-text">{{ $itemComponent->item->itemCategory?->name }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.collaborator') }}: </strong>
                         <p class="card-text">{{ $itemComponent->item->collaborator?->full_name }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.created_at') }}: </strong>
@@ -136,7 +136,7 @@
                         <strong>{{ __('view.admin.catalog.components.show.detail') }}: </strong>
                         <p class="ms-3">{!! nl2br($itemComponent->component->detail) !!}</p>
                         <strong>{{ __('view.admin.catalog.components.show.date') }}: </strong>
-                        <p class="card-text">{{ date('d-m-Y', strtotime($itemComponent->component->date)) }}</p>
+                        <p class="card-text">{{ $itemComponent->component->date ? date('d-m-Y', strtotime($itemComponent->component->date)) : '—' }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.identification_code') }}: </strong>
                         <p class="ms-3">{{ $itemComponent->component->identification_code }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.validated') }}: </strong>
@@ -148,7 +148,7 @@
                             @endif
                         </p>
                         <strong>{{ __('view.admin.catalog.components.show.item_category') }}: </strong>
-                        <p class="card-text">{{ $itemComponent->component->category?->name }}</p>
+                        <p class="card-text">{{ $itemComponent->component->itemCategory?->name }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.collaborator') }}: </strong>
                         <p class="card-text">{{ $itemComponent->component->collaborator?->full_name }}</p>
                         <strong>{{ __('view.admin.catalog.components.show.created_at') }}: </strong>

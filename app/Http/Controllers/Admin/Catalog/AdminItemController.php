@@ -3,23 +3,19 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\BuildsAdminIndexQuery;
 use App\Http\Controllers\Admin\Concerns\LocksSubject;
-use App\Http\Requests\Catalog\StoreItemRequest;
-use App\Http\Requests\Catalog\UpdateItemRequest;
+use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
+use App\Http\Requests\Admin\Catalog\AdminUpdateItemRequest;
 use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemCategory;
 use App\Models\Catalog\ItemImage;
-use App\Models\Collaborator\Collaborator;
-use App\Services\Catalog\ItemContributionService;
+use App\Services\Catalog\ItemCategoryService;
+use App\Services\Catalog\ItemImagesService;
+use App\Services\Catalog\ItemService;
+use App\Services\Collaborator\CollaboratorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Arr;
 use Illuminate\View\View;
-use RuntimeException;
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
@@ -27,300 +23,110 @@ use RuntimeException;
  */
 class AdminItemController extends AdminBaseController
 {
-    use BuildsAdminIndexQuery;
     use LocksSubject;
 
-    /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
-    private const INDEX_CONFIG = [
-        'baseTable' => 'items',
-        'searchSpecial' => [
-            'collaborator_id' => ['table' => 'collaborators', 'column' => 'contact'],
-            'category_id' => ['table' => 'item_categories', 'column' => 'name'],
-        ],
-        'sortSpecial' => [
-            'collaborator_id' => 'collaborators.contact',
-            'category_id' => 'item_categories.name',
-        ],
-    ];
-
-    public function index(Request $request): View
+    public function index(Request $request, ItemService $itemService): View
     {
-        $count = Item::count();
-        $query = Item::query();
-        $query->with('coverImage');
-        $query->leftJoin('collaborators', 'items.collaborator_id', '=', 'collaborators.id');
-        $query->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id');
-        $query->select([
-            'items.*',
-            'items.name AS item_name',
-            'items.created_at AS item_created',
-            'items.updated_at AS item_updated',
-            'items.validation AS item_validation',
-            DB::raw('LEFT(items.history, 300) as history'),
-            DB::raw('LEFT(items.description, 150) as description'),
-            DB::raw('LEFT(items.detail, 150) as detail'),
-            'item_categories.name AS section_name',
-            'collaborators.contact AS collaborator_contact',
+        $result = $itemService->getPaginatedItemsForAdminIndex($request);
+
+        return view('admin.catalog.items.index', [
+            'items' => $result['items'],
+            'count' => $result['count'],
         ]);
-
-        $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
-        $this->applyIndexSort($query, $request->sort, $request->order, self::INDEX_CONFIG);
-
-        $items = $query->paginate(30)->withQueryString();
-
-        return view('admin.catalog.items.index', compact('items', 'count'));
     }
 
-    public function show(string $id): View
+    public function show(Item $item): View
     {
-        $item = Item::with('images')->findOrFail($id);
+        $item->load('images');
 
         return view('admin.catalog.items.show', compact('item'));
     }
 
-    public function create(): View
+    public function create(ItemCategoryService $itemCategoryService, CollaboratorService $collaboratorService): View
     {
-        $sections = ItemCategory::orderBy('name')->get();
-        $collaborators = Collaborator::orderBy('full_name')->get();
-
-        return view('admin.catalog.items.create', compact('collaborators', 'sections'));
+        return view('admin.catalog.items.create', [
+            'itemCategories' => $itemCategoryService->getForForm(),
+            'collaborators' => $collaboratorService->getForForm(),
+        ]);
     }
 
-    public function store(StoreItemRequest $request, ItemContributionService $itemContributionService): RedirectResponse
-    {
-        $rules = [
-            'collaborator_id' => 'required|integer|numeric|exists:collaborators,id',
-            'validation' => 'required|boolean',
-        ];
+    public function store(
+        AdminStoreItemRequest $request,
+        ItemService $itemService,
+        ItemImagesService $itemImagesService
+    ): RedirectResponse {
+        $item = $itemService->createItemWithIdentificationCode($request);
+        $itemImagesService->storeImagesFromStoreRequest($item, $request);
 
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        $item = $this->createItemFromRequest($request, $itemContributionService);
-        $this->handleImagesForStore($item, $request);
-
-        $item->normalizeSingleCover();
-
-        return redirect()->route('admin.items.show', $item)->with('success', __('app.catalog.item.created'));
+        return redirect()->route('admin.items.show', $item->id)->with('success', __('app.catalog.item.created'));
     }
 
-    public function edit(string $id): View
-    {
-        $item = Item::findOrFail($id);
+    public function edit(
+        Item $item,
+        ItemCategoryService $itemCategoryService,
+        CollaboratorService $collaboratorService
+    ): View {
+        $item->load(['images', 'coverImage']);
         $this->requireUnlocked($item);
 
         $this->lock($item);
 
-        $sections = ItemCategory::orderBy('name')->get();
-        $collaborators = Collaborator::orderBy('full_name')->get();
-
-        return view('admin.catalog.items.edit', compact('item', 'sections', 'collaborators'));
+        return view('admin.catalog.items.edit', [
+            'item' => $item,
+            'itemCategories' => $itemCategoryService->getForForm(),
+            'collaborators' => $collaboratorService->getForForm(),
+        ]);
     }
 
-    public function update(UpdateItemRequest $request, Item $item): RedirectResponse
-    {
+    public function update(
+        AdminUpdateItemRequest $request,
+        Item $item,
+        ItemImagesService $itemImagesService,
+        ItemService $itemService
+    ): RedirectResponse {
         $this->requireUnlocked($item);
 
-        $data = $request->validated();
-        unset($data['image'], $data['gallery_images'], $data['delete_image_ids'], $data['set_cover_image_id']);
+        $data = Arr::except($request->validated(), [
+            'image',
+            'gallery_images',
+            'delete_image_ids',
+            'set_cover_image_id',
+        ]);
 
-        $this->processDeleteImageIds($item, $request);
-        $this->processCoverImage($item, $request);
-        $this->processGalleryImages($item, $request);
+        $itemImagesService->processDeleteImageIds($item, $request);
+        $itemImagesService->processCoverImage($item, $request);
+        $itemImagesService->processGalleryImages($item, $request);
 
-        if ($data['date'] === null) {
-            $data['date'] = '0001-01-01 00:00:00';
-        }
-        $item->update($data);
-        $item->normalizeSingleCover();
+        $itemService->updateItem($item, $data);
+
         $this->unlock($item);
 
         return redirect()->route('admin.items.show', $item)->with('success', __('app.catalog.item.updated'));
     }
 
-    private function processDeleteImageIds(Item $item, UpdateItemRequest $request): void
-    {
-        $deleteIds = array_filter(array_map('intval', (array) $request->input('delete_image_ids', [])));
-        if ($deleteIds === []) {
-            return;
-        }
-        /** @var \Illuminate\Support\Collection<int, ItemImage> $toDelete */
-        $toDelete = $item->images()->whereIn('id', $deleteIds)->get();
-        $toDelete->each(fn (ItemImage $img) => $this->deleteItemImageFromStorage($img));
-    }
-
-    private function processCoverImage(Item $item, UpdateItemRequest $request): void
-    {
-        if ($request->image) {
-            /** @var \Illuminate\Support\Collection<int, ItemImage> $currentCovers */
-            $currentCovers = $item->images()->where('type', 'cover')->get();
-            $currentCovers->each(fn (ItemImage $img) => $this->deleteItemImageFromStorage($img));
-            $this->storeNewCoverImage($item, $request->image);
-            return;
-        }
-        if ($request->filled('set_cover_image_id')) {
-            $this->promoteImageToCover($item, (int) $request->input('set_cover_image_id'));
-        }
-    }
-
-    private function processGalleryImages(Item $item, UpdateItemRequest $request): void
-    {
-        $galleryFiles = $request->file('gallery_images');
-        if (! is_array($galleryFiles)) {
-            return;
-        }
-        $maxOrder = (int) $item->images()->max('sort_order');
-        foreach ($galleryFiles as $file) {
-            if (! $file->isValid()) {
-                continue;
-            }
-            $contents = $file->get();
-            if ($contents === false) {
-                continue;
-            }
-            $ext = $file->getClientOriginalExtension() ?: 'png';
-            $path = ItemImage::buildPath($item, $ext);
-            Storage::disk('public')->put($path, $contents);
-            $item->images()->create(['path' => $path, 'type' => 'gallery', 'sort_order' => ++$maxOrder]);
-        }
-    }
-
-    private function deleteItemImageFromStorage(ItemImage $img): void
-    {
-        $path = $img->getRawOriginal('path');
-        if ($path !== null && $path !== '' && ! str_starts_with((string) $path, 'http')) {
-            Storage::disk('public')->delete($path);
-        }
-        $img->delete();
-    }
-
-    private function storeNewCoverImage(Item $item, UploadedFile $file): void
-    {
-        $ext = $file->getClientOriginalExtension() ?: 'png';
-        $path = ItemImage::buildPath($item, $ext);
-        $contents = $file->get();
-        if ($contents === false) {
-            return;
-        }
-        Storage::disk('public')->put($path, $contents);
-        $item->images()->create(['path' => $path, 'type' => 'cover', 'sort_order' => 0]);
-    }
-
-    private function promoteImageToCover(Item $item, int $newCoverId): void
-    {
-        $newCover = $item->images()->find($newCoverId);
-        if ($newCover === null) {
-            return;
-        }
-        $item->images()->where('type', 'cover')->update(['type' => 'gallery']);
-        $newCover->update(['type' => 'cover', 'sort_order' => 0]);
-    }
-
-    public function destroy(Item $item): RedirectResponse
-    {
+    public function destroy(
+        Item $item,
+        ItemImagesService $itemImagesService,
+        ItemService $itemService
+    ): RedirectResponse {
         $this->requireUnlocked($item);
 
         $this->unlock($item);
 
-        foreach ($item->images as $img) {
-            $path = $img->getRawOriginal('path');
-            if ($path !== null && $path !== '' && ! str_starts_with((string) $path, 'http')) {
-                Storage::disk('public')->delete($path);
-            }
-        }
-        $item->images()->delete();
-
-        $itemFolder = 'items/' . $item->id;
-        if (Storage::disk('public')->exists($itemFolder)) {
-            Storage::disk('public')->deleteDirectory($itemFolder);
-        }
-
-        $item->delete();
+        $itemImagesService->deleteAllImagesForItem($item);
+        $itemService->deleteItem($item);
 
         return redirect()->route('admin.items.index')->with('success', __('app.catalog.item.deleted'));
     }
 
-    public function destroyImage(Item $item, ItemImage $image): RedirectResponse
-    {
+    public function destroyImage(
+        Item $item,
+        ItemImage $image,
+        ItemImagesService $itemImagesService
+    ): RedirectResponse {
         $this->requireUnlocked($item);
-        if ($image->item_id !== (int) $item->id) {
-            abort(404);
-        }
-        $path = $image->getRawOriginal('path');
-        if ($path !== null && $path !== '' && ! str_starts_with((string) $path, 'http')) {
-            Storage::disk('public')->delete($path);
-        }
-        $image->delete();
+        $itemImagesService->deleteImage($item, $image);
 
         return redirect()->route('admin.items.edit', $item)->with('success', __('app.catalog.item_image.deleted'));
-    }
-
-    private function createItemFromRequest(
-        StoreItemRequest $request,
-        ItemContributionService $itemContributionService
-    ): Item {
-        $data = [
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'history' => $request->input('history'),
-            'detail' => $request->input('detail'),
-            'date' => $request->input('date') ?? '0001-01-01 00:00:00',
-            'category_id' => $request->input('category_id'),
-            'collaborator_id' => $request->input('collaborator_id'),
-            'validation' => $request->boolean('validation'),
-            'identification_code' => '000',
-        ];
-
-        $item = null;
-
-        DB::transaction(function () use ($data, &$item, $itemContributionService): void {
-            $item = Item::create($data);
-
-            $updateData = $data;
-            $updateData['identification_code'] = $itemContributionService->createIdentificationCode($item);
-
-            $item->update($updateData);
-        });
-
-        if (! $item instanceof Item) {
-            throw new RuntimeException('Item creation failed');
-        }
-
-        return $item;
-    }
-
-    private function handleImagesForStore(Item $item, StoreItemRequest $request): void
-    {
-        $coverFile = $request->file('cover_image');
-        if ($coverFile instanceof UploadedFile && $coverFile->isValid()) {
-            $this->storeNewCoverImage($item, $coverFile);
-        }
-
-        $galleryFiles = $request->file('gallery_images');
-        if (! is_array($galleryFiles)) {
-            return;
-        }
-
-        $maxOrder = (int) $item->images()->max('sort_order');
-        foreach ($galleryFiles as $file) {
-            if (! $file instanceof UploadedFile || ! $file->isValid()) {
-                continue;
-            }
-            $contents = $file->get();
-            if ($contents === false) {
-                continue;
-            }
-            $ext = $file->getClientOriginalExtension() ?: 'png';
-            $path = ItemImage::buildPath($item, $ext);
-            Storage::disk('public')->put($path, $contents);
-            $item->images()->create([
-                'path' => $path,
-                'type' => 'gallery',
-                'sort_order' => ++$maxOrder,
-            ]);
-        }
     }
 }

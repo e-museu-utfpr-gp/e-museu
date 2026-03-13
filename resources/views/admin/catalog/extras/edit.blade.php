@@ -28,16 +28,16 @@
                          data-section-selector="#category_id" 
                          data-item-selector="#item_id" 
                          data-original-item-id="{{ $extra->item->id }}"
-                         data-get-items-url="{{ route('items.bySection') }}">
+                         data-get-items-url="{{ route('items.byCategory') }}">
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="category_id" class="form-label">{{ __('view.admin.catalog.extras.edit.item_category') }}</label>
                                 <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
                                     name="category_id">
-                                    @foreach ($sections as $section)
-                                        <option value="{{ $section->id }}"
-                                            {{ $extra->item->category?->id == $section->id ? 'selected' : '' }}>
-                                            {{ $section->name }}</option>
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            {{ $extra->item->itemCategory?->id == $itemCategory->id ? 'selected' : '' }}>
+                                            {{ $itemCategory->name }}</option>
                                     @endforeach
                                 </select>
                                 @error('category_id')

@@ -25,42 +25,24 @@
                     <i class="bi bi-plus-circle"></i>
                     {{ __('view.admin.collaborator.collaborators.index.add') }}
                 </a>
-                <form action="{{ route('admin.collaborators.index') }}" class="d-flex" method="GET">
-                    <select class="form-select me-2" id="search_column" name="search_column">
-                        <option value="id" @if (request()->query('search_column') == 'id') selected @endif>
-                            {{ __('view.admin.collaborator.collaborators.index.search_option_id') }}
-                        </option>
-                        <option value="full_name" @if (request()->query('search_column') == 'full_name') selected @endif>
-                            {{ __('view.admin.collaborator.collaborators.index.search_option_full_name') }}
-                        </option>
-                        <option value="contact" @if (request()->query('search_column') == 'contact') selected @endif>
-                            {{ __('view.admin.collaborator.collaborators.index.search_option_contact') }}
-                        </option>
-                        <option value="role" @if (request()->query('search_column') == 'role') selected @endif>
-                            {{ __('view.admin.collaborator.collaborators.index.search_option_role') }}
-                        </option>
-                        <option value="blocked" @if (request()->query('search_column') == 'blocked') selected @endif>
-                            {{ __('view.admin.collaborator.collaborators.index.search_option_blocked') }}
-                        </option>
-                        <option value="created_at" @if (request()->query('search_column') == 'created_at') selected @endif>
-                            {{ __('view.admin.collaborator.collaborators.index.search_option_created_at') }}
-                        </option>
-                        <option value="updated_at" @if (request()->query('search_column') == 'updated_at') selected @endif>
-                            {{ __('view.admin.collaborator.collaborators.index.search_option_updated_at') }}
-                        </option>
-                    </select>
-                    <input
-                        id="search"
-                        name="search"
-                        class="form-control me-2"
-                        type="search"
-                        placeholder="{{ __('view.admin.collaborator.collaborators.index.search_placeholder') }}"
-                        aria-label="Search"
-                    >
-                    <button class="btn btn-secondary" type="submit">
-                        {{ __('view.admin.collaborator.collaborators.index.search_button') }}
-                    </button>
-                </form>
+                @php
+                    $searchOptions = [
+                        ['value' => 'id', 'label' => __('view.admin.collaborator.collaborators.index.search_option_id')],
+                        ['value' => 'full_name', 'label' => __('view.admin.collaborator.collaborators.index.search_option_full_name')],
+                        ['value' => 'contact', 'label' => __('view.admin.collaborator.collaborators.index.search_option_contact')],
+                        ['value' => 'role', 'label' => __('view.admin.collaborator.collaborators.index.search_option_role')],
+                        ['value' => 'blocked', 'label' => __('view.admin.collaborator.collaborators.index.search_option_blocked')],
+                        ['value' => 'created_at', 'label' => __('view.admin.collaborator.collaborators.index.search_option_created_at')],
+                        ['value' => 'updated_at', 'label' => __('view.admin.collaborator.collaborators.index.search_option_updated_at')],
+                    ];
+                @endphp
+                <x-admin.search-form
+                    :action="route('admin.collaborators.index')"
+                    :options="$searchOptions"
+                    :placeholder="__('view.admin.collaborator.collaborators.index.search_placeholder')"
+                    :buttonLabel="__('view.admin.collaborator.collaborators.index.search_button')"
+                    :booleanColumns="['blocked']"
+                />
             </div>
         </nav>
         <div class="row">

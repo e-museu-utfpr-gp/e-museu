@@ -46,9 +46,9 @@
                                 <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
                                     name="category_id">
                                     <option selected="selected" value="">-</option>
-                                    @foreach ($sections as $section)
-                                        <option value="{{ $section->id }}"
-                                            {{ old('category_id') == $section->id ? 'selected' : '' }}>{{ $section->name }}
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            {{ old('category_id') == $itemCategory->id ? 'selected' : '' }}>{{ $itemCategory->name }}
                                         </option>
                                     @endforeach
                                 </select>

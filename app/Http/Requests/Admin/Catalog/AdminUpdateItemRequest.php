@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Catalog;
+namespace App\Http\Requests\Admin\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateItemRequest extends FormRequest
+class AdminUpdateItemRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -29,7 +29,7 @@ class UpdateItemRequest extends FormRequest
                 'max:200',
                 Rule::unique('items')->ignore($itemId),
             ],
-            'date' => 'date',
+            'date' => 'nullable|date',
             'description' => 'required|string|min:1|max:1000',
             'detail' => 'max:10000',
             'history' => 'max:50000',

@@ -19,16 +19,16 @@
                          data-section-selector="#category_id" 
                          data-item-selector="#item_id" 
                          data-original-item-id="{{ request()->query('id') }}"
-                         data-get-items-url="{{ route('items.bySection') }}">
+                         data-get-items-url="{{ route('items.byCategory') }}">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="category_id" class="form-label">{{ __('view.admin.catalog.components.create.item_category') }}</label>
                                 <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
                                     name="category_id">
-                                    @foreach ($sections as $section)
-                                        <option value="{{ $section->id }}"
-                                            {{ old('category_id', request()->query('section')) == $section->id ? 'selected' : '' }}>
-                                            {{ $section->name }}</option>
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            {{ old('category_id', request()->query('item_category')) == $itemCategory->id ? 'selected' : '' }}>
+                                            {{ $itemCategory->name }}</option>
                                     @endforeach
                                 </select>
                                 @error('category_id')
@@ -49,16 +49,19 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row" data-section-item-selector
+                         data-section-selector="#component_category_id"
+                         data-item-selector="#component_id"
+                         data-get-items-url="{{ route('items.byCategory') }}">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="component_category_id" class="form-label">{{ __('view.admin.catalog.components.create.component_section') }}</label>
+                                <label for="component_category_id" class="form-label">{{ __('view.admin.catalog.components.create.component_category') }}</label>
                                 <select class="form-select @error('component_category_id') is-invalid @enderror"
                                     id="component_category_id" name="component_category_id">
-                                    @foreach ($sections as $section)
-                                        <option value="{{ $section->id }}"
-                                            {{ old('component_category_id') == $section->id ? 'selected' : '' }}>
-                                            {{ $section->name }}</option>
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            {{ old('component_category_id') == $itemCategory->id ? 'selected' : '' }}>
+                                            {{ $itemCategory->name }}</option>
                                     @endforeach
                                 </select>
                                 @error('component_category_id')

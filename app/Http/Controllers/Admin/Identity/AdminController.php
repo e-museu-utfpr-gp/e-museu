@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\Identity;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Requests\Identity\AdminRequest;
+use App\Http\Requests\Admin\Identity\AdminRequest;
 use App\Models\Identity\Lock;
 use App\Models\Identity\Admin;
 use Illuminate\Http\RedirectResponse;

@@ -137,7 +137,7 @@
                                         @endif
                                     </p>
                                     <strong>Categoria de Item: </strong>
-                                    <p class="card-text">{{ $item->category?->name }}</p>
+                                    <p class="card-text">{{ $item->itemCategory?->name }}</p>
                                     <strong>Colaborador: </strong>
                                     <p class="card-text">{{ $item->collaborator->full_name }}</p>
                                     <strong>Criado em: </strong>

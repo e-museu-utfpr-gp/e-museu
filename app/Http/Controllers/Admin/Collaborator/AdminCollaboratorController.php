@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin\Collaborator;
 use App\Enums\Collaborator\CollaboratorRole;
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Controllers\Admin\Concerns\LocksSubject;
-use App\Http\Requests\Collaborator\StoreCollaboratorRequest;
-use App\Http\Requests\Collaborator\UpdateCollaboratorRequest;
+use App\Http\Requests\Admin\Collaborator\AdminStoreCollaboratorRequest;
+use App\Http\Requests\Admin\Collaborator\AdminUpdateCollaboratorRequest;
 use App\Models\Collaborator\Collaborator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -56,14 +56,8 @@ class AdminCollaboratorController extends AdminBaseController
             return;
         }
 
-        if ($search === 'sim') {
-            $query->where($searchColumn, true);
-
-            return;
-        }
-
-        if ($search === 'não' || $search === 'nao') {
-            $query->where($searchColumn, false);
+        if ($searchColumn === 'blocked') {
+            $query->where($searchColumn, (string) $search === '1');
 
             return;
         }
@@ -83,7 +77,7 @@ class AdminCollaboratorController extends AdminBaseController
         return view('admin.collaborators.create');
     }
 
-    public function store(StoreCollaboratorRequest $request): RedirectResponse
+    public function store(AdminStoreCollaboratorRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $data['blocked'] = $request->boolean('blocked', false);
@@ -105,7 +99,7 @@ class AdminCollaboratorController extends AdminBaseController
         return view('admin.collaborators.edit', compact('collaborator'));
     }
 
-    public function update(UpdateCollaboratorRequest $request, Collaborator $collaborator): RedirectResponse
+    public function update(AdminUpdateCollaboratorRequest $request, Collaborator $collaborator): RedirectResponse
     {
         $this->requireUnlocked($collaborator);
 

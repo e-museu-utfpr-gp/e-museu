@@ -334,7 +334,7 @@ return [
             'heading' => 'Relacionar Item e Componente',
             'item_category' => 'Categoria do Item',
             'item' => 'Item',
-            'component_section' => 'Categoria do Componente',
+            'component_category' => 'Categoria do Componente',
             'component' => 'Componente',
             'validation' => 'Validado',
             'yes' => 'Sim',

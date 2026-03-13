@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin\Taxonomy;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\BuildsAdminIndexQuery;
 use App\Http\Controllers\Admin\Concerns\LocksSubject;
-use App\Http\Requests\Catalog\SingleTagRequest;
+use App\Support\AdminIndexQuery;
+use App\Http\Requests\Admin\Taxonomy\AdminSingleTagRequest;
 use App\Models\Taxonomy\TagCategory;
 use App\Models\Taxonomy\Tag;
 use Illuminate\Http\RedirectResponse;
@@ -14,7 +14,6 @@ use Illuminate\View\View;
 
 class AdminTagController extends AdminBaseController
 {
-    use BuildsAdminIndexQuery;
     use LocksSubject;
 
     /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
@@ -26,6 +25,7 @@ class AdminTagController extends AdminBaseController
         'sortSpecial' => [
             'tag_category_id' => 'tag_categories.name',
         ],
+        'booleanColumns' => ['validation'],
     ];
 
     public function index(Request $request): View
@@ -41,8 +41,8 @@ class AdminTagController extends AdminBaseController
             'tag_categories.name AS category_name',
         ]);
 
-        $this->applyIndexSearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
-        $this->applyIndexSort($query, $request->sort, $request->order, self::INDEX_CONFIG);
+        AdminIndexQuery::applySearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
+        AdminIndexQuery::applySort($query, $request->sort, $request->order, self::INDEX_CONFIG);
 
         $tags = $query->paginate(30)->withQueryString();
 
@@ -63,7 +63,7 @@ class AdminTagController extends AdminBaseController
         return view('admin.taxonomy.tags.create', compact('categories'));
     }
 
-    public function store(SingleTagRequest $request): RedirectResponse
+    public function store(AdminSingleTagRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $data['tag_category_id'] = $data['category_id'];
@@ -85,7 +85,7 @@ class AdminTagController extends AdminBaseController
         return view('admin.taxonomy.tags.edit', compact('tag', 'categories'));
     }
 
-    public function update(SingleTagRequest $request, Tag $tag): RedirectResponse
+    public function update(AdminSingleTagRequest $request, Tag $tag): RedirectResponse
     {
         $this->requireUnlocked($tag);
 

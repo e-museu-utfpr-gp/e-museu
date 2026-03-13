@@ -15,19 +15,23 @@
             <div class="container-fluid">
                 <a href="{{ route('admin.item-components.create') }}" type="button" class="btn btn-success"><i
                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.components.index.add_component') }}</a>
-                <form action="{{ route('admin.item-components.index') }}" class="d-flex" method="GET">
-                    <select class="form-select me-2" id="search_column" name="search_column">
-                        <option value="id" @if (request()->query('search_column') == 'id') selected @endif>{{ __('view.admin.catalog.components.index.id') }}</option>
-                        <option value="item_id" @if (request()->query('search_column') == 'item_id') selected @endif>{{ __('view.admin.catalog.components.index.main_item') }}</option>
-                        <option value="component_id" @if (request()->query('search_column') == 'component_id') selected @endif>{{ __('view.admin.catalog.components.index.component') }}</option>
-                        <option value="validation" @if (request()->query('search_column') == 'validation') selected @endif>{{ __('view.admin.catalog.components.index.validation') }}</option>
-                        <option value="created_at" @if (request()->query('search_column') == 'created_at') selected @endif>{{ __('view.admin.catalog.components.index.created_at') }}</option>
-                        <option value="updated_at" @if (request()->query('search_column') == 'updated_at') selected @endif>{{ __('view.admin.catalog.components.index.updated_at') }}</option>
-                    </select>
-                    <input id="search" name="search" class="form-control me-2" type="search" placeholder="{{ __('view.admin.catalog.components.index.search_placeholder') }}"
-                        aria-label="Search">
-                    <button class="btn btn-secondary" type="submit">{{ __('view.admin.catalog.components.index.search_button') }}</button>
-                </form>
+                @php
+                    $searchOptions = [
+                        ['value' => 'id', 'label' => __('view.admin.catalog.components.index.id')],
+                        ['value' => 'item_id', 'label' => __('view.admin.catalog.components.index.main_item')],
+                        ['value' => 'component_id', 'label' => __('view.admin.catalog.components.index.component')],
+                        ['value' => 'validation', 'label' => __('view.admin.catalog.components.index.validation')],
+                        ['value' => 'created_at', 'label' => __('view.admin.catalog.components.index.created_at')],
+                        ['value' => 'updated_at', 'label' => __('view.admin.catalog.components.index.updated_at')],
+                    ];
+                @endphp
+                <x-admin.search-form
+                    :action="route('admin.item-components.index')"
+                    :options="$searchOptions"
+                    :placeholder="__('view.admin.catalog.components.index.search_placeholder')"
+                    :buttonLabel="__('view.admin.catalog.components.index.search_button')"
+                    :booleanColumns="['validation']"
+                />
             </div>
         </nav>
         <div class="row">

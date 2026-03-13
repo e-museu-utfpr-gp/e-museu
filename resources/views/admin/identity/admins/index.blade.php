@@ -20,17 +20,20 @@
             <div class="container-fluid">
                 <a href="{{ route('admin.admins.create') }}" type="button" class="btn btn-success"><i
                         class="bi bi-plus-circle"></i> {{ __('view.admin.identity.admins.index.add_admin') }}</a>
-                <form action="{{ route('admin.admins.index') }}" class="d-flex" method="GET">
-                    <select class="form-select me-2" id="search_column" name="search_column">
-                        <option value="id" @if (request()->query('search_column') == 'id') selected @endif>{{ __('view.admin.identity.admins.index.id') }}</option>
-                        <option value="username" @if (request()->query('search_column') == 'username') selected @endif>{{ __('view.admin.identity.admins.index.username') }}</option>
-                        <option value="created_at" @if (request()->query('search_column') == 'created_at') selected @endif>{{ __('view.admin.identity.admins.index.created_at') }}</option>
-                        <option value="updated_at" @if (request()->query('search_column') == 'updated_at') selected @endif>{{ __('view.admin.identity.admins.index.updated_at') }}</option>
-                    </select>
-                    <input id="search" name="search" class="form-control me-2" type="search" placeholder="{{ __('view.admin.identity.admins.index.search_placeholder') }}"
-                        aria-label="Search">
-                    <button class="btn btn-secondary" type="submit">{{ __('view.admin.identity.admins.index.search_button') }}</button>
-                </form>
+                @php
+                    $searchOptions = [
+                        ['value' => 'id', 'label' => __('view.admin.identity.admins.index.id')],
+                        ['value' => 'username', 'label' => __('view.admin.identity.admins.index.username')],
+                        ['value' => 'created_at', 'label' => __('view.admin.identity.admins.index.created_at')],
+                        ['value' => 'updated_at', 'label' => __('view.admin.identity.admins.index.updated_at')],
+                    ];
+                @endphp
+                <x-admin.search-form
+                    :action="route('admin.admins.index')"
+                    :options="$searchOptions"
+                    :placeholder="__('view.admin.identity.admins.index.search_placeholder')"
+                    :buttonLabel="__('view.admin.identity.admins.index.search_button')"
+                />
             </div>
         </nav>
         <div class="row">

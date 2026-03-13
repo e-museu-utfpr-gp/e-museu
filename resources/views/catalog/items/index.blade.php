@@ -3,10 +3,10 @@
 
 @section('content')
     <div class="container main-container mb-auto">
-        @if (request()->query('section') == '')
+        @if (request()->query('item_category') == '')
             <h1>{{ __('view.catalog.items.index.heading_all') }}</h1>
         @else
-            <h1>{{ __('view.catalog.items.index.heading_in_section', ['section' => $sectionName]) }}</h1>
+            <h1>{{ __('view.catalog.items.index.heading_in_category', ['category' => $categoryName]) }}</h1>
         @endif
         <div class="row">
             <div class="col-md-2 d-none d-md-block">
@@ -47,8 +47,8 @@
                                     <p class="border-dark">{{ $item->identification_code }}</p>
                                     <div class="division-line my-1"></div>
                                     <div class="d-flex justify-content-between pt-1">
-                                        <p class="card-subtitle border- fw-bold">{{ $item->category?->name }}</p>
-                                        @if (\Carbon\Carbon::parse($item->date)->format('Y') != '0001')
+                                        <p class="card-subtitle border- fw-bold">{{ $item->itemCategory?->name }}</p>
+                                        @if ($item->date)
                                             <p class="card-subtitle">{{ date('d/m/Y', strtotime($item->date)) }}</p>
                                         @else
                                             <p class="card-subtitle">

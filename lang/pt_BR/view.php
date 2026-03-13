@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'shared' => [
+        'buttons' => [
+            'add' => 'Adicionar',
+        ],
+        'yes' => 'Sim',
+        'no' => 'Não',
+    ],
     'catalog' => require __DIR__ . '/view/catalog.php',
     'home' => require __DIR__ . '/view/home.php',
     'layout' => require __DIR__ . '/view/layout.php',
