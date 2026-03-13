@@ -8,7 +8,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('items.store-extra') }}" method="POST" id="addExtraForm">
+                <form action="{{ route('extras.store') }}" method="POST" id="addExtraForm">
                     @csrf
                     <input name="item_id" value="{{ $item->id }}" hidden>
                     <label for="info">

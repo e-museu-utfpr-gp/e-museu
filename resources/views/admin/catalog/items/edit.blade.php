@@ -48,9 +48,9 @@
                                 <label for="category_id" class="form-label">{{ __('view.admin.catalog.items.edit.item_category') }}</label>
                                 <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
                                     name="category_id">
-                                    @foreach ($sections as $section)
-                                        <option value="{{ $section->id }}"
-                                            @if ($item->category_id == $section->id) selected @endif>{{ $section->name }}</option>
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            @if ($item->category_id == $itemCategory->id) selected @endif>{{ $itemCategory->name }}</option>
                                     @endforeach
                                 </select>
                                 @error('category_id')
@@ -74,7 +74,7 @@
                             <div class="mb-3">
                                 <label for="date" class="form-label">{{ __('view.admin.catalog.items.edit.date') }}</label>
                                 <input type="date" class="form-control @error('date') is-invalid @enderror"
-                                    id="date" name="date" value="{{ $item->date }}">
+                                    id="date" name="date" value="{{ $item->date?->format('Y-m-d') }}">
                                 @error('date')
                                     <div class="invalid-feedback"> {{ $message }} </div>
                                 @enderror

@@ -22,8 +22,8 @@
                         <select class="form-select me-2 input-form" name="component-category" id="component-category"
                             onchange="checkIfComponentCategoryIsEmpty()">
                             <option selected="selected" value="">-</option>
-                            @foreach ($sections as $section)
-                                <option value="{{ $section->id }}">{{ $section->name }}</option>
+                            @foreach ($itemCategories as $itemCategory)
+                                <option value="{{ $itemCategory->id }}">{{ $itemCategory->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -38,7 +38,7 @@
                     </label>
                     <div class="input-div rounded-top">
                         <input class="form-control typeahead me-2 input-form" type="text" name="component-name"
-                            id="component-name" onchange="checkComponentName()" placeholder="" disabled>
+                            id="component-name" onchange="checkComponentName()" oninput="checkComponentName()" placeholder="" disabled>
                     </div>
                     <div class="error-div px-1 mx-5 mb-3" id="component-name-warning" hidden>
                         <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create_modals.component.not_found') }}
@@ -46,7 +46,7 @@
                     <div class="col d-flex align-items-center justify-content-end">
                         <button class="button nav-link py-2 px-3 fw-bold" type="button" onclick="saveComponent()"
                             id="save-component-button" disabled>
-                            {{ __('views.shared.buttons.add') }}
+                            {{ __('view.shared.buttons.add') }}
                         </button>
                         <button class="button nav-link py-2 px-3 fw-bold" type="button" onclick="updateComponent()"
                             id="update-component-button" hidden>
@@ -73,7 +73,7 @@
     function saveComponent() {
         let componentCategoryText = $('#component-category').find(":selected").text();
         let componentCategoryVal = $('#component-category').find(":selected").val();
-        let componentName = $('#component-name').val();
+        let componentName = $('#component-name').val().trim();
 
         if (componentCategoryVal == '') {
             alert("O campo categoria precisa de opção válida!");
@@ -85,6 +85,24 @@
             return;
         }
 
+        $.ajax({
+            type: "GET",
+            url: componentCheckName,
+            data: { category: componentCategoryVal, name: componentName },
+            success: function(count) {
+                if (count > 0) {
+                    $('#component-name-warning').prop("hidden", true);
+                    addComponentToList(componentCategoryText, componentCategoryVal, componentName);
+                    $('#addComponentModal').modal('hide');
+                } else {
+                    $('#component-name-warning').prop("hidden", false);
+                    $('#save-component-button').prop("disabled", true);
+                }
+            }
+        });
+    }
+
+    function addComponentToList(componentCategoryText, componentCategoryVal, componentName) {
         componentBuilder(componentCategoryText, componentCategoryVal, componentName, componentIds);
 
         sessionStorage.setItem("itemCreateForm", "true");
@@ -98,7 +116,6 @@
         sessionStorage.setItem("componentCount", componentCount);
 
         checkComponents();
-        $('#addComponentModal').modal('hide');
     }
 
     function editComponent(componentId) {
@@ -162,9 +179,11 @@
         if ($('#component-category').find(":selected").val() == '') {
             $('#component-name').prop('disabled', true);
             $('#component-description').prop('disabled', true);
+            $('#save-component-button').prop("disabled", true);
         } else {
             $('#component-name').prop('disabled', false);
             $('#component-description').prop('disabled', false);
+            checkComponentName();
         }
     }
 
@@ -225,25 +244,12 @@
     }
 
     function checkComponentName() {
-        $.ajax({
-            type: "GET",
-            url: componentCheckName,
-            data: {
-                category: $('#component-category').val(),
-                name: $('#component-name').val()
-            },
-            success: function(data) {
-                if (data > 0) {
-                    $('#component-name-warning').prop("hidden", true);
-                    $('#save-component-button').prop("disabled", false);
-                    return;
-                } else {
-                    $('#component-name-warning').prop("hidden", false);
-                    $('#save-component-button').prop("disabled", true);
-                    return;
-                }
-            }
-        });
+        var name = $('#component-name').val();
+        if (!name || name.trim() === '') {
+            $('#save-component-button').prop("disabled", true);
+            return;
+        }
+        $('#save-component-button').prop("disabled", false);
     }
 
     function initComponentAutocomplete() {

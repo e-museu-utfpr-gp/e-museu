@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\Catalog\AdminExtraController;
 use App\Http\Controllers\Admin\Catalog\AdminItemController;
 use App\Http\Controllers\Admin\Catalog\AdminItemTagController;
 use App\Http\Controllers\Admin\Catalog\AdminItemCategoryController;
+use App\Http\Controllers\Catalog\ExtraController;
 use App\Http\Controllers\Catalog\ItemController;
 use App\Http\Controllers\Catalog\QueryController;
 use App\Http\Controllers\HomeController;
@@ -27,11 +28,11 @@ Route::get('/about', function () {
 
 Route::get('items', [ItemController::class, 'index'])->name('items.index');
 Route::get('items/create', [ItemController::class, 'create'])->name('items.create');
-Route::get('items/by-section', [ItemController::class, 'bySection'])->name('items.bySection');
+Route::get('items/by-category', [ItemController::class, 'byCategory'])->name('items.byCategory');
 Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show');
 
 Route::post('items', [ItemController::class, 'store'])->name('items.store');
-Route::post('items/extras', [ItemController::class, 'storeSingleExtra'])->name('items.store-extra');
+Route::post('extras', [ExtraController::class, 'store'])->name('extras.store');
 
 Route::get(
     '/component-name-auto-complete',
@@ -42,7 +43,7 @@ Route::get('/tag-name-auto-complete', [QueryController::class, 'tagNameAutoCompl
 Route::get('/check-tag-name', [QueryController::class, 'checkTagName'])->name('check-tag-name');
 Route::get('/check-contact', [QueryController::class, 'checkContact'])->name('check-contact');
 Route::get('/get-tags', [QueryController::class, 'getTags'])->name('get-tags');
-Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => 'authenticate'], function () {
     Route::redirect('/admin', '/admin/items');
 
     Route::resource('admin/items', AdminItemController::class)->names('admin.items');
@@ -77,4 +78,4 @@ Route::middleware('redirectIfAuthenticated')->group(function () {
     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AdminLoginController::class, 'login']);
 });
-Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout')->middleware('authenticate');

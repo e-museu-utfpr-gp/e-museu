@@ -3,10 +3,8 @@ import './i18n';
 
 import './components/img-modal';
 import './components/popOverButton';
-import './components/getComponentsBySection';
-import './components/getItemsBySection';
 import './components/getTagsByCategory';
-import './components/sectionItemSelector';
+import './components/itemCategoryItemSelector';
 import './components/checkContact';
 
 import './components/releaseLockOnLeave';

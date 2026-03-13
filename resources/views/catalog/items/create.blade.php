@@ -54,12 +54,12 @@
                                 </h5>
                             </label>
                             <div class="input-div rounded-top">
-                                <select required class="form-select me-2 input-form  @error('section') is-invalid @enderror"
+                                <select required class="form-select me-2 input-form  @error('category_id') is-invalid @enderror"
                                     name="category_id" id="category_id">
                                     <option selected="selected" value="">-</option>
-                                    @foreach ($sections as $section)
-                                        <option value="{{ $section->id }}"
-                                            {{ old('category_id') == $section->id ? 'selected' : '' }}>{{ $section->name }}
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            {{ old('category_id') == $itemCategory->id ? 'selected' : '' }}>{{ $itemCategory->name }}
                                         </option>
                                     @endforeach
                                 </select>

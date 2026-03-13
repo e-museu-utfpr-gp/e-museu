@@ -6,12 +6,14 @@ $(document).ready(function () {
         const sectionSelector = $container.data('section-selector') || '#section_id';
         const itemSelector = $container.data('item-selector') || '#item_id';
         const originalItemId = $container.data('original-item-id') || null;
-        const getItemsUrl = $container.data('get-items-url') || '/items/by-section';
+        const getItemsUrl = $container.data('get-items-url') || '/items/by-category';
 
         function getItems() {
-            const sectionId = $(sectionSelector).val();
-            if (!sectionId) {
-                $(itemSelector).empty();
+            const itemCategoryId = $(sectionSelector).val();
+            if (!itemCategoryId) {
+                $(itemSelector)
+                    .empty()
+                    .append($('<option>', { value: '', text: '-' }));
                 return;
             }
 
@@ -19,13 +21,14 @@ $(document).ready(function () {
                 url: getItemsUrl,
                 type: 'GET',
                 data: {
-                    section: sectionId,
+                    item_category: itemCategoryId,
                 },
                 success: function (data) {
-                    $(itemSelector).empty();
+                    const $select = $(itemSelector);
+                    $select.empty().append($('<option>', { value: '', text: '-' }));
                     if (Array.isArray(data) && data.length > 0) {
                         $.each(data, function (index, item) {
-                            $(itemSelector).append(
+                            $select.append(
                                 $('<option>', {
                                     value: item.id,
                                     text: item.name,
@@ -35,7 +38,7 @@ $(document).ready(function () {
                     }
 
                     if (originalItemId) {
-                        $(itemSelector).val(originalItemId);
+                        $select.val(originalItemId);
                     }
                 },
                 error: function (_xhr, _status, _error) {

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Collaborator;
+namespace App\Http\Requests\Admin\Collaborator;
 
 use App\Enums\Collaborator\CollaboratorRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreCollaboratorRequest extends FormRequest
+class AdminStoreCollaboratorRequest extends FormRequest
 {
     public function authorize(): bool
     {

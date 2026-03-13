@@ -16,22 +16,22 @@
                         <h2 class="card-header">{{ __('view.admin.catalog.item_tags.create.heading') }}</h2>
                     </div>
                     <div class="row" data-section-item-selector 
-                         data-section-selector="#section" 
+                         data-section-selector="#item_category" 
                          data-item-selector="#item_id" 
                          data-original-item-id="{{ request()->query('id') }}"
-                         data-get-items-url="{{ route('items.bySection') }}">
+                         data-get-items-url="{{ route('items.byCategory') }}">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="section" class="form-label">{{ __('view.admin.catalog.item_tags.create.item_category') }}</label>
-                                <select class="form-select @error('section') is-invalid @enderror" id="section"
-                                    name="section">
-                                    @foreach ($sections as $section)
-                                        <option value="{{ $section->id }}"
-                                            {{ old('section', request()->query('section')) == $section->id ? 'selected' : '' }}>
-                                            {{ $section->name }}</option>
+                                <label for="item_category" class="form-label">{{ __('view.admin.catalog.item_tags.create.item_category') }}</label>
+                                <select class="form-select @error('item_category') is-invalid @enderror" id="item_category"
+                                    name="item_category">
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            {{ old('item_category', request()->query('item_category')) == $itemCategory->id ? 'selected' : '' }}>
+                                            {{ $itemCategory->name }}</option>
                                     @endforeach
                                 </select>
-                                @error('section')
+                                @error('item_category')
                                     <div class="invalid-feedback"> {{ $message }} </div>
                                 @enderror
                             </div>

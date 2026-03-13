@@ -5,7 +5,7 @@ return [
         'index' => [
             'title' => 'Itens do acervo',
             'heading_all' => 'Itens do acervo',
-            'heading_in_section' => 'Itens - :section',
+            'heading_in_category' => 'Itens - :category',
             'filters_title' => 'Filtros',
             'image_alt' => 'Imagem do item',
             'date_unknown' => 'Data desconhecida',
@@ -74,7 +74,7 @@ return [
                 'category_help' => 'Selecione a categoria do componente.',
                 'name_label' => 'Nome',
                 'name_help' => 'Nome do componente.',
-                'not_found' => 'Categoria ou componente não encontrado.',
+                'not_found' => 'Não encontramos este item nos nossos registros! Os campos "categoria" e "nome" foram preenchidos corretamente?',
                 'edit' => 'Editar',
                 'cancel' => 'Cancelar',
                 'alert_category_required' => 'Selecione a categoria.',

@@ -117,7 +117,7 @@
                         <strong>{{ __('view.admin.catalog.items.show.detail') }}: </strong>
                         <p class="ms-3">{!! nl2br($itemTag->item->detail) !!}</p>
                         <strong>{{ __('view.admin.catalog.items.show.date') }}: </strong>
-                        <p class="card-text">{{ date('d-m-Y', strtotime($itemTag->item->date)) }}</p>
+                        <p class="card-text">{{ $itemTag->item->date ? date('d-m-Y', strtotime($itemTag->item->date)) : '—' }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.identification_code') }}: </strong>
                         <p class="ms-3">{{ $itemTag->item->identification_code }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.validated') }}: </strong>
@@ -129,7 +129,7 @@
                             @endif
                         </p>
                         <strong>{{ __('view.admin.catalog.items.show.item_category') }}: </strong>
-                        <p class="card-text">{{ $itemTag->item->category?->name }}</p>
+                        <p class="card-text">{{ $itemTag->item->itemCategory?->name }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.collaborator') }}: </strong>
                         <p class="card-text">{{ $itemTag->item->collaborator?->full_name }}</p>
                         <strong>{{ __('view.admin.catalog.items.show.created_at') }}: </strong>

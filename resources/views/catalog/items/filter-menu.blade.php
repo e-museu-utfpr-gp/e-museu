@@ -11,7 +11,7 @@
     </div>
     <div class="collapse ms-3" id="toggleFilter">
         <form action="{{ route('items.index') }}" method="GET">
-            <input name="section" value="{{ request()->query('section') }}" hidden>
+            <input name="item_category" value="{{ request()->query('item_category') }}" hidden>
             <input name="search" value="{{ request()->query('search') }}" hidden>
             @foreach ($categories as $category)
                 <div>

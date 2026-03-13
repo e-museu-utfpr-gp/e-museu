@@ -5,7 +5,7 @@ return [
         'index' => [
             'title' => 'Collection items',
             'heading_all' => 'Collection items',
-            'heading_in_section' => 'Items - :section',
+            'heading_in_category' => 'Items - :category',
             'filters_title' => 'Filters',
             'image_alt' => 'Item image',
             'date_unknown' => 'Date unknown',
@@ -74,7 +74,7 @@ return [
                 'category_help' => 'Select the component category.',
                 'name_label' => 'Name',
                 'name_help' => 'Component name.',
-                'not_found' => 'Category or component not found.',
+                'not_found' => 'We did not find this item in our records! Were the "category" and "name" fields filled in correctly?',
                 'edit' => 'Edit',
                 'cancel' => 'Cancel',
                 'alert_category_required' => 'Please select the category.',

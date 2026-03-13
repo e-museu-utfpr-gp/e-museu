@@ -21,21 +21,24 @@
             <div class="container-fluid">
                 <a href="{{ route('admin.extras.create') }}" type="button" class="btn btn-success"><i
                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.extras.index.add_extra') }}</a>
-                <form action="{{ route('admin.extras.index') }}" class="d-flex" method="GET">
-                    <select class="form-select me-2" id="search_column" name="search_column">
-                        <option value="id" @if (request()->query('search_column') == 'id') selected @endif>{{ __('view.admin.catalog.extras.index.id') }}</option>
-                        <option value="info" @if (request()->query('search_column') == 'info') selected @endif>{{ __('view.admin.catalog.extras.index.info') }}</option>
-                        <option value="item_id" @if (request()->query('search_column') == 'item_id') selected @endif>{{ __('view.admin.catalog.extras.index.item') }}</option>
-                        <option value="collaborator_id" @if (request()->query('search_column') == 'collaborator_id') selected @endif>{{ __('view.admin.catalog.extras.index.collaborator') }}
-                        </option>
-                        <option value="validation" @if (request()->query('search_column') == 'validation') selected @endif>{{ __('view.admin.catalog.extras.index.validation') }}</option>
-                        <option value="created_at" @if (request()->query('search_column') == 'created_at') selected @endif>{{ __('view.admin.catalog.extras.index.created_at') }}</option>
-                        <option value="updated_at" @if (request()->query('search_column') == 'updated_at') selected @endif>{{ __('view.admin.catalog.extras.index.updated_at') }}</option>
-                    </select>
-                    <input id="search" name="search" class="form-control me-2" type="search" placeholder="{{ __('view.admin.catalog.extras.index.search_placeholder') }}"
-                        aria-label="Search">
-                    <button class="btn btn-secondary" type="submit">{{ __('view.admin.catalog.extras.index.search_button') }}</button>
-                </form>
+                @php
+                    $searchOptions = [
+                        ['value' => 'id', 'label' => __('view.admin.catalog.extras.index.id')],
+                        ['value' => 'info', 'label' => __('view.admin.catalog.extras.index.info')],
+                        ['value' => 'item_id', 'label' => __('view.admin.catalog.extras.index.item')],
+                        ['value' => 'collaborator_id', 'label' => __('view.admin.catalog.extras.index.collaborator')],
+                        ['value' => 'validation', 'label' => __('view.admin.catalog.extras.index.validation')],
+                        ['value' => 'created_at', 'label' => __('view.admin.catalog.extras.index.created_at')],
+                        ['value' => 'updated_at', 'label' => __('view.admin.catalog.extras.index.updated_at')],
+                    ];
+                @endphp
+                <x-admin.search-form
+                    :action="route('admin.extras.index')"
+                    :options="$searchOptions"
+                    :placeholder="__('view.admin.catalog.extras.index.search_placeholder')"
+                    :buttonLabel="__('view.admin.catalog.extras.index.search_button')"
+                    :booleanColumns="['validation']"
+                />
             </div>
         </nav>
         <div class="row">

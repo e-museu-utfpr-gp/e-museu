@@ -20,25 +20,29 @@
             <div class="container-fluid">
                 <a href="{{ route('admin.items.create') }}" type="button" class="btn btn-success"><i
                         class="bi bi-plus-circle"></i> {{ __('view.admin.catalog.items.index.add_item') }}</a>
-                <form action="{{ route('admin.items.index') }}" class="d-flex" method="GET">
-                    <select class="form-select me-2" id="search_column" name="search_column">
-                        <option value="id" @if (request()->query('search_column') == 'id') selected @endif>{{ __('view.admin.catalog.items.index.search_option_id') }}</option>
-                        <option value="name" @if (request()->query('search_column') == 'name') selected @endif>{{ __('view.admin.catalog.items.index.search_option_name') }}</option>
-                        <option value="description" @if (request()->query('search_column') == 'description') selected @endif>{{ __('view.admin.catalog.items.index.search_option_description') }}</option>
-                        <option value="history" @if (request()->query('search_column') == 'history') selected @endif>{{ __('view.admin.catalog.items.index.search_option_history') }}</option>
-                        <option value="detalhes" @if (request()->query('search_column') == 'detalhes') selected @endif>{{ __('view.admin.catalog.items.index.search_option_detail') }}</option>
-                        <option value="date" @if (request()->query('search_column') == 'date') selected @endif>{{ __('view.admin.catalog.items.index.search_option_date') }}</option>
-                        <option value="identification_code" @if (request()->query('search_column') == 'identification_code') selected @endif>{{ __('view.admin.catalog.items.index.search_option_identification_code') }}</option>
-                        <option value="validation" @if (request()->query('search_column') == 'validation') selected @endif>{{ __('view.admin.catalog.items.index.search_option_validation') }}</option>
-                        <option value="collaborator_id" @if (request()->query('search_column') == 'collaborator_id') selected @endif>{{ __('view.admin.catalog.items.index.search_option_collaborator') }}</option>
-                        <option value="category_id" @if (request()->query('search_column') == 'category_id') selected @endif>{{ __('view.admin.catalog.items.index.search_option_item_category') }}</option>
-                        <option value="created_at" @if (request()->query('search_column') == 'created_at') selected @endif>{{ __('view.admin.catalog.items.index.search_option_created_at') }}</option>
-                        <option value="updated_at" @if (request()->query('search_column') == 'updated_at') selected @endif>{{ __('view.admin.catalog.items.index.search_option_updated_at') }}</option>
-                    </select>
-                    <input id="search" name="search" class="form-control me-2" type="search" placeholder="{{ __('view.admin.catalog.items.index.search_placeholder') }}"
-                        aria-label="Search">
-                    <button class="btn btn-secondary" type="submit">{{ __('view.admin.catalog.items.index.search_button') }}</button>
-                </form>
+                @php
+                    $searchOptions = [
+                        ['value' => 'id', 'label' => __('view.admin.catalog.items.index.search_option_id')],
+                        ['value' => 'name', 'label' => __('view.admin.catalog.items.index.search_option_name')],
+                        ['value' => 'description', 'label' => __('view.admin.catalog.items.index.search_option_description')],
+                        ['value' => 'history', 'label' => __('view.admin.catalog.items.index.search_option_history')],
+                        ['value' => 'detalhes', 'label' => __('view.admin.catalog.items.index.search_option_detail')],
+                        ['value' => 'date', 'label' => __('view.admin.catalog.items.index.search_option_date')],
+                        ['value' => 'identification_code', 'label' => __('view.admin.catalog.items.index.search_option_identification_code')],
+                        ['value' => 'validation', 'label' => __('view.admin.catalog.items.index.search_option_validation')],
+                        ['value' => 'collaborator_id', 'label' => __('view.admin.catalog.items.index.search_option_collaborator')],
+                        ['value' => 'category_id', 'label' => __('view.admin.catalog.items.index.search_option_item_category')],
+                        ['value' => 'created_at', 'label' => __('view.admin.catalog.items.index.search_option_created_at')],
+                        ['value' => 'updated_at', 'label' => __('view.admin.catalog.items.index.search_option_updated_at')],
+                    ];
+                @endphp
+                <x-admin.search-form
+                    :action="route('admin.items.index')"
+                    :options="$searchOptions"
+                    :placeholder="__('view.admin.catalog.items.index.search_placeholder')"
+                    :buttonLabel="__('view.admin.catalog.items.index.search_button')"
+                    :booleanColumns="['validation']"
+                />
             </div>
         </nav>
         <div class="row">
@@ -87,7 +91,7 @@
                                 <td>{{ $item->description}}</td>
                                 <td>{{ $item->history }}</td>
                                 <td>{{ $item->detail }}</td>
-                                <td>{{ date('d-m-Y', strtotime($item->date)) }}</td>
+                                <td>{{ $item->date ? date('d-m-Y', strtotime($item->date)) : '—' }}</td>
                                 <td>{{ $item->identification_code }}</td>
                                 <td>
                                     @if ($item->item_validation == 1)
@@ -96,7 +100,7 @@
                                         {{ __('view.admin.catalog.items.index.no') }}
                                     @endif
                                 </td>
-                                <td>{{ $item->section_name }}</td>
+                                <td>{{ $item->item_category_name }}</td>
                                 <td>{{ $item->collaborator_contact }}</td>
                                 <td>{{ date('d-m-Y H:i:s', strtotime($item->item_created)) }}</td>
                                 <td>{{ date('d-m-Y H:i:s', strtotime($item->item_updated)) }}</td>
@@ -120,5 +124,4 @@
         </div>
         {{ $items->links('pagination::bootstrap-5') }}
     </div>
-
 @endsection

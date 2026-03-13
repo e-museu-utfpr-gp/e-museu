@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Catalog;
 
+use App\Actions\Catalog\StoreItemContributionAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\ItemContributionValidator;
-use App\Http\Requests\Catalog\SingleExtraRequest;
-use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemCategory;
-use App\Models\Taxonomy\TagCategory;
-use App\Services\Catalog\ItemContributionService;
+use App\Services\Catalog\ItemCategoryService;
+use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemIndexQueryBuilder;
+use App\Services\Catalog\ItemService;
+use App\Services\Taxonomy\TagCategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,50 +17,45 @@ use Illuminate\View\View;
 
 class ItemController extends Controller
 {
-    public function __construct(
-        private ItemIndexQueryBuilder $itemIndexQueryBuilder,
-        private ItemContributionService $itemContributionService,
-        private ItemContributionValidator $itemContributionValidator
-    ) {
-    }
-
-    public function index(Request $request): View
-    {
-        $indexResult = $this->itemIndexQueryBuilder->build($request);
-        $sections = $this->itemContributionService->loadSections();
-        $categories = $this->itemContributionService->loadCategories();
+    public function index(
+        Request $request,
+        ItemCategoryService $itemCategoryService,
+        ItemIndexQueryBuilder $itemIndexQueryBuilder,
+        TagCategoryService $tagCategoryService
+    ): View {
+        $indexResult = $itemIndexQueryBuilder->build($request);
+        $itemCategories = $itemCategoryService->getForIndex();
+        $categories = $tagCategoryService->getForIndex();
 
         return view('catalog.items.index', [
             'items' => $indexResult['items'],
-            'sectionName' => $indexResult['sectionName'],
-            'sections' => $sections,
+            'categoryName' => $indexResult['categoryName'],
+            'itemCategories' => $itemCategories,
             'categories' => $categories,
         ]);
     }
 
-    public function create(): View
-    {
-        $categories = TagCategory::all();
-        $sections = ItemCategory::all();
+    public function create(
+        ItemCategoryService $itemCategoryService,
+        TagCategoryService $tagCategoryService
+    ): View {
+        $categories = $tagCategoryService->getForIndex();
+        $itemCategories = $itemCategoryService->getForIndex();
 
-        return view('catalog.items.create', compact('categories', 'sections'));
+        return view('catalog.items.create', compact('categories', 'itemCategories'));
     }
 
-    public function store(Request $request): RedirectResponse
-    {
-        $validatedData = $this->itemContributionValidator->validateStore($request);
+    public function store(
+        Request $request,
+        ItemContributionValidator $itemContributionValidator,
+        StoreItemContributionAction $storeItemContributionAction,
+        ItemImagesService $itemImagesService
+    ): RedirectResponse {
+        $validatedData = $itemContributionValidator->validateStore($request);
 
-        $galleryFiles = $request->file('gallery_images');
-        if (is_array($galleryFiles)) {
-            /** @var array<int, \Illuminate\Http\UploadedFile> $galleryFiles */
-            $galleryFiles = array_values(array_filter($galleryFiles, function (mixed $f): bool {
-                return $f instanceof \Illuminate\Http\UploadedFile && $f->isValid();
-            }));
-        } else {
-            $galleryFiles = null;
-        }
+        $galleryFiles = $itemImagesService->filterValidGalleryFiles($request->file('gallery_images'));
 
-        return $this->itemContributionService->store(
+        return $storeItemContributionAction->handle(
             $validatedData['collaborator'],
             $validatedData['item'],
             $validatedData['tags'],
@@ -71,42 +66,31 @@ class ItemController extends Controller
         );
     }
 
-    public function show(string $id): View
-    {
-        $item = Item::with('images')->findOrFail($id);
+    public function show(
+        string $id,
+        ItemCategoryService $itemCategoryService,
+        TagCategoryService $tagCategoryService,
+        ItemService $itemService
+    ): View {
+        $item = $itemService->getPublicItemForShow($id);
 
-        if ($item->validation === false) {
-            abort(403, __('app.catalog.item.access_denied'));
-        }
-        $sections = ItemCategory::get();
-        $categories = TagCategory::get();
+        $itemCategories = $itemCategoryService->getForIndex();
+        $categories = $tagCategoryService->getForIndex();
 
-        return view('catalog.items.show', compact('item', 'sections', 'categories'));
+        return view('catalog.items.show', compact('item', 'itemCategories', 'categories'));
     }
 
-    public function edit(Item $item): never
+    public function edit(): never
     {
         abort(404);
     }
 
-    public function storeSingleExtra(SingleExtraRequest $request): RedirectResponse
+    public function byCategory(Request $request, ItemService $itemService): JsonResponse
     {
-        $validatedData = $this->itemContributionValidator->validateSingleExtra($request);
+        $itemCategoryId = (string) ($request->input('item_category') ?? '');
 
-        return $this->itemContributionService->storeSingleExtra(
-            $validatedData['collaborator'],
-            $validatedData['extra']
-        );
-    }
+        $items = $itemService->getPublicItemsByCategory($itemCategoryId);
 
-    public function bySection(Request $request): JsonResponse
-    {
-        $section = (string) ($request->input('section') ?? '');
-
-        $data = Item::where('category_id', 'LIKE', $section)
-            ->orderBy('name', 'asc')
-            ->get();
-
-        return response()->json($data);
+        return response()->json($items);
     }
 }

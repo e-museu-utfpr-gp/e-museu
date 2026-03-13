@@ -11,24 +11,24 @@ use Illuminate\Http\Request;
 class ItemIndexQueryBuilder
 {
     /**
-     * @return array{items: LengthAwarePaginator, sectionName: string}
+     * @return array{items: LengthAwarePaginator, categoryName: string}
      */
     public function build(Request $request): array
     {
         $query = $this->baseQuery();
-        $order = (int) ($request->order ?: 1);
-        $sectionId = $request->section ?? $request->input('section');
+        $sortOption = (int) ($request->order ?: 1);
+        $itemCategoryId = $request->item_category ?? $request->input('item_category');
 
-        $this->applySection($query, $sectionId);
-        $this->applySearch($query, $request->search);
-        $this->applyCategoryFilter($query, $request->category);
+        $this->applyItemCategoryFilter($query, $itemCategoryId);
+        $this->applySearchFilter($query, $request->search);
+        $this->applyTagCategoryFilter($query, $request->category);
         $this->applyTagFilter($query, $request->tag);
-        $this->applyOrder($query, $order);
+        $this->applySort($query, $sortOption);
 
-        $items = $query->paginate(24)->withQueryString()->appends(['section' => $sectionId]);
-        $sectionName = $this->resolveSectionName($sectionId);
+        $items = $query->paginate(24)->withQueryString()->appends(['item_category' => $itemCategoryId]);
+        $itemCategoryName = $this->resolveItemCategoryName($itemCategoryId);
 
-        return ['items' => $items, 'sectionName' => $sectionName];
+        return ['items' => $items, 'categoryName' => $itemCategoryName];
     }
 
     /**
@@ -45,38 +45,42 @@ class ItemIndexQueryBuilder
     /**
      * @param  Builder<Item>  $query
      */
-    private function applySection(Builder $query, ?string $sectionId): void
+    private function applyItemCategoryFilter(Builder $query, ?string $itemCategoryId): void
     {
-        if ($sectionId) {
-            $query->where('category_id', $sectionId);
+        if ($itemCategoryId) {
+            $query->where('category_id', $itemCategoryId);
         }
     }
 
     /**
      * @param  Builder<Item>  $query
      */
-    private function applySearch(Builder $query, ?string $search): void
+    private function applySearchFilter(Builder $query, ?string $searchTerm): void
     {
-        if (isset($search) && $search !== '') {
-            $query->where('name', 'LIKE', "%{$search}%");
+        if (isset($searchTerm) && $searchTerm !== '') {
+            $query->where('name', 'LIKE', "%{$searchTerm}%");
         }
     }
 
     /**
+     * Filter items that have at least one tag in the given tag categories.
+     *
      * @param  Builder<Item>  $query
-     * @param  array<int|string>|null  $categoryIds
+     * @param  array<int|string>|null  $tagCategoryIds
      */
-    private function applyCategoryFilter(Builder $query, $categoryIds): void
+    private function applyTagCategoryFilter(Builder $query, $tagCategoryIds): void
     {
-        if (! isset($categoryIds) || $categoryIds === []) {
+        if (! isset($tagCategoryIds) || $tagCategoryIds === []) {
             return;
         }
-        $query->whereHas('tags', function (Builder $tagRelationQuery) use ($categoryIds): void {
-            $tagRelationQuery->whereIn('tag_category_id', $categoryIds)->where('item_tag.validation', true);
+        $query->whereHas('tags', function (Builder $tagsRelationQuery) use ($tagCategoryIds): void {
+            $tagsRelationQuery->whereIn('tag_category_id', $tagCategoryIds)->where('item_tag.validation', true);
         });
     }
 
     /**
+     * Filter items that have at least one of the given tags.
+     *
      * @param  Builder<Item>  $query
      * @param  array<int|string>|null  $tagIds
      */
@@ -85,35 +89,33 @@ class ItemIndexQueryBuilder
         if (! isset($tagIds) || $tagIds === []) {
             return;
         }
-        $query->whereHas('tags', function (Builder $tagRelationQuery) use ($tagIds): void {
-            $tagRelationQuery->whereIn('tag_id', $tagIds)->where('item_tag.validation', true);
+        $query->whereHas('tags', function (Builder $tagsRelationQuery) use ($tagIds): void {
+            $tagsRelationQuery->whereIn('tag_id', $tagIds)->where('item_tag.validation', true);
         });
     }
 
     /**
      * @param  Builder<Item>  $query
      */
-    private function applyOrder(Builder $query, int $order): void
+    private function applySort(Builder $query, int $sortOption): void
     {
-        $orderMap = [
+        $sortOptionMap = [
             1 => ['date', 'asc'],
             2 => ['date', 'desc'],
             3 => ['name', 'asc'],
             4 => ['name', 'desc'],
         ];
-        $orderSpec = $orderMap[$order] ?? $orderMap[1];
-        $orderColumn = $orderSpec[0];
-        $orderDirection = $orderSpec[1];
-        $query->orderBy($orderColumn, $orderDirection);
+        [$sortColumn, $sortDirection] = $sortOptionMap[$sortOption] ?? $sortOptionMap[1];
+        $query->orderBy($sortColumn, $sortDirection);
     }
 
-    private function resolveSectionName(?string $sectionId): string
+    private function resolveItemCategoryName(?string $itemCategoryId): string
     {
-        if (! $sectionId) {
+        if (! $itemCategoryId) {
             return '';
         }
-        $category = ItemCategory::find($sectionId);
+        $itemCategory = ItemCategory::find($itemCategoryId);
 
-        return $category !== null ? $category->name : '';
+        return $itemCategory !== null ? $itemCategory->name : '';
     }
 }

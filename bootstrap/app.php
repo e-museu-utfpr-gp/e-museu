@@ -34,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(prepend: [
-            \App\Http\Middleware\StagingBasicAuth::class,
+            \App\Http\Middleware\Auth\StagingBasicAuth::class,
         ], append: [
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
@@ -50,7 +50,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'auth' => \App\Http\Middleware\Auth\Authenticate::class,
+            'authenticate' => \App\Http\Middleware\Auth\Authenticate::class,
             'redirectIfAuthenticated' => \App\Http\Middleware\Auth\RedirectIfAuthenticated::class,
         ]);
     })
