@@ -12,8 +12,6 @@ use Illuminate\Http\RedirectResponse;
 class ExtraService
 {
     /**
-     * Create extra records for an item (contribution flow).
-     *
      * @param  array<int, array<string, mixed>>  $extrasData
      */
     public function createForItem(Item $item, Collaborator $collaborator, array $extrasData): void
@@ -26,8 +24,6 @@ class ExtraService
     }
 
     /**
-     * Create a single extra (e.g. from storeSingleExtra contribution).
-     *
      * @param  array<string, mixed>  $extraData
      */
     public function create(array $extraData, Collaborator $collaborator): Extra
@@ -38,8 +34,6 @@ class ExtraService
     }
 
     /**
-     * Store a single extra from contribution (resolve collaborator, validate, create extra).
-     *
      * @param  array<string, mixed>  $collaboratorData
      * @param  array<string, mixed>  $extraData
      */

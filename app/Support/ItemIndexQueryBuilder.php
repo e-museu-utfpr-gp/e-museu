@@ -1,51 +1,44 @@
 <?php
 
-namespace App\Services\Catalog;
+namespace App\Support;
 
 use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemCategory;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
+/**
+ * Builds the query for the public catalog item index (validated items, filters and sort). Caller paginates.
+ */
 class ItemIndexQueryBuilder
 {
     /**
-     * @return array{items: LengthAwarePaginator, categoryName: string}
-     */
-    public function build(Request $request): array
-    {
-        $query = $this->baseQuery();
-        $sortOption = (int) ($request->order ?: 1);
-        $itemCategoryId = $request->item_category ?? $request->input('item_category');
-
-        $this->applyItemCategoryFilter($query, $itemCategoryId);
-        $this->applySearchFilter($query, $request->search);
-        $this->applyTagCategoryFilter($query, $request->category);
-        $this->applyTagFilter($query, $request->tag);
-        $this->applySort($query, $sortOption);
-
-        $items = $query->paginate(24)->withQueryString()->appends(['item_category' => $itemCategoryId]);
-        $itemCategoryName = $this->resolveItemCategoryName($itemCategoryId);
-
-        return ['items' => $items, 'categoryName' => $itemCategoryName];
-    }
-
-    /**
+     * Build and return the query with filters and sort applied. Caller is responsible for paginating.
+     *
      * @return Builder<Item>
      */
-    private function baseQuery(): Builder
+    public static function build(Request $request): Builder
     {
-        return Item::query()
+        $query = Item::query()
             ->with('coverImage')
             ->select('id', 'name', 'date', 'category_id', 'description', 'identification_code')
             ->where('validation', true);
+
+        $sortOption = (int) $request->input('order', 1);
+        $itemCategoryId = $request->item_category ?? $request->input('item_category');
+
+        self::applyItemCategoryFilter($query, $itemCategoryId);
+        self::applySearchFilter($query, $request->search);
+        self::applyTagCategoryFilter($query, $request->category);
+        self::applyTagFilter($query, $request->tag);
+        self::applySort($query, $sortOption);
+
+        return $query;
     }
 
     /**
      * @param  Builder<Item>  $query
      */
-    private function applyItemCategoryFilter(Builder $query, ?string $itemCategoryId): void
+    private static function applyItemCategoryFilter(Builder $query, ?string $itemCategoryId): void
     {
         if ($itemCategoryId) {
             $query->where('category_id', $itemCategoryId);
@@ -55,7 +48,7 @@ class ItemIndexQueryBuilder
     /**
      * @param  Builder<Item>  $query
      */
-    private function applySearchFilter(Builder $query, ?string $searchTerm): void
+    private static function applySearchFilter(Builder $query, ?string $searchTerm): void
     {
         if (isset($searchTerm) && $searchTerm !== '') {
             $query->where('name', 'LIKE', "%{$searchTerm}%");
@@ -63,12 +56,10 @@ class ItemIndexQueryBuilder
     }
 
     /**
-     * Filter items that have at least one tag in the given tag categories.
-     *
      * @param  Builder<Item>  $query
      * @param  array<int|string>|null  $tagCategoryIds
      */
-    private function applyTagCategoryFilter(Builder $query, $tagCategoryIds): void
+    private static function applyTagCategoryFilter(Builder $query, $tagCategoryIds): void
     {
         if (! isset($tagCategoryIds) || $tagCategoryIds === []) {
             return;
@@ -79,12 +70,10 @@ class ItemIndexQueryBuilder
     }
 
     /**
-     * Filter items that have at least one of the given tags.
-     *
      * @param  Builder<Item>  $query
      * @param  array<int|string>|null  $tagIds
      */
-    private function applyTagFilter(Builder $query, $tagIds): void
+    private static function applyTagFilter(Builder $query, $tagIds): void
     {
         if (! isset($tagIds) || $tagIds === []) {
             return;
@@ -97,7 +86,7 @@ class ItemIndexQueryBuilder
     /**
      * @param  Builder<Item>  $query
      */
-    private function applySort(Builder $query, int $sortOption): void
+    private static function applySort(Builder $query, int $sortOption): void
     {
         $sortOptionMap = [
             1 => ['date', 'asc'],
@@ -107,15 +96,5 @@ class ItemIndexQueryBuilder
         ];
         [$sortColumn, $sortDirection] = $sortOptionMap[$sortOption] ?? $sortOptionMap[1];
         $query->orderBy($sortColumn, $sortDirection);
-    }
-
-    private function resolveItemCategoryName(?string $itemCategoryId): string
-    {
-        if (! $itemCategoryId) {
-            return '';
-        }
-        $itemCategory = ItemCategory::find($itemCategoryId);
-
-        return $itemCategory !== null ? $itemCategory->name : '';
     }
 }

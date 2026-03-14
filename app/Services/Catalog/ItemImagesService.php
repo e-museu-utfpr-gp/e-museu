@@ -13,9 +13,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ItemImagesService
 {
-    /**
-     * Store cover and gallery images from the admin store item request (new item creation).
-     */
     public function storeImagesFromStoreRequest(Item $item, AdminStoreItemRequest $request): void
     {
         $coverFile = $request->file('cover_image');
@@ -120,9 +117,6 @@ class ItemImagesService
         }
     }
 
-    /**
-     * Delete all images of an item from storage and remove their records, then remove the item's folder if it exists.
-     */
     public function deleteAllImagesForItem(Item $item): void
     {
         foreach ($item->images as $img) {
@@ -135,7 +129,6 @@ class ItemImagesService
     }
 
     /**
-     * Delete an item image by item id and image id (from route params).
      * @throws NotFoundHttpException when the image does not exist or does not belong to the item
      */
     public function deleteImageById(string $itemId, string $imageId): void
@@ -146,7 +139,6 @@ class ItemImagesService
     }
 
     /**
-     * Delete an item image from storage and remove its record.
      * @throws NotFoundHttpException when the image does not belong to the item
      */
     public function deleteImage(Item $item, ItemImage $image): void

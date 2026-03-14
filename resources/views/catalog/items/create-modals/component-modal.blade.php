@@ -65,8 +65,8 @@
 </div>
 
 <script type="text/javascript">
-    let componentNameAutoCompletePath = "{{ route('component-name-auto-complete') }}";
-    let componentCheckName = "{{ route('check-component-name') }}";
+    let componentNameAutoCompletePath = "{{ route('items.component-autocomplete') }}";
+    let componentCheckName = "{{ route('items.check-component-name') }}";
     let componentCount = 0;
     let componentIds = 1;
 

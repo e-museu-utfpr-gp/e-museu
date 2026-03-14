@@ -65,8 +65,8 @@
 </div>
 
 <script type="text/javascript">
-    let tagNameAutoCompletePath = "{{ route('tag-name-auto-complete') }}";
-    let tagCheckName = "{{ route('check-tag-name') }}";
+    let tagNameAutoCompletePath = "{{ route('tags.autocomplete') }}";
+    let tagCheckName = "{{ route('tags.check-name') }}";
     let tagCount = 0;
     let tagIds = 1;
 

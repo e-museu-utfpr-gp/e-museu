@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Catalog\AdminSingleComponentRequest;
-use App\Support\AdminIndexQuery;
+use App\Support\AdminIndexQueryBuilder;
 use App\Models\Catalog\ItemComponent;
 use App\Models\Catalog\ItemCategory;
 use Illuminate\Http\RedirectResponse;
@@ -42,8 +42,7 @@ class AdminItemComponentController extends AdminBaseController
             'component.name AS component_name',
         ]);
 
-        AdminIndexQuery::applySearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
-        AdminIndexQuery::applySort($query, $request->sort, $request->order, self::INDEX_CONFIG);
+        AdminIndexQueryBuilder::build($query, $request, self::INDEX_CONFIG);
 
         $itemComponents = $query->paginate(30)->withQueryString();
 

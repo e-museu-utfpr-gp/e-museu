@@ -16,8 +16,6 @@ class ItemCategoryService
     }
 
     /**
-     * All item categories ordered by name (e.g. for admin form dropdowns).
-     *
      * @return Collection<int, ItemCategory>
      */
     public function getForForm(): Collection
