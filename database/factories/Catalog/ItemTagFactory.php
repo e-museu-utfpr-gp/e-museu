@@ -21,6 +21,7 @@ class ItemTagFactory extends Factory
         return [
             'tag_id' => Tag::pluck('id')->random(),
             'item_id' => Item::pluck('id')->random(),
+            'validation' => true,
         ];
     }
 }

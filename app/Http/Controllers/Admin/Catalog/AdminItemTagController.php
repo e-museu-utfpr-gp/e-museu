@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Catalog\AdminItemTagRequest;
-use App\Support\AdminIndexQuery;
+use App\Support\AdminIndexQueryBuilder;
 use App\Models\Catalog\ItemCategory;
 use App\Models\Catalog\ItemTag;
 use App\Models\Taxonomy\TagCategory;
@@ -43,8 +43,7 @@ class AdminItemTagController extends AdminBaseController
             'tags.name AS tag_name',
         ]);
 
-        AdminIndexQuery::applySearch($query, $request->search_column, $request->search, self::INDEX_CONFIG);
-        AdminIndexQuery::applySort($query, $request->sort, $request->order, self::INDEX_CONFIG);
+        AdminIndexQueryBuilder::build($query, $request, self::INDEX_CONFIG);
 
         $itemTags = $query->paginate(50)->withQueryString();
 

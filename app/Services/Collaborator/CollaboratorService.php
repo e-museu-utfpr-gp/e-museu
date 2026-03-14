@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\Collection;
 class CollaboratorService
 {
     /**
-     * Find collaborator by contact or create a new external collaborator.
-     *
      * @param  array<string, mixed>  $collaboratorData
      */
     public function resolveOrCreateCollaborator(array $collaboratorData): Collaborator
@@ -21,8 +19,6 @@ class CollaboratorService
     }
 
     /**
-     * Create a new external collaborator.
-     *
      * @param  array<string, mixed>  $collaboratorData
      */
     public function storeCollaborator(array $collaboratorData): Collaborator
@@ -33,12 +29,18 @@ class CollaboratorService
     }
 
     /**
-     * All collaborators ordered by name (e.g. for admin form dropdowns).
-     *
      * @return Collection<int, Collaborator>
      */
     public function getForForm(): Collection
     {
         return Collaborator::orderBy('full_name')->get();
+    }
+
+    public function findExternalByContact(string $contact): ?Collaborator
+    {
+        return Collaborator::where('contact', 'LIKE', $contact)
+            ->where('role', CollaboratorRole::EXTERNAL)
+            ->where('blocked', false)
+            ->first();
     }
 }

@@ -557,7 +557,7 @@
     </style>
     <script type="text/javascript">
         // Disponibiliza a rota para o componente checkContact.js
-        window.checkContactRoute = "{{ route('check-contact') }}";
+        window.checkContactRoute = "{{ route('collaborators.check-contact') }}";
 
         (function() {
             function init() {

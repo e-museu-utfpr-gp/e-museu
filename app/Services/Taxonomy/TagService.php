@@ -10,6 +10,16 @@ class TagService
     /**
      * @return Collection<int, Tag>
      */
+    public function getByCategory(string $categoryId): Collection
+    {
+        return Tag::where('tag_category_id', 'LIKE', $categoryId)
+            ->orderBy('name', 'asc')
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, Tag>
+     */
     public function getValidatedByCategory(string $categoryId): Collection
     {
         return Tag::select('name', 'id')
@@ -20,8 +30,30 @@ class TagService
     }
 
     /**
-     * Find a tag by category and name, or create it.
-     *
+     * @return Collection<int, Tag>
+     */
+    public function getValidatedNamesForAutocomplete(string $query, string $categoryId): Collection
+    {
+        $qb = Tag::select('name')
+            ->where('tag_category_id', 'LIKE', $categoryId)
+            ->where('validation', true);
+
+        if ($query !== '') {
+            $qb = $qb->where('name', 'LIKE', '%' . $query . '%');
+        }
+
+        return $qb->limit(10)->get();
+    }
+
+    public function countValidatedByNameAndCategory(string $name, string $categoryId): int
+    {
+        return Tag::where('tag_category_id', 'LIKE', $categoryId)
+            ->where('name', 'LIKE', $name)
+            ->where('validation', true)
+            ->count();
+    }
+
+    /**
      * @param  array<string, mixed>  $tagData  Must contain 'name'; use 'tag_category_id' or 'category_id'.
      */
     public function findOrCreate(array $tagData): Tag
