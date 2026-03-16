@@ -4,37 +4,26 @@ namespace App\Http\Controllers\Admin\Identity;
 
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Identity\AdminRequest;
-use App\Models\Identity\Lock;
 use App\Models\Identity\Admin;
+use App\Services\Identity\AdminService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class AdminController extends AdminBaseController
 {
-    public function index(Request $request): View
+    public function index(Request $request, AdminService $adminService): View
     {
-        $query = Admin::query();
-        $count = Admin::count();
+        $result = $adminService->getPaginatedAdminsForAdminIndex($request);
 
-        if ($request->search_column && $request->search) {
-            $query->where($request->search_column, 'LIKE', "%{$request->search}%");
-        }
-
-        if ($request->sort && $request->order) {
-            $query->orderBy($request->sort, $request->order);
-        }
-
-        $admins = $query->paginate(50)->withQueryString();
-
-        return view('admin.identity.admins.index', compact('admins', 'count'));
+        return view('admin.identity.admins.index', [
+            'admins' => $result['admins'],
+            'count' => $result['count'],
+        ]);
     }
 
-    public function show(string $id): View
+    public function show(Admin $admin): View
     {
-        $admin = Admin::findOrFail($id);
-
         return view('admin.identity.admins.show', compact('admin'));
     }
 
@@ -43,31 +32,23 @@ class AdminController extends AdminBaseController
         return view('admin.identity.admins.create');
     }
 
-    public function store(AdminRequest $request): RedirectResponse
+    public function store(AdminRequest $request, AdminService $adminService): RedirectResponse
     {
-        $data = $request->validated();
-
-        $data['password'] = Hash::make($request->password);
-
-        $admin = Admin::create($data);
+        $admin = $adminService->createAdmin($request->validated());
 
         return redirect()->route('admin.admins.show', $admin)->with('success', __('app.identity.admin.created'));
     }
 
-    public function destroy(Admin $admin): RedirectResponse
+    public function destroy(Admin $admin, AdminService $adminService): RedirectResponse
     {
-        $admin->delete();
+        $adminService->deleteAdmin($admin);
 
         return redirect()->route('admin.admins.index')->with('success', __('app.identity.admin.deleted'));
     }
 
-    public function destroyLock(string $id): RedirectResponse
+    public function destroyLock(string $id, AdminService $adminService): RedirectResponse
     {
-        $lock = Lock::where('admin_id', $id)->first();
-
-        if ($lock) {
-            $lock->delete();
-
+        if ($adminService->removeLockByAdminId($id)) {
             return redirect()->route('admin.admins.index')->with('success', __('app.identity.lock_removed'));
         }
 

@@ -6,9 +6,10 @@ use App\Http\Controllers\Admin\Catalog\AdminExtraController;
 use App\Http\Controllers\Admin\Catalog\AdminItemController;
 use App\Http\Controllers\Admin\Catalog\AdminItemTagController;
 use App\Http\Controllers\Admin\Catalog\AdminItemCategoryController;
+use App\Http\Controllers\Catalog\CollaboratorController;
 use App\Http\Controllers\Catalog\ExtraController;
 use App\Http\Controllers\Catalog\ItemController;
-use App\Http\Controllers\Catalog\QueryController;
+use App\Http\Controllers\Catalog\TagController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\Identity\AdminController;
 use App\Http\Controllers\Admin\Identity\ReleaseLockController;
@@ -29,20 +30,20 @@ Route::get('/about', function () {
 Route::get('items', [ItemController::class, 'index'])->name('items.index');
 Route::get('items/create', [ItemController::class, 'create'])->name('items.create');
 Route::get('items/by-category', [ItemController::class, 'byCategory'])->name('items.byCategory');
+Route::get('items/component-autocomplete', [ItemController::class, 'componentAutocomplete'])
+    ->name('items.component-autocomplete');
+Route::get('items/check-component-name', [ItemController::class, 'checkComponentName'])
+    ->name('items.check-component-name');
 Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show');
 
 Route::post('items', [ItemController::class, 'store'])->name('items.store');
 Route::post('extras', [ExtraController::class, 'store'])->name('extras.store');
 
-Route::get(
-    '/component-name-auto-complete',
-    [QueryController::class, 'componentNameAutoComplete']
-)->name('component-name-auto-complete');
-Route::get('/check-component-name', [QueryController::class, 'checkComponentName'])->name('check-component-name');
-Route::get('/tag-name-auto-complete', [QueryController::class, 'tagNameAutoComplete'])->name('tag-name-auto-complete');
-Route::get('/check-tag-name', [QueryController::class, 'checkTagName'])->name('check-tag-name');
-Route::get('/check-contact', [QueryController::class, 'checkContact'])->name('check-contact');
-Route::get('/get-tags', [QueryController::class, 'getTags'])->name('get-tags');
+Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
+Route::get('/tags/autocomplete', [TagController::class, 'autocomplete'])->name('tags.autocomplete');
+Route::get('/tags/check-name', [TagController::class, 'checkName'])->name('tags.check-name');
+Route::get('/collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
+    ->name('collaborators.check-contact');
 Route::group(['middleware' => 'authenticate'], function () {
     Route::redirect('/admin', '/admin/items');
 

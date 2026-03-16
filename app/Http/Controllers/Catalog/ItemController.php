@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\ItemContributionValidator;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemImagesService;
-use App\Services\Catalog\ItemIndexQueryBuilder;
 use App\Services\Catalog\ItemService;
 use App\Services\Taxonomy\TagCategoryService;
 use Illuminate\Http\JsonResponse;
@@ -20,16 +19,16 @@ class ItemController extends Controller
     public function index(
         Request $request,
         ItemCategoryService $itemCategoryService,
-        ItemIndexQueryBuilder $itemIndexQueryBuilder,
-        TagCategoryService $tagCategoryService
+        TagCategoryService $tagCategoryService,
+        ItemService $itemService
     ): View {
-        $indexResult = $itemIndexQueryBuilder->build($request);
+        $data = $itemService->getPaginatedItemsForCatalogIndex($request);
         $itemCategories = $itemCategoryService->getForIndex();
         $categories = $tagCategoryService->getForIndex();
 
         return view('catalog.items.index', [
-            'items' => $indexResult['items'],
-            'categoryName' => $indexResult['categoryName'],
+            'items' => $data['items'],
+            'categoryName' => $data['categoryName'],
             'itemCategories' => $itemCategories,
             'categories' => $categories,
         ]);
@@ -92,5 +91,25 @@ class ItemController extends Controller
         $items = $itemService->getPublicItemsByCategory($itemCategoryId);
 
         return response()->json($items);
+    }
+
+    public function componentAutocomplete(Request $request, ItemService $itemService): JsonResponse
+    {
+        $query = (string) ($request->input('query') ?? '');
+        $category = (string) ($request->input('category') ?? '');
+
+        $items = $itemService->getValidatedNamesForComponentAutocomplete($query, $category);
+
+        return response()->json($items);
+    }
+
+    public function checkComponentName(Request $request, ItemService $itemService): JsonResponse
+    {
+        $category = (string) ($request->input('category') ?? '');
+        $name = (string) ($request->input('name') ?? '');
+
+        $count = $itemService->countValidatedByNameAndCategory($name, $category);
+
+        return response()->json($count);
     }
 }

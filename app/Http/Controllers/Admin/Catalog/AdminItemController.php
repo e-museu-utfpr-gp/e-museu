@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\LocksSubject;
 use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
 use App\Http\Requests\Admin\Catalog\AdminUpdateItemRequest;
 use App\Models\Catalog\Item;
@@ -12,6 +11,7 @@ use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemService;
 use App\Services\Collaborator\CollaboratorService;
+use App\Services\Identity\LockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -23,8 +23,6 @@ use Illuminate\View\View;
  */
 class AdminItemController extends AdminBaseController
 {
-    use LocksSubject;
-
     public function index(Request $request, ItemService $itemService): View
     {
         $result = $itemService->getPaginatedItemsForAdminIndex($request);
@@ -64,12 +62,12 @@ class AdminItemController extends AdminBaseController
     public function edit(
         Item $item,
         ItemCategoryService $itemCategoryService,
-        CollaboratorService $collaboratorService
+        CollaboratorService $collaboratorService,
+        LockService $lockService
     ): View {
         $item->load(['images', 'coverImage']);
-        $this->requireUnlocked($item);
-
-        $this->lock($item);
+        $lockService->requireUnlocked($item);
+        $lockService->lock($item);
 
         return view('admin.catalog.items.edit', [
             'item' => $item,
@@ -82,9 +80,10 @@ class AdminItemController extends AdminBaseController
         AdminUpdateItemRequest $request,
         Item $item,
         ItemImagesService $itemImagesService,
-        ItemService $itemService
+        ItemService $itemService,
+        LockService $lockService
     ): RedirectResponse {
-        $this->requireUnlocked($item);
+        $lockService->requireUnlocked($item);
 
         $data = Arr::except($request->validated(), [
             'image',
@@ -99,7 +98,7 @@ class AdminItemController extends AdminBaseController
 
         $itemService->updateItem($item, $data);
 
-        $this->unlock($item);
+        $lockService->unlock($item);
 
         return redirect()->route('admin.items.show', $item)->with('success', __('app.catalog.item.updated'));
     }
@@ -107,11 +106,12 @@ class AdminItemController extends AdminBaseController
     public function destroy(
         Item $item,
         ItemImagesService $itemImagesService,
-        ItemService $itemService
+        ItemService $itemService,
+        LockService $lockService
     ): RedirectResponse {
-        $this->requireUnlocked($item);
+        $lockService->requireUnlocked($item);
 
-        $this->unlock($item);
+        $lockService->unlock($item);
 
         $itemImagesService->deleteAllImagesForItem($item);
         $itemService->deleteItem($item);
@@ -122,9 +122,10 @@ class AdminItemController extends AdminBaseController
     public function destroyImage(
         Item $item,
         ItemImage $image,
-        ItemImagesService $itemImagesService
+        ItemImagesService $itemImagesService,
+        LockService $lockService
     ): RedirectResponse {
-        $this->requireUnlocked($item);
+        $this->requireUnlocked($item, $lockService);
         $itemImagesService->deleteImage($item, $image);
 
         return redirect()->route('admin.items.edit', $item)->with('success', __('app.catalog.item_image.deleted'));

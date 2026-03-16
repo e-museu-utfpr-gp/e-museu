@@ -10,7 +10,7 @@ $(document).ready(function () {
         return;
     }
 
-    const checkContactRoute = window.checkContactRoute || '/check-contact';
+    const checkContactRoute = window.checkContactRoute || '/collaborators/check-contact';
 
     function checkContact() {
         const contact = $contactInput.val();

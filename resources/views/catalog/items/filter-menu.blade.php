@@ -13,6 +13,7 @@
         <form action="{{ route('items.index') }}" method="GET">
             <input name="item_category" value="{{ request()->query('item_category') }}" hidden>
             <input name="search" value="{{ request()->query('search') }}" hidden>
+            <input name="order" type="hidden" value="{{ request()->query('order', 1) }}">
             @foreach ($categories as $category)
                 <div>
                     <button class="toggle-filter-options d-flex justify-content-between fw-bold py-1" type="button"
