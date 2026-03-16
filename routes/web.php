@@ -1,19 +1,22 @@
 <?php
 
-use App\Http\Controllers\Catalog\AdminComponentController;
-use App\Http\Controllers\Catalog\AdminExtraController;
-use App\Http\Controllers\Catalog\AdminItemController;
-use App\Http\Controllers\Catalog\AdminItemTagController;
-use App\Http\Controllers\Catalog\AdminSectionController;
+use App\Http\Controllers\Admin\Auth\AdminLoginController;
+use App\Http\Controllers\Admin\Catalog\AdminItemComponentController;
+use App\Http\Controllers\Admin\Catalog\AdminExtraController;
+use App\Http\Controllers\Admin\Catalog\AdminItemController;
+use App\Http\Controllers\Admin\Catalog\AdminItemTagController;
+use App\Http\Controllers\Admin\Catalog\AdminItemCategoryController;
+use App\Http\Controllers\Catalog\CollaboratorController;
+use App\Http\Controllers\Catalog\ExtraController;
 use App\Http\Controllers\Catalog\ItemController;
-use App\Http\Controllers\Catalog\QueryController;
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Catalog\TagController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Proprietary\AdminProprietaryController;
-use App\Http\Controllers\Taxonomy\AdminCategoryController;
-use App\Http\Controllers\Taxonomy\AdminTagController;
-use App\Http\Controllers\Identity\AdminUserController;
+use App\Http\Controllers\Admin\Identity\AdminController;
+use App\Http\Controllers\Admin\Identity\ReleaseLockController;
+use App\Http\Controllers\Admin\Collaborator\AdminCollaboratorController;
 use App\Http\Controllers\StorageProxyController;
+use App\Http\Controllers\Admin\Taxonomy\AdminTagCategoryController;
+use App\Http\Controllers\Admin\Taxonomy\AdminTagController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/storage/{path}', StorageProxyController::class)->where('path', '.*')->name('storage.proxy');
@@ -24,121 +27,56 @@ Route::get('/about', function () {
     return view('about');
 })->name('about');
 
-Route::get('/items', [ItemController::class, 'index'])->name('items.index');
-Route::get('/items/create', [ItemController::class, 'create'])->name('items.create');
-Route::get('/items/{id}', [ItemController::class, 'show'])->name('items.show')->middleware('validate.item');
+Route::get('items', [ItemController::class, 'index'])->name('items.index');
+Route::get('items/create', [ItemController::class, 'create'])->name('items.create');
+Route::get('items/by-category', [ItemController::class, 'byCategory'])->name('items.byCategory');
+Route::get('items/component-autocomplete', [ItemController::class, 'componentAutocomplete'])
+    ->name('items.component-autocomplete');
+Route::get('items/check-component-name', [ItemController::class, 'checkComponentName'])
+    ->name('items.check-component-name');
+Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show');
 
-Route::group(['middleware' => 'validate.proprietary'], function () {
-    Route::post('/items/store', [ItemController::class, 'store'])->name('items.store');
-    Route::post('/items/store-extra', [ItemController::class, 'storeSingleExtra'])->name('items.store-extra');
-});
+Route::post('items', [ItemController::class, 'store'])->name('items.store');
+Route::post('extras', [ExtraController::class, 'store'])->name('extras.store');
 
-Route::get(
-    '/component-name-auto-complete',
-    [QueryController::class, 'componentNameAutoComplete']
-)->name('component-name-auto-complete');
-Route::get('/check-component-name', [QueryController::class, 'checkComponentName'])->name('check-component-name');
-Route::get('/tag-name-auto-complete', [QueryController::class, 'tagNameAutoComplete'])->name('tag-name-auto-complete');
-Route::get('/check-tag-name', [QueryController::class, 'checkTagName'])->name('check-tag-name');
-Route::get('/check-contact', [QueryController::class, 'checkContact'])->name('check-contact');
-Route::get('/get-tags', [QueryController::class, 'getTags'])->name('get-tags');
-Route::get('/get-items', [QueryController::class, 'getItems'])->name('get-items');
-
-Route::group(['middleware' => 'auth'], function () {
+Route::get('/tags', [TagController::class, 'index'])->name('tags.index');
+Route::get('/tags/autocomplete', [TagController::class, 'autocomplete'])->name('tags.autocomplete');
+Route::get('/tags/check-name', [TagController::class, 'checkName'])->name('tags.check-name');
+Route::get('/collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
+    ->name('collaborators.check-contact');
+Route::group(['middleware' => 'authenticate'], function () {
     Route::redirect('/admin', '/admin/items');
 
-    Route::resource('admin/items', AdminItemController::class)->names([
-        'index' => 'admin.items.index',
-        'create' => 'admin.items.create',
-        'store' => 'admin.items.store',
-        'show' => 'admin.items.show',
-        'edit' => 'admin.items.edit',
-        'update' => 'admin.items.update',
-        'destroy' => 'admin.items.destroy',
-    ]);
+    Route::resource('admin/items', AdminItemController::class)->names('admin.items');
+    Route::delete('admin/items/{item}/images/{image}', [AdminItemController::class, 'destroyImage'])
+        ->name('admin.items.images.destroy');
+    Route::resource('admin/item-categories', AdminItemCategoryController::class)->names('admin.item-categories');
+    Route::resource('admin/tags', AdminTagController::class)->names('admin.tags');
+    Route::resource('admin/tag-categories', AdminTagCategoryController::class)->names('admin.tag-categories');
+    Route::resource('admin/collaborators', AdminCollaboratorController::class)->names('admin.collaborators');
+    Route::resource('admin/extras', AdminExtraController::class)->names('admin.extras');
 
-    Route::resource('admin/sections', AdminSectionController::class)->names([
-        'index' => 'admin.sections.index',
-        'create' => 'admin.sections.create',
-        'store' => 'admin.sections.store',
-        'show' => 'admin.sections.show',
-        'edit' => 'admin.sections.edit',
-        'update' => 'admin.sections.update',
-        'destroy' => 'admin.sections.destroy',
-    ]);
+    Route::resource('admin/item-components', AdminItemComponentController::class)
+        ->only(['index', 'create', 'store', 'show', 'update', 'destroy'])
+        ->names('admin.item-components');
+    Route::resource('admin/item-tags', AdminItemTagController::class)
+        ->only(['index', 'create', 'store', 'show', 'update', 'destroy'])
+        ->names('admin.item-tags');
 
-    Route::resource('admin/tags', AdminTagController::class)->names([
-        'index' => 'admin.tags.index',
-        'create' => 'admin.tags.create',
-        'store' => 'admin.tags.store',
-        'show' => 'admin.tags.show',
-        'edit' => 'admin.tags.edit',
-        'update' => 'admin.tags.update',
-        'destroy' => 'admin.tags.destroy',
-    ]);
+    Route::post('admin/release-lock', ReleaseLockController::class)->name('admin.release-lock');
 
-    Route::resource('admin/categories', AdminCategoryController::class)->names([
-        'index' => 'admin.categories.index',
-        'create' => 'admin.categories.create',
-        'store' => 'admin.categories.store',
-        'show' => 'admin.categories.show',
-        'edit' => 'admin.categories.edit',
-        'update' => 'admin.categories.update',
-        'destroy' => 'admin.categories.destroy',
-    ]);
-
-    Route::resource('admin/proprietaries', AdminProprietaryController::class)->names([
-        'index' => 'admin.proprietaries.index',
-        'create' => 'admin.proprietaries.create',
-        'store' => 'admin.proprietaries.store',
-        'show' => 'admin.proprietaries.show',
-        'edit' => 'admin.proprietaries.edit',
-        'update' => 'admin.proprietaries.update',
-        'destroy' => 'admin.proprietaries.destroy',
-    ]);
-
-    Route::resource('admin/components', AdminComponentController::class)->names([
-        'index' => 'admin.components.index',
-        'create' => 'admin.components.create',
-        'store' => 'admin.components.store',
-        'show' => 'admin.components.show',
-        'update' => 'admin.components.update',
-        'destroy' => 'admin.components.destroy',
-    ]);
-
-    Route::resource('admin/item-tags', AdminItemTagController::class)->names([
-        'index' => 'admin.item-tags.index',
-        'create' => 'admin.item-tags.create',
-        'store' => 'admin.item-tags.store',
-        'show' => 'admin.item-tags.show',
-        'update' => 'admin.item-tags.update',
-        'destroy' => 'admin.item-tags.destroy',
-    ]);
-
-    Route::resource('admin/extras', AdminExtraController::class)->names([
-        'index' => 'admin.extras.index',
-        'create' => 'admin.extras.create',
-        'store' => 'admin.extras.store',
-        'show' => 'admin.extras.show',
-        'edit' => 'admin.extras.edit',
-        'update' => 'admin.extras.update',
-        'destroy' => 'admin.extras.destroy',
-    ]);
-
-    Route::resource('admin/users', AdminUserController::class)->names([
-        'index' => 'admin.users.index',
-        'create' => 'admin.users.create',
-        'store' => 'admin.users.store',
-        'show' => 'admin.users.show',
-        'destroy' => 'admin.users.destroy',
-    ]);
+    Route::resource('admin/admins', AdminController::class)
+        ->only(['index', 'create', 'store', 'show', 'destroy'])
+        ->names('admin.admins');
 
     Route::delete(
-        '/admin/users/{id}/delete-lock',
-        [AdminUserController::class, 'destroyLock']
-    )->name('admin.users.delete-lock');
+        '/admin/admins/{id}/delete-lock',
+        [AdminController::class, 'destroyLock']
+    )->name('admin.admins.delete-lock');
 });
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::middleware('redirectIfAuthenticated')->group(function () {
+    Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AdminLoginController::class, 'login']);
+});
+Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout')->middleware('authenticate');

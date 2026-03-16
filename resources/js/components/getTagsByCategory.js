@@ -2,7 +2,7 @@ $(document).ready(function () {
     function getTags() {
         var categoryId = $('#category_id').val();
         $.ajax({
-            url: '/get-tags',
+            url: '/tags',
             type: 'GET',
             data: { category: categoryId },
             success: function (data) {

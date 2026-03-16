@@ -2,8 +2,9 @@
 
 namespace Database\Factories\Catalog;
 
-use App\Models\Catalog\Section;
-use App\Models\Proprietary\Proprietary;
+use App\Models\Catalog\ItemCategory;
+use App\Models\Catalog\ItemImage;
+use App\Models\Collaborator\Collaborator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,10 +21,23 @@ class ItemFactory extends Factory
             'detail' => $this->faker->text,
             'date' => $this->faker->date,
             'identification_code' => $this->faker->unique()->numberBetween(1, 1000),
-            'image' => null,
             'validation' => $this->faker->boolean,
-            'section_id' => Section::pluck('id')->random(),
-            'proprietary_id' => Proprietary::pluck('id')->random(),
+            'category_id' => ItemCategory::pluck('id')->random(),
+            'collaborator_id' => Collaborator::pluck('id')->random(),
         ];
+    }
+
+    /**
+     * Create an item with multiple images (1 cover + N-1 gallery).
+     *
+     * @param  int  $total  Total number of images (default 3: 1 cover + 2 gallery)
+     */
+    public function withImages(int $total = 3): static
+    {
+        return $this->has(
+            ItemImage::factory()->cover()->count(1)
+        )->has(
+            ItemImage::factory()->gallery()->count(max(0, $total - 1))
+        );
     }
 }

@@ -1,8 +1,9 @@
+import i18next from 'i18next';
+
 $(document).ready(function () {
-    $('.deleteProprietaryButton').click(function () {
-        var confirmation = confirm(
-            'Tem certeza que deseja excluir o proprietário e todas as vezes que é referenciado em outros registros?'
-        );
+    $('.deleteProprietaryButton, .deleteCollaboratorButton').click(function () {
+        const message = $(this).data('confirm-message') || i18next.t('warnings.delete_collaborator');
+        const confirmation = confirm(message);
 
         if (!confirmation) event.preventDefault();
     });

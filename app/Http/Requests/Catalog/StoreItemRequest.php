@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\File;
 
 class StoreItemRequest extends FormRequest
 {
@@ -18,6 +17,9 @@ class StoreItemRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
+     * Public item contribution: cover_image is the required main image (stored as type "cover");
+     * gallery_images is an optional array of extra images (stored as type "gallery"). Max 10MB per file.
+     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -28,20 +30,10 @@ class StoreItemRequest extends FormRequest
             'description' => 'required|string|min:1|max:1000',
             'detail' => 'nullable|max:10000',
             'history' => 'nullable|max:100000',
-            'section_id' => 'required|integer|numeric|exists:sections,id',
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'O campo nome é obrigatório.',
-            'description.required' => 'O campo descrição é obrigatório.',
-            'section_id.required' => 'O campo categoria de item é obrigatório.',
-            'image.required' => 'O campo imagem é obrigatório.',
-            'image.mimes:jpeg,png,jpg,webp' => 'A extensão da imagem deve ser: jpeg, png ou webp.',
-            'image.max:10240' => 'A imagem deve ter no máximo 10MB.',
+            'category_id' => 'required|integer|numeric|exists:item_categories,id',
+            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'gallery_images' => 'sometimes|array',
+            'gallery_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:10240',
         ];
     }
 }

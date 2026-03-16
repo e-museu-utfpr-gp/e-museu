@@ -3,21 +3,29 @@
 namespace App\Models\Catalog;
 
 use App\Models\Identity\Lock;
-use App\Models\Proprietary\Proprietary;
+use App\Models\Collaborator\Collaborator;
 use App\Models\Taxonomy\Tag;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Tag> $tags
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ItemImage> $images
+ * @property-read ItemImage|null $coverImage
+ * @property-read ItemCategory|null $itemCategory
+ * @property-read string|null $item_category_name
  * @property-read string $image_url
+ *
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Item extends Model
 {
@@ -31,9 +39,8 @@ class Item extends Model
         'date',
         'identification_code',
         'validation',
-        'image',
-        'section_id',
-        'proprietary_id',
+        'category_id',
+        'collaborator_id',
     ];
 
     protected $table = 'items';
@@ -44,72 +51,37 @@ class Item extends Model
     ];
 
     /**
-     * Image path in storage. For legacy full URLs (http/https), getter returns '' (use image_url for display).
-     * Nullable: null when item has no image yet.
-     *
-     * @return Attribute<string, ?string>
-     */
-    public function image(): Attribute
-    {
-        return Attribute::make(
-            get: fn (): string => $this->normalizeToPath($this->attributes['image'] ?? ''),
-            set: function (?string $value): ?string {
-                if ($value === null || $value === '') {
-                    return null;
-                }
-                return $value;
-            },
-        );
-    }
-
-    /**
-     * Builds storage path for item image: items/{id}/{uuid}_{id}.{ext}
-     * Used by seeder and when creating/updating items with uploads.
-     */
-    public static function buildImagePath(self $item, string $extension = 'png'): string
-    {
-        $uuid = (string) Str::uuid7();
-        $ext = preg_match('/^[a-z0-9]+$/i', $extension) ? strtolower($extension) : 'png';
-
-        return sprintf('items/%s/%s_%s.%s', $item->id, $uuid, $item->id, $ext);
-    }
-
-    /**
-     * Public URL for displaying the image (e.g. <img> src). Supports storage paths and legacy full URLs.
+     * Public URL for the item's cover image (first image with type cover, or first image).
      *
      * @return Attribute<string, never>
      */
     public function imageUrl(): Attribute
     {
         return Attribute::get(function (): string {
-            $raw = $this->attributes['image'] ?? null;
-            if ($raw === null || $raw === '') {
-                return '';
-            }
-            if (str_starts_with($raw, 'http')) {
-                return $raw;
-            }
-            return Storage::disk('public')->url($raw);
+            $cover = $this->coverImage;
+
+            return $cover?->image_url ?? optional($this->images()->orderBy('sort_order')->first())?->image_url ?? '';
         });
     }
 
-    /** For legacy URLs we have no storage path; return '' so only image_url is used for display. */
-    private function normalizeToPath(string $value): string
+    public function images(): HasMany
     {
-        if ($value === '' || ! str_starts_with($value, 'http')) {
-            return $value;
-        }
-        return '';
+        return $this->hasMany(ItemImage::class)->orderBy('sort_order');
     }
 
-    public function proprietary(): BelongsTo
+    public function coverImage(): HasOne
     {
-        return $this->belongsTo(Proprietary::class);
+        return $this->hasOne(ItemImage::class)->where('type', 'cover')->orderBy('sort_order');
+    }
+
+    public function collaborator(): BelongsTo
+    {
+        return $this->belongsTo(Collaborator::class);
     }
 
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Tag::class, 'tag_item', 'item_id', 'tag_id');
+        return $this->belongsToMany(Tag::class, 'item_tag', 'item_id', 'tag_id');
     }
 
     public function composedOf(): BelongsToMany
@@ -127,9 +99,9 @@ class Item extends Model
         return $this->hasMany(Extra::class);
     }
 
-    public function section(): BelongsTo
+    public function itemCategory(): BelongsTo
     {
-        return $this->belongsTo(Section::class);
+        return $this->belongsTo(ItemCategory::class, 'category_id');
     }
 
     public function itemComponents(): HasMany
@@ -137,13 +109,56 @@ class Item extends Model
         return $this->hasMany(ItemComponent::class);
     }
 
-    public function tagItems(): HasMany
+    public function itemTags(): HasMany
     {
-        return $this->hasMany(TagItem::class);
+        return $this->hasMany(ItemTag::class);
     }
 
     public function locks(): MorphMany
     {
         return $this->morphMany(Lock::class, 'lockable');
+    }
+
+    /**
+     * Scope for admin list: joins collaborators and categories, selects truncated text columns.
+     *
+     * @param  Builder<Item>  $query
+     * @return Builder<Item>
+     */
+    public function scopeForAdminList(Builder $query): Builder
+    {
+        $query->with('coverImage')
+            ->leftJoin('collaborators', 'items.collaborator_id', '=', 'collaborators.id')
+            ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
+            ->select([
+                'items.*',
+                'items.name AS item_name',
+                'items.created_at AS item_created',
+                'items.updated_at AS item_updated',
+                'items.validation AS item_validation',
+                DB::raw('LEFT(items.history, 300) as history'),
+                DB::raw('LEFT(items.description, 150) as description'),
+                DB::raw('LEFT(items.detail, 150) as detail'),
+                'item_categories.name AS item_category_name',
+                'collaborators.contact AS collaborator_contact',
+            ]);
+
+        return $query;
+    }
+
+    /**
+     * Ensure only one image has type=cover (the first by sort_order). Fixes legacy duplicate covers.
+     */
+    public function normalizeSingleCover(): void
+    {
+        $covers = $this->images()->where('type', 'cover')->orderBy('sort_order')->get();
+        if ($covers->count() <= 1) {
+            return;
+        }
+        $first = $covers->first();
+        if ($first === null) {
+            return;
+        }
+        $this->images()->where('type', 'cover')->where('id', '!=', $first->id)->update(['type' => 'gallery']);
     }
 }

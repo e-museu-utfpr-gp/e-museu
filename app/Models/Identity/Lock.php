@@ -2,6 +2,8 @@
 
 namespace App\Models\Identity;
 
+use Carbon\Carbon;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -16,7 +18,7 @@ class Lock extends Model
         'lockable_id',
         'lockable_type',
         'expiry_date',
-        'user_id',
+        'admin_id',
     ];
 
     protected $table = 'locks';
@@ -26,13 +28,14 @@ class Lock extends Model
         return $this->morphTo();
     }
 
-    public function user(): BelongsTo
+    public function admin(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Admin::class);
     }
 
     /**
      * @return static|null
+     *
      * @phpstan-return static|null
      */
     public static function findByModel(EloquentModel $subject)
@@ -48,5 +51,28 @@ class Lock extends Model
     public function expiresAt(): ?string
     {
         return $this->expiry_date;
+    }
+
+    /**
+     * Whether another user's active lock blocks the given user from editing the model.
+     * Expired locks are not considered active (and are removed).
+     */
+    public static function isLockedByOtherUser(Authenticatable $user, EloquentModel $subject): bool
+    {
+        $lock = static::where('lockable_type', $subject::class)
+            ->where('lockable_id', $subject->getKey())
+            ->first();
+
+        if (! $lock || ! $lock->expiresAt()) {
+            return false;
+        }
+
+        if (Carbon::parse($lock->expiry_date)->isPast()) {
+            $lock->delete();
+
+            return false;
+        }
+
+        return (string) $lock->admin_id !== (string) $user->getAuthIdentifier();
     }
 }

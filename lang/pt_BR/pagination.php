@@ -1,15 +1,19 @@
 <?php
 
+/*
+| Laravel framework language file. Keys and structure are defined by the framework.
+| Do not rename keys. Keep this file in sync with the same file in other locales (e.g. en).
+*/
+
 return [
 
     /*
     |--------------------------------------------------------------------------
-    | Pagination Language Lines
+    | Pagination (framework)
     |--------------------------------------------------------------------------
     |
-    | The following language lines are used by the paginator library to build
-    | the simple pagination links. You are free to change them to anything
-    | you want to customize your views to better match your application.
+    | Text for "Previous" and "Next" links in pagination views
+    | (pagination::bootstrap-5, tailwind, etc.).
     |
     */
 

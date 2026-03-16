@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Providers\Concerns\GuessesFactoryName;
+use App\Providers\Concerns\GuessesModelName;
+use App\Providers\Concerns\AdminDatabaseSessionHandler;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,32 +23,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $factoryMap = config('factory_model_map', []);
+        Factory::guessFactoryNamesUsing([GuessesFactoryName::class, 'forModel']);
+        Factory::guessModelNamesUsing([GuessesModelName::class, 'forFactory']);
 
-        /** @phpstan-ignore argument.type (callback return type is class-string in practice) */
-        Factory::guessFactoryNamesUsing(function (string $modelName) use ($factoryMap): string {
-            if (isset($factoryMap[$modelName])) {
-                return $factoryMap[$modelName];
-            }
+        Session::extend('database', function ($app) {
+            $table = $app['config']->get('session.table');
+            $lifetime = $app['config']->get('session.lifetime');
+            $connection = $app['config']->get('session.connection');
+            $dbConnection = $app['db']->connection($connection);
 
-            $modelBasename = Str::after($modelName, 'App\Models\\');
-
-            return 'Database\Factories\\' . $modelBasename . 'Factory';
-        });
-
-        $modelMap = array_flip($factoryMap);
-
-        /** @phpstan-ignore argument.type (callback return type is class-string in practice) */
-        Factory::guessModelNamesUsing(function (Factory $factory) use ($modelMap): string {
-            $factoryClass = $factory::class;
-
-            if (isset($modelMap[$factoryClass])) {
-                return $modelMap[$factoryClass];
-            }
-
-            $factoryBasename = Str::replaceLast('Factory', '', class_basename($factory));
-
-            return 'App\Models\\' . $factoryBasename;
+            return new AdminDatabaseSessionHandler($dbConnection, $table, $lifetime, $app);
         });
     }
 }

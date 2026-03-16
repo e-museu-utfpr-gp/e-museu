@@ -2,10 +2,9 @@
 
 namespace Database\Seeders\Taxonomy;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\Catalog\TagItem;
+use App\Models\Catalog\ItemTag;
 use App\Models\Taxonomy\Tag;
+use Illuminate\Database\Seeder;
 
 class TagSeeder extends Seeder
 {
@@ -14,7 +13,7 @@ class TagSeeder extends Seeder
         if (app()->environment('local')) {
             Tag::factory(100)->create();
 
-            TagItem::factory(50)->create();
+            ItemTag::factory(50)->create();
         }
     }
 }

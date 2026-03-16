@@ -24,15 +24,8 @@ class SingleExtraRequest extends FormRequest
         return [
             'info' => 'required|string|min:1|max:10000',
             'item_id' => 'required|integer|numeric|exists:items,id',
-            'proprietary_id' => 'sometimes|integer|numeric|exists:proprietaries,id',
-            'validation' => 'sometimes|boolean'
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'info.required' => 'O campo curiosidade é obrigatório.',
+            'collaborator_id' => 'sometimes|integer|numeric|exists:collaborators,id',
+            'validation' => 'sometimes|boolean',
         ];
     }
 }
