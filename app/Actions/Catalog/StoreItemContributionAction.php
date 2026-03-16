@@ -2,17 +2,15 @@
 
 namespace App\Actions\Catalog;
 
-use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemComponent;
 use App\Models\Collaborator\Collaborator;
+use App\Services\Catalog\ExtraService;
 use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemService;
 use App\Services\Catalog\ItemTagService;
-use App\Services\Catalog\ExtraService;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Taxonomy\TagService;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
@@ -30,14 +28,22 @@ class StoreItemContributionAction
 
     /**
      * Store a contributed item (public contribution flow).
-     * Resolves collaborator, creates item, images, tags, extras and components.
+     * Resolves collaborator and creates item, images, tags, extras and components.
      *
-     * @param  array<string, mixed>                 $collaboratorData
-     * @param  array<string, mixed>                 $itemData
-     * @param  array<int, array<string, mixed>>     $tags
-     * @param  array<int, array<string, mixed>>     $extras
-     * @param  array<int, array<string, mixed>>     $components
-     * @param  array<int, UploadedFile>|null        $galleryImages
+     * @param  array<string, mixed>  $collaboratorData  Collaborator data validated by the
+     *                                                  request (e.g. name, contact).
+     * @param  array<string, mixed>  $itemData          Item data (name, category_id,
+     *                                                  description, history, detail, date,
+     *                                                  validation, etc.).
+     * @param  array<int, array<string, mixed>>  $tags  Tag data validated by the request.
+     * @param  array<int, array<string, mixed>>  $extras  Extra data (e.g. type, value, etc.).
+     * @param  array<int, array<string, mixed>>  $components  Components identified by
+     *                                                        category and name.
+     * @param  array<int, UploadedFile>|null  $galleryImages
+     * @return array{
+     *     status: 'ok'|'internal_blocked'|'collaborator_blocked',
+     *     item?: Item
+     * }
      */
     public function handle(
         array $collaboratorData,
@@ -47,10 +53,14 @@ class StoreItemContributionAction
         array $components,
         ?UploadedFile $coverImage,
         ?array $galleryImages = null
-    ): RedirectResponse {
-        $collaborator = $this->resolveCollaboratorForContribution($collaboratorData);
-        if ($collaborator instanceof RedirectResponse) {
-            return $collaborator;
+    ): array {
+        $resolution = $this->resolveCollaboratorForContribution($collaboratorData);
+        if ($resolution['status'] !== 'ok') {
+            return ['status' => $resolution['status']];
+        }
+        $collaborator = $resolution['collaborator'];
+        if (! $collaborator instanceof Collaborator) {
+            return ['status' => 'internal_blocked'];
         }
 
         if ($coverImage) {
@@ -68,26 +78,42 @@ class StoreItemContributionAction
         $this->extraService->createForItem($item, $collaborator, $extras);
         $this->attachComponentsToItem($item, $components);
 
-        return redirect()->route('items.create')->with('success', __('app.catalog.item.contribution_success'));
+        return [
+            'status' => 'ok',
+            'item' => $item,
+        ];
     }
 
     /**
-     * Resolve collaborator for contribution; return redirect with errors if not allowed.
+     * Resolve collaborator for contribution.
      *
      * @param  array<string, mixed>  $collaboratorData
-     * @return Collaborator|RedirectResponse
+     * @return array{
+     *     status: 'ok'|'internal_blocked'|'collaborator_blocked',
+     *     collaborator: Collaborator|null
+     * }
      */
-    private function resolveCollaboratorForContribution(array $collaboratorData): Collaborator|RedirectResponse
+    private function resolveCollaboratorForContribution(array $collaboratorData): array
     {
         $collaborator = $this->collaboratorService->resolveOrCreateCollaborator($collaboratorData);
-        if ($collaborator->role === CollaboratorRole::INTERNAL) {
-            return back()->withErrors(['contact' => __('app.collaborator.contact_reserved_for_internal')]);
-        }
-        if ($collaborator->blocked === true) {
-            return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
+        if ($collaborator->role === \App\Enums\Collaborator\CollaboratorRole::INTERNAL) {
+            return [
+                'status' => 'internal_blocked',
+                'collaborator' => null,
+            ];
         }
 
-        return $collaborator;
+        if ($collaborator->blocked === true) {
+            return [
+                'status' => 'collaborator_blocked',
+                'collaborator' => null,
+            ];
+        }
+
+        return [
+            'status' => 'ok',
+            'collaborator' => $collaborator,
+        ];
     }
 
     /**
@@ -107,7 +133,6 @@ class StoreItemContributionAction
             $this->itemImagesService->storeCoverImage($item, $coverImage);
         }
         $this->itemImagesService->storeGalleryImages($item, $galleryImages);
-        $item->normalizeSingleCover();
 
         return $item;
     }
@@ -124,9 +149,9 @@ class StoreItemContributionAction
 
         return DB::transaction(function () use ($itemData): Item {
             $item = Item::create($itemData);
-            $updateData = $itemData;
-            $updateData['identification_code'] = $this->itemService->createIdentificationCode($item);
-            $item->update($updateData);
+            $item->update([
+                'identification_code' => $this->itemService->createIdentificationCode($item),
+            ]);
 
             return $item;
         });
@@ -144,6 +169,11 @@ class StoreItemContributionAction
                 ->where('name', '=', $componentItemData['name'])
                 ->first();
             if (! $component) {
+                logger()->info('Component item not found for contribution', [
+                    'item_id' => $item->id,
+                    'component_category_id' => $componentItemData['category_id'] ?? null,
+                    'component_name' => $componentItemData['name'] ?? null,
+                ]);
                 continue;
             }
             $componentItemData['component_id'] = $component->id;

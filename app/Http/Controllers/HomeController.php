@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Catalog\Item;
+use App\Services\Catalog\ItemService;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function index(): View
+    public function index(ItemService $itemService): View
     {
-        $items = Item::with('coverImage')->where('validation', true)->inRandomOrder()->take(5)->get();
+        $items = $itemService->getRandomValidatedItemsForHome();
 
         return view('home', compact('items'));
     }

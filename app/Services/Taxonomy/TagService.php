@@ -101,7 +101,7 @@ class TagService
 
     public function countValidatedByNameAndCategory(string $name, string $categoryId): int
     {
-        return Tag::where('tag_category_id', 'LIKE', $categoryId)
+        return Tag::where('tag_category_id', $categoryId)
             ->where('name', 'LIKE', $name)
             ->where('validation', true)
             ->count();

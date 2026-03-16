@@ -10,7 +10,6 @@ use App\Services\Collaborator\CollaboratorService;
 use App\Support\AdminIndexQueryBuilder;
 use App\Support\AdminIndexConfig;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ExtraService
@@ -74,26 +73,29 @@ class ExtraService
     }
 
     /**
-     * @param  array<string, mixed>  $collaboratorData
-     * @param  array<string, mixed>  $extraData
+     * Handle single extra creation from public contribution.
+     *
+     * @param  array<string, mixed>  $collaboratorData Collaborator data validated by the request.
+     * @param  array<string, mixed>  $extraData        Extra data validated by the request.
+     * @return array{status: 'ok'|'internal_blocked'|'collaborator_blocked'}
      */
     public function storeSingleExtra(
         CollaboratorService $collaboratorService,
         array $collaboratorData,
         array $extraData
-    ): RedirectResponse {
+    ): array {
         $collaborator = $collaboratorService->resolveOrCreateCollaborator($collaboratorData);
 
         if ($collaborator->role === CollaboratorRole::INTERNAL) {
-            return back()->withErrors(['contact' => __('app.collaborator.contact_reserved_for_internal')]);
+            return ['status' => 'internal_blocked'];
         }
 
         if ($collaborator->blocked === true) {
-            return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
+            return ['status' => 'collaborator_blocked'];
         }
 
         $this->create($extraData, $collaborator);
 
-        return back()->with('success', __('app.catalog.extra.contribution_success'));
+        return ['status' => 'ok'];
     }
 }

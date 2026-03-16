@@ -85,6 +85,20 @@ class ItemService
     }
 
     /**
+     * Random validated items for the public home page carousel.
+     *
+     * @return Collection<int, Item>
+     */
+    public function getRandomValidatedItemsForHome(int $limit = 5): Collection
+    {
+        return Item::with('coverImage')
+            ->where('validation', true)
+            ->inRandomOrder()
+            ->take($limit)
+            ->get();
+    }
+
+    /**
      * @return Collection<int, Item>
      */
     public function getValidatedNamesForComponentAutocomplete(string $query, string $categoryId): Collection
@@ -102,7 +116,7 @@ class ItemService
 
     public function countValidatedByNameAndCategory(string $name, string $categoryId): int
     {
-        return Item::where('category_id', 'LIKE', $categoryId)
+        return Item::where('category_id', $categoryId)
             ->where('name', 'LIKE', $name)
             ->where('validation', true)
             ->count();

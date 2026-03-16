@@ -125,7 +125,7 @@ class AdminItemController extends AdminBaseController
         ItemImagesService $itemImagesService,
         LockService $lockService
     ): RedirectResponse {
-        $this->requireUnlocked($item, $lockService);
+        $lockService->requireUnlocked($item);
         $itemImagesService->deleteImage($item, $image);
 
         return redirect()->route('admin.items.edit', $item)->with('success', __('app.catalog.item_image.deleted'));

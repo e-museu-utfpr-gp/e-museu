@@ -355,6 +355,26 @@ function all-tests {
   ./run prettier-check
 }
 
+function all-fix {
+  set -e
+  echo "===="
+  echo ">> Running PHP Code Beautifier and Fixer (phpcbf)..."
+  echo "===="
+  ./run phpcbf
+  echo "===="
+  echo ">> Running Laravel Pint (PHP code style fixer)..."
+  echo "===="
+  ./run pint
+  echo "===="
+  echo ">> Running ESLint with auto-fix..."
+  echo "===="
+  ./run eslint-fix
+  echo "===="
+  echo ">> Running Prettier (format JS/SASS/JSON)..."
+  echo "===="
+  ./run prettier
+}
+
 function ps {
   docker compose -f "$(get_compose_file)" ps "${@}"
 }
@@ -620,6 +640,7 @@ function help {
   echo "  prettier-check   - Check if files are formatted correctly (without modifying)"
   echo "  prettier-check <path> - Check specific path formatting"
   echo "  all-tests          - Run all checks (test, phpcs, pint-test, phpmd, phpstan, phpcpd, eslint, prettier-check)"
+  echo "  all-fix           - Run all auto-fix tools (phpcbf, pint, eslint-fix, prettier)"
   echo "  simulate-ci        - Simulate complete CI pipeline (runs all CI jobs)"
   echo "  simulate-ci -y     - Simulate CI pipeline without confirmation"
   echo ""
