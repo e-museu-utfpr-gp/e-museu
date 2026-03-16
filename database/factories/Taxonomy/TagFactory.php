@@ -15,7 +15,7 @@ class TagFactory extends Factory
     public function definition(): array
     {
         return [
-            'category_id' => $this->faker->numberBetween(1, 4),
+            'tag_category_id' => $this->faker->numberBetween(1, 4),
             'name' => $this->faker->unique()->word,
             'validation' => $this->faker->boolean,
         ];

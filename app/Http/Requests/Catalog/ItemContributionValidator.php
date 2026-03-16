@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Catalog;
 
-use App\Http\Requests\Proprietary\ProprietaryRequest;
+use App\Http\Requests\Collaborator\CollaboratorRequest;
 use App\Http\Requests\Taxonomy\TagRequest;
 use Illuminate\Http\Request;
 
@@ -10,7 +10,7 @@ class ItemContributionValidator
 {
     /**
      * @return array{
-     *   proprietary: array<string, mixed>,
+     *   collaborator: array<string, mixed>,
      *   item: array<string, mixed>,
      *   tags: array<int, array<string, mixed>>,
      *   extras: array<int, array<string, mixed>>,
@@ -19,15 +19,15 @@ class ItemContributionValidator
      */
     public function validateStore(Request $request): array
     {
-        $proprietaryRequest = new ProprietaryRequest();
+        $collaboratorRequest = new CollaboratorRequest();
         $storeItemRequest = new StoreItemRequest();
         $tagRequest = new TagRequest();
         $extraRequest = new ExtraRequest();
         $componentRequest = new ComponentRequest();
 
-        $proprietary = $request->validate(
-            $proprietaryRequest->rules(),
-            $proprietaryRequest->messages()
+        $collaborator = $request->validate(
+            $collaboratorRequest->rules(),
+            $collaboratorRequest->messages()
         );
         $item = $request->validate(
             $storeItemRequest->rules(),
@@ -38,7 +38,7 @@ class ItemContributionValidator
         $request->validate($componentRequest->rules(), $componentRequest->messages());
 
         return [
-            'proprietary' => $proprietary,
+            'collaborator' => $collaborator,
             'item' => $item,
             'tags' => (array) $request->tags,
             'extras' => (array) $request->extras,
@@ -47,18 +47,18 @@ class ItemContributionValidator
     }
 
     /**
-     * @return array{proprietary: array<string, mixed>, extra: array<string, mixed>}
+     * @return array{collaborator: array<string, mixed>, extra: array<string, mixed>}
      */
     public function validateSingleExtra(SingleExtraRequest $request): array
     {
-        $proprietaryRequest = new ProprietaryRequest();
-        $proprietary = $request->validate(
-            $proprietaryRequest->rules(),
-            $proprietaryRequest->messages()
+        $collaboratorRequest = new CollaboratorRequest();
+        $collaborator = $request->validate(
+            $collaboratorRequest->rules(),
+            $collaboratorRequest->messages()
         );
         $extra = $request->validated();
         $extra['validation'] = 0;
 
-        return ['proprietary' => $proprietary, 'extra' => $extra];
+        return ['collaborator' => $collaborator, 'extra' => $extra];
     }
 }

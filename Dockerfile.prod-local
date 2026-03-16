@@ -59,6 +59,7 @@ RUN npm ci
 # Copy only necessary files for building assets
 COPY resources/ ./resources/
 COPY public/ ./public/
+COPY lang/js/ ./lang/js/
 COPY vite.config.js ./
 
 RUN npm run build

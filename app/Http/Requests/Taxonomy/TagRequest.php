@@ -22,8 +22,8 @@ class TagRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tags.*.category_id' => 'sometimes|required|integer|numeric|exists:categories,id',
-            'tags.*.name' => 'sometimes|required|string|min:1|max:200'
+            'tags.*.category_id' => 'sometimes|required|integer|numeric|exists:tag_categories,id',
+            'tags.*.name' => 'sometimes|required|string|min:1|max:200',
         ];
     }
 }

@@ -3,15 +3,15 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Route prefix to lockable model (for CheckLock middleware)
+    | Route prefix to lockable model (used by LocksSubject trait and ReleaseLockController)
     | Key: route name prefix (e.g. admin.items)
     | Value: [route parameter name, model class]
     |--------------------------------------------------------------------------
     */
     'admin.items' => ['item', \App\Models\Catalog\Item::class],
     'admin.tags' => ['tag', \App\Models\Taxonomy\Tag::class],
-    'admin.categories' => ['category', \App\Models\Taxonomy\Category::class],
-    'admin.proprietaries' => ['proprietary', \App\Models\Proprietary\Proprietary::class],
+    'admin.tag-categories' => ['tag_category', \App\Models\Taxonomy\TagCategory::class],
+    'admin.collaborators' => ['collaborator', \App\Models\Collaborator\Collaborator::class],
     'admin.extras' => ['extra', \App\Models\Catalog\Extra::class],
-    'admin.sections' => ['section', \App\Models\Catalog\Section::class],
+    'admin.item-categories' => ['item_category', \App\Models\Catalog\ItemCategory::class],
 ];

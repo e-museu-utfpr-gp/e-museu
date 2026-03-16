@@ -17,19 +17,19 @@ class Tag extends Model
     protected $fillable = [
         'name',
         'validation',
-        'category_id',
+        'tag_category_id',
     ];
 
     protected $table = 'tags';
 
     public function items(): BelongsToMany
     {
-        return $this->belongsToMany(Item::class, 'tag_item', 'tag_id', 'item_id');
+        return $this->belongsToMany(Item::class, 'item_tag', 'tag_id', 'item_id');
     }
 
-    public function category(): BelongsTo
+    public function tagCategory(): BelongsTo
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(TagCategory::class, 'tag_category_id');
     }
 
     public function locks(): MorphMany

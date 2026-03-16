@@ -14,7 +14,7 @@ class ItemComponentFactory extends Factory
     {
         return [
             'component_id' => Item::pluck('id')->random(),
-            'item_id' => Item::pluck('id')->random()
+            'item_id' => Item::pluck('id')->random(),
         ];
     }
 }
