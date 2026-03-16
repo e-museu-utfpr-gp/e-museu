@@ -274,7 +274,7 @@
     @include('catalog.items.show-modals.extra-modal')
 
     <script>
-        let checkContactRoute = "{{ route('check-contact') }}";
+        let checkContactRoute = "{{ route('collaborators.check-contact') }}";
     </script>
 
 @endsection

@@ -7,13 +7,51 @@ use App\Models\Catalog\Extra;
 use App\Models\Catalog\Item;
 use App\Models\Collaborator\Collaborator;
 use App\Services\Collaborator\CollaboratorService;
+use App\Support\AdminIndexQueryBuilder;
+use App\Support\AdminIndexConfig;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class ExtraService
 {
     /**
-     * Create extra records for an item (contribution flow).
-     *
+     * @return array{extras: LengthAwarePaginator<int, Extra>, count: int}
+     */
+    public function getPaginatedExtrasForAdminIndex(Request $request): array
+    {
+        $count = Extra::count();
+        $query = Extra::query()->forAdminList();
+
+        AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::extras());
+
+        $extras = $query->paginate(30)->withQueryString();
+
+        return ['extras' => $extras, 'count' => $count];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function createExtra(array $data): Extra
+    {
+        return Extra::create($data);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateExtra(Extra $extra, array $data): void
+    {
+        $extra->update($data);
+    }
+
+    public function deleteExtra(Extra $extra): void
+    {
+        $extra->delete();
+    }
+
+    /**
      * @param  array<int, array<string, mixed>>  $extrasData
      */
     public function createForItem(Item $item, Collaborator $collaborator, array $extrasData): void
@@ -26,8 +64,6 @@ class ExtraService
     }
 
     /**
-     * Create a single extra (e.g. from storeSingleExtra contribution).
-     *
      * @param  array<string, mixed>  $extraData
      */
     public function create(array $extraData, Collaborator $collaborator): Extra
@@ -38,8 +74,6 @@ class ExtraService
     }
 
     /**
-     * Store a single extra from contribution (resolve collaborator, validate, create extra).
-     *
      * @param  array<string, mixed>  $collaboratorData
      * @param  array<string, mixed>  $extraData
      */

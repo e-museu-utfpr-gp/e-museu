@@ -2,73 +2,30 @@
 
 namespace App\Http\Controllers\Admin\Collaborator;
 
-use App\Enums\Collaborator\CollaboratorRole;
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\LocksSubject;
 use App\Http\Requests\Admin\Collaborator\AdminStoreCollaboratorRequest;
 use App\Http\Requests\Admin\Collaborator\AdminUpdateCollaboratorRequest;
 use App\Models\Collaborator\Collaborator;
+use App\Services\Collaborator\CollaboratorService;
+use App\Services\Identity\LockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AdminCollaboratorController extends AdminBaseController
 {
-    use LocksSubject;
-
-    public function index(Request $request): View
+    public function index(Request $request, CollaboratorService $collaboratorService): View
     {
-        $count = Collaborator::count();
-        $query = Collaborator::query();
+        $result = $collaboratorService->getPaginatedCollaboratorsForAdminIndex($request);
 
-        $this->applySearchFilter($query, $request->search_column, $request->search);
-
-        if ($request->sort && $request->order) {
-            $query->orderBy($request->sort, $request->order);
-        }
-
-        $collaborators = $query->paginate(10)->withQueryString();
-
-        return view('admin.collaborators.index', compact('collaborators', 'count'));
+        return view('admin.collaborators.index', [
+            'collaborators' => $result['collaborators'],
+            'count' => $result['count'],
+        ]);
     }
 
-    /**
-     * @param  \Illuminate\Database\Eloquent\Builder<Collaborator>  $query
-     */
-    private function applySearchFilter($query, ?string $searchColumn, ?string $search): void
+    public function show(Collaborator $collaborator): View
     {
-        if (! $searchColumn || ! $search) {
-            return;
-        }
-
-        if (
-            $searchColumn === 'role' && in_array(
-                strtolower($search),
-                [
-                    CollaboratorRole::INTERNAL->value,
-                    CollaboratorRole::EXTERNAL->value,
-                ],
-                true
-            )
-        ) {
-            $query->where($searchColumn, strtolower($search));
-
-            return;
-        }
-
-        if ($searchColumn === 'blocked') {
-            $query->where($searchColumn, (string) $search === '1');
-
-            return;
-        }
-
-        $query->where($searchColumn, 'LIKE', "%{$search}%");
-    }
-
-    public function show(string $id): View
-    {
-        $collaborator = Collaborator::findOrFail($id);
-
         return view('admin.collaborators.show', compact('collaborator'));
     }
 
@@ -77,51 +34,58 @@ class AdminCollaboratorController extends AdminBaseController
         return view('admin.collaborators.create');
     }
 
-    public function store(AdminStoreCollaboratorRequest $request): RedirectResponse
-    {
-        $data = $request->validated();
-        $data['blocked'] = $request->boolean('blocked', false);
+    public function store(
+        AdminStoreCollaboratorRequest $request,
+        CollaboratorService $collaboratorService
+    ): RedirectResponse {
+        $data = array_merge(
+            $request->validated(),
+            ['blocked' => $request->boolean('blocked', false)]
+        );
+        $collaborator = $collaboratorService->createCollaborator($data);
 
-        $collaborator = Collaborator::create($data);
-
-        $message = 'Colaborador adicionado com sucesso.';
-
-        return redirect()->route('admin.collaborators.show', $collaborator)->with('success', $message);
+        return redirect()
+            ->route('admin.collaborators.show', $collaborator)
+            ->with('success', __('app.collaborator.created'));
     }
 
-    public function edit(string $id): View
+    public function edit(Collaborator $collaborator, LockService $lockService): View
     {
-        $collaborator = Collaborator::findOrFail($id);
-        $this->requireUnlocked($collaborator);
-
-        $this->lock($collaborator);
+        $lockService->requireUnlocked($collaborator);
+        $lockService->lock($collaborator);
 
         return view('admin.collaborators.edit', compact('collaborator'));
     }
 
-    public function update(AdminUpdateCollaboratorRequest $request, Collaborator $collaborator): RedirectResponse
-    {
-        $this->requireUnlocked($collaborator);
+    public function update(
+        AdminUpdateCollaboratorRequest $request,
+        Collaborator $collaborator,
+        CollaboratorService $collaboratorService,
+        LockService $lockService
+    ): RedirectResponse {
+        $lockService->requireUnlocked($collaborator);
 
-        $data = $request->validated();
+        $collaboratorService->updateCollaborator($collaborator, $request->validated());
 
-        $collaborator->update($data);
+        $lockService->unlock($collaborator);
 
-        $this->unlock($collaborator);
-
-        $message = 'Colaborador atualizado com sucesso.';
-
-        return redirect()->route('admin.collaborators.show', $collaborator)->with('success', $message);
+        return redirect()
+            ->route('admin.collaborators.show', $collaborator)
+            ->with('success', __('app.collaborator.updated'));
     }
 
-    public function destroy(Collaborator $collaborator): RedirectResponse
-    {
-        $this->requireUnlocked($collaborator);
+    public function destroy(
+        Collaborator $collaborator,
+        CollaboratorService $collaboratorService,
+        LockService $lockService
+    ): RedirectResponse {
+        $lockService->requireUnlocked($collaborator);
 
-        $this->unlock($collaborator);
+        $lockService->unlock($collaborator);
+        $collaboratorService->deleteCollaborator($collaborator);
 
-        $collaborator->delete();
-
-        return redirect()->route('admin.collaborators.index')->with('success', 'Colaborador excluído com sucesso.');
+        return redirect()
+            ->route('admin.collaborators.index')
+            ->with('success', __('app.collaborator.deleted'));
     }
 }

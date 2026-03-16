@@ -3,30 +3,40 @@
 namespace App\Support;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 /**
  * Applies search and sort to an Eloquent query for admin index listings.
- *
- * Config: baseTable, searchBaseTable (optional), searchSpecial, sortSpecial,
- * booleanColumns (optional): list of column names; search value must be 1/0 (from form).
  *
  * @phpstan-type IndexConfig array{
  *   baseTable: string,
  *   searchBaseTable?: string,
  *   searchSpecial?: array<string, array{table: string, column: string}>,
  *   sortSpecial?: array<string, string>,
- *   booleanColumns?: array<int, string>
+ *   booleanColumns?: array<int, string>,
+ *   exactColumns?: array<int, string>
  * }
  */
-class AdminIndexQuery
+class AdminIndexQueryBuilder
 {
     /**
-     * @template T of \Illuminate\Database\Eloquent\Model
-     * @param  Builder<T>  $query
+     * Apply search and sort from the request to the given query.
+     *
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  IndexConfig  $config
+     */
+    public static function build(Builder $query, Request $request, array $config): void
+    {
+        self::applySearchFilter($query, $request->search_column, $request->search, $config);
+        self::applySort($query, $request->sort, $request->order, $config);
+    }
+
+    /**
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
      * @param  IndexConfig  $config
      * @param  string|int|bool|null  $search
      */
-    public static function applySearch(Builder $query, ?string $searchColumn, $search, array $config): void
+    private static function applySearchFilter(Builder $query, ?string $searchColumn, $search, array $config): void
     {
         if (! $searchColumn || $search === null || $search === '') {
             return;
@@ -35,6 +45,7 @@ class AdminIndexQuery
         $baseTable = $config['searchBaseTable'] ?? $config['baseTable'];
         $searchSpecialColumns = $config['searchSpecial'] ?? [];
         $booleanColumns = $config['booleanColumns'] ?? [];
+        $exactColumns = $config['exactColumns'] ?? [];
 
         if (isset($searchSpecialColumns[$searchColumn])) {
             $referencedTable = $searchSpecialColumns[$searchColumn]['table'];
@@ -50,11 +61,17 @@ class AdminIndexQuery
             return;
         }
 
+        if (in_array($searchColumn, $exactColumns, true)) {
+            $query->where("{$baseTable}.{$searchColumn}", '=', strtolower((string) $search));
+
+            return;
+        }
+
         $query->where("{$baseTable}.{$searchColumn}", 'LIKE', '%' . (string) $search . '%');
     }
 
     /**
-     * @param  string|int|bool  $value  Expects 1/0 from the form for boolean columns.
+     * @param  string|int|bool  $value
      */
     private static function normalizeSearchToBoolean($value): bool
     {
@@ -66,11 +83,10 @@ class AdminIndexQuery
     }
 
     /**
-     * @template T of \Illuminate\Database\Eloquent\Model
-     * @param  Builder<T>  $query
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
      * @param  IndexConfig  $config
      */
-    public static function applySort(Builder $query, ?string $sort, ?string $order, array $config): void
+    private static function applySort(Builder $query, ?string $sort, ?string $order, array $config): void
     {
         if (! $sort || ! $order) {
             return;

@@ -3,33 +3,24 @@
 namespace App\Http\Controllers\Admin\Taxonomy;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\LocksSubject;
 use App\Http\Requests\Admin\Taxonomy\AdminTagCategoryRequest;
 use App\Models\Taxonomy\TagCategory;
+use App\Services\Identity\LockService;
+use App\Services\Taxonomy\TagCategoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AdminTagCategoryController extends AdminBaseController
 {
-    use LocksSubject;
-
-    public function index(Request $request): View
+    public function index(Request $request, TagCategoryService $tagCategoryService): View
     {
-        $query = TagCategory::query();
-        $count = TagCategory::count();
+        $result = $tagCategoryService->getPaginatedTagCategoriesForAdminIndex($request);
 
-        if ($request->search_column && $request->search) {
-            $query->where($request->search_column, 'LIKE', "%{$request->search}%");
-        }
-
-        if ($request->sort && $request->order) {
-            $query->orderBy($request->sort, $request->order);
-        }
-
-        $tagCategories = $query->paginate(30)->withQueryString();
-
-        return view('admin.taxonomy.tag-categories.index', compact('tagCategories', 'count'));
+        return view('admin.taxonomy.tag-categories.index', [
+            'tagCategories' => $result['tagCategories'],
+            'count' => $result['count'],
+        ]);
     }
 
     public function create(): View
@@ -37,55 +28,58 @@ class AdminTagCategoryController extends AdminBaseController
         return view('admin.taxonomy.tag-categories.create');
     }
 
-    public function store(AdminTagCategoryRequest $request): RedirectResponse
+    public function store(AdminTagCategoryRequest $request, TagCategoryService $tagCategoryService): RedirectResponse
     {
-        $data = $request->validated();
-        $tagCategory = TagCategory::create($data);
+        $tagCategory = $tagCategoryService->createTagCategory($request->validated());
 
         return redirect()
             ->route('admin.tag-categories.show', $tagCategory)
             ->with('success', __('app.taxonomy.tag_category.created'));
     }
 
-    public function show(string $id): View
+    public function show(TagCategory $tagCategory): View
     {
-        $tagCategory = TagCategory::findOrFail($id);
-
         return view('admin.taxonomy.tag-categories.show', compact('tagCategory'));
     }
 
-    public function edit(string $id): View
+    public function edit(TagCategory $tagCategory, LockService $lockService): View
     {
-        $tagCategory = TagCategory::findOrFail($id);
-        $this->requireUnlocked($tagCategory);
+        $lockService->requireUnlocked($tagCategory);
 
-        $this->lock($tagCategory);
+        $lockService->lock($tagCategory);
 
         return view('admin.taxonomy.tag-categories.edit', compact('tagCategory'));
     }
 
-    public function update(AdminTagCategoryRequest $request, TagCategory $tagCategory): RedirectResponse
-    {
-        $this->requireUnlocked($tagCategory);
+    public function update(
+        AdminTagCategoryRequest $request,
+        TagCategory $tagCategory,
+        TagCategoryService $tagCategoryService,
+        LockService $lockService
+    ): RedirectResponse {
+        $lockService->requireUnlocked($tagCategory);
 
         $data = $request->validated();
 
-        $tagCategory->update($data);
+        $tagCategoryService->updateTagCategory($tagCategory, $data);
 
-        $this->unlock($tagCategory);
+        $lockService->unlock($tagCategory);
 
         return redirect()
             ->route('admin.tag-categories.show', $tagCategory)
             ->with('success', __('app.taxonomy.tag_category.updated'));
     }
 
-    public function destroy(TagCategory $tagCategory): RedirectResponse
-    {
-        $this->requireUnlocked($tagCategory);
+    public function destroy(
+        TagCategory $tagCategory,
+        TagCategoryService $tagCategoryService,
+        LockService $lockService
+    ): RedirectResponse {
+        $lockService->requireUnlocked($tagCategory);
 
-        $this->unlock($tagCategory);
+        $lockService->unlock($tagCategory);
 
-        $tagCategory->delete();
+        $tagCategoryService->deleteTagCategory($tagCategory);
 
         return redirect()
             ->route('admin.tag-categories.index')
