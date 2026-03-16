@@ -13,7 +13,8 @@ use Illuminate\Http\Request;
  *   searchBaseTable?: string,
  *   searchSpecial?: array<string, array{table: string, column: string}>,
  *   sortSpecial?: array<string, string>,
- *   booleanColumns?: array<int, string>
+ *   booleanColumns?: array<int, string>,
+ *   exactColumns?: array<int, string>
  * }
  */
 class AdminIndexQueryBuilder
@@ -44,6 +45,7 @@ class AdminIndexQueryBuilder
         $baseTable = $config['searchBaseTable'] ?? $config['baseTable'];
         $searchSpecialColumns = $config['searchSpecial'] ?? [];
         $booleanColumns = $config['booleanColumns'] ?? [];
+        $exactColumns = $config['exactColumns'] ?? [];
 
         if (isset($searchSpecialColumns[$searchColumn])) {
             $referencedTable = $searchSpecialColumns[$searchColumn]['table'];
@@ -55,6 +57,12 @@ class AdminIndexQueryBuilder
 
         if (in_array($searchColumn, $booleanColumns, true)) {
             $query->where("{$baseTable}.{$searchColumn}", self::normalizeSearchToBoolean($search));
+
+            return;
+        }
+
+        if (in_array($searchColumn, $exactColumns, true)) {
+            $query->where("{$baseTable}.{$searchColumn}", '=', strtolower((string) $search));
 
             return;
         }

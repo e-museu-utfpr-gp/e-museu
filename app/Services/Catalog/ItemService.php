@@ -6,6 +6,7 @@ use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemCategory;
 use App\Support\AdminIndexQueryBuilder;
+use App\Support\AdminIndexConfig;
 use App\Support\ItemIndexQueryBuilder;
 use App\Support\StringHelper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -16,20 +17,6 @@ use RuntimeException;
 
 class ItemService
 {
-    /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>, booleanColumns: array<int, string>} */
-    private const ADMIN_INDEX_CONFIG = [
-        'baseTable' => 'items',
-        'searchSpecial' => [
-            'collaborator_id' => ['table' => 'collaborators', 'column' => 'contact'],
-            'category_id' => ['table' => 'item_categories', 'column' => 'name'],
-        ],
-        'sortSpecial' => [
-            'collaborator_id' => 'collaborators.contact',
-            'category_id' => 'item_categories.name',
-        ],
-        'booleanColumns' => ['validation'],
-    ];
-
     /**
      * @return array{items: LengthAwarePaginator<int, Item>, count: int}
      */
@@ -38,7 +25,7 @@ class ItemService
         $count = Item::count();
         $query = Item::query()->forAdminList();
 
-        AdminIndexQueryBuilder::build($query, $request, self::ADMIN_INDEX_CONFIG);
+        AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::items());
 
         $items = $query->paginate(30)->withQueryString();
 

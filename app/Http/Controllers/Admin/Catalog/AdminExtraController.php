@@ -3,111 +3,87 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\LocksSubject;
-use App\Support\AdminIndexQueryBuilder;
 use App\Http\Requests\Catalog\SingleExtraRequest;
 use App\Models\Catalog\Extra;
-use App\Models\Catalog\ItemCategory;
-use App\Models\Collaborator\Collaborator;
+use App\Services\Catalog\ExtraService;
+use App\Services\Catalog\ItemCategoryService;
+use App\Services\Collaborator\CollaboratorService;
+use App\Services\Identity\LockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AdminExtraController extends AdminBaseController
 {
-    use LocksSubject;
-
-    /** @var array{baseTable: string, searchBaseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
-    private const INDEX_CONFIG = [
-        'baseTable' => 'extras',
-        'searchBaseTable' => 'items',
-        'searchSpecial' => [
-            'collaborator_id' => ['table' => 'collaborators', 'column' => 'contact'],
-            'item_id' => ['table' => 'items', 'column' => 'name'],
-        ],
-        'sortSpecial' => [
-            'collaborator_id' => 'collaborators.contact',
-            'item_id' => 'items.name',
-        ],
-        'booleanColumns' => ['validation'],
-    ];
-
-    public function index(Request $request): View
+    public function index(Request $request, ExtraService $extraService): View
     {
-        $count = Extra::count();
-        $query = Extra::query();
-        $query
-            ->leftJoin('collaborators', 'extras.collaborator_id', '=', 'collaborators.id')
-            ->leftJoin('items', 'extras.item_id', '=', 'items.id')
-            ->select([
-                'extras.*',
-                'items.name AS item_name',
-                'collaborators.contact AS collaborator_contact',
-            ]);
+        $result = $extraService->getPaginatedExtrasForAdminIndex($request);
 
-        AdminIndexQueryBuilder::build($query, $request, self::INDEX_CONFIG);
-
-        $extras = $query->paginate(30)->withQueryString();
-
-        return view('admin.catalog.extras.index', compact('extras', 'count'));
+        return view('admin.catalog.extras.index', [
+            'extras' => $result['extras'],
+            'count' => $result['count'],
+        ]);
     }
 
-    public function show(string $id): View
+    public function show(Extra $extra): View
     {
-        $extra = Extra::findOrFail($id);
-
         return view('admin.catalog.extras.show', compact('extra'));
     }
 
-    public function create(): View
-    {
-        $itemCategories = ItemCategory::orderBy('name', 'asc')->get();
-        $collaborators = Collaborator::orderBy('contact', 'asc')->get();
-
-        return view('admin.catalog.extras.create', compact('collaborators', 'itemCategories'));
+    public function create(
+        ItemCategoryService $itemCategoryService,
+        CollaboratorService $collaboratorService
+    ): View {
+        return view('admin.catalog.extras.create', [
+            'itemCategories' => $itemCategoryService->getForForm(),
+            'collaborators' => $collaboratorService->getForForm(),
+        ]);
     }
 
-    public function store(SingleExtraRequest $request): RedirectResponse
+    public function store(SingleExtraRequest $request, ExtraService $extraService): RedirectResponse
     {
-        $data = $request->validated();
-        $extra = Extra::create($data);
+        $extra = $extraService->createExtra($request->validated());
 
         return redirect()->route('admin.extras.show', $extra)->with('success', __('app.catalog.extra.created'));
     }
 
-    public function edit(string $id): View
-    {
-        $extra = Extra::findOrFail($id);
-        $this->requireUnlocked($extra);
+    public function edit(
+        Extra $extra,
+        ItemCategoryService $itemCategoryService,
+        CollaboratorService $collaboratorService,
+        LockService $lockService
+    ): View {
+        $lockService->requireUnlocked($extra);
+        $lockService->lock($extra);
 
-        $collaborators = Collaborator::orderBy('contact', 'asc')->get();
-        $itemCategories = ItemCategory::orderBy('name', 'asc')->get();
-
-        $this->lock($extra);
-
-        return view('admin.catalog.extras.edit', compact('extra', 'itemCategories', 'collaborators'));
+        return view('admin.catalog.extras.edit', [
+            'extra' => $extra,
+            'itemCategories' => $itemCategoryService->getForForm(),
+            'collaborators' => $collaboratorService->getForForm(),
+        ]);
     }
 
-    public function update(SingleExtraRequest $request, Extra $extra): RedirectResponse
-    {
-        $this->requireUnlocked($extra);
+    public function update(
+        SingleExtraRequest $request,
+        Extra $extra,
+        ExtraService $extraService,
+        LockService $lockService
+    ): RedirectResponse {
+        $lockService->requireUnlocked($extra);
 
-        $data = $request->validated();
+        $extraService->updateExtra($extra, $request->validated());
 
-        $extra->update($data);
-
-        $this->unlock($extra);
+        $lockService->unlock($extra);
 
         return redirect()->route('admin.extras.show', $extra)->with('success', __('app.catalog.extra.updated'));
     }
 
-    public function destroy(Extra $extra): RedirectResponse
+    public function destroy(Extra $extra, ExtraService $extraService, LockService $lockService): RedirectResponse
     {
-        $this->requireUnlocked($extra);
+        $lockService->requireUnlocked($extra);
 
-        $this->unlock($extra);
-
-        $extra->delete();
+        $lockService->unlock($extra);
+        $extraService->deleteExtra($extra);
 
         return redirect()->route('admin.extras.index')->with('success', __('app.catalog.extra.deleted'));
     }

@@ -4,78 +4,51 @@ namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Catalog\AdminSingleComponentRequest;
-use App\Support\AdminIndexQueryBuilder;
 use App\Models\Catalog\ItemComponent;
-use App\Models\Catalog\ItemCategory;
+use App\Services\Catalog\ItemCategoryService;
+use App\Services\Catalog\ItemComponentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AdminItemComponentController extends AdminBaseController
 {
-    /** @var array{baseTable: string, searchSpecial: array<string, array{table: string, column: string}>, sortSpecial: array<string, string>} */
-    private const INDEX_CONFIG = [
-        'baseTable' => 'item_component',
-        'searchSpecial' => [
-            'item_id' => ['table' => 'item', 'column' => 'name'],
-            'component_id' => ['table' => 'component', 'column' => 'name'],
-        ],
-        'sortSpecial' => [
-            'item_id' => 'item.name',
-            'component_id' => 'component.name',
-        ],
-        'booleanColumns' => ['validation'],
-    ];
-
-    public function index(Request $request): View
+    public function index(Request $request, ItemComponentService $itemComponentService): View
     {
-        $count = ItemComponent::count();
-        $query = ItemComponent::query();
-        $query->leftJoin('items as item', 'item_component.item_id', '=', 'item.id');
-        $query->leftJoin('items as component', 'item_component.component_id', '=', 'component.id');
-        $query->select([
-            'item_component.*',
-            'item_component.created_at AS item_component_created',
-            'item_component.updated_at AS item_component_updated',
-            'item_component.validation AS item_component_validation',
-            'item.name AS item_name',
-            'component.name AS component_name',
+        $result = $itemComponentService->getPaginatedItemComponentsForAdminIndex($request);
+
+        return view('admin.catalog.item-components.index', [
+            'itemComponents' => $result['itemComponents'],
+            'count' => $result['count'],
         ]);
-
-        AdminIndexQueryBuilder::build($query, $request, self::INDEX_CONFIG);
-
-        $itemComponents = $query->paginate(30)->withQueryString();
-
-        return view('admin.catalog.item-components.index', compact('itemComponents', 'count'));
     }
 
-    public function show(string $id): View
+    public function show(ItemComponent $itemComponent): View
     {
-        $itemComponent = ItemComponent::findOrFail($id);
-
         return view('admin.catalog.item-components.show', compact('itemComponent'));
     }
 
-    public function create(): View
+    public function create(ItemCategoryService $itemCategoryService): View
     {
-        $itemCategories = ItemCategory::orderBy('name', 'asc')->get();
-
-        return view('admin.catalog.item-components.create', compact('itemCategories'));
+        return view('admin.catalog.item-components.create', [
+            'itemCategories' => $itemCategoryService->getForForm(),
+        ]);
     }
 
-    public function store(AdminSingleComponentRequest $request): RedirectResponse
-    {
-        $data = $request->validated();
-        $itemComponent = ItemComponent::create($data);
+    public function store(
+        AdminSingleComponentRequest $request,
+        ItemComponentService $itemComponentService
+    ): RedirectResponse {
+        $itemComponent = $itemComponentService->createItemComponent($request->validated());
 
         return redirect()
             ->route('admin.item-components.show', $itemComponent)
             ->with('success', __('app.catalog.component.created'));
     }
 
-    public function update(Request $request, ItemComponent $itemComponent): RedirectResponse
+    public function update(ItemComponent $itemComponent, ItemComponentService $itemComponentService): RedirectResponse
     {
-        $itemComponent->update([
+        $itemComponentService->updateItemComponent($itemComponent, [
             'validation' => ! $itemComponent->validation,
         ]);
 
@@ -84,9 +57,9 @@ class AdminItemComponentController extends AdminBaseController
             ->with('success', __('app.catalog.component.updated'));
     }
 
-    public function destroy(ItemComponent $itemComponent): RedirectResponse
+    public function destroy(ItemComponent $itemComponent, ItemComponentService $itemComponentService): RedirectResponse
     {
-        $itemComponent->delete();
+        $itemComponentService->deleteItemComponent($itemComponent);
 
         return redirect()->route('admin.item-components.index')->with('success', __('app.catalog.component.deleted'));
     }

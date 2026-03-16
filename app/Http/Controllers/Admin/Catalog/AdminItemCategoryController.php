@@ -3,39 +3,28 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Controllers\Admin\Concerns\LocksSubject;
 use App\Http\Requests\Admin\Catalog\AdminItemCategoryRequest;
 use App\Models\Catalog\ItemCategory;
+use App\Services\Catalog\ItemCategoryService;
+use App\Services\Identity\LockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AdminItemCategoryController extends AdminBaseController
 {
-    use LocksSubject;
-
-    public function index(Request $request): View
+    public function index(Request $request, ItemCategoryService $itemCategoryService): View
     {
-        $query = ItemCategory::query();
-        $count = ItemCategory::count();
+        $result = $itemCategoryService->getPaginatedItemCategoriesForAdminIndex($request);
 
-        if ($request->search_column && $request->search) {
-            $query->where($request->search_column, 'LIKE', "%{$request->search}%");
-        }
-
-        if ($request->sort && $request->order) {
-            $query->orderBy($request->sort, $request->order);
-        }
-
-        $itemCategories = $query->paginate(50)->withQueryString();
-
-        return view('admin.catalog.item-categories.index', compact('itemCategories', 'count'));
+        return view('admin.catalog.item-categories.index', [
+            'itemCategories' => $result['itemCategories'],
+            'count' => $result['count'],
+        ]);
     }
 
-    public function show(string $id): View
+    public function show(ItemCategory $itemCategory): View
     {
-        $itemCategory = ItemCategory::findOrFail($id);
-
         return view('admin.catalog.item-categories.show', compact('itemCategory'));
     }
 
@@ -44,48 +33,49 @@ class AdminItemCategoryController extends AdminBaseController
         return view('admin.catalog.item-categories.create');
     }
 
-    public function store(AdminItemCategoryRequest $request): RedirectResponse
+    public function store(AdminItemCategoryRequest $request, ItemCategoryService $itemCategoryService): RedirectResponse
     {
-        $data = $request->validated();
-        $itemCategory = ItemCategory::create($data);
+        $itemCategory = $itemCategoryService->createItemCategory($request->validated());
 
         return redirect()
             ->route('admin.item-categories.show', $itemCategory)
             ->with('success', __('app.catalog.item_category.created'));
     }
 
-    public function edit(string $id): View
+    public function edit(ItemCategory $itemCategory, LockService $lockService): View
     {
-        $itemCategory = ItemCategory::findOrFail($id);
-        $this->requireUnlocked($itemCategory);
-
-        $this->lock($itemCategory);
+        $lockService->requireUnlocked($itemCategory);
+        $lockService->lock($itemCategory);
 
         return view('admin.catalog.item-categories.edit', compact('itemCategory'));
     }
 
-    public function update(AdminItemCategoryRequest $request, ItemCategory $itemCategory): RedirectResponse
-    {
-        $this->requireUnlocked($itemCategory);
+    public function update(
+        AdminItemCategoryRequest $request,
+        ItemCategory $itemCategory,
+        ItemCategoryService $itemCategoryService,
+        LockService $lockService
+    ): RedirectResponse {
+        $lockService->requireUnlocked($itemCategory);
 
-        $data = $request->validated();
+        $itemCategoryService->updateItemCategory($itemCategory, $request->validated());
 
-        $itemCategory->update($data);
-
-        $this->unlock($itemCategory);
+        $lockService->unlock($itemCategory);
 
         return redirect()
             ->route('admin.item-categories.show', $itemCategory)
             ->with('success', __('app.catalog.item_category.updated'));
     }
 
-    public function destroy(ItemCategory $itemCategory): RedirectResponse
-    {
-        $this->requireUnlocked($itemCategory);
+    public function destroy(
+        ItemCategory $itemCategory,
+        ItemCategoryService $itemCategoryService,
+        LockService $lockService
+    ): RedirectResponse {
+        $lockService->requireUnlocked($itemCategory);
 
-        $this->unlock($itemCategory);
-
-        $itemCategory->delete();
+        $lockService->unlock($itemCategory);
+        $itemCategoryService->deleteItemCategory($itemCategory);
 
         return redirect()
             ->route('admin.item-categories.index')
