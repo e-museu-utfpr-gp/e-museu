@@ -54,7 +54,7 @@ class ItemController extends Controller
 
         $galleryFiles = $itemImagesService->filterValidGalleryFiles($request->file('gallery_images'));
 
-        return $storeItemContributionAction->handle(
+        $result = $storeItemContributionAction->handle(
             $validatedData['collaborator'],
             $validatedData['item'],
             $validatedData['tags'],
@@ -63,6 +63,16 @@ class ItemController extends Controller
             $request->file('cover_image'),
             $galleryFiles ?: null
         );
+
+        if ($result['status'] === 'internal_blocked') {
+            return back()->withErrors(['contact' => __('app.collaborator.contact_reserved_for_internal')]);
+        }
+
+        if ($result['status'] === 'collaborator_blocked') {
+            return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
+        }
+
+        return redirect()->route('items.create')->with('success', __('app.catalog.item.contribution_success'));
     }
 
     public function show(

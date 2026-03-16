@@ -22,10 +22,20 @@ class ExtraController extends Controller
     ): RedirectResponse {
         $validatedData = $itemContributionValidator->validateSingleExtra($request);
 
-        return $extraService->storeSingleExtra(
+        $result = $extraService->storeSingleExtra(
             $collaboratorService,
             $validatedData['collaborator'],
             $validatedData['extra']
         );
+
+        if ($result['status'] === 'internal_blocked') {
+            return back()->withErrors(['contact' => __('app.collaborator.contact_reserved_for_internal')]);
+        }
+
+        if ($result['status'] === 'collaborator_blocked') {
+            return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
+        }
+
+        return back()->with('success', __('app.catalog.extra.contribution_success'));
     }
 }

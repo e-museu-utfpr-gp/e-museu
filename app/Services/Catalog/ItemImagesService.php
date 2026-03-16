@@ -42,11 +42,12 @@ class ItemImagesService
 
     public function processCoverImage(Item $item, AdminUpdateItemRequest $request): void
     {
-        if ($request->image) {
+        $coverFile = $request->file('image');
+        if ($coverFile instanceof UploadedFile && $coverFile->isValid()) {
             /** @var \Illuminate\Support\Collection<int, ItemImage> $currentCovers */
             $currentCovers = $item->images()->where('type', 'cover')->get();
             $currentCovers->each(fn (ItemImage $img) => $this->deleteItemImageFromStorage($img));
-            $this->storeCoverImage($item, $request->image);
+            $this->storeCoverImage($item, $coverFile);
             return;
         }
         if ($request->filled('set_cover_image_id')) {
@@ -58,7 +59,8 @@ class ItemImagesService
     {
         $galleryFiles = $request->file('gallery_images');
         if (is_array($galleryFiles)) {
-            $this->storeGalleryImages($item, $galleryFiles);
+            $validGalleryFiles = $this->filterValidGalleryFiles($galleryFiles);
+            $this->storeGalleryImages($item, $validGalleryFiles);
         }
     }
 
@@ -87,10 +89,16 @@ class ItemImagesService
         $path = ItemImage::buildPath($item, $ext);
         $contents = $file->get();
         if ($contents === false) {
+            report(new RuntimeException(sprintf(
+                'Failed to read uploaded cover image contents for item ID %s',
+                (string) $item->id
+            )));
+
             throw new RuntimeException(__('app.catalog.item.upload_read_failed'));
         }
         Storage::disk('public')->put($path, $contents);
         $item->images()->create(['path' => $path, 'type' => 'cover', 'sort_order' => 0]);
+        $item->normalizeSingleCover();
     }
 
     /**
@@ -115,6 +123,7 @@ class ItemImagesService
             Storage::disk('public')->put($path, $contents);
             $item->images()->create(['path' => $path, 'type' => 'gallery', 'sort_order' => ++$maxOrder]);
         }
+        $item->normalizeSingleCover();
     }
 
     public function deleteAllImagesForItem(Item $item): void
@@ -143,7 +152,9 @@ class ItemImagesService
      */
     public function deleteImage(Item $item, ItemImage $image): void
     {
-        if ($image->item_id !== (int) $item->id) {
+        if ((int) $image->item_id !== (int) $item->id) {
+            report(new NotFoundHttpException('Image does not belong to the given item.'));
+
             throw new NotFoundHttpException();
         }
         $this->deleteItemImageFromStorage($image);
