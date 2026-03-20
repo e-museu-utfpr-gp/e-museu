@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('locks', function (Blueprint $table) {
             $table->id();
             $table->morphs('lockable');
-            $table->foreignId('admin_id')->constrained('admins')->onDelete('cascade');
+            $table->foreignId('admin_id')->nullable()->constrained('admins')->nullOnDelete();
             $table->timestamp('expiry_date')->nullable();
             $table->timestamps();
         });

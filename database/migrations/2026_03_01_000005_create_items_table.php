@@ -21,8 +21,8 @@ return new class extends Migration
             $table->string('identification_code');
             $table->string('image')->nullable();
             $table->boolean('validation')->default(0);
-            $table->foreignId('category_id')->constrained('item_categories')->onDelete('cascade');
-            $table->foreignId('collaborator_id')->constrained('collaborators')->onDelete('cascade');
+            $table->foreignId('category_id')->nullable()->constrained('item_categories')->nullOnDelete();
+            $table->foreignId('collaborator_id')->nullable()->constrained('collaborators')->nullOnDelete();
             $table->timestamps();
         });
     }

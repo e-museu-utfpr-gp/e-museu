@@ -10,14 +10,13 @@ return new class extends Migration
      * Run the migrations.
      *
      * Creates the item_images table: one-to-many with items. Each row stores one image
-     * (path, type: cover|gallery, sort_order). Data migration from items.image is done
-     * in a separate migration.
+     * (path, type: cover|gallery, sort_order).
      */
     public function up(): void
     {
         Schema::create('item_images', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->string('path');
             $table->string('type'); // 'cover' | 'gallery'
             $table->unsignedInteger('sort_order')->default(0);
