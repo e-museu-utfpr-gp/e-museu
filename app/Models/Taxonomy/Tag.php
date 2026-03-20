@@ -32,6 +32,14 @@ class Tag extends Model
         return $this->belongsTo(TagCategory::class, 'tag_category_id');
     }
 
+    /**
+     * Alias for {@see tagCategory()} — catalog views use `tag->category`.
+     */
+    public function category(): BelongsTo
+    {
+        return $this->tagCategory();
+    }
+
     public function locks(): MorphMany
     {
         return $this->morphMany(Lock::class, 'lockable');

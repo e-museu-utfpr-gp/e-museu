@@ -120,6 +120,28 @@ class Item extends Model
     }
 
     /**
+     * Eager loads relations used by the public catalog item show view (avoids N+1).
+     *
+     * @param  Builder<Item>  $query
+     * @return Builder<Item>
+     */
+    public function scopeWithCatalogShowRelations(Builder $query): Builder
+    {
+        return $query->with([
+            'images',
+            'itemCategory',
+            'collaborator',
+            'itemTags.tag.category',
+            'itemTags.tag.items.coverImage',
+            'itemTags.tag.items.images',
+            'itemComponents.component.coverImage',
+            'itemComponents.component.images',
+            'itemComponents.component.itemCategory',
+            'extras.collaborator',
+        ]);
+    }
+
+    /**
      * Scope for admin list: joins collaborators and categories, selects truncated text columns.
      *
      * @param  Builder<Item>  $query

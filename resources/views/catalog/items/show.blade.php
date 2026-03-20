@@ -3,8 +3,8 @@
 
 @php
     $hasSeries = $item->itemTags
-        ->filter(function ($tagItem) {
-            return $tagItem->tag->category->name == 'Série' && $tagItem->validation == true;
+        ->filter(function ($tagItem) use ($seriesCategoryId) {
+            return $tagItem->tag->category?->id == $seriesCategoryId && $tagItem->validation == true;
         })
         ->isEmpty();
 
@@ -92,7 +92,7 @@
                             @if ($tagItem->validation == true && $tagItem->tag->validation == true)
                                 <div class="row">
                                     <div class="col-md-5">
-                                        <p class="fw-bold">{{ $tagItem->tag->category->name }}</p>
+                                        <p class="fw-bold">{{ $tagItem->tag->category?->name }}</p>
                                     </div>
                                     <div class="col-md-7">
                                         <a href={{ route('items.index', ['tag[]' => $tagItem->tag->id]) }}>
@@ -200,7 +200,7 @@
                 <h3>{{ __('view.catalog.items.show.timelines') }}</h3>
                 @foreach ($item->itemTags as $tagItem)
                     @if ($tagItem->validation == true && $tagItem->tag->validation == true)
-                        @if ($tagItem->tag->category->name == 'Série')
+                        @if ($tagItem->tag->category?->id == $seriesCategoryId)
                             <div class="mx-4 my-5">
                                 <h4 class="mb-4 fw-bold">{{ $tagItem->tag->name }}</h4>
                                 <div class="timeline m-2 px-2">
