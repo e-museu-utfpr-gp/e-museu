@@ -7,7 +7,6 @@ class AdminIndexConfig
     /**
      * @return array{
      *     baseTable: string,
-     *     searchBaseTable: string,
      *     searchSpecial: array<string, array{table: string, column: string}>,
      *     sortSpecial: array<string, string>,
      *     booleanColumns: array<int, string>
@@ -17,7 +16,6 @@ class AdminIndexConfig
     {
         return [
             'baseTable' => 'extras',
-            'searchBaseTable' => 'items',
             'searchSpecial' => [
                 'collaborator_id' => ['table' => 'collaborators', 'column' => 'contact'],
                 'item_id' => ['table' => 'items', 'column' => 'name'],

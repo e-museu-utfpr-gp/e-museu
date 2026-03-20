@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('extras', function (Blueprint $table) {
             $table->id();
             $table->text('info');
-            $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
-            $table->foreignId('collaborator_id')->constrained('collaborators')->onDelete('cascade');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
+            $table->foreignId('collaborator_id')->nullable()->constrained('collaborators')->nullOnDelete();
             $table->boolean('validation')->default(0);
             $table->timestamps();
         });
