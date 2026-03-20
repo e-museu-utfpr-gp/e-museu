@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('item_component', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
-            $table->foreignId('component_id')->constrained('items')->onDelete('cascade');
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
+            $table->foreignId('component_id')->nullable()->constrained('items')->nullOnDelete();
             $table->boolean('validation')->default(0);
             $table->timestamps();
         });

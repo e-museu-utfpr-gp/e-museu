@@ -64,7 +64,7 @@ class ItemService
 
     public function getPublicItemForShow(string $id): Item
     {
-        $item = Item::with('images')->findOrFail($id);
+        $item = Item::query()->withCatalogShowRelations()->findOrFail($id);
 
         if (! $item->validation) {
             abort(403, __('app.catalog.item.access_denied'));

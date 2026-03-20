@@ -15,14 +15,14 @@ return new class extends Migration
             $table->id();
             $table->text('name');
             $table->boolean('validation')->default(0);
-            $table->foreignId('tag_category_id')->constrained('tag_categories')->onDelete('cascade');
+            $table->foreignId('tag_category_id')->nullable()->constrained('tag_categories')->nullOnDelete();
             $table->timestamps();
         });
 
         Schema::create('item_tag', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tag_id')->constrained('tags')->onDelete('cascade');
-            $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
+            $table->foreignId('tag_id')->nullable()->constrained('tags')->nullOnDelete();
+            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->boolean('validation')->default(0);
             $table->timestamps();
         });
