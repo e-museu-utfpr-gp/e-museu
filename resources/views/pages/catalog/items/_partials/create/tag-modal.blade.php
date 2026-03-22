@@ -11,11 +11,7 @@
                     <input type="text" name="tag_id" id="tag-id" hidden>
                     <label for="tag-category">
                         <h5>{{ __('view.catalog.items.create_modals.tag.category_label') }}
-                            <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                data-bs-content="{{ __('view.catalog.items.create_modals.tag.category_help') }}">
-                                <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
-                            </button>
+                            <x-ui.info-popover :content="__('view.catalog.items.create_modals.tag.category_help')" />
                         </h5>
                     </label>
                     <div class="input-div rounded-top">
@@ -29,11 +25,7 @@
                     </div>
                     <label for="name">
                         <h5>{{ __('view.catalog.items.create_modals.tag.name_label') }}
-                            <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                data-bs-content="{{ __('view.catalog.items.create_modals.tag.name_help') }}">
-                                <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
-                            </button>
+                            <x-ui.info-popover :content="__('view.catalog.items.create_modals.tag.name_help')" />
                         </h5>
                     </label>
                     <div class="input-div rounded-top">

@@ -9,6 +9,7 @@ use App\Services\Catalog\ExtraService;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Identity\LockService;
+use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,10 +20,10 @@ class AdminExtraController extends AdminBaseController
     {
         $result = $extraService->getPaginatedExtrasForAdminIndex($request);
 
-        return view('pages.admin.catalog.extras.index', [
+        return view('pages.admin.catalog.extras.index', array_merge([
             'extras' => $result['extras'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::catalogExtras()));
     }
 
     public function show(Extra $extra): View

@@ -1,15 +1,9 @@
-<x-layouts.admin :title="__('view.admin.collaborator.collaborators.create.title')">
-    <div class="mb-auto container-fluid">
-        <x-ui.flash-messages />
+<x-layouts.admin :title="__('view.admin.collaborator.collaborators.create.title')"
+    :heading="__('view.admin.collaborator.collaborators.create.heading')">
         <form action="{{ route('admin.collaborators.store') }}" method="POST">
             @csrf
             <div class="row">
                 <div class="col-md-6">
-                    <div class="card mb-3">
-                        <h2 class="card-header">
-                            {{ __('view.admin.collaborator.collaborators.create.heading') }}
-                        </h2>
-                    </div>
                     <div class="mb-3">
                         <label for="full_name" class="form-label">
                             {{ __('view.admin.collaborator.collaborators.create.full_name') }}
@@ -63,13 +57,11 @@
                         @enderror
                     </div>
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-plus-circle"></i>
+                        <x-ui.buttons.submit variant="success" icon="bi bi-plus-circle">
                             {{ __('view.admin.collaborator.collaborators.create.submit') }}
-                        </button>
+                        </x-ui.buttons.submit>
                     </div>
                 </div>
             </div>
         </form>
-    </div>
 </x-layouts.admin>

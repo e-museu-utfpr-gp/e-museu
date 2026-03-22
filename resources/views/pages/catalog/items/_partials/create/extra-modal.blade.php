@@ -10,11 +10,8 @@
                     <input type="text" name="extra_id" id="extra-id" hidden>
                     <label for="extra-info">
                         <h5>Informação Extra
-                            <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                data-bs-content="Possui alguma informação adicional ou curiosidade sobre o item que gostaria de compartilhar? Por favor, nos informe por aqui.">
-                                <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
-                            </button>
+                            <x-ui.info-popover
+                                :content="'Possui alguma informação adicional ou curiosidade sobre o item que gostaria de compartilhar? Por favor, nos informe por aqui.'" />
                         </h5>
                     </label>
                     <div class="input-div rounded-top">

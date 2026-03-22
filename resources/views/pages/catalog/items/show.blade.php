@@ -261,7 +261,7 @@
     </div>
 
     <x-ui.image-modal />
-    @include('pages.catalog.items.show-modals.extra-modal')
+    @include('pages.catalog.items._partials.show.extra-modal')
 
     <script>
         let checkContactRoute = "{{ route('catalog.collaborators.check-contact') }}";

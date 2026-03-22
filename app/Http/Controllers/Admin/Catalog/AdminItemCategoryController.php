@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Catalog\AdminItemCategoryRequest;
 use App\Models\Catalog\ItemCategory;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Identity\LockService;
+use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,10 +18,10 @@ class AdminItemCategoryController extends AdminBaseController
     {
         $result = $itemCategoryService->getPaginatedItemCategoriesForAdminIndex($request);
 
-        return view('pages.admin.catalog.item-categories.index', [
+        return view('pages.admin.catalog.item-categories.index', array_merge([
             'itemCategories' => $result['itemCategories'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::catalogItemCategories()));
     }
 
     public function show(ItemCategory $itemCategory): View

@@ -11,6 +11,7 @@ use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemService;
 use App\Services\Collaborator\CollaboratorService;
+use App\Support\Admin\AdminIndexTableView;
 use App\Services\Identity\LockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,10 +28,10 @@ class AdminItemController extends AdminBaseController
     {
         $result = $itemService->getPaginatedItemsForAdminIndex($request);
 
-        return view('pages.admin.catalog.items.index', [
+        return view('pages.admin.catalog.items.index', array_merge([
             'items' => $result['items'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::catalogItems()));
     }
 
     public function show(Item $item): View

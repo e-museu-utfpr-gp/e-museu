@@ -1,28 +1,17 @@
-<x-layouts.admin :title="__('view.admin.taxonomy.tag_categories.show.title', ['id' => $tagCategory->id])">
-    <div class="mb-auto container-fluid">
-        <x-ui.flash-messages />
+<x-layouts.admin :title="__('view.admin.taxonomy.tag_categories.show.title', ['id' => $tagCategory->id])"
+    :heading="__('view.admin.taxonomy.tag_categories.show.heading', ['id' => $tagCategory->id, 'name' => $tagCategory->name])">
+    <x-slot name="pageHeaderActions">
+        <x-ui.buttons.edit href="{{ route('admin.taxonomy.tag-categories.edit', $tagCategory->id) }}"
+            class="me-1" />
+        <form action="{{ route('admin.taxonomy.tag-categories.destroy', $tagCategory->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <x-ui.buttons.delete class="deleteCategoryButton"
+                data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}" />
+        </form>
+    </x-slot>
         <div class="row">
             <div class="col-md-6">
-                <div class="card mb-3">
-                    <h2 class="card-header">
-                        {{ __('view.admin.taxonomy.tag_categories.show.heading', ['id' => $tagCategory->id, 'name' => $tagCategory->name]) }}
-                    </h2>
-                    <div class="card-body d-flex">
-                        <a href="{{ route('admin.taxonomy.tag-categories.edit', $tagCategory->id) }}" type="button"
-                            class="btn btn-warning me-1">
-                            <i class="bi bi-pencil-fill"></i>
-                            {{ __('view.admin.taxonomy.tag_categories.show.edit') }}
-                        </a>
-                        <form action="{{ route('admin.taxonomy.tag-categories.destroy', $tagCategory->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="deleteCategoryButton btn btn-danger" data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}">
-                                <i class="bi bi-trash-fill"></i>
-                                {{ __('view.admin.taxonomy.tag_categories.show.delete') }}
-                            </button>
-                        </form>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card mb-3">
@@ -63,6 +52,5 @@
                 </div>
             </div>
         </div>
-    </div>
 
 </x-layouts.admin>

@@ -23,7 +23,7 @@
         <div class="container-fluid">
             <div class="navbar-left d-flex py-1">
                 <div class="logo-div">
-                    <a class="navbar-brand fw-bold" href="/"><img src="/img/tecnolixo-logo.png" alt=""
+                    <a class="navbar-brand fw-bold" href="{{ route('home') }}"><img src="/img/tecnolixo-logo.png" alt=""
                             width="40" height="40"> E-MUSEU</a>
                 </div>
             </div>
@@ -60,7 +60,7 @@
             <p class="custom-nav mb-0 d-flex justify-content-center col-md-4"><strong class="me-1">{{ __('view.layout.footer.contact') }}
                 </strong>emuseuvirtual@gmail.com</p>
 
-            <a href="/"
+            <a href="{{ route('home') }}"
                 class="col-md-4 d-flex align-items-center justify-content-center my-3 me-md-auto link-dark text-decoration-none">
                 <img class="e-lixo-footer-logo" src="/img/e-lixo-footer-logo.png" alt="">
                 <h2 class="mx-3">-</h2>

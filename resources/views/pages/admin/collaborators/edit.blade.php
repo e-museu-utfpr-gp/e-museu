@@ -1,16 +1,10 @@
-<x-layouts.admin :title="__('view.admin.collaborator.collaborators.edit.title', ['id' => $collaborator->id])">
-    <div class="mb-auto container-fluid">
-        <x-ui.flash-messages />
+<x-layouts.admin :title="__('view.admin.collaborator.collaborators.edit.title', ['id' => $collaborator->id])"
+    :heading="__('view.admin.collaborator.collaborators.edit.heading', ['id' => $collaborator->id, 'name' => $collaborator->full_name])">
         <form action="{{ route('admin.collaborators.update', $collaborator->id) }}" method="POST">
             @csrf
             @method('PATCH')
             <div class="row">
                 <div class="col-md-6">
-                    <div class="card mb-3">
-                        <h2 class="card-header">
-                            {{ __('view.admin.collaborator.collaborators.edit.heading', ['id' => $collaborator->id, 'name' => $collaborator->full_name]) }}
-                        </h2>
-                    </div>
                     <div class="mb-3">
                         <label for="full_name" class="form-label">
                             {{ __('view.admin.collaborator.collaborators.edit.full_name') }}
@@ -67,14 +61,12 @@
                         @enderror
                     </div>
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-warning">
-                            <i class="bi bi-pencil-fill"></i>
+                        <x-ui.buttons.submit variant="warning" icon="bi bi-pencil-fill">
                             {{ __('view.admin.collaborator.collaborators.edit.submit') }}
-                        </button>
+                        </x-ui.buttons.submit>
                     </div>
                 </div>
             </div>
         </form>
-    </div>
     <x-release-lock-on-leave type="collaborators" :id="$collaborator->id" />
 </x-layouts.admin>

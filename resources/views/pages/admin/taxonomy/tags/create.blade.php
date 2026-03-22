@@ -1,13 +1,9 @@
-<x-layouts.admin :title="__('view.admin.taxonomy.tags.create.title')">
-    <div class="mb-auto container-fluid">
-        <x-ui.flash-messages />
+<x-layouts.admin :title="__('view.admin.taxonomy.tags.create.title')"
+    :heading="__('view.admin.taxonomy.tags.create.heading')">
         <form action="{{ route('admin.taxonomy.tags.store') }}" method="POST">
             @csrf
             <div class="row">
                 <div class="col-md-6">
-                    <div class="card mb-3">
-                        <h2 class="card-header">{{ __('view.admin.taxonomy.tags.create.heading') }}</h2>
-                    </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">{{ __('view.admin.taxonomy.tags.create.name') }}</label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
@@ -43,10 +39,11 @@
                         @enderror
                     </div>
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle"></i> {{ __('view.admin.taxonomy.tags.create.submit') }}</button>
+                        <x-ui.buttons.submit variant="success" icon="bi bi-plus-circle">
+                            {{ __('view.admin.taxonomy.tags.create.submit') }}
+                        </x-ui.buttons.submit>
                     </div>
                 </div>
             </div>
         </form>
-    </div>
 </x-layouts.admin>

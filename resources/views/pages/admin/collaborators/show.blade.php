@@ -1,28 +1,15 @@
-<x-layouts.admin :title="__('view.admin.collaborator.collaborators.show.title', ['id' => $collaborator->id])">
-    <div class="mb-auto container-fluid">
-        <x-ui.flash-messages />
+<x-layouts.admin :title="__('view.admin.collaborator.collaborators.show.title', ['id' => $collaborator->id])"
+    :heading="__('view.admin.collaborator.collaborators.show.heading', ['id' => $collaborator->id, 'name' => $collaborator->full_name])">
+    <x-slot name="pageHeaderActions">
+        <x-ui.buttons.edit href="{{ route('admin.collaborators.edit', $collaborator->id) }}" class="me-1" />
+        <form action="{{ route('admin.collaborators.destroy', $collaborator->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <x-ui.buttons.delete class="deleteCollaboratorButton" />
+        </form>
+    </x-slot>
         <div class="row">
             <div class="col-md-6">
-                <div class="card mb-3">
-                    <h2 class="card-header">
-                        {{ __('view.admin.collaborator.collaborators.show.heading', ['id' => $collaborator->id, 'name' => $collaborator->full_name]) }}
-                    </h2>
-                    <div class="card-body d-flex">
-                        <a href="{{ route('admin.collaborators.edit', $collaborator->id) }}" type="button"
-                            class="btn btn-warning me-1">
-                            <i class="bi bi-pencil-fill"></i>
-                            {{ __('view.admin.collaborator.collaborators.show.edit') }}
-                        </a>
-                        <form action="{{ route('admin.collaborators.destroy', $collaborator->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="deleteCollaboratorButton btn btn-danger">
-                                <i class="bi bi-trash-fill"></i>
-                                {{ __('view.admin.collaborator.collaborators.show.delete') }}
-                            </button>
-                        </form>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card mb-3">
@@ -137,15 +124,15 @@
                                     <strong>Atualizado em: </strong>
                                     <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($item->updated_at)) }}</p>
                                     <div class="d-flex">
-                                        <a href="{{ route('admin.catalog.items.show', $item->id) }}" type="button"
-                                            class="btn btn-primary me-1"><i class="bi bi-eye-fill"></i> Visualizar</a>
-                                        <a href="{{ route('admin.catalog.items.edit', $item->id) }}" type="button"
-                                            class="btn btn-warning me-1"><i class="bi bi-pencil-fill"></i> Editar</a>
+                                        <x-ui.buttons.view href="{{ route('admin.catalog.items.show', $item->id) }}"
+                                            class="me-1" />
+                                        <x-ui.buttons.edit href="{{ route('admin.catalog.items.edit', $item->id) }}"
+                                            class="me-1" />
                                         <form action="{{ route('admin.catalog.items.destroy', $item->id) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="deleteItemButton btn btn-danger" type="submit"><i
-                                                    class="bi bi-trash-fill"></i> Excluir
+                                            <x-ui.buttons.delete class="deleteItemButton"
+                                                data-confirm-message="{{ __('view.admin.catalog.items.index.delete_confirm') }}" />
                                         </form>
                                     </div>
                                 </li>
@@ -156,7 +143,6 @@
                 {{ $collaborator->items()->paginate(15)->links('pagination::bootstrap-5') }}
             </div>
         </div>
-    </div>
 
     <x-ui.image-modal />
 

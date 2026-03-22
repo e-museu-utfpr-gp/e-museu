@@ -11,6 +11,6 @@ class HomeController extends Controller
     {
         $items = $itemService->getRandomValidatedItemsForHome();
 
-        return view('pages.home', compact('items'));
+        return view('pages.home.index', compact('items'));
     }
 }

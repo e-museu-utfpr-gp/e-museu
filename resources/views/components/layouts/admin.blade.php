@@ -1,4 +1,7 @@
-@props(['title' => ''])
+@props([
+    'title' => '',
+    'heading' => null,
+])
 
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -29,10 +32,11 @@
                 <a class="text-decoration-none" href="{{ route('home') }}"><span class="fs-4 ms-2">E-Museu</span></a>
             </a>
             <hr>
-            <a role="button" class="btn btn-secondary d-block d-md-none mb-3" type="button" data-bs-toggle="collapse"
-                data-bs-target="#sidebarCollapse" aria-expanded="false" aria-controls="sidebarCollapse">
+            <x-ui.buttons.default href="#" variant="secondary" class="d-block d-md-none mb-3" role="button"
+                data-bs-toggle="collapse" data-bs-target="#sidebarCollapse" aria-expanded="false"
+                aria-controls="sidebarCollapse">
                 {{ __('view.admin.layout.menu') }}
-            </a>
+            </x-ui.buttons.default>
             <div class="collapse d-md-block" id="sidebarCollapse">
                 <ul class="nav nav-pills flex-column mb-auto">
                     <li>
@@ -115,7 +119,17 @@
             <hr>
         </div>
         <div class="col-md-10 p-4">
-            {{ $slot }}
+            <div class="mb-auto container-fluid">
+                <x-ui.flash-messages />
+                @if (filled($heading))
+                    <x-admin.page-header :text="$heading">
+                        @isset($pageHeaderActions)
+                            {{ $pageHeaderActions }}
+                        @endisset
+                    </x-admin.page-header>
+                @endif
+                {{ $slot }}
+            </div>
         </div>
     </div>
     @if (! file_exists(public_path('build/manifest.json')))

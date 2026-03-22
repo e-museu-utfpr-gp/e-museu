@@ -4,8 +4,8 @@ namespace App\Services\Collaborator;
 
 use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Collaborator\Collaborator;
-use App\Support\AdminIndexQueryBuilder;
-use App\Support\AdminIndexConfig;
+use App\Support\Admin\AdminIndexConfig;
+use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;

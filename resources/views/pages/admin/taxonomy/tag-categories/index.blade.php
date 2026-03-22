@@ -1,64 +1,14 @@
-<x-layouts.admin :title="__('view.admin.taxonomy.tag_categories.index.title')">
-    <x-admin.index-shell :heading="__('view.admin.taxonomy.tag_categories.index.heading', ['count' => $count])">
-        <nav class="navbar navbar-light bg-light">
-            <div class="container-fluid">
-                <a href="{{ route('admin.taxonomy.tag-categories.create') }}" type="button" class="btn btn-success">
-                    <i class="bi bi-plus-circle"></i>
-                    {{ __('view.admin.taxonomy.tag_categories.index.add_tag_category') }}
-                </a>
-                @php
-                    $searchOptions = [
-                        ['value' => 'id', 'label' => __('view.admin.taxonomy.tag_categories.index.search_option_id')],
-                        ['value' => 'name', 'label' => __('view.admin.taxonomy.tag_categories.index.search_option_name')],
-                        ['value' => 'created_at', 'label' => __('view.admin.taxonomy.tag_categories.index.search_option_created_at')],
-                        ['value' => 'updated_at', 'label' => __('view.admin.taxonomy.tag_categories.index.search_option_updated_at')],
-                    ];
-                @endphp
-                <x-admin.search-form
-                    :action="route('admin.taxonomy.tag-categories.index')"
-                    :options="$searchOptions"
-                    :placeholder="__('view.admin.taxonomy.tag_categories.index.search_placeholder')"
-                    :buttonLabel="__('view.admin.taxonomy.tag_categories.index.search_button')"
-                />
-            </div>
-        </nav>
-        <div class="row">
-            <div class="col">
-                <table class="table table-hover table-bordered">
-                    <thead>
-                        <form action="{{ route('admin.taxonomy.tag-categories.index') }}" method="GET">
-                            <tr>
-                                <th scope="col">
-                                    <button class="btn border-0 bg-transparent px-0 py-0" type="submit"
-                                        name="sort" value="id">
-                                        {{ __('view.admin.taxonomy.tag_categories.index.sort_id') }}
-                                    </button>
-                                </th>
-                                <th scope="col">
-                                    <button class="btn border-0 bg-transparent px-0 py-0" type="submit"
-                                        name="sort" value="name">
-                                        {{ __('view.admin.taxonomy.tag_categories.index.sort_name') }}
-                                    </button>
-                                </th>
-                                <th scope="col">
-                                    <button class="btn border-0 bg-transparent px-0 py-0" type="submit"
-                                        name="sort" value="created_at">
-                                        {{ __('view.admin.taxonomy.tag_categories.index.sort_created_at') }}
-                                    </button>
-                                </th>
-                                <th scope="col">
-                                    <button class="btn border-0 bg-transparent px-0 py-0" type="submit"
-                                        name="sort" value="updated_at">
-                                        {{ __('view.admin.taxonomy.tag_categories.index.sort_updated_at') }}
-                                    </button>
-                                </th>
-                            </tr>
-                            <input name="order" value="@if (request()->query('order') == 'asc' || request()->query('order') == '') desc @else asc @endif" hidden>
-                            <input name="search_column" value="{{ request()->query('search_column') }}" hidden>
-                            <input name="search" value="{{ request()->query('search') }}" hidden>
-                        </form>
-                    </thead>
-                    <tbody>
+<x-layouts.admin :title="__('view.admin.taxonomy.tag_categories.index.title')"
+    :heading="__('view.admin.taxonomy.tag_categories.index.heading', ['count' => $count])">
+        <x-admin.index-toolbar
+            :create-href="route('admin.taxonomy.tag-categories.create')"
+            :create-label="__('view.admin.taxonomy.tag_categories.index.add_tag_category')"
+            :search-action="route('admin.taxonomy.tag-categories.index')"
+            :search-options="$searchOptions"
+            :search-placeholder="__('view.admin.taxonomy.tag_categories.index.search_placeholder')"
+            :boolean-columns="$searchBooleanColumns"
+        />
+        <x-admin.sortable-table :action="route('admin.taxonomy.tag-categories.index')" :columns="$sortColumns">
                         @foreach ($tagCategories as $tagCategory)
                             <tr class="@if (!$tagCategory->locks->isEmpty() && $tagCategory->locks->first()->admin_id != auth()->user()->id) table-warning @endif">
                                 <th scope="row">{{ $tagCategory->id }}</th>
@@ -67,25 +17,21 @@
                                 <td>{{ date('d-m-Y H:i:s', strtotime($tagCategory->updated_at)) }}</td>
                                 <td>
                                     <div class="d-flex justify-content-center align-items-center">
-                                        <a href="{{ route('admin.taxonomy.tag-categories.show', $tagCategory->id) }}" type="button"
-                                            class="btn btn-primary me-1"><i class="bi bi-eye-fill"></i></a>
-                                        <a href="{{ route('admin.taxonomy.tag-categories.edit', $tagCategory->id) }}" type="button"
-                                            class="btn btn-warning me-1"><i class="bi bi-pencil-fill"></i></a>
+                                        <x-ui.buttons.view href="{{ route('admin.taxonomy.tag-categories.show', $tagCategory->id) }}"
+                                            class="me-1" />
+                                        <x-ui.buttons.edit href="{{ route('admin.taxonomy.tag-categories.edit', $tagCategory->id) }}"
+                                            class="me-1" />
                                         <form action="{{ route('admin.taxonomy.tag-categories.destroy', $tagCategory->id) }}"
                                             method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger deleteCategoryButton" data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}"><i
-                                                    class="bi bi-trash-fill"></i>
+                                            <x-ui.buttons.delete class="deleteCategoryButton"
+                                                data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}" />
                                         </form>
                                     </div>
                                 </td>
                             </tr>
                         @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </x-admin.sortable-table>
         {{ $tagCategories->links('pagination::bootstrap-5') }}
-    </x-admin.index-shell>
 </x-layouts.admin>

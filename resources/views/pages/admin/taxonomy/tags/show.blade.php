@@ -1,21 +1,16 @@
-<x-layouts.admin :title="__('view.admin.taxonomy.tags.show.title') . ' ' . $tag->id">
-    <div class="mb-auto container-fluid">
-        <x-ui.flash-messages />
+<x-layouts.admin :title="__('view.admin.taxonomy.tags.show.title') . ' ' . $tag->id"
+    :heading="__('view.admin.taxonomy.tags.show.heading', ['id' => $tag->id, 'name' => $tag->name])">
+    <x-slot name="pageHeaderActions">
+        <x-ui.buttons.edit href="{{ route('admin.taxonomy.tags.edit', $tag->id) }}" class="me-1" />
+        <form action="{{ route('admin.taxonomy.tags.destroy', $tag->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <x-ui.buttons.delete class="deleteTagButton"
+                data-confirm-message="{{ __('view.admin.taxonomy.tags.index.delete_confirm') }}" />
+        </form>
+    </x-slot>
         <div class="row">
             <div class="col-md-6">
-                <div class="card mb-3">
-                    <h2 class="card-header">{{ __('view.admin.taxonomy.tags.show.heading', ['id' => $tag->id, 'name' => $tag->name]) }}</h2>
-                    <div class="card-body d-flex">
-                        <a href="{{ route('admin.taxonomy.tags.edit', $tag->id) }}" type="button" class="btn btn-warning me-1"><i
-                                class="bi bi-pencil-fill"></i> {{ __('view.admin.taxonomy.tags.show.edit') }}</a>
-                        <form action="{{ route('admin.taxonomy.tags.destroy', $tag->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="deleteTagButton btn btn-danger" data-confirm-message="{{ __('view.admin.taxonomy.tags.index.delete_confirm') }}"><i class="bi bi-trash-fill"></i>
-                                {{ __('view.admin.taxonomy.tags.show.delete') }}
-                        </form>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card mb-3">
@@ -68,16 +63,16 @@
                                 <strong>{{ __('view.admin.taxonomy.tags.show.updated_at') }}: </strong>
                                 <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($tag->tagCategory->updated_at)) }}</p>
                                 <div class="d-flex">
-                                    <a href="{{ route('admin.taxonomy.tag-categories.show', $tag->tagCategory->id) }}" type="button"
-                                        class="btn btn-primary me-1"><i class="bi bi-eye-fill"></i> {{ __('view.admin.taxonomy.tags.show.view') }}</a>
-                                    <a href="{{ route('admin.taxonomy.tag-categories.edit', $tag->tagCategory->id) }}" type="button"
-                                        class="btn btn-warning me-1"><i class="bi bi-pencil-fill"></i> {{ __('view.admin.taxonomy.tags.show.edit') }}</a>
+                                    <x-ui.buttons.view href="{{ route('admin.taxonomy.tag-categories.show', $tag->tagCategory->id) }}"
+                                        class="me-1" />
+                                    <x-ui.buttons.edit href="{{ route('admin.taxonomy.tag-categories.edit', $tag->tagCategory->id) }}"
+                                        class="me-1" />
                                     <form action="{{ route('admin.taxonomy.tag-categories.destroy', $tag->tagCategory->id) }}"
                                         method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="deleteCategoryButton btn btn-danger" type="submit" data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}"><i
-                                                class="bi bi-trash-fill"></i> {{ __('view.admin.taxonomy.tags.show.delete') }}
+                                        <x-ui.buttons.delete class="deleteCategoryButton"
+                                            data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}" />
                                     </form>
                                 </div>
                             </div>
@@ -86,6 +81,5 @@
                 </div>
             </div>
         </div>
-    </div>
 
 </x-layouts.admin>

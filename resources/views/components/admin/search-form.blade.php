@@ -44,7 +44,7 @@
             <option value="0" @if ($isBooleanSelected && ($currentSearch === '0' || $currentSearch === 0)) selected @endif>{{ $noLabel }}</option>
         </select>
     @endif
-    <button class="btn btn-secondary" type="submit">{{ $buttonLabel }}</button>
+    <x-ui.buttons.submit variant="secondary">{{ $buttonLabel }}</x-ui.buttons.submit>
 </form>
 @if ($hasBoolean)
     @push('scripts')

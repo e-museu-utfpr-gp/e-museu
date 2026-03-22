@@ -74,7 +74,7 @@
                 </div>
             </div>
             <div class="col d-flex align-items-center justify-content-end">
-                <button class="button nav-link py-2 px-3 fw-bold" type="submit">{{ __('view.catalog.items.filter.apply') }}</button>
+                <x-ui.buttons.submit variant="plain" class="button nav-link py-2 px-3 fw-bold">{{ __('view.catalog.items.filter.apply') }}</x-ui.buttons.submit>
             </div>
         </form>
     </div>

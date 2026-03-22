@@ -1,19 +1,15 @@
-<x-layouts.admin :title="__('view.admin.identity.admins.show.title') . ' ' . $admin->id">
-    <div class="mb-auto container-fluid">
-        <x-ui.flash-messages />
+<x-layouts.admin :title="__('view.admin.identity.admins.show.title') . ' ' . $admin->id"
+    :heading="__('view.admin.identity.admins.show.heading', ['id' => $admin->id, 'username' => $admin->username])">
+    <x-slot name="pageHeaderActions">
+        <form action="{{ route('admin.identity.admins.destroy', $admin->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <x-ui.buttons.delete class="deleteAdminButton"
+                data-confirm-message="{{ __('view.admin.identity.admins.index.delete_confirm') }}" />
+        </form>
+    </x-slot>
         <div class="row">
             <div class="col-md-6">
-                <div class="card mb-3">
-                    <h2 class="card-header">{{ __('view.admin.identity.admins.show.heading', ['id' => $admin->id, 'username' => $admin->username]) }}</h2>
-                    <div class="card-body d-flex">
-                        <form action="{{ route('admin.identity.admins.destroy', $admin->id) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="deleteAdminButton btn btn-danger" data-confirm-message="{{ __('view.admin.identity.admins.index.delete_confirm') }}"><i class="bi bi-trash-fill"></i>
-                                {{ __('view.admin.identity.admins.show.delete') }}
-                        </form>
-                    </div>
-                </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card mb-3">
@@ -46,6 +42,5 @@
                 </div>
             </div>
         </div>
-    </div>
 
 </x-layouts.admin>

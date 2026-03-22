@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Taxonomy\AdminTagCategoryRequest;
 use App\Models\Taxonomy\TagCategory;
 use App\Services\Identity\LockService;
 use App\Services\Taxonomy\TagCategoryService;
+use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,10 +18,10 @@ class AdminTagCategoryController extends AdminBaseController
     {
         $result = $tagCategoryService->getPaginatedTagCategoriesForAdminIndex($request);
 
-        return view('pages.admin.taxonomy.tag-categories.index', [
+        return view('pages.admin.taxonomy.tag-categories.index', array_merge([
             'tagCategories' => $result['tagCategories'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::taxonomyTagCategories()));
     }
 
     public function create(): View

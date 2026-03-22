@@ -1,14 +1,10 @@
-<x-layouts.admin :title="__('view.admin.taxonomy.tags.edit.title') . ' ' . $tag->id">
-    <div class="mb-auto container-fluid">
-        <x-ui.flash-messages />
+<x-layouts.admin :title="__('view.admin.taxonomy.tags.edit.title') . ' ' . $tag->id"
+    :heading="__('view.admin.taxonomy.tags.edit.heading', ['id' => $tag->id, 'name' => $tag->name])">
         <form action="{{ route('admin.taxonomy.tags.update', $tag->id) }}" method="POST">
             @csrf
             @method('PATCH')
             <div class="row">
                 <div class="col-md-6">
-                    <div class="card mb-3">
-                        <h2 class="card-header">{{ __('view.admin.taxonomy.tags.edit.heading', ['id' => $tag->id, 'name' => $tag->name]) }}</h2>
-                    </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">{{ __('view.admin.taxonomy.tags.edit.name') }}</label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
@@ -42,11 +38,12 @@
                         @enderror
                     </div>
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-warning"><i class="bi bi-pencil-fill"></i> {{ __('view.admin.taxonomy.tags.edit.submit') }}</button>
+                        <x-ui.buttons.submit variant="warning" icon="bi bi-pencil-fill">
+                            {{ __('view.admin.taxonomy.tags.edit.submit') }}
+                        </x-ui.buttons.submit>
                     </div>
                 </div>
             </div>
         </form>
-    </div>
     <x-release-lock-on-leave type="tags" :id="$tag->id" />
 </x-layouts.admin>

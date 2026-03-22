@@ -12,11 +12,7 @@
                     <div>
                         <label for="name">
                             <h5>{{ __('view.catalog.items.create.name_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.name_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.create.name_help')" />
                             </h5>
                         </label>
                         <div class="input-div">
@@ -34,12 +30,7 @@
                         <div class="col-md-6">
                             <label for="category_id">
                                 <h5>{{ __('view.catalog.items.create.category_label') }}
-                                    <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                        data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                        data-bs-content="{{ __('view.catalog.items.create.category_help') }}">
-                                        <i class="bi bi-info-circle-fill h4 ms-1"
-                                            style="color: #ED6E38; cursor: pointer;"></i>
-                                    </button>
+                                    <x-ui.info-popover :content="__('view.catalog.items.create.category_help')" />
                                 </h5>
                             </label>
                             <div class="input-div rounded-top">
@@ -57,12 +48,7 @@
                         <div class="col-md-6">
                             <label for="date">
                                 <h5>{{ __('view.catalog.items.create.release_date') }}
-                                    <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                        data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                        data-bs-content="{{ __('view.catalog.items.create.release_date_help') }}">
-                                        <i class="bi bi-info-circle-fill h4 ms-1"
-                                            style="color: #ED6E38; cursor: pointer;"></i>
-                                    </button>
+                                    <x-ui.info-popover :content="__('view.catalog.items.create.release_date_help')" />
                                 </h5>
                             </label>
                             <div class="input-div">
@@ -79,11 +65,7 @@
                     <div>
                         <label for="description">
                             <h5>{{ __('view.catalog.items.create.short_description') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.short_description_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.create.short_description_help')" />
                             </h5>
                         </label>
                         <div class="input-div">
@@ -99,11 +81,7 @@
                     <div>
                         <label for="detail">
                             <h5>{{ __('view.catalog.items.create.technical_details') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.technical_details_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.create.technical_details_help')" />
                             </h5>
                         </label>
                         <div class="input-div">
@@ -119,12 +97,7 @@
                     <div>
                         <label for="history">
                             <h5>{{ __('view.catalog.items.create.history_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.history_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1"
-                                        style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.create.history_help')" />
                             </h5>
                         </label>
                         <div class="input-div">
@@ -139,11 +112,7 @@
                     </div>
                     <div class="mb-3">
                         <h5 class="mb-2">{{ __('view.catalog.items.create.cover_label') }} <span class="text-danger">*</span>
-                            <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                data-bs-content="{{ __('view.catalog.items.create.cover_help') }}">
-                                <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
-                            </button>
+                            <x-ui.info-popover :content="__('view.catalog.items.create.cover_help')" />
                         </h5>
                         <div id="cover-drop-zone" class="upload-drop-zone rounded-3 border-2 border-dashed d-flex flex-column align-items-center justify-content-center p-4 text-center" style="min-height: 140px; border-color: #c8e6c9; background: #f1f8e9; cursor: pointer;">
                             <input type="file" name="cover_image" id="cover_image" accept="image/jpeg,image/png,image/jpg,image/webp" class="d-none">
@@ -154,7 +123,10 @@
                             <div id="cover-preview" class="d-none position-relative">
                                 <img id="cover-preview-img" src="" alt="" class="rounded shadow-sm" style="max-height: 120px; max-width: 100%; object-fit: contain;">
                                 <span class="badge bg-primary position-absolute top-0 start-0 m-1">{{ __('app.catalog.item_image.cover') }}</span>
-                                <button type="button" class="btn btn-sm btn-outline-secondary position-absolute bottom-0 end-0 m-1" id="cover-replace-btn">{{ __('view.catalog.items.create.replace_image') }}</button>
+                                <x-ui.buttons.default type="button" variant="outline-secondary" size="sm"
+                                    class="position-absolute bottom-0 end-0 m-1" id="cover-replace-btn">
+                                    {{ __('view.catalog.items.create.replace_image') }}
+                                </x-ui.buttons.default>
                             </div>
                         </div>
                         <p id="cover-required-msg" class="text-danger small mt-1 d-none">{{ __('view.catalog.items.create.cover_required') }}</p>
@@ -164,11 +136,7 @@
                     </div>
                     <div class="mb-3">
                         <h5 class="mb-2">{{ __('view.catalog.items.create.gallery_label') }}
-                            <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                data-bs-content="{{ __('view.catalog.items.create.gallery_help') }}">
-                                <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
-                            </button>
+                            <x-ui.info-popover :content="__('view.catalog.items.create.gallery_help')" />
                         </h5>
                         <div id="gallery-drop-zone" class="upload-drop-zone rounded-3 border-2 border-dashed d-flex flex-column align-items-center justify-content-center p-4 text-center" style="min-height: 100px; border-color: #c8e6c9; background: #f1f8e9; cursor: pointer;">
                             <input type="file" name="gallery_images[]" id="gallery_input" accept="image/jpeg,image/png,image/jpg,image/webp" class="d-none" multiple>
@@ -188,12 +156,7 @@
                     <div>
                         <label for="e-mail">
                             <h5>{{ __('view.catalog.items.create.email_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.email_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1"
-                                        style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.create.email_help')" />
                             </h5>
                         </label>
                         <div class="input-div">
@@ -217,12 +180,7 @@
                     <div>
                         <label for="full_name">
                             <h5>{{ __('view.catalog.items.create.full_name_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.full_name_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1"
-                                        style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.create.full_name_help')" />
                             </h5>
                         </label>
                         <div class="input-div">
@@ -241,12 +199,7 @@
                     <div>
                         <div class="d-flex justify-content-between">
                             <h5>{{ __('view.catalog.items.create.tags_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.tags_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1"
-                                        style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.create.tags_help')" />
                             </h5>
                             <h4 class="me-2" id="tag-count-text">0/10</h4>
                         </div>
@@ -258,22 +211,14 @@
                                 <div class="warning-div px-1 mx-5 mb-3" id="tag-full-text" hidden>
                                     <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create.tags_limit') }}
                                 </div>
-                                <button class="button nav-link px-2 pb-2" data-bs-toggle="modal"
-                                    data-bs-target="#addTagModal" id="add-tag-button" type="button">
-                                    <i class="bi bi-plus h3"></i>
-                                </button>
+                                <x-ui.buttons.catalog-modal-add target="#addTagModal" id="add-tag-button" />
                             </div>
                         </div>
                     </div>
                     <div>
                         <div class="d-flex justify-content-between">
                             <h5>{{ __('view.catalog.items.create.extra_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.extra_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1"
-                                        style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.create.extra_help')" />
                             </h5>
                             <h4 class="me-2" id="extra-count-text">0/10</h4>
                         </div>
@@ -285,22 +230,14 @@
                                 <div class="warning-div px-1 mx-5 mb-3" id="extra-full-text" hidden>
                                     <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create.extra_limit') }}
                                 </div>
-                                <button class="button nav-link px-2 pb-2" data-bs-toggle="modal"
-                                    data-bs-target="#addExtraModal" id="add-extra-button" type="button">
-                                    <i class="bi bi-plus h3"></i>
-                                </button>
+                                <x-ui.buttons.catalog-modal-add target="#addExtraModal" id="add-extra-button" />
                             </div>
                         </div>
                     </div>
                     <div>
                         <div class="d-flex justify-content-between">
                             <h5>{{ __('view.catalog.items.create.components_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.create.components_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1"
-                                        style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.create.components_help')" />
                             </h5>
                             <h4 class="me-2" id="component-count-text">0/10</h4>
                         </div>
@@ -312,15 +249,12 @@
                                 <div class="warning-div px-1 mx-5 mb-3" id="component-full-text" hidden>
                                     <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create.components_limit') }}
                                 </div>
-                                <button class="button nav-link px-2 pb-2" data-bs-toggle="modal"
-                                    data-bs-target="#addComponentModal" type="button" id="add-component-button">
-                                    <i class="bi bi-plus h3"></i>
-                                </button>
+                                <x-ui.buttons.catalog-modal-add target="#addComponentModal" id="add-component-button" />
                             </div>
                         </div>
                     </div>
                     <div class="col d-flex align-items-center justify-content-end">
-                        <button class="button nav-link py-2 px-3 fw-bold" type="submit">{{ __('view.catalog.items.create.submit') }}</button>
+                        <x-ui.buttons.submit variant="plain" class="button nav-link py-2 px-3 fw-bold">{{ __('view.catalog.items.create.submit') }}</x-ui.buttons.submit>
                     </div>
                 </div>
             </div>
@@ -345,11 +279,11 @@
     <script type="text/javascript">
         window.createModalsI18n = @json($createModalsI18n);
     </script>
-    @include('pages.catalog.items.create-modals.component-modal')
+    @include('pages.catalog.items._partials.create.component-modal')
 
-    @include('pages.catalog.items.create-modals.extra-modal')
+    @include('pages.catalog.items._partials.create.extra-modal')
 
-    @include('pages.catalog.items.create-modals.tag-modal')
+    @include('pages.catalog.items._partials.create.tag-modal')
 
     <script type="text/javascript">
         (function() {

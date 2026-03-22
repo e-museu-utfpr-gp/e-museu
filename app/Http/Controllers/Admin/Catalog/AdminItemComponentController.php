@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Catalog\AdminSingleComponentRequest;
 use App\Models\Catalog\ItemComponent;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemComponentService;
+use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,10 +18,10 @@ class AdminItemComponentController extends AdminBaseController
     {
         $result = $itemComponentService->getPaginatedItemComponentsForAdminIndex($request);
 
-        return view('pages.admin.catalog.item-components.index', [
+        return view('pages.admin.catalog.item-components.index', array_merge([
             'itemComponents' => $result['itemComponents'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::catalogItemComponents()));
     }
 
     public function show(ItemComponent $itemComponent): View

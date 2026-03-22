@@ -1,5 +1,5 @@
 <x-layouts.app :title="__('view.catalog.items.index.title')">
-    @include('pages.catalog.items.explore-menu')
+    @include('pages.catalog.items._partials.index.explore.menu')
     <div class="container main-container mb-auto">
         @if (request()->query('item_category') == '')
             <h1>{{ __('view.catalog.items.index.heading_all') }}</h1>
@@ -8,13 +8,13 @@
         @endif
         <div class="row">
             <div class="col-md-2 d-none d-md-block">
-                @include('pages.catalog.items.filter-menu')
+                @include('pages.catalog.items._partials.index.filter-menu')
             </div>
             <div class="col-2 d-block d-md-none">
-                <button class="btn btn-primary d-md-none toggle-filter-button-mobile py-2" type="button"
+                <x-ui.buttons.default type="button" variant="primary" class="d-md-none toggle-filter-button-mobile py-2"
                     data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
                     <i class="bi bi-funnel-fill h3"></i>
-                </button>
+                </x-ui.buttons.default>
 
                 <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel"
                     style="overflow-y: scroll;">
@@ -25,7 +25,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
                     <div class="offcanvas-body">
-                        @include('pages.catalog.items.filter-menu')
+                        @include('pages.catalog.items._partials.index.filter-menu')
                     </div>
                 </div>
             </div>

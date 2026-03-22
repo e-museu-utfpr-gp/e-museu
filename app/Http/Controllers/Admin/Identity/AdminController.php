@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Identity\AdminRequest;
 use App\Models\Identity\Admin;
 use App\Services\Identity\AdminService;
+use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,10 +17,10 @@ class AdminController extends AdminBaseController
     {
         $result = $adminService->getPaginatedAdminsForAdminIndex($request);
 
-        return view('pages.admin.identity.admins.index', [
+        return view('pages.admin.identity.admins.index', array_merge([
             'admins' => $result['admins'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::identityAdmins()));
     }
 
     public function show(Admin $admin): View

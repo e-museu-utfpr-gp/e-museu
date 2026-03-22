@@ -4,9 +4,16 @@ return [
     'shared' => [
         'buttons' => [
             'add' => 'Adicionar',
+            'view' => 'Visualizar',
+            'edit' => 'Editar',
+            'delete' => 'Excluir',
+            'validate_invalidate' => 'Validar / Invalidar',
+            'submit' => 'Enviar',
+            'search' => 'Buscar',
         ],
         'yes' => 'Sim',
         'no' => 'Não',
+        'info_popover_label' => 'Mais informações',
     ],
     'catalog' => require __DIR__ . '/view/catalog.php',
     'home' => require __DIR__ . '/view/home.php',

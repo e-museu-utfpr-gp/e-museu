@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Catalog\AdminItemTagRequest;
 use App\Models\Catalog\ItemTag;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemTagService;
+use App\Support\Admin\AdminIndexTableView;
 use App\Services\Taxonomy\TagCategoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,10 +19,10 @@ class AdminItemTagController extends AdminBaseController
     {
         $result = $itemTagService->getPaginatedItemTagsForAdminIndex($request);
 
-        return view('pages.admin.catalog.item-tags.index', [
+        return view('pages.admin.catalog.item-tags.index', array_merge([
             'itemTags' => $result['itemTags'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::catalogItemTags()));
     }
 
     public function show(ItemTag $itemTag): View

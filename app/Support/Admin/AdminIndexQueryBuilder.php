@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support;
+namespace App\Support\Admin;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;

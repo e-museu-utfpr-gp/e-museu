@@ -21,9 +21,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/storage/{path}', StorageProxyController::class)->where('path', '.*')->name('storage.proxy');
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::redirect('/', '/home');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/about', function () {
-    return view('pages.about');
+    return view('pages.about.index');
 })->name('about');
 
 Route::prefix('catalog')->name('catalog.')->group(function () {

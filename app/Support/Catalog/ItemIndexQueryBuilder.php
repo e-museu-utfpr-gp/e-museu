@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Support;
+namespace App\Support\Catalog;
 
 use App\Models\Catalog\Item;
 use Illuminate\Database\Eloquent\Builder;

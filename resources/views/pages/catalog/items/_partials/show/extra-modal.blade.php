@@ -14,11 +14,7 @@
                     <label for="info">
                         <h5>
                             {{ __('view.catalog.items.show_extra.label') }}
-                            <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                data-bs-content="{{ __('view.catalog.items.show_extra.info_help') }}">
-                                <i class="bi bi-info-circle-fill h4 ms-1" style="color: #ED6E38; cursor: pointer;"></i>
-                            </button>
+                            <x-ui.info-popover :content="__('view.catalog.items.show_extra.info_help')" />
                         </h5>
                     </label>
                     <div class="input-div rounded-top">
@@ -29,12 +25,7 @@
                         <label for="e-mail">
                             <h5>
                                 {{ __('view.catalog.items.show_extra.email_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.show_extra.email_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1"
-                                        style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.show_extra.email_help')" />
                             </h5>
                         </label>
                             <div class="input-div">
@@ -60,12 +51,7 @@
                         <label for="full_name">
                             <h5>
                                 {{ __('view.catalog.items.show_extra.full_name_label') }}
-                                <button type="button" class="info-icon btn border-0 bg-transparent px-0 py-0 mb-1"
-                                    data-bs-toggle="popover" data-bs-placement="top" data-bs-trigger="focus"
-                                    data-bs-content="{{ __('view.catalog.items.show_extra.full_name_help') }}">
-                                    <i class="bi bi-info-circle-fill h4 ms-1"
-                                        style="color: #ED6E38; cursor: pointer;"></i>
-                                </button>
+                                <x-ui.info-popover :content="__('view.catalog.items.show_extra.full_name_help')" />
                             </h5>
                         </label>
                         <div class="input-div">
@@ -80,9 +66,9 @@
                         </div>
                     </div>
                     <div class="col d-flex align-items-center justify-content-end">
-                        <button class="button nav-link py-2 px-3 fw-bold" type="submit" id="save-extra-button">
+                        <x-ui.buttons.submit variant="plain" class="button nav-link py-2 px-3 fw-bold" id="save-extra-button">
                             {{ __('view.catalog.items.show_extra.submit') }}
-                        </button>
+                        </x-ui.buttons.submit>
                     </div>
                 </form>
             </div>

@@ -14,7 +14,7 @@
                         <label for="exampleInputPassword1" class="form-label">{{ __('view.admin.auth.login.password_label') }}</label>
                         <input class="form-control" id="password" type="password" name="password" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">{{ __('view.admin.auth.login.submit') }}</button>
+                    <x-ui.buttons.submit variant="primary">{{ __('view.admin.auth.login.submit') }}</x-ui.buttons.submit>
                 </form>
             </div>
         </div>
