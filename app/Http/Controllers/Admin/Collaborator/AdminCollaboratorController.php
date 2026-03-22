@@ -18,7 +18,7 @@ class AdminCollaboratorController extends AdminBaseController
     {
         $result = $collaboratorService->getPaginatedCollaboratorsForAdminIndex($request);
 
-        return view('admin.collaborators.index', [
+        return view('pages.admin.collaborators.index', [
             'collaborators' => $result['collaborators'],
             'count' => $result['count'],
         ]);
@@ -26,12 +26,12 @@ class AdminCollaboratorController extends AdminBaseController
 
     public function show(Collaborator $collaborator): View
     {
-        return view('admin.collaborators.show', compact('collaborator'));
+        return view('pages.admin.collaborators.show', compact('collaborator'));
     }
 
     public function create(): View
     {
-        return view('admin.collaborators.create');
+        return view('pages.admin.collaborators.create');
     }
 
     public function store(
@@ -54,7 +54,7 @@ class AdminCollaboratorController extends AdminBaseController
         $lockService->requireUnlocked($collaborator);
         $lockService->lock($collaborator);
 
-        return view('admin.collaborators.edit', compact('collaborator'));
+        return view('pages.admin.collaborators.edit', compact('collaborator'));
     }
 
     public function update(

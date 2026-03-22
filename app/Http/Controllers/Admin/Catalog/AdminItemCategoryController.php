@@ -17,7 +17,7 @@ class AdminItemCategoryController extends AdminBaseController
     {
         $result = $itemCategoryService->getPaginatedItemCategoriesForAdminIndex($request);
 
-        return view('admin.catalog.item-categories.index', [
+        return view('pages.admin.catalog.item-categories.index', [
             'itemCategories' => $result['itemCategories'],
             'count' => $result['count'],
         ]);
@@ -25,12 +25,12 @@ class AdminItemCategoryController extends AdminBaseController
 
     public function show(ItemCategory $itemCategory): View
     {
-        return view('admin.catalog.item-categories.show', compact('itemCategory'));
+        return view('pages.admin.catalog.item-categories.show', compact('itemCategory'));
     }
 
     public function create(): View
     {
-        return view('admin.catalog.item-categories.create');
+        return view('pages.admin.catalog.item-categories.create');
     }
 
     public function store(AdminItemCategoryRequest $request, ItemCategoryService $itemCategoryService): RedirectResponse
@@ -38,7 +38,7 @@ class AdminItemCategoryController extends AdminBaseController
         $itemCategory = $itemCategoryService->createItemCategory($request->validated());
 
         return redirect()
-            ->route('admin.item-categories.show', $itemCategory)
+            ->route('admin.catalog.item-categories.show', $itemCategory)
             ->with('success', __('app.catalog.item_category.created'));
     }
 
@@ -47,7 +47,7 @@ class AdminItemCategoryController extends AdminBaseController
         $lockService->requireUnlocked($itemCategory);
         $lockService->lock($itemCategory);
 
-        return view('admin.catalog.item-categories.edit', compact('itemCategory'));
+        return view('pages.admin.catalog.item-categories.edit', compact('itemCategory'));
     }
 
     public function update(
@@ -63,7 +63,7 @@ class AdminItemCategoryController extends AdminBaseController
         $lockService->unlock($itemCategory);
 
         return redirect()
-            ->route('admin.item-categories.show', $itemCategory)
+            ->route('admin.catalog.item-categories.show', $itemCategory)
             ->with('success', __('app.catalog.item_category.updated'));
     }
 
@@ -78,7 +78,7 @@ class AdminItemCategoryController extends AdminBaseController
         $itemCategoryService->deleteItemCategory($itemCategory);
 
         return redirect()
-            ->route('admin.item-categories.index')
+            ->route('admin.catalog.item-categories.index')
             ->with('success', __('app.catalog.item_category.deleted'));
     }
 }

@@ -16,7 +16,7 @@ class AdminController extends AdminBaseController
     {
         $result = $adminService->getPaginatedAdminsForAdminIndex($request);
 
-        return view('admin.identity.admins.index', [
+        return view('pages.admin.identity.admins.index', [
             'admins' => $result['admins'],
             'count' => $result['count'],
         ]);
@@ -24,32 +24,32 @@ class AdminController extends AdminBaseController
 
     public function show(Admin $admin): View
     {
-        return view('admin.identity.admins.show', compact('admin'));
+        return view('pages.admin.identity.admins.show', compact('admin'));
     }
 
     public function create(): View
     {
-        return view('admin.identity.admins.create');
+        return view('pages.admin.identity.admins.create');
     }
 
     public function store(AdminRequest $request, AdminService $adminService): RedirectResponse
     {
         $admin = $adminService->createAdmin($request->validated());
 
-        return redirect()->route('admin.admins.show', $admin)->with('success', __('app.identity.admin.created'));
+        return redirect()->route('admin.identity.admins.show', $admin)->with('success', __('app.identity.admin.created'));
     }
 
     public function destroy(Admin $admin, AdminService $adminService): RedirectResponse
     {
         $adminService->deleteAdmin($admin);
 
-        return redirect()->route('admin.admins.index')->with('success', __('app.identity.admin.deleted'));
+        return redirect()->route('admin.identity.admins.index')->with('success', __('app.identity.admin.deleted'));
     }
 
     public function destroyLock(string $id, AdminService $adminService): RedirectResponse
     {
         if ($adminService->removeLockByAdminId($id)) {
-            return redirect()->route('admin.admins.index')->with('success', __('app.identity.lock_removed'));
+            return redirect()->route('admin.identity.admins.index')->with('success', __('app.identity.lock_removed'));
         }
 
         return back()->withErrors([__('app.identity.lock_not_found')]);

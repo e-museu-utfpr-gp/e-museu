@@ -27,7 +27,7 @@ class ItemController extends Controller
         $itemCategories = $itemCategoryService->getForIndex();
         $categories = $tagCategoryService->getForIndex();
 
-        return view('catalog.items.index', [
+        return view('pages.catalog.items.index', [
             'items' => $data['items'],
             'categoryName' => $data['categoryName'],
             'itemCategories' => $itemCategories,
@@ -42,7 +42,7 @@ class ItemController extends Controller
         $categories = $tagCategoryService->getForIndex();
         $itemCategories = $itemCategoryService->getForIndex();
 
-        return view('catalog.items.create', compact('categories', 'itemCategories'));
+        return view('pages.catalog.items.create', compact('categories', 'itemCategories'));
     }
 
     public function store(
@@ -73,7 +73,7 @@ class ItemController extends Controller
             return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
         }
 
-        return redirect()->route('items.create')->with('success', __('app.catalog.item.contribution_success'));
+        return redirect()->route('catalog.items.create')->with('success', __('app.catalog.item.contribution_success'));
     }
 
     public function show(
@@ -91,7 +91,7 @@ class ItemController extends Controller
             ->where('name', 'Série')
             ->value('id');
 
-        return view('catalog.items.show', compact('item', 'itemCategories', 'categories', 'seriesCategoryId'));
+        return view('pages.catalog.items.show', compact('item', 'itemCategories', 'categories', 'seriesCategoryId'));
     }
 
     public function edit(): never

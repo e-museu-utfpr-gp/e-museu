@@ -17,7 +17,7 @@ class AdminItemComponentController extends AdminBaseController
     {
         $result = $itemComponentService->getPaginatedItemComponentsForAdminIndex($request);
 
-        return view('admin.catalog.item-components.index', [
+        return view('pages.admin.catalog.item-components.index', [
             'itemComponents' => $result['itemComponents'],
             'count' => $result['count'],
         ]);
@@ -25,12 +25,12 @@ class AdminItemComponentController extends AdminBaseController
 
     public function show(ItemComponent $itemComponent): View
     {
-        return view('admin.catalog.item-components.show', compact('itemComponent'));
+        return view('pages.admin.catalog.item-components.show', compact('itemComponent'));
     }
 
     public function create(ItemCategoryService $itemCategoryService): View
     {
-        return view('admin.catalog.item-components.create', [
+        return view('pages.admin.catalog.item-components.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
         ]);
     }
@@ -42,7 +42,7 @@ class AdminItemComponentController extends AdminBaseController
         $itemComponent = $itemComponentService->createItemComponent($request->validated());
 
         return redirect()
-            ->route('admin.item-components.show', $itemComponent)
+            ->route('admin.catalog.item-components.show', $itemComponent)
             ->with('success', __('app.catalog.component.created'));
     }
 
@@ -53,7 +53,7 @@ class AdminItemComponentController extends AdminBaseController
         ]);
 
         return redirect()
-            ->route('admin.item-components.show', $itemComponent)
+            ->route('admin.catalog.item-components.show', $itemComponent)
             ->with('success', __('app.catalog.component.updated'));
     }
 
@@ -61,6 +61,6 @@ class AdminItemComponentController extends AdminBaseController
     {
         $itemComponentService->deleteItemComponent($itemComponent);
 
-        return redirect()->route('admin.item-components.index')->with('success', __('app.catalog.component.deleted'));
+        return redirect()->route('admin.catalog.item-components.index')->with('success', __('app.catalog.component.deleted'));
     }
 }
