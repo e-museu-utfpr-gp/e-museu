@@ -1,0 +1,106 @@
+<x-layouts.admin :title="__('view.admin.catalog.item_categories.index.title')">
+    <x-admin.index-shell :heading="__('view.admin.catalog.item_categories.index.heading', ['count' => $count])">
+        <nav class="navbar navbar-light bg-light">
+            <div class="container-fluid">
+                <a href="{{ route('admin.catalog.item-categories.create') }}" type="button" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i>
+                    {{ __('view.admin.catalog.item_categories.index.add_item_category') }}
+                </a>
+                @php
+                    $searchOptions = [
+                        ['value' => 'id', 'label' => __('view.admin.catalog.item_categories.index.search_option_id')],
+                        ['value' => 'name', 'label' => __('view.admin.catalog.item_categories.index.search_option_name')],
+                        ['value' => 'created_at', 'label' => __('view.admin.catalog.item_categories.index.search_option_created_at')],
+                        ['value' => 'updated_at', 'label' => __('view.admin.catalog.item_categories.index.search_option_updated_at')],
+                    ];
+                @endphp
+                <x-admin.search-form
+                    :action="route('admin.catalog.item-categories.index')"
+                    :options="$searchOptions"
+                    :placeholder="__('view.admin.catalog.item_categories.index.search_placeholder')"
+                    :buttonLabel="__('view.admin.catalog.item_categories.index.search_button')"
+                />
+            </div>
+        </nav>
+        <div class="row">
+            <div class="col">
+                <table class="table table-hover table-bordered">
+                    <thead>
+                        <form action="{{ route('admin.catalog.item-categories.index') }}" method="GET">
+                            <tr>
+                                <th scope="col">
+                                    <button
+                                        class="btn border-0 bg-transparent px-0 py-0"
+                                        type="submit"
+                                        name="sort"
+                                        value="id"
+                                    >
+                                        {{ __('view.admin.catalog.item_categories.index.sort_id') }}
+                                    </button>
+                                </th>
+                                <th scope="col">
+                                    <button
+                                        class="btn border-0 bg-transparent px-0 py-0"
+                                        type="submit"
+                                        name="sort"
+                                        value="name"
+                                    >
+                                        {{ __('view.admin.catalog.item_categories.index.sort_name') }}
+                                    </button>
+                                </th>
+                                <th scope="col">
+                                    <button
+                                        class="btn border-0 bg-transparent px-0 py-0"
+                                        type="submit"
+                                        name="sort"
+                                        value="created_at"
+                                    >
+                                        {{ __('view.admin.catalog.item_categories.index.sort_created_at') }}
+                                    </button>
+                                </th>
+                                <th scope="col">
+                                    <button
+                                        class="btn border-0 bg-transparent px-0 py-0"
+                                        type="submit"
+                                        name="sort"
+                                        value="updated_at"
+                                    >
+                                        {{ __('view.admin.catalog.item_categories.index.sort_updated_at') }}
+                                    </button>
+                                </th>
+                            </tr>
+                            <input name="order" value="@if (request()->query('order') == 'asc' || request()->query('order') == '') desc @else asc @endif" hidden>
+                            <input name="search_column" value="{{ request()->query('search_column') }}" hidden>
+                            <input name="search" value="{{ request()->query('search') }}" hidden>
+                        </form>
+                    </thead>
+                    <tbody>
+                        @foreach ($itemCategories as $itemCategory)
+                            <tr class="@if (!$itemCategory->locks->isEmpty() && $itemCategory->locks->first()->admin_id != auth()->user()->id) table-warning @endif">
+                                <th scope="row">{{ $itemCategory->id }}</th>
+                                <td>{{ $itemCategory->name }}</td>
+                                <td>{{ date('d-m-Y H:i:s', strtotime($itemCategory->created_at)) }}</td>
+                                <td>{{ date('d-m-Y H:i:s', strtotime($itemCategory->updated_at)) }}</td>
+                                <td>
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <a href="{{ route('admin.catalog.item-categories.show', $itemCategory->id) }}" type="button"
+                                            class="btn btn-primary me-1"><i class="bi bi-eye-fill"></i></a>
+                                        <a href="{{ route('admin.catalog.item-categories.edit', $itemCategory->id) }}" type="button"
+                                            class="btn btn-warning me-1"><i class="bi bi-pencil-fill"></i></a>
+                                        <form action="{{ route('admin.catalog.item-categories.destroy', $itemCategory->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger deleteItemCategoryButton" data-confirm-message="{{ __('view.admin.catalog.item_categories.delete_confirm') }}"><i
+                                                    class="bi bi-trash-fill"></i>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{ $itemCategories->links('pagination::bootstrap-5') }}
+    </x-admin.index-shell>
+</x-layouts.admin>

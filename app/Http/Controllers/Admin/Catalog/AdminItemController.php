@@ -27,7 +27,7 @@ class AdminItemController extends AdminBaseController
     {
         $result = $itemService->getPaginatedItemsForAdminIndex($request);
 
-        return view('admin.catalog.items.index', [
+        return view('pages.admin.catalog.items.index', [
             'items' => $result['items'],
             'count' => $result['count'],
         ]);
@@ -37,12 +37,12 @@ class AdminItemController extends AdminBaseController
     {
         $item->load('images');
 
-        return view('admin.catalog.items.show', compact('item'));
+        return view('pages.admin.catalog.items.show', compact('item'));
     }
 
     public function create(ItemCategoryService $itemCategoryService, CollaboratorService $collaboratorService): View
     {
-        return view('admin.catalog.items.create', [
+        return view('pages.admin.catalog.items.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
         ]);
@@ -56,7 +56,7 @@ class AdminItemController extends AdminBaseController
         $item = $itemService->createItemWithIdentificationCode($request);
         $itemImagesService->storeImagesFromStoreRequest($item, $request);
 
-        return redirect()->route('admin.items.show', $item->id)->with('success', __('app.catalog.item.created'));
+        return redirect()->route('admin.catalog.items.show', $item->id)->with('success', __('app.catalog.item.created'));
     }
 
     public function edit(
@@ -69,7 +69,7 @@ class AdminItemController extends AdminBaseController
         $lockService->requireUnlocked($item);
         $lockService->lock($item);
 
-        return view('admin.catalog.items.edit', [
+        return view('pages.admin.catalog.items.edit', [
             'item' => $item,
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
@@ -100,7 +100,7 @@ class AdminItemController extends AdminBaseController
 
         $lockService->unlock($item);
 
-        return redirect()->route('admin.items.show', $item)->with('success', __('app.catalog.item.updated'));
+        return redirect()->route('admin.catalog.items.show', $item)->with('success', __('app.catalog.item.updated'));
     }
 
     public function destroy(
@@ -116,7 +116,7 @@ class AdminItemController extends AdminBaseController
         $itemImagesService->deleteAllImagesForItem($item);
         $itemService->deleteItem($item);
 
-        return redirect()->route('admin.items.index')->with('success', __('app.catalog.item.deleted'));
+        return redirect()->route('admin.catalog.items.index')->with('success', __('app.catalog.item.deleted'));
     }
 
     public function destroyImage(
@@ -128,6 +128,6 @@ class AdminItemController extends AdminBaseController
         $lockService->requireUnlocked($item);
         $itemImagesService->deleteImage($item, $image);
 
-        return redirect()->route('admin.items.edit', $item)->with('success', __('app.catalog.item_image.deleted'));
+        return redirect()->route('admin.catalog.items.edit', $item)->with('success', __('app.catalog.item_image.deleted'));
     }
 }
