@@ -1,0 +1,141 @@
+@props([
+    'title' => '',
+    'heading' => null,
+])
+
+<!doctype html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>E-museu: {{ $title }}</title>
+
+    @if (file_exists(public_path('build/manifest.json')))
+        @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    @else
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    @endif
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+
+</head>
+
+<body class="bd-light d-flex flex-column min-vh-100">
+    <div class="row">
+        <div class="col-md-2 flex-column flex-shrink-0 p-3">
+            <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
+                <a class="text-decoration-none" href="{{ route('home') }}"><span class="fs-4 ms-2">E-Museu</span></a>
+            </a>
+            <hr>
+            <x-ui.buttons.default href="#" variant="secondary" class="d-block d-md-none mb-3" role="button"
+                data-bs-toggle="collapse" data-bs-target="#sidebarCollapse" aria-expanded="false"
+                aria-controls="sidebarCollapse">
+                {{ __('view.admin.layout.menu') }}
+            </x-ui.buttons.default>
+            <div class="collapse d-md-block" id="sidebarCollapse">
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li>
+                        <a href="{{ route('admin.catalog.item-categories.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.catalog.item-categories')) active @endif" aria-current="page">
+                            {{ __('view.admin.layout.nav.item_categories') }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.catalog.items.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.catalog.items')) active @endif" aria-current="page">
+                            {{ __('view.admin.layout.nav.items') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.catalog.item-components.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.catalog.item-components')) active @endif" aria-current="page">
+                            {{ __('view.admin.layout.nav.item_components') }}
+                        </a>
+                    </li>
+                    <hr/>
+                    <li>
+                        <a href="{{ route('admin.taxonomy.tag-categories.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.taxonomy.tag-categories')) active @endif" aria-current="page">
+                            {{ __('view.admin.layout.nav.tag_categories') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.taxonomy.tags.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.taxonomy.tags')) active @endif" aria-current="page">
+                            {{ __('view.admin.layout.nav.tags') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.catalog.item-tags.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.catalog.item-tags')) active @endif" aria-current="page">
+                            {{ __('view.admin.layout.nav.item_tags') }}
+                        </a>
+                    </li>
+                    <hr/>
+                    <li>
+                        <a href="{{ route('admin.catalog.extras.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.catalog.extras')) active @endif" aria-current="page">
+                            {{ __('view.admin.layout.nav.extras') }}
+                        </a>
+                    </li>
+                    <hr/>
+                    <li>
+                        <a href="{{ route('admin.collaborators.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.collaborators')) active @endif" aria-current="page">
+                            {{ __('view.admin.layout.nav.collaborators') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('admin.identity.admins.index') }}"
+                            class="nav-link @if (Str::startsWith(Route::currentRouteName(), 'admin.identity.admins')) active @endif" aria-current="page">
+                            {{ __('view.admin.layout.nav.administrators') }}
+                        </a>
+                    </li>
+                </ul>
+                <hr/>
+                <div class="dropdown mt-2">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle ms-3"
+                        id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <strong>
+                            {{ auth()->user()->username }}
+                        </strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu text-small shadow" aria-labelledby="dropdownUser1">
+                        <li>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button
+                                    class="btn border-0 bg-transparent px-0 py-0 dropdown-item ms-2" type="submit">{{ __('view.admin.layout.logout') }}</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+        </div>
+        <div class="col-md-10 p-4">
+            <div class="mb-auto container-fluid">
+                <x-ui.flash-messages />
+                @if (filled($heading))
+                    <x-admin.page-header :text="$heading">
+                        @isset($pageHeaderActions)
+                            {{ $pageHeaderActions }}
+                        @endisset
+                    </x-admin.page-header>
+                @endif
+                {{ $slot }}
+            </div>
+        </div>
+    </div>
+    @if (! file_exists(public_path('build/manifest.json')))
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    @endif
+    @stack('scripts')
+</body>
+
+</html>

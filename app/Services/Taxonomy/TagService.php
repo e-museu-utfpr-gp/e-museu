@@ -3,8 +3,8 @@
 namespace App\Services\Taxonomy;
 
 use App\Models\Taxonomy\Tag;
-use App\Support\AdminIndexConfig;
-use App\Support\AdminIndexQueryBuilder;
+use App\Support\Admin\AdminIndexConfig;
+use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;

@@ -17,9 +17,17 @@ class LockService
      */
     public function resolveSubject(array $data): array
     {
-        $routePrefix = 'admin.' . $data['type'];
+        $typeToRoutePrefix = [
+            'items' => 'admin.catalog.items',
+            'item-categories' => 'admin.catalog.item-categories',
+            'tag-categories' => 'admin.taxonomy.tag-categories',
+            'tags' => 'admin.taxonomy.tags',
+            'collaborators' => 'admin.collaborators',
+            'extras' => 'admin.catalog.extras',
+        ];
+        $routePrefix = $typeToRoutePrefix[$data['type']] ?? null;
         $config = config('lockable_routes', []);
-        if (! isset($config[$routePrefix])) {
+        if ($routePrefix === null || ! isset($config[$routePrefix])) {
             return [null, Response::HTTP_BAD_REQUEST];
         }
 

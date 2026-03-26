@@ -6,7 +6,7 @@ $(document).ready(function () {
         const sectionSelector = $container.data('section-selector') || '#section_id';
         const itemSelector = $container.data('item-selector') || '#item_id';
         const originalItemId = $container.data('original-item-id') || null;
-        const getItemsUrl = $container.data('get-items-url') || '/items/by-category';
+        const getItemsUrl = $container.data('get-items-url') || '/catalog/items/by-category';
 
         function getItems() {
             const itemCategoryId = $(sectionSelector).val();
