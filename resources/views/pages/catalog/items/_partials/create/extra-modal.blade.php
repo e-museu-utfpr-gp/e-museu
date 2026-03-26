@@ -2,37 +2,36 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Adicionar um Informação Extra</h4>
+                <h4 class="modal-title">{{ __('view.catalog.items.create_modals.extra.title') }}</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form method="POST" id="addExtraForm" enctype="multipart/form-data">
+                    @csrf
                     <input type="text" name="extra_id" id="extra-id" hidden>
-                    <label for="extra-info">
-                        <h5>Informação Extra
-                            <x-ui.info-popover
-                                :content="'Possui alguma informação adicional ou curiosidade sobre o item que gostaria de compartilhar? Por favor, nos informe por aqui.'" />
-                        </h5>
-                    </label>
-                    <div class="input-div rounded-top">
-                        <textarea class="form-control me-2 input-form @error('info') is-invalid @enderror" type="text" name="extra-info"
-                            id="extra-info" placeholder="" rows="6"></textarea>
-                    </div>
+                    <x-ui.inputs.textarea
+                        name="extra-info"
+                        id="extra-info"
+                        :label="__('view.catalog.items.create_modals.extra.label')"
+                        :help="__('view.catalog.items.create_modals.extra.help')"
+                        :rows="6"
+                        :showErrors="false"
+                    />
                     <div class="col d-flex align-items-center justify-content-end">
                         <button class="button nav-link py-2 px-3 fw-bold" type="button" onclick="saveExtra()"
                             id="save-extra-button">
-                            Adicionar
+                            {{ __('view.catalog.items.create_modals.extra.add') }}
                         </button>
                         <button class="button nav-link py-2 px-3 fw-bold" type="button" onclick="updateExtra()"
                             id="update-extra-button" hidden>
-                            Editar
+                            {{ __('view.catalog.items.create_modals.extra.edit') }}
                         </button>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="cancel-button nav-link py-2 px-3 fw-bold" type="button" data-bs-dismiss="modal">
-                    Cancelar
+                    {{ __('view.catalog.items.create_modals.extra.cancel') }}
                 </button>
             </div>
         </div>
@@ -47,7 +46,7 @@
         let extraInfo = $('#extra-info').val();
 
         if (extraInfo == '') {
-            alert("O campo curiosidade precisa ser preenchido!");
+            alert(window.createModalsI18n.extra.alert_required);
             return;
         }
 
@@ -80,7 +79,7 @@
         let extraId = $('#extra-id').val();
 
         if (extraInfo == '') {
-            alert("O campo curiosidade precisa ser preenchido!");
+            alert(window.createModalsI18n.extra.alert_required);
             return;
         }
 
@@ -150,7 +149,7 @@
                 </div>`;
 
         $("#extras").append(extraDiv);
-        $("#extra-" + extraIds).append(extraInfoInput, extraCard);
+        $("#extra-" + extraId).append(extraInfoInput, extraCard);
     }
 
     $('#addExtraModal').on('hidden.bs.modal', function() {

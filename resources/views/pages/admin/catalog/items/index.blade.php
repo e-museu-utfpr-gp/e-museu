@@ -19,7 +19,7 @@
                                     <td>{{ $item->date ? date('d-m-Y', strtotime($item->date)) : '—' }}</td>
                                     <td>{{ $item->identification_code }}</td>
                                     <td>
-                                        @if ($item->item_validation == 1)
+                                        @if ($item->validation == 1)
                                             {{ __('view.admin.catalog.items.index.yes') }}
                                         @else
                                             {{ __('view.admin.catalog.items.index.no') }}
@@ -30,17 +30,17 @@
                                     <td>{{ date('d-m-Y H:i:s', strtotime($item->item_created)) }}</td>
                                     <td>{{ date('d-m-Y H:i:s', strtotime($item->item_updated)) }}</td>
                                     <td>
-                                        <x-ui.buttons.view href="{{ route('admin.catalog.items.show', $item->id) }}" />
-                                        <x-ui.buttons.edit href="{{ route('admin.catalog.items.edit', $item->id) }}" class="my-1" />
+                                        <x-ui.buttons.admin.view href="{{ route('admin.catalog.items.show', $item->id) }}" />
+                                        <x-ui.buttons.admin.edit href="{{ route('admin.catalog.items.edit', $item->id) }}" class="my-1" />
                                         <form action="{{ route('admin.catalog.items.destroy', $item->id) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <x-ui.buttons.delete class="deleteItemButton"
+                                            <x-ui.buttons.admin.delete class="deleteItemButton"
                                                 data-confirm-message="{{ __('view.admin.catalog.items.index.delete_confirm') }}" />
                                         </form>
                                     </td>
                                 </tr>
                             @endforeach
             </x-admin.sortable-table>
-            {{ $items->links('pagination::bootstrap-5') }}
+            <x-ui.pagination :paginator="$items" variant="success" class="mt-3" />
 </x-layouts.admin>

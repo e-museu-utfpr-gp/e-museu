@@ -14,6 +14,34 @@ class AdminIndexTableView
     }
 
     /**
+     * @param  array<string, mixed>  $config
+     * @return array{
+     *     searchOptions: list<array{value: string, label: string}>,
+     *     sortColumns: list<array{sort: string|null, label: string}>,
+     *     searchBooleanColumns: array<int, string>
+     * }
+     */
+    private static function basicNameIndex(string $prefix, array $config): array
+    {
+        return [
+            'searchOptions' => [
+                ['value' => 'id', 'label' => __("$prefix.search_option_id")],
+                ['value' => 'name', 'label' => __("$prefix.search_option_name")],
+                ['value' => 'created_at', 'label' => __("$prefix.search_option_created_at")],
+                ['value' => 'updated_at', 'label' => __("$prefix.search_option_updated_at")],
+            ],
+            'sortColumns' => [
+                ['sort' => 'id', 'label' => __("$prefix.sort_id")],
+                ['sort' => 'name', 'label' => __("$prefix.sort_name")],
+                ['sort' => 'created_at', 'label' => __("$prefix.sort_created_at")],
+                ['sort' => 'updated_at', 'label' => __("$prefix.sort_updated_at")],
+                ['sort' => null, 'label' => ''],
+            ],
+            'searchBooleanColumns' => self::booleanColumnsFromConfig($config),
+        ];
+    }
+
+    /**
      * @return array{
      *     searchOptions: list<array{value: string, label: string}>,
      *     sortColumns: list<array{sort: string|null, label: string}>,
@@ -30,9 +58,15 @@ class AdminIndexTableView
                 ['value' => 'history', 'label' => __('app.catalog.admin.items.index.search_option_history')],
                 ['value' => 'detalhes', 'label' => __('app.catalog.admin.items.index.search_option_detail')],
                 ['value' => 'date', 'label' => __('app.catalog.admin.items.index.search_option_date')],
-                ['value' => 'identification_code', 'label' => __('app.catalog.admin.items.index.search_option_identification_code')],
+                [
+                    'value' => 'identification_code',
+                    'label' => __('app.catalog.admin.items.index.search_option_identification_code'),
+                ],
                 ['value' => 'validation', 'label' => __('app.catalog.admin.items.index.search_option_validation')],
-                ['value' => 'collaborator_id', 'label' => __('app.catalog.admin.items.index.search_option_collaborator')],
+                [
+                    'value' => 'collaborator_id',
+                    'label' => __('app.catalog.admin.items.index.search_option_collaborator'),
+                ],
                 ['value' => 'category_id', 'label' => __('app.catalog.admin.items.index.search_option_item_category')],
                 ['value' => 'created_at', 'label' => __('app.catalog.admin.items.index.search_option_created_at')],
                 ['value' => 'updated_at', 'label' => __('app.catalog.admin.items.index.search_option_updated_at')],
@@ -118,7 +152,9 @@ class AdminIndexTableView
                 ['sort' => 'updated_at', 'label' => __("$p.sort_updated_at")],
                 ['sort' => null, 'label' => ''],
             ],
-            'searchBooleanColumns' => self::booleanColumnsFromConfig(AdminIndexConfig::itemComponents()),
+            'searchBooleanColumns' => self::booleanColumnsFromConfig(
+                AdminIndexConfig::itemComponents()
+            ),
         ];
     }
 
@@ -166,24 +202,10 @@ class AdminIndexTableView
      */
     public static function catalogItemCategories(): array
     {
-        $p = 'app.catalog.admin.item_categories.index';
-
-        return [
-            'searchOptions' => [
-                ['value' => 'id', 'label' => __("$p.search_option_id")],
-                ['value' => 'name', 'label' => __("$p.search_option_name")],
-                ['value' => 'created_at', 'label' => __("$p.search_option_created_at")],
-                ['value' => 'updated_at', 'label' => __("$p.search_option_updated_at")],
-            ],
-            'sortColumns' => [
-                ['sort' => 'id', 'label' => __("$p.sort_id")],
-                ['sort' => 'name', 'label' => __("$p.sort_name")],
-                ['sort' => 'created_at', 'label' => __("$p.sort_created_at")],
-                ['sort' => 'updated_at', 'label' => __("$p.sort_updated_at")],
-                ['sort' => null, 'label' => ''],
-            ],
-            'searchBooleanColumns' => self::booleanColumnsFromConfig(AdminIndexConfig::itemCategories()),
-        ];
+        return self::basicNameIndex(
+            'app.catalog.admin.item_categories.index',
+            AdminIndexConfig::itemCategories()
+        );
     }
 
     /**
@@ -292,23 +314,9 @@ class AdminIndexTableView
      */
     public static function taxonomyTagCategories(): array
     {
-        $p = 'app.taxonomy.admin.tag_categories.index';
-
-        return [
-            'searchOptions' => [
-                ['value' => 'id', 'label' => __("$p.search_option_id")],
-                ['value' => 'name', 'label' => __("$p.search_option_name")],
-                ['value' => 'created_at', 'label' => __("$p.search_option_created_at")],
-                ['value' => 'updated_at', 'label' => __("$p.search_option_updated_at")],
-            ],
-            'sortColumns' => [
-                ['sort' => 'id', 'label' => __("$p.sort_id")],
-                ['sort' => 'name', 'label' => __("$p.sort_name")],
-                ['sort' => 'created_at', 'label' => __("$p.sort_created_at")],
-                ['sort' => 'updated_at', 'label' => __("$p.sort_updated_at")],
-                ['sort' => null, 'label' => ''],
-            ],
-            'searchBooleanColumns' => self::booleanColumnsFromConfig(AdminIndexConfig::tagCategories()),
-        ];
+        return self::basicNameIndex(
+            'app.taxonomy.admin.tag_categories.index',
+            AdminIndexConfig::tagCategories()
+        );
     }
 }

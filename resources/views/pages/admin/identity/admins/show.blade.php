@@ -4,7 +4,7 @@
         <form action="{{ route('admin.identity.admins.destroy', $admin->id) }}" method="POST">
             @csrf
             @method('DELETE')
-            <x-ui.buttons.delete class="deleteAdminButton"
+            <x-ui.buttons.admin.delete class="deleteAdminButton"
                 data-confirm-message="{{ __('view.admin.identity.admins.index.delete_confirm') }}" />
         </form>
     </x-slot>

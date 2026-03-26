@@ -4,13 +4,13 @@
         <form action="{{ route('admin.catalog.item-tags.update', $itemTag->id) }}" method="POST">
             @csrf
             @method('PATCH')
-            <x-ui.buttons.validate-invalidate class="me-1" data-toggle="tooltip" data-placement="top"
+            <x-ui.buttons.admin.validate-invalidate class="me-1" data-toggle="tooltip" data-placement="top"
                 title="{{ __('view.admin.catalog.item_tags.show.validate_invalidate_tooltip') }}" />
         </form>
         <form action="{{ route('admin.catalog.item-tags.destroy', $itemTag->id) }}" method="POST">
             @csrf
             @method('DELETE')
-            <x-ui.buttons.delete class="deleteItemTagButton"
+            <x-ui.buttons.admin.delete class="deleteItemTagButton"
                 data-confirm-message="{{ __('view.admin.catalog.item_tags.show.delete_confirm') }}" />
         </form>
     </x-slot>
@@ -70,14 +70,14 @@
                                     <strong>{{ __('view.admin.catalog.item_tags.show.updated_at') }}: </strong>
                                     <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($itemTag->tag->updated_at)) }}</p>
                                     <div class="d-flex">
-                                        <x-ui.buttons.view href="{{ route('admin.taxonomy.tags.show', $itemTag->tag->id) }}"
+                                        <x-ui.buttons.admin.view href="{{ route('admin.taxonomy.tags.show', $itemTag->tag->id) }}"
                                             class="me-1" />
-                                        <x-ui.buttons.edit href="{{ route('admin.taxonomy.tags.edit', $itemTag->tag->id) }}"
+                                        <x-ui.buttons.admin.edit href="{{ route('admin.taxonomy.tags.edit', $itemTag->tag->id) }}"
                                             class="me-1" />
                                         <form action="{{ route('admin.taxonomy.tags.destroy', $itemTag->tag->id) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <x-ui.buttons.delete class="deleteTagButton" />
+                                            <x-ui.buttons.admin.delete class="deleteTagButton" />
                                         </form>
                                     </div>
                                 </div>
@@ -125,14 +125,14 @@
                             <strong>{{ __('view.admin.catalog.items.show.updated_at') }}: </strong>
                             <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($itemTag->item->updated_at)) }}</p>
                             <div class="d-flex">
-                                <x-ui.buttons.view href="{{ route('admin.catalog.items.show', $itemTag->item->id) }}"
+                                <x-ui.buttons.admin.view href="{{ route('admin.catalog.items.show', $itemTag->item->id) }}"
                                     class="me-1" />
-                                <x-ui.buttons.edit href="{{ route('admin.catalog.items.edit', $itemTag->item->id) }}"
+                                <x-ui.buttons.admin.edit href="{{ route('admin.catalog.items.edit', $itemTag->item->id) }}"
                                     class="me-1" />
                                 <form action="{{ route('admin.catalog.items.destroy', $itemTag->item->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <x-ui.buttons.delete class="deleteItemButton"
+                                    <x-ui.buttons.admin.delete class="deleteItemButton"
                                         data-confirm-message="{{ __('view.admin.catalog.items.index.delete_confirm') }}" />
                                 </form>
                             </div>

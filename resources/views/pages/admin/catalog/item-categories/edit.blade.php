@@ -5,16 +5,12 @@
                 @method('PATCH')
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">
-                                {{ __('view.admin.catalog.item_categories.edit.name') }}
-                            </label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
-                                name="name" value="{{ $itemCategory->name }}">
-                            @error('name')
-                                <div class="invalid-feedback"> {{ $message }} </div>
-                            @enderror
-                        </div>
+                        <x-ui.inputs.admin.text
+                            name="name"
+                            id="name"
+                            :label="__('view.admin.catalog.item_categories.edit.name')"
+                            :value="$itemCategory->name"
+                        />
                         <div class="mb-3">
                             <x-ui.buttons.submit variant="warning" icon="bi bi-pencil-fill">
                                 {{ __('view.admin.catalog.item_categories.edit.submit') }}

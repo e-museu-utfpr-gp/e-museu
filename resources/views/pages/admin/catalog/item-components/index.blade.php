@@ -25,21 +25,21 @@
                                     <td>{{ date('d-m-Y H:i:s', strtotime($itemComponent->item_component_updated)) }}</td>
                                     <td>
                                         <div class="d-flex justify-content-center align-items-center">
-                                            <x-ui.buttons.view href="{{ route('admin.catalog.item-components.show', $itemComponent->id) }}"
+                                            <x-ui.buttons.admin.view href="{{ route('admin.catalog.item-components.show', $itemComponent->id) }}"
                                                 class="me-1" data-toggle="tooltip" data-placement="top"
                                                 title="{{ __('view.admin.catalog.components.index.view_tooltip') }}" />
                                             <form action="{{ route('admin.catalog.item-components.update', $itemComponent->id) }}"
                                                 method="POST">
                                                 @csrf
                                                 @method('PATCH')
-                                                <x-ui.buttons.validate-invalidate class="me-1" data-toggle="tooltip"
+                                                <x-ui.buttons.admin.validate-invalidate class="me-1" data-toggle="tooltip"
                                                     data-placement="top" title="{{ __('view.admin.catalog.components.index.validate_tooltip') }}" />
                                             </form>
                                             <form action="{{ route('admin.catalog.item-components.destroy', $itemComponent->id) }}"
                                                 method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <x-ui.buttons.delete class="deleteComponentButton"
+                                                <x-ui.buttons.admin.delete class="deleteComponentButton"
                                                     data-toggle="tooltip" data-placement="top" title="{{ __('view.admin.catalog.components.index.delete_tooltip') }}"
                                                     data-confirm-message="{{ __('view.admin.catalog.components.index.delete_confirm') }}" />
                                             </form>

@@ -62,6 +62,8 @@ class AdminItemComponentController extends AdminBaseController
     {
         $itemComponentService->deleteItemComponent($itemComponent);
 
-        return redirect()->route('admin.catalog.item-components.index')->with('success', __('app.catalog.component.deleted'));
+        return redirect()
+            ->route('admin.catalog.item-components.index')
+            ->with('success', __('app.catalog.component.deleted'));
     }
 }

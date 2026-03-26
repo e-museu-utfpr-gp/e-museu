@@ -5,72 +5,63 @@
                 @method('PATCH')
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="info" class="form-label">{{ __('view.admin.catalog.extras.edit.info') }}</label>
-                            <textarea type="text" class="form-control @error('info') is-invalid @enderror" id="info" name="info"
-                                rows="5">{{ $extra->info }}</textarea>
-                            @error('info')
-                                <div class="invalid-feedback"> {{ $message }} </div>
-                            @enderror
-                        </div>
+                        <x-ui.inputs.admin.textarea
+                            name="info"
+                            id="info"
+                            :rows="5"
+                            :label="__('view.admin.catalog.extras.edit.info')"
+                            :value="$extra->info"
+                        />
                         <div class="row" data-section-item-selector 
                              data-section-selector="#category_id" 
                              data-item-selector="#item_id" 
                              data-original-item-id="{{ $extra->item->id }}"
                              data-get-items-url="{{ route('catalog.items.byCategory') }}">
                             <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="category_id" class="form-label">{{ __('view.admin.catalog.extras.edit.item_category') }}</label>
-                                    <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
-                                        name="category_id">
-                                        @foreach ($itemCategories as $itemCategory)
-                                            <option value="{{ $itemCategory->id }}"
-                                                {{ $extra->item->itemCategory?->id == $itemCategory->id ? 'selected' : '' }}>
-                                                {{ $itemCategory->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('category_id')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
+                                <x-ui.inputs.admin.select
+                                    name="category_id"
+                                    id="category_id"
+                                    :label="__('view.admin.catalog.extras.edit.item_category')"
+                                    required
+                                >
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            @selected(old('category_id', $extra->item->itemCategory?->id) == $itemCategory->id)>
+                                            {{ $itemCategory->name }}</option>
+                                    @endforeach
+                                </x-ui.inputs.admin.select>
                             </div>
                             <div class="col-md-8">
-                                <div class="mb-3">
-                                    <label for="item_id" class="form-label">{{ __('view.admin.catalog.extras.edit.item') }}</label>
-                                    <select class="form-select @error('item_id') is-invalid @enderror" id="item_id"
-                                        name="item_id">
-                                    </select>
-                                    @error('item_id')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
+                                <x-ui.inputs.admin.select
+                                    name="item_id"
+                                    id="item_id"
+                                    :label="__('view.admin.catalog.extras.edit.item')"
+                                    required
+                                >
+                                </x-ui.inputs.admin.select>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="collaborator_id" class="form-label">{{ __('view.admin.catalog.extras.edit.collaborator') }}</label>
-                            <select class="form-select @error('collaborator_id') is-invalid @enderror" id="collaborator_id"
-                                name="collaborator_id">
-                                @foreach ($collaborators as $collaborator)
-                                    <option value="{{ $collaborator->id }}"
-                                        {{ $extra->collaborator->id == $collaborator->id ? 'selected' : '' }}>
-                                        {{ $collaborator->contact }}</option>
-                                @endforeach
-                            </select>
-                            @error('collaborator_id')
-                                <div class="invalid-feedback"> {{ $message }} </div>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label for="validation" class="form-label">{{ __('view.admin.catalog.extras.edit.validation') }}</label>
-                            <select class="form-select @error('validation') is-invalid @enderror" id="validation"
-                                name="validation">
-                                <option value="0" {{ $extra->validation == 0 ? 'selected' : '' }}>{{ __('view.admin.catalog.extras.edit.no') }}</option>
-                                <option value="1" {{ $extra->validation == 1 ? 'selected' : '' }}>{{ __('view.admin.catalog.extras.edit.yes') }}</option>
-                            </select>
-                            @error('validation')
-                                <div class="invalid-feedback"> {{ $message }} </div>
-                            @enderror
-                        </div>
+                        <x-ui.inputs.admin.select
+                            name="collaborator_id"
+                            id="collaborator_id"
+                            :label="__('view.admin.catalog.extras.edit.collaborator')"
+                            required
+                        >
+                            @foreach ($collaborators as $collaborator)
+                                <option value="{{ $collaborator->id }}"
+                                    @selected(old('collaborator_id', $extra->collaborator->id) == $collaborator->id)>
+                                    {{ $collaborator->contact }}</option>
+                            @endforeach
+                        </x-ui.inputs.admin.select>
+                        <x-ui.inputs.admin.select
+                            name="validation"
+                            id="validation"
+                            :label="__('view.admin.catalog.extras.edit.validation')"
+                            required
+                        >
+                            <option value="0" @selected(old('validation', $extra->validation) == 0)>{{ __('view.admin.catalog.extras.edit.no') }}</option>
+                            <option value="1" @selected(old('validation', $extra->validation) == 1)>{{ __('view.admin.catalog.extras.edit.yes') }}</option>
+                        </x-ui.inputs.admin.select>
                         <div class="mb-3">
                             <x-ui.buttons.submit variant="warning" icon="bi bi-pencil-fill">
                                 {{ __('view.admin.catalog.extras.edit.submit') }}
@@ -79,5 +70,9 @@
                     </div>
                 </div>
             </form>
+            <x-admin.dependent-select-fetch
+                containerSelector='[data-section-item-selector][data-item-selector="#item_id"]'
+                :oldSelectedId="old('item_id', '')"
+            />
         <x-release-lock-on-leave type="extras" :id="$extra->id" />
 </x-layouts.admin>

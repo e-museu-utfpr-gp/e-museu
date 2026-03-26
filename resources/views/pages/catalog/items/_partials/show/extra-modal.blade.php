@@ -11,33 +11,25 @@
                 <form action="{{ route('catalog.extras.store') }}" method="POST" id="addExtraForm">
                     @csrf
                     <input name="item_id" value="{{ $item->id }}" hidden>
-                    <label for="info">
-                        <h5>
-                            {{ __('view.catalog.items.show_extra.label') }}
-                            <x-ui.info-popover :content="__('view.catalog.items.show_extra.info_help')" />
-                        </h5>
-                    </label>
-                    <div class="input-div rounded-top">
-                        <textarea class="form-control me-2 input-form @error('info') is-invalid @enderror" type="text" name="info"
-                            id="info" placeholder="" rows="15" required></textarea>
-                    </div>
+                    <x-ui.inputs.textarea
+                        name="info"
+                        id="info"
+                        :label="__('view.catalog.items.show_extra.label')"
+                        :help="__('view.catalog.items.show_extra.info_help')"
+                        :rows="15"
+                        required
+                    />
                     <div>
-                        <label for="e-mail">
-                            <h5>
-                                {{ __('view.catalog.items.show_extra.email_label') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.show_extra.email_help')" />
-                            </h5>
-                        </label>
-                            <div class="input-div">
-                            <input class="form-control me-2 input-form  @error('contact') is-invalid @enderror"
-                                type="email" name="contact" id="contact" placeholder="" value="{{ old('contact') }}"
-                                onchange="checkContact()" onkeyup="checkContact()" required>
-                            @error('email')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
+                        <x-ui.inputs.text
+                            name="contact"
+                            id="contact"
+                            type="email"
+                            :label="__('view.catalog.items.show_extra.email_label')"
+                            :help="__('view.catalog.items.show_extra.email_help')"
+                            required
+                            onchange="checkContact()"
+                            onkeyup="checkContact()"
+                        />
                         <div class="warning-div px-1 mx-5 mb-3" id="contact-warning" hidden>
                             <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>
                             {{ __('view.catalog.items.show_extra.contact_warning') }}
@@ -47,24 +39,13 @@
                             {{ __('view.catalog.items.show_extra.contact_success') }}
                         </div>
                     </div>
-                    <div>
-                        <label for="full_name">
-                            <h5>
-                                {{ __('view.catalog.items.show_extra.full_name_label') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.show_extra.full_name_help')" />
-                            </h5>
-                        </label>
-                        <div class="input-div">
-                            <input class="form-control me-2 input-form  @error('full_name') is-invalid @enderror"
-                                type="text" name="full_name" id="full_name" placeholder=""
-                                value="{{ old('full_name') }}" required>
-                            @error('full_name')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-                    </div>
+                    <x-ui.inputs.text
+                        name="full_name"
+                        id="full_name"
+                        :label="__('view.catalog.items.show_extra.full_name_label')"
+                        :help="__('view.catalog.items.show_extra.full_name_help')"
+                        required
+                    />
                     <div class="col d-flex align-items-center justify-content-end">
                         <x-ui.buttons.submit variant="plain" class="button nav-link py-2 px-3 fw-bold" id="save-extra-button">
                             {{ __('view.catalog.items.show_extra.submit') }}

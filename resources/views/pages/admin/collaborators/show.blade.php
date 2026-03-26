@@ -1,11 +1,11 @@
 <x-layouts.admin :title="__('view.admin.collaborator.collaborators.show.title', ['id' => $collaborator->id])"
     :heading="__('view.admin.collaborator.collaborators.show.heading', ['id' => $collaborator->id, 'name' => $collaborator->full_name])">
     <x-slot name="pageHeaderActions">
-        <x-ui.buttons.edit href="{{ route('admin.collaborators.edit', $collaborator->id) }}" class="me-1" />
+        <x-ui.buttons.admin.edit href="{{ route('admin.collaborators.edit', $collaborator->id) }}" class="me-1" />
         <form action="{{ route('admin.collaborators.destroy', $collaborator->id) }}" method="POST">
             @csrf
             @method('DELETE')
-            <x-ui.buttons.delete class="deleteCollaboratorButton" />
+            <x-ui.buttons.admin.delete class="deleteCollaboratorButton" />
         </form>
     </x-slot>
         <div class="row">
@@ -124,14 +124,14 @@
                                     <strong>Atualizado em: </strong>
                                     <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($item->updated_at)) }}</p>
                                     <div class="d-flex">
-                                        <x-ui.buttons.view href="{{ route('admin.catalog.items.show', $item->id) }}"
+                                        <x-ui.buttons.admin.view href="{{ route('admin.catalog.items.show', $item->id) }}"
                                             class="me-1" />
-                                        <x-ui.buttons.edit href="{{ route('admin.catalog.items.edit', $item->id) }}"
+                                        <x-ui.buttons.admin.edit href="{{ route('admin.catalog.items.edit', $item->id) }}"
                                             class="me-1" />
                                         <form action="{{ route('admin.catalog.items.destroy', $item->id) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <x-ui.buttons.delete class="deleteItemButton"
+                                            <x-ui.buttons.admin.delete class="deleteItemButton"
                                                 data-confirm-message="{{ __('view.admin.catalog.items.index.delete_confirm') }}" />
                                         </form>
                                     </div>

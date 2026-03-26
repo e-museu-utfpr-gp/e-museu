@@ -6,15 +6,23 @@
             <div class="col-6">
                 <form action="{{ route('login') }}" method="POST">
                     @csrf
+                    <x-ui.inputs.admin.text
+                        name="username"
+                        id="username"
+                        :label="__('view.admin.auth.login.username_label')"
+                        required
+                        autofocus
+                    />
+                    <x-ui.inputs.admin.password
+                        name="password"
+                        id="password"
+                        autocomplete="current-password"
+                        :label="__('view.admin.auth.login.password_label')"
+                        required
+                    />
                     <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">{{ __('view.admin.auth.login.username_label') }}</label>
-                        <input class="form-control" id="username" type="text" name="username" required autofocus>
+                        <x-ui.buttons.submit variant="primary">{{ __('view.admin.auth.login.submit') }}</x-ui.buttons.submit>
                     </div>
-                    <div class="mb-3">
-                        <label for="exampleInputPassword1" class="form-label">{{ __('view.admin.auth.login.password_label') }}</label>
-                        <input class="form-control" id="password" type="password" name="password" required>
-                    </div>
-                    <x-ui.buttons.submit variant="primary">{{ __('view.admin.auth.login.submit') }}</x-ui.buttons.submit>
                 </form>
             </div>
         </div>

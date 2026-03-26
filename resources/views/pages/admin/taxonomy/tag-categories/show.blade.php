@@ -1,12 +1,12 @@
 <x-layouts.admin :title="__('view.admin.taxonomy.tag_categories.show.title', ['id' => $tagCategory->id])"
     :heading="__('view.admin.taxonomy.tag_categories.show.heading', ['id' => $tagCategory->id, 'name' => $tagCategory->name])">
     <x-slot name="pageHeaderActions">
-        <x-ui.buttons.edit href="{{ route('admin.taxonomy.tag-categories.edit', $tagCategory->id) }}"
+        <x-ui.buttons.admin.edit href="{{ route('admin.taxonomy.tag-categories.edit', $tagCategory->id) }}"
             class="me-1" />
         <form action="{{ route('admin.taxonomy.tag-categories.destroy', $tagCategory->id) }}" method="POST">
             @csrf
             @method('DELETE')
-            <x-ui.buttons.delete class="deleteCategoryButton"
+            <x-ui.buttons.admin.delete class="deleteCategoryButton"
                 data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}" />
         </form>
     </x-slot>

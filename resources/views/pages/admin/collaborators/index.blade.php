@@ -27,15 +27,15 @@
                                 <td>{{ date('d-m-Y H:i:s', strtotime($collaborator->updated_at)) }}</td>
                                 <td>
                                     <div class="d-flex justify-content-center align-items-center">
-                                        <x-ui.buttons.view href="{{ route('admin.collaborators.show', $collaborator->id) }}"
+                                        <x-ui.buttons.admin.view href="{{ route('admin.collaborators.show', $collaborator->id) }}"
                                             class="me-1" />
-                                        <x-ui.buttons.edit href="{{ route('admin.collaborators.edit', $collaborator->id) }}"
+                                        <x-ui.buttons.admin.edit href="{{ route('admin.collaborators.edit', $collaborator->id) }}"
                                             class="me-1" />
                                         <form action="{{ route('admin.collaborators.destroy', $collaborator->id) }}"
                                             method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <x-ui.buttons.delete class="deleteCollaboratorButton" />
+                                            <x-ui.buttons.admin.delete class="deleteCollaboratorButton" />
                                         </form>
                                     </div>
                                 </td>

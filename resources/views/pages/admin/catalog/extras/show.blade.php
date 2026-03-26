@@ -1,11 +1,11 @@
 <x-layouts.admin :title="__('view.admin.catalog.extras.show.title') . ' ' . $extra->
     id" :heading="__('view.admin.catalog.extras.show.heading', ['id' => $extra->id])">
     <x-slot name="pageHeaderActions">
-        <x-ui.buttons.edit href="{{ route('admin.catalog.extras.edit', $extra->id) }}" class="me-1" />
+        <x-ui.buttons.admin.edit href="{{ route('admin.catalog.extras.edit', $extra->id) }}" class="me-1" />
         <form action="{{ route('admin.catalog.extras.destroy', $extra->id) }}" method="POST">
             @csrf
             @method('DELETE')
-            <x-ui.buttons.delete class="deleteExtraButton"
+            <x-ui.buttons.admin.delete class="deleteExtraButton"
                 data-confirm-message="{{ __('view.admin.catalog.extras.show.delete_confirm') }}" />
         </form>
     </x-slot>
@@ -73,15 +73,15 @@
                                     <strong>{{ __('view.admin.catalog.extras.show.updated_at') }}: </strong>
                                     <p class="ms-3">{{ date('d-m-Y H:i:s', strtotime($extra->collaborator->updated_at)) }}</p>
                                     <div class="d-flex">
-                                        <x-ui.buttons.view href="{{ route('admin.collaborators.show', $extra->collaborator->id) }}"
+                                        <x-ui.buttons.admin.view href="{{ route('admin.collaborators.show', $extra->collaborator->id) }}"
                                             class="me-1" />
-                                        <x-ui.buttons.edit href="{{ route('admin.collaborators.edit', $extra->collaborator->id) }}"
+                                        <x-ui.buttons.admin.edit href="{{ route('admin.collaborators.edit', $extra->collaborator->id) }}"
                                             class="me-1" />
                                         <form action="{{ route('admin.collaborators.destroy', $extra->collaborator->id) }}"
                                             method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <x-ui.buttons.delete class="deleteCollaboratorButton" />
+                                            <x-ui.buttons.admin.delete class="deleteCollaboratorButton" />
                                         </form>
                                     </div>
                                 </div>
@@ -130,14 +130,14 @@
                             <strong>{{ __('view.admin.catalog.items.show.updated_at') }}: </strong>
                             <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($extra->item->updated_at)) }}</p>
                             <div class="d-flex">
-                                <x-ui.buttons.view href="{{ route('admin.catalog.items.show', $extra->item->id) }}"
+                                <x-ui.buttons.admin.view href="{{ route('admin.catalog.items.show', $extra->item->id) }}"
                                     class="me-1" />
-                                <x-ui.buttons.edit href="{{ route('admin.catalog.items.edit', $extra->item->id) }}"
+                                <x-ui.buttons.admin.edit href="{{ route('admin.catalog.items.edit', $extra->item->id) }}"
                                     class="me-1" />
                                 <form action="{{ route('admin.catalog.items.destroy', $extra->item->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <x-ui.buttons.delete class="deleteItemButton"
+                                    <x-ui.buttons.admin.delete class="deleteItemButton"
                                         data-confirm-message="{{ __('view.admin.catalog.items.show.delete_confirm') }}" />
                                 </form>
                             </div>

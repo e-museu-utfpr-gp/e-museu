@@ -4,58 +4,41 @@
             @csrf
             <div class="row">
                 <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="full_name" class="form-label">
-                            {{ __('view.admin.collaborator.collaborators.create.full_name') }}
-                        </label>
-                        <input type="text" class="form-control @error('full_name') is-invalid @enderror" id="full_name"
-                            name="full_name" value="{{ old('full_name') }}">
-                        @error('full_name')
-                            <div class="invalid-feedback"> {{ $message }} </div>
-                        @enderror
-                    </div>
-                    <div class="mb-3">
-                        <label for="contact" class="form-label">
-                            {{ __('view.admin.collaborator.collaborators.create.contact') }}
-                        </label>
-                        <input type="email" class="form-control @error('contact') is-invalid @enderror" id="contact"
-                            name="contact" value="{{ old('contact') }}">
-                        @error('contact')
-                            <div class="invalid-feedback"> {{ $message }} </div>
-                        @enderror
-                    </div>
-                    <div class="mb-3">
-                        <label for="role" class="form-label">
-                            {{ __('view.admin.collaborator.collaborators.create.role') }}
-                        </label>
-                        <select class="form-select @error('role') is-invalid @enderror" id="role" name="role">
-                            <option value="{{ \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value }}" {{ old('role', \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value) === \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value ? 'selected' : '' }}>
-                                {{ __('app.collaborator.role.external') }}
-                            </option>
-                            <option value="{{ \App\Enums\Collaborator\CollaboratorRole::INTERNAL->value }}" {{ old('role') === \App\Enums\Collaborator\CollaboratorRole::INTERNAL->value ? 'selected' : '' }}>
-                                {{ __('app.collaborator.role.internal') }}
-                            </option>
-                        </select>
-                        @error('role')
-                            <div class="invalid-feedback"> {{ $message }} </div>
-                        @enderror
-                    </div>
-                    <div class="mb-3">
-                        <label for="blocked" class="form-label">
-                            {{ __('view.admin.collaborator.collaborators.create.blocked') }}
-                        </label>
-                        <select class="form-select @error('blocked') is-invalid @enderror" id="blocked" name="blocked">
-                            <option value="0" {{ old('blocked') == 0 ? 'selected' : '' }}>
-                                {{ __('view.admin.collaborator.collaborators.create.no') }}
-                            </option>
-                            <option value="1" {{ old('blocked') == 1 ? 'selected' : '' }}>
-                                {{ __('view.admin.collaborator.collaborators.create.yes') }}
-                            </option>
-                        </select>
-                        @error('blocked')
-                            <div class="invalid-feedback"> {{ $message }} </div>
-                        @enderror
-                    </div>
+                    <x-ui.inputs.admin.text
+                        name="full_name"
+                        id="full_name"
+                        :label="__('view.admin.collaborator.collaborators.create.full_name')"
+                    />
+                    <x-ui.inputs.admin.text
+                        name="contact"
+                        id="contact"
+                        type="email"
+                        :label="__('view.admin.collaborator.collaborators.create.contact')"
+                    />
+                    <x-ui.inputs.admin.select
+                        name="role"
+                        id="role"
+                        :label="__('view.admin.collaborator.collaborators.create.role')"
+                    >
+                        <option value="{{ \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value }}" @selected(old('role', \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value) === \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value)>
+                            {{ __('app.collaborator.role.external') }}
+                        </option>
+                        <option value="{{ \App\Enums\Collaborator\CollaboratorRole::INTERNAL->value }}" @selected(old('role') === \App\Enums\Collaborator\CollaboratorRole::INTERNAL->value)>
+                            {{ __('app.collaborator.role.internal') }}
+                        </option>
+                    </x-ui.inputs.admin.select>
+                    <x-ui.inputs.admin.select
+                        name="blocked"
+                        id="blocked"
+                        :label="__('view.admin.collaborator.collaborators.create.blocked')"
+                    >
+                        <option value="0" @selected(old('blocked') == 0)>
+                            {{ __('view.admin.collaborator.collaborators.create.no') }}
+                        </option>
+                        <option value="1" @selected(old('blocked') == 1)>
+                            {{ __('view.admin.collaborator.collaborators.create.yes') }}
+                        </option>
+                    </x-ui.inputs.admin.select>
                     <div class="mb-3">
                         <x-ui.buttons.submit variant="success" icon="bi bi-plus-circle">
                             {{ __('view.admin.collaborator.collaborators.create.submit') }}

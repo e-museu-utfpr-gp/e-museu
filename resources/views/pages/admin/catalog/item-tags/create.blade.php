@@ -10,73 +10,62 @@
                              data-original-item-id="{{ request()->query('id') }}"
                              data-get-items-url="{{ route('catalog.items.byCategory') }}">
                             <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="item_category" class="form-label">{{ __('view.admin.catalog.item_tags.create.item_category') }}</label>
-                                    <select class="form-select @error('item_category') is-invalid @enderror" id="item_category"
-                                        name="item_category">
-                                        @foreach ($itemCategories as $itemCategory)
-                                            <option value="{{ $itemCategory->id }}"
-                                                {{ old('item_category', request()->query('item_category')) == $itemCategory->id ? 'selected' : '' }}>
-                                                {{ $itemCategory->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('item_category')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
+                                <x-ui.inputs.admin.select
+                                    name="item_category"
+                                    id="item_category"
+                                    :label="__('view.admin.catalog.item_tags.create.item_category')"
+                                    required
+                                >
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}"
+                                            @selected(old('item_category', request()->query('item_category')) == $itemCategory->id)>
+                                            {{ $itemCategory->name }}</option>
+                                    @endforeach
+                                </x-ui.inputs.admin.select>
                             </div>
                             <div class="col-md-8">
-                                <div class="mb-3">
-                                    <label for="item_id" class="form-label">{{ __('view.admin.catalog.item_tags.create.item') }}</label>
-                                    <select class="form-select @error('item_id') is-invalid @enderror" id="item_id"
-                                        name="item_id">
-                                    </select>
-                                    @error('item_id')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
+                                <x-ui.inputs.admin.select
+                                    name="item_id"
+                                    id="item_id"
+                                    :label="__('view.admin.catalog.item_tags.create.item')"
+                                    required
+                                >
+                                </x-ui.inputs.admin.select>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="tag_category_id" class="form-label">{{ __('view.admin.catalog.item_tags.create.category') }}</label>
-                                    <select class="form-select @error('category_id') is-invalid @enderror" id="tag_category_id"
-                                        name="category_id">
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}"
-                                                {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                                {{ $category->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('category_id')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
+                                <x-ui.inputs.admin.select
+                                    name="category_id"
+                                    id="tag_category_id"
+                                    :label="__('view.admin.catalog.item_tags.create.category')"
+                                    required
+                                >
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
+                                            {{ $category->name }}</option>
+                                    @endforeach
+                                </x-ui.inputs.admin.select>
                             </div>
                             <div class="col-md-8">
-                                <div class="mb-3">
-                                    <label for="tag_id" class="form-label">{{ __('view.admin.catalog.item_tags.create.tag') }}</label>
-                                    <select class="form-select @error('tag_id') is-invalid @enderror" id="tag_id"
-                                        name="tag_id">
-                                    </select>
-                                    @error('tag_id')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
+                                <x-ui.inputs.admin.select
+                                    name="tag_id"
+                                    id="tag_id"
+                                    :label="__('view.admin.catalog.item_tags.create.tag')"
+                                    required
+                                >
+                                </x-ui.inputs.admin.select>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="validation" class="form-label">{{ __('view.admin.catalog.item_tags.create.validation') }}</label>
-                            <select class="form-select @error('validation') is-invalid @enderror" id="validation"
-                                name="validation">
-                                <option value="0" {{ old('validation') == 0 ? 'selected' : '' }}>{{ __('view.admin.catalog.item_tags.create.no') }}</option>
-                                <option value="1" {{ old('validation') == 1 ? 'selected' : '' }}>{{ __('view.admin.catalog.item_tags.create.yes') }}</option>
-                            </select>
-                            @error('validation')
-                                <div class="invalid-feedback"> {{ $message }} </div>
-                            @enderror
-                        </div>
+                        <x-ui.inputs.admin.select
+                            name="validation"
+                            id="validation"
+                            :label="__('view.admin.catalog.item_tags.create.validation')"
+                            required
+                        >
+                            <option value="0" @selected(old('validation') == 0)>{{ __('view.admin.catalog.item_tags.create.no') }}</option>
+                            <option value="1" @selected(old('validation') == 1)>{{ __('view.admin.catalog.item_tags.create.yes') }}</option>
+                        </x-ui.inputs.admin.select>
                         <div class="mb-3">
                             <x-ui.buttons.submit variant="success" icon="bi bi-plus-circle">
                                 {{ __('view.admin.catalog.item_tags.create.submit') }}

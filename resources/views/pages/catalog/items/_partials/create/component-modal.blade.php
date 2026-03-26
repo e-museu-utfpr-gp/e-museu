@@ -9,29 +9,32 @@
                 <form method="POST" id="addComponentForm">
                     @csrf
                     <input type="text" name="component_id" id="component-id" hidden>
-                    <label for="component-category">
-                        <h5>{{ __('view.catalog.items.create_modals.component.category_label') }}
-                            <x-ui.info-popover :content="__('view.catalog.items.create_modals.component.category_help')" />
-                        </h5>
-                    </label>
-                    <div class="input-div rounded-top">
-                        <select class="form-select me-2 input-form" name="component-category" id="component-category"
-                            onchange="checkIfComponentCategoryIsEmpty()">
-                            <option selected="selected" value="">-</option>
-                            @foreach ($itemCategories as $itemCategory)
-                                <option value="{{ $itemCategory->id }}">{{ $itemCategory->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <label for="name">
-                        <h5>{{ __('view.catalog.items.create_modals.component.name_label') }}
-                            <x-ui.info-popover :content="__('view.catalog.items.create_modals.component.name_help')" />
-                        </h5>
-                    </label>
-                    <div class="input-div rounded-top">
-                        <input class="form-control typeahead me-2 input-form" type="text" name="component-name"
-                            id="component-name" onchange="checkComponentName()" oninput="checkComponentName()" placeholder="" disabled>
-                    </div>
+                    <x-ui.inputs.select
+                        name="component-category"
+                        id="component-category"
+                        :label="__('view.catalog.items.create_modals.component.category_label')"
+                        :help="__('view.catalog.items.create_modals.component.category_help')"
+                        :roundedTop="true"
+                        :showErrors="false"
+                        onchange="checkIfComponentCategoryIsEmpty()"
+                    >
+                        <option value="" selected>-</option>
+                        @foreach ($itemCategories as $itemCategory)
+                            <option value="{{ $itemCategory->id }}">{{ $itemCategory->name }}</option>
+                        @endforeach
+                    </x-ui.inputs.select>
+                    <x-ui.inputs.select
+                        name="component-name"
+                        id="component-name"
+                        :label="__('view.catalog.items.create_modals.component.name_label')"
+                        :help="__('view.catalog.items.create_modals.component.name_help')"
+                        :roundedTop="true"
+                        :showErrors="false"
+                        onchange="checkComponentName()"
+                        disabled
+                    >
+                        <option value="" selected>-</option>
+                    </x-ui.inputs.select>
                     <div class="error-div px-1 mx-5 mb-3" id="component-name-warning" hidden>
                         <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create_modals.component.not_found') }}
                     </div>
@@ -57,41 +60,87 @@
 </div>
 
 <script type="text/javascript">
-    let componentNameAutoCompletePath = "{{ route('catalog.items.component-autocomplete') }}";
-    let componentCheckName = "{{ route('catalog.items.check-component-name') }}";
+    let componentGetByCategoryRoute = "{{ route('catalog.items.byCategory') }}";
     let componentCount = 0;
     let componentIds = 1;
+
+    function getComponentI18n(path) {
+        try {
+            var parts = path.split('.');
+            var obj = window.createModalsI18n;
+            for (var i = 0; i < parts.length; i++) obj = obj[parts[i]];
+            return obj || '';
+        } catch (e) {
+            return '';
+        }
+    }
+
+    async function loadComponentsByCategory(categoryId) {
+        try {
+            var urlObj = new URL(componentGetByCategoryRoute, window.location.origin);
+            urlObj.searchParams.set('item_category', categoryId);
+            var res = await fetch(urlObj.toString(), { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) throw new Error('Request failed: ' + res.status);
+            var data = await res.json();
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    }
+
+    async function checkIfComponentCategoryIsEmpty() {
+        var categoryId = $('#component-category').find(":selected").val();
+        var select = $('#component-name');
+
+        select.empty();
+        select.append('<option value="" selected>-</option>');
+        $('#component-name-warning').prop("hidden", true);
+        $('#save-component-button').prop("disabled", true);
+
+        if (!categoryId) {
+            select.prop('disabled', true);
+            return;
+        }
+
+        select.prop('disabled', false);
+
+        var items = await loadComponentsByCategory(categoryId);
+        if (items === null) {
+            $('#component-name-warning').prop("hidden", false);
+            select.prop('disabled', true);
+            return;
+        }
+
+        if (items.length === 0) {
+            $('#component-name-warning').prop("hidden", false);
+            return;
+        }
+
+        items.forEach(function (it) {
+            select.append('<option value="' + it.id + '">' + it.name + '</option>');
+        });
+    }
 
     function saveComponent() {
         let componentCategoryText = $('#component-category').find(":selected").text();
         let componentCategoryVal = $('#component-category').find(":selected").val();
-        let componentName = $('#component-name').val().trim();
+        let componentName = $('#component-name').find(":selected").text().trim();
+        let componentSelectedId = $('#component-name').find(":selected").val();
 
         if (componentCategoryVal == '') {
-            alert("O campo categoria precisa de opção válida!");
+            alert(getComponentI18n('component.alert_category_required'));
             return;
         }
 
-        if (componentName == '') {
-            alert("O campo nome do componente precisa ser preenchida!");
+        if (componentSelectedId == '' || componentName == '-' || componentName == '') {
+            alert(getComponentI18n('component.alert_name_required'));
             return;
         }
 
-        $.ajax({
-            type: "GET",
-            url: componentCheckName,
-            data: { category: componentCategoryVal, name: componentName },
-            success: function(count) {
-                if (count > 0) {
-                    $('#component-name-warning').prop("hidden", true);
-                    addComponentToList(componentCategoryText, componentCategoryVal, componentName);
-                    $('#addComponentModal').modal('hide');
-                } else {
-                    $('#component-name-warning').prop("hidden", false);
-                    $('#save-component-button').prop("disabled", true);
-                }
-            }
-        });
+        $('#component-name-warning').prop("hidden", true);
+        addComponentToList(componentCategoryText, componentCategoryVal, componentName);
+        $('#addComponentModal').modal('hide');
     }
 
     function addComponentToList(componentCategoryText, componentCategoryVal, componentName) {
@@ -118,10 +167,11 @@
 
         $('#component-id').attr('value', componentId);
         $('#component-category').val(inputs[0]);
-        $('#component-name').val(inputs[1]);
-
-        checkIfComponentCategoryIsEmpty();
-        checkComponentName();
+        checkIfComponentCategoryIsEmpty().then(function () {
+            // inputs[1] is the stored component name. Try to preselect by label.
+            $('#component-name option').filter(function () { return $(this).text() === inputs[1]; }).prop('selected', true);
+            checkComponentName();
+        });
 
         $('#save-component-button').prop("hidden", true);
         $('#update-component-button').prop("hidden", false);
@@ -130,16 +180,17 @@
     function updateComponent() {
         let componentCategoryText = $('#component-category').find(":selected").text();
         let componentCategoryVal = $('#component-category').find(":selected").val();
-        let componentName = $('#component-name').val();
+        let componentName = $('#component-name').find(":selected").text().trim();
+        let componentSelectedId = $('#component-name').find(":selected").val();
         let componentId = $('#component-id').val();
 
         if (componentCategoryVal == '') {
-            alert("O campo categoria precisa de opção válida!");
+            alert(getComponentI18n('component.alert_category_required'));
             return;
         }
 
-        if (componentName == '') {
-            alert("O campo nome de uma etiqueta precisa ser preenchida!");
+        if (componentSelectedId == '' || componentName == '-' || componentName == '') {
+            alert(getComponentI18n('component.alert_name_required'));
             return;
         }
 
@@ -165,18 +216,6 @@
         sessionStorage.setItem("componentCount", componentCount);
 
         checkComponents();
-    }
-
-    function checkIfComponentCategoryIsEmpty() {
-        if ($('#component-category').find(":selected").val() == '') {
-            $('#component-name').prop('disabled', true);
-            $('#component-description').prop('disabled', true);
-            $('#save-component-button').prop("disabled", true);
-        } else {
-            $('#component-name').prop('disabled', false);
-            $('#component-description').prop('disabled', false);
-            checkComponentName();
-        }
     }
 
     function checkComponents() {
@@ -232,43 +271,21 @@
                         </div>`;
 
         $("#components").append(componentDiv);
-        $("#component-" + componentIds).append(componentCategoryInput, componentNameInput, componentCard);
+        $("#component-" + componentId).append(componentCategoryInput, componentNameInput, componentCard);
     }
 
     function checkComponentName() {
-        var name = $('#component-name').val();
-        if (!name || name.trim() === '') {
+        var selectedId = $('#component-name').find(":selected").val();
+        if (!selectedId) {
             $('#save-component-button').prop("disabled", true);
             return;
         }
         $('#save-component-button').prop("disabled", false);
     }
 
-    function initComponentAutocomplete() {
-        if (typeof $ === 'undefined' || typeof $.fn.modernTypeahead === 'undefined') {
-            setTimeout(initComponentAutocomplete, 100);
-            return;
-        }
-        
-        $('#component-name').modernTypeahead({
-            source: function(query, process) {
-                return $.get(componentNameAutoCompletePath, {
-                    query: query,
-                    category: $('#component-category').find(":selected").val()
-                }, function(data) {
-                    return process(data);
-                });
-            },
-            minLength: 1,
-            delay: 300
-        });
-    }
-    
-    initComponentAutocomplete();
-
     $('#addComponentModal').on('hidden.bs.modal', function() {
         $('#component-category').val('');
-        $('#component-name').val('');
+        $('#component-name').empty().append('<option value="" selected>-</option>');
 
         $('#save-component-button').prop("hidden", false);
         $('#update-component-button').prop("hidden", true);

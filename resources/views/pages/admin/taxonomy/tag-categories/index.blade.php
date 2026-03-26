@@ -17,15 +17,15 @@
                                 <td>{{ date('d-m-Y H:i:s', strtotime($tagCategory->updated_at)) }}</td>
                                 <td>
                                     <div class="d-flex justify-content-center align-items-center">
-                                        <x-ui.buttons.view href="{{ route('admin.taxonomy.tag-categories.show', $tagCategory->id) }}"
+                                        <x-ui.buttons.admin.view href="{{ route('admin.taxonomy.tag-categories.show', $tagCategory->id) }}"
                                             class="me-1" />
-                                        <x-ui.buttons.edit href="{{ route('admin.taxonomy.tag-categories.edit', $tagCategory->id) }}"
+                                        <x-ui.buttons.admin.edit href="{{ route('admin.taxonomy.tag-categories.edit', $tagCategory->id) }}"
                                             class="me-1" />
                                         <form action="{{ route('admin.taxonomy.tag-categories.destroy', $tagCategory->id) }}"
                                             method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <x-ui.buttons.delete class="deleteCategoryButton"
+                                            <x-ui.buttons.admin.delete class="deleteCategoryButton"
                                                 data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}" />
                                         </form>
                                     </div>

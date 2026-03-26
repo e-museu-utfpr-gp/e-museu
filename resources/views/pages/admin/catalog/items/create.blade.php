@@ -4,146 +4,94 @@
                 @csrf
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">{{ __('view.admin.catalog.items.create.name') }}</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
-                                name="name" value="{{ old('name') }}">
-                            @error('name')
-                                <div class="invalid-feedback"> {{ $message }} </div>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">{{ __('view.admin.catalog.items.create.description') }}</label>
-                            <textarea type="text" class="form-control @error('description') is-invalid @enderror" id="description"
-                                name="description" rows="5">{{ old('description') }}</textarea>
-                            @error('description')
-                                <div class="invalid-feedback"> {{ $message }} </div>
-                            @enderror
-                        </div>
-                        <div class="mb-3">
-                            <label for="detail" class="form-label">{{ __('view.admin.catalog.items.create.detail') }}</label>
-                            <textarea type="text" class="form-control @error('detail') is-invalid @enderror" id="detail" name="detail"
-                                rows="7">{{ old('detail') }}</textarea>
-                            @error('detail')
-                                <div class="invalid-feedback"> {{ $message }} </div>
-                            @enderror
-                        </div>
+                        <x-ui.inputs.admin.text
+                            name="name"
+                            id="name"
+                            :label="__('view.admin.catalog.items.create.name')"
+                        />
+                        <x-ui.inputs.admin.textarea
+                            name="description"
+                            id="description"
+                            :rows="5"
+                            :label="__('view.admin.catalog.items.create.description')"
+                        />
+                        <x-ui.inputs.admin.textarea
+                            name="detail"
+                            id="detail"
+                            :rows="7"
+                            :label="__('view.admin.catalog.items.create.detail')"
+                        />
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="category_id" class="form-label">{{ __('view.admin.catalog.items.create.item_category') }}</label>
-                                    <select class="form-select @error('category_id') is-invalid @enderror" id="category_id"
-                                        name="category_id">
-                                        <option selected="selected" value="">-</option>
-                                        @foreach ($itemCategories as $itemCategory)
-                                            <option value="{{ $itemCategory->id }}"
-                                                {{ old('category_id') == $itemCategory->id ? 'selected' : '' }}>{{ $itemCategory->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('category_id')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
-                                <div class="mb-3">
-                                    <label for="collaborator_id" class="form-label">{{ __('view.admin.catalog.items.create.collaborator') }}</label>
-                                    <select class="form-select @error('collaborator_id') is-invalid @enderror"
-                                        id="collaborator_id" name="collaborator_id">
-                                        <option selected="selected" value="">-</option>
-                                        @foreach ($collaborators as $collaborator)
-                                            <option value="{{ $collaborator->id }}"
-                                                {{ old('collaborator_id') == $collaborator->id ? 'selected' : '' }}>
-                                                {{ $collaborator->contact }} - {{ $collaborator->full_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('collaborator_id')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
-                                <div class="mb-3">
-                                    <label for="date" class="form-label">{{ __('view.admin.catalog.items.create.date') }}</label>
-                                    <input type="date" class="form-control @error('date') is-invalid @enderror"
-                                        id="date" name="date" value="{{ old('date') }}">
-                                    @error('date')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
+                                <x-ui.inputs.admin.select
+                                    name="category_id"
+                                    id="category_id"
+                                    :label="__('view.admin.catalog.items.create.item_category')"
+                                    required
+                                >
+                                    <option value="" @selected(old('category_id') === null || old('category_id') === '')>-</option>
+                                    @foreach ($itemCategories as $itemCategory)
+                                        <option value="{{ $itemCategory->id }}" @selected(old('category_id') == $itemCategory->id)>
+                                            {{ $itemCategory->name }}
+                                        </option>
+                                    @endforeach
+                                </x-ui.inputs.admin.select>
+                                <x-ui.inputs.admin.select
+                                    name="collaborator_id"
+                                    id="collaborator_id"
+                                    :label="__('view.admin.catalog.items.create.collaborator')"
+                                    required
+                                >
+                                    <option value="" @selected(old('collaborator_id') === null || old('collaborator_id') === '')>-</option>
+                                    @foreach ($collaborators as $collaborator)
+                                        <option value="{{ $collaborator->id }}" @selected(old('collaborator_id') == $collaborator->id)>
+                                            {{ $collaborator->contact }} - {{ $collaborator->full_name }}
+                                        </option>
+                                    @endforeach
+                                </x-ui.inputs.admin.select>
+                                <x-ui.inputs.admin.text
+                                    name="date"
+                                    id="date"
+                                    type="date"
+                                    :label="__('view.admin.catalog.items.create.date')"
+                                />
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">{{ __('view.admin.catalog.items.edit.cover_image') }}</label>
-                                    <div id="admin-create-cover-drop-zone" class="upload-drop-zone rounded-3 border-2 border-dashed d-flex flex-column align-items-center justify-content-center p-3 text-center" style="min-height: 120px; border-color: #c8e6c9; background: #f1f8e9; cursor: pointer;">
-                                        <input type="file" name="cover_image" id="admin_create_cover_image" accept="image/jpeg,image/png,image/jpg,image/webp" class="d-none">
-                                        <div id="admin-create-cover-placeholder">
-                                            <i class="bi bi-image text-secondary mb-2" style="font-size: 1.5rem;"></i>
-                                            <p class="text-muted small mb-0">{{ __('view.catalog.items.create.cover_drop_here') }}</p>
-                                        </div>
-                                        <div id="admin-create-cover-preview" class="d-none position-relative">
-                                            <img id="admin-create-cover-preview-img" src="" alt="" class="rounded shadow-sm" style="max-height: 100px; max-width: 100%; object-fit: contain;">
-                                            <span class="badge bg-primary position-absolute top-0 start-0 m-1">{{ __('app.catalog.item_image.cover') }}</span>
-                                            <x-ui.buttons.default type="button" variant="outline-secondary" size="sm"
-                                                class="position-absolute bottom-0 end-0 m-1" id="admin-create-cover-replace-btn">{{ __('view.catalog.items.create.replace_image') }}</x-ui.buttons.default>
-                                        </div>
-                                    </div>
-                                    <p id="admin-create-cover-required-msg" class="text-danger small mt-1 d-none">{{ __('view.catalog.items.create.cover_required') }}</p>
-                                    @error('cover_image')
-                                        <div class="invalid-feedback d-block"> {{ $message }} </div>
-                                    @enderror
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">{{ __('view.admin.catalog.items.edit.gallery_images') }}</label>
-                                    <div id="admin-create-gallery-drop-zone" class="upload-drop-zone rounded-3 border-2 border-dashed d-flex flex-column align-items-center justify-content-center p-3 text-center" style="min-height: 90px; border-color: #c8e6c9; background: #f1f8e9; cursor: pointer;">
-                                        <input type="file" name="gallery_images[]" id="admin_create_gallery_input" accept="image/jpeg,image/png,image/jpg,image/webp" class="d-none" multiple>
-                                        <i class="bi bi-images text-secondary mb-2" style="font-size: 1.25rem;"></i>
-                                        <p class="text-muted small mb-0">{{ __('view.catalog.items.create.gallery_drop_here') }}</p>
-                                    </div>
-                                    @error('gallery_images.*')
-                                        <div class="invalid-feedback d-block"> {{ $message }} </div>
-                                    @enderror
-                                </div>
-                                <div class="mb-3 rounded-3 p-3" style="background-color: #e8f5e9;">
-                                    <h6 class="mb-2">{{ __('view.catalog.items.create.images_preview_title') }}</h6>
-                                    <div id="admin-create-images-preview" class="d-flex flex-wrap gap-2 align-items-start">
-                                        <p class="text-muted small mb-0" id="admin-create-images-preview-empty">{{ __('view.catalog.items.create.images_preview_empty') }}</p>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="validation" class="form-label">{{ __('view.admin.catalog.items.create.validation') }}</label>
-                                    <select class="form-select @error('validation') is-invalid @enderror" id="validation"
-                                        name="validation">
-                                        <option value="0" {{ old('validation') == 0 ? 'selected' : '' }}>{{ __('view.admin.catalog.items.create.no') }}</option>
-                                        <option value="1" {{ old('validation') == 1 ? 'selected' : '' }}>{{ __('view.admin.catalog.items.create.yes') }}</option>
-                                    </select>
-                                    @error('validation')
-                                        <div class="invalid-feedback"> {{ $message }} </div>
-                                    @enderror
-                                </div>
+                            @include('pages.admin.catalog.items._partials.create.images-upload')
+                                <x-ui.inputs.admin.select
+                                    name="validation"
+                                    id="validation"
+                                    :label="__('view.admin.catalog.items.create.validation')"
+                                >
+                                    <option value="0" @selected(old('validation') == 0)>{{ __('view.admin.catalog.items.create.no') }}</option>
+                                    <option value="1" @selected(old('validation') == 1)>{{ __('view.admin.catalog.items.create.yes') }}</option>
+                                </x-ui.inputs.admin.select>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="history" class="form-label">{{ __('view.admin.catalog.items.create.history') }}</label>
-                            <textarea type="text" class="form-control @error('history') is-invalid @enderror" id="history" name="history"
-                                rows="46">{{ old('history') }}</textarea>
-                            @error('history')
-                                <div class="invalid-feedback"> {{ $message }} </div>
-                            @enderror
-                        </div>
+                        <x-ui.inputs.admin.textarea
+                            name="history"
+                            id="history"
+                            :rows="46"
+                            :label="__('view.admin.catalog.items.create.history')"
+                        />
                         <div class="mb-3">
                             <x-ui.buttons.submit variant="success" icon="bi bi-plus-circle">{{ __('view.admin.catalog.items.create.submit') }}</x-ui.buttons.submit>
                         </div>
                     </div>
                 </div>
             </form>
+        <x-ui.images.catalog.upload-assets />
         <script>
             (function() {
+                if (window.__catalogItemImagesUploadInitializedForms && window.__catalogItemImagesUploadInitializedForms['admin-item-create-form']) return;
                 var coverLabel = @json(__('app.catalog.item_image.cover'));
                 var galleryLabel = @json(__('app.catalog.item_image.gallery'));
                 var removeLabel = @json(__('view.catalog.items.create.remove_image'));
                 var adminGalleryFiles = [];
 
-                function isImage(file) { return file && file.type && file.type.indexOf('image/') === 0; }
+                function isImage(file) { return window.__catalogUploadUtils && window.__catalogUploadUtils.isImage(file); }
 
                 function setCoverFromFile(file) {
                     if (!isImage(file)) return;
@@ -174,12 +122,7 @@
                         if (input.files && input.files[0]) setCoverFromFile(input.files[0]);
                     });
                     if (replaceBtn) replaceBtn.addEventListener('click', function(e) { e.stopPropagation(); input.click(); });
-                    ['dragenter', 'dragover'].forEach(function(ev) {
-                        zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.add('upload-drop-zone--over'); });
-                    });
-                    ['dragleave', 'drop'].forEach(function(ev) {
-                        zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.remove('upload-drop-zone--over'); });
-                    });
+                    window.__catalogUploadUtils && window.__catalogUploadUtils.attachDropZoneState(zone);
                     zone.addEventListener('drop', function(e) {
                         var f = e.dataTransfer.files[0];
                         if (isImage(f)) setCoverFromFile(f);
@@ -209,12 +152,7 @@
                             input.value = '';
                         }
                     });
-                    ['dragenter', 'dragover'].forEach(function(ev) {
-                        zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.add('upload-drop-zone--over'); });
-                    });
-                    ['dragleave', 'drop'].forEach(function(ev) {
-                        zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.remove('upload-drop-zone--over'); });
-                    });
+                    window.__catalogUploadUtils && window.__catalogUploadUtils.attachDropZoneState(zone);
                     zone.addEventListener('drop', function(e) {
                         addGalleryFiles(Array.from(e.dataTransfer.files));
                     });
@@ -274,18 +212,9 @@
                 function injectGalleryInputs() {
                     var form = document.getElementById('admin-item-create-form');
                     if (!form) return;
-                    form.querySelectorAll('input[name="gallery_images[]"]').forEach(function(inp) { inp.remove(); });
-                    adminGalleryFiles.forEach(function(file) {
-                        if (typeof DataTransfer === 'undefined') return;
-                        var inp = document.createElement('input');
-                        inp.type = 'file';
-                        inp.name = 'gallery_images[]';
-                        inp.className = 'd-none';
-                        var dt = new DataTransfer();
-                        dt.items.add(file);
-                        inp.files = dt.files;
-                        form.appendChild(inp);
-                    });
+                    if (window.__catalogUploadUtils) {
+                        window.__catalogUploadUtils.setFileInputs(form, 'gallery_images[]', adminGalleryFiles);
+                    }
                 }
 
                 function validateAndSubmit(e) {
@@ -326,9 +255,4 @@
                 }
             })();
         </script>
-        <style>
-            .upload-drop-zone--over { border-color: #81c784 !important; background: #c8e6c9 !important; }
-            .upload-drop-zone:hover { border-color: #a5d6a7 !important; }
-            .upload-drop-zone--invalid { border-color: #e57373 !important; background: #ffebee !important; }
-        </style>
 </x-layouts.admin>

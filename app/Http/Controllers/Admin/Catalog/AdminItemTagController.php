@@ -44,7 +44,9 @@ class AdminItemTagController extends AdminBaseController
     {
         $itemTag = $itemTagService->createItemTag($request->validated());
 
-        return redirect()->route('admin.catalog.item-tags.show', $itemTag)->with('success', __('app.catalog.itemtag.created'));
+        return redirect()
+            ->route('admin.catalog.item-tags.show', $itemTag)
+            ->with('success', __('app.catalog.itemtag.created'));
     }
 
     public function update(ItemTag $itemTag, ItemTagService $itemTagService): RedirectResponse
@@ -53,7 +55,9 @@ class AdminItemTagController extends AdminBaseController
             'validation' => ! $itemTag->validation,
         ]);
 
-        return redirect()->route('admin.catalog.item-tags.show', $itemTag)->with('success', __('app.catalog.itemtag.updated'));
+        return redirect()
+            ->route('admin.catalog.item-tags.show', $itemTag)
+            ->with('success', __('app.catalog.itemtag.updated'));
     }
 
     public function destroy(ItemTag $itemTag, ItemTagService $itemTagService): RedirectResponse

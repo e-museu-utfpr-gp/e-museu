@@ -70,6 +70,7 @@
             <p class="col-md-4 mb-0 d-flex justify-content-center">{{ __('view.layout.footer.copyright') }}</p>
         </footer>
     </div>
+    @stack('scripts')
 </body>
 
 </html>

@@ -9,29 +9,31 @@
                 <form method="POST" id="addTagForm">
                     @csrf
                     <input type="text" name="tag_id" id="tag-id" hidden>
-                    <label for="tag-category">
-                        <h5>{{ __('view.catalog.items.create_modals.tag.category_label') }}
-                            <x-ui.info-popover :content="__('view.catalog.items.create_modals.tag.category_help')" />
-                        </h5>
-                    </label>
-                    <div class="input-div rounded-top">
-                        <select class="form-select me-2 input-form" name="tag-category" id="tag-category"
-                            onchange="checkIfCategoryIsEmpty()">
-                            <option selected="selected" value="">-</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <label for="name">
-                        <h5>{{ __('view.catalog.items.create_modals.tag.name_label') }}
-                            <x-ui.info-popover :content="__('view.catalog.items.create_modals.tag.name_help')" />
-                        </h5>
-                    </label>
-                    <div class="input-div rounded-top">
-                        <input class="form-control typeahead me-2 input-form" type="text" name="tag-name"
-                            id="tag-name" onchange="checkTagName()" placeholder="" disabled>
-                    </div>
+                    <x-ui.inputs.select
+                        name="tag-category"
+                        id="tag-category"
+                        :label="__('view.catalog.items.create_modals.tag.category_label')"
+                        :help="__('view.catalog.items.create_modals.tag.category_help')"
+                        :roundedTop="true"
+                        :showErrors="false"
+                        onchange="checkIfCategoryIsEmpty()"
+                    >
+                        <option value="" selected>-</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </x-ui.inputs.select>
+                    <x-ui.inputs.text
+                        name="tag-name"
+                        id="tag-name"
+                        :label="__('view.catalog.items.create_modals.tag.name_label')"
+                        :help="__('view.catalog.items.create_modals.tag.name_help')"
+                        :roundedTop="true"
+                        :showErrors="false"
+                        class="typeahead"
+                        onchange="checkTagName()"
+                        disabled
+                    />
                     <div class="warning-div px-1 mx-5 mb-3" id="tag-name-warning" hidden>
                         <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create_modals.tag.not_registered') }}
                     </div>
@@ -153,10 +155,8 @@
     function checkIfCategoryIsEmpty() {
         if ($('#tag-category').find(":selected").val() == '') {
             $('#tag-name').prop('disabled', true);
-            $('#tag-description').prop('disabled', true);
         } else {
             $('#tag-name').prop('disabled', false);
-            $('#tag-description').prop('disabled', false);
         }
     }
 
@@ -212,7 +212,7 @@
                         </div>`;
 
         $("#tags").append(tagDiv);
-        $("#tag-" + tagIds).append(tagCategoryInput, tagNameInput, tagCard);
+        $("#tag-" + tagId).append(tagCategoryInput, tagNameInput, tagCard);
     }
 
     function checkTagName() {

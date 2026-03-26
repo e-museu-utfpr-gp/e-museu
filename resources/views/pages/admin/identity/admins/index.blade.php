@@ -17,13 +17,13 @@
                                 <td>{{ date('d-m-Y H:i:s', strtotime($admin->updated_at)) }}</td>
                                 <td>
                                     <div class="d-flex justify-content-center align-items-center">
-                                        <x-ui.buttons.view href="{{ route('admin.identity.admins.show', $admin->id) }}"
+                                        <x-ui.buttons.admin.view href="{{ route('admin.identity.admins.show', $admin->id) }}"
                                             class="me-1" />
                                         <form class="me-1" action="{{ route('admin.identity.admins.destroy', $admin->id) }}"
                                             method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <x-ui.buttons.delete class="deleteAdminButton"
+                                            <x-ui.buttons.admin.delete class="deleteAdminButton"
                                                 data-confirm-message="{{ __('view.admin.identity.admins.index.delete_confirm') }}" />
                                         </form>
                                         <form action="{{ route('admin.identity.admins.delete-lock', $admin->id) }}" method="POST">

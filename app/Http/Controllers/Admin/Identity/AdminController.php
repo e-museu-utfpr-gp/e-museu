@@ -37,7 +37,9 @@ class AdminController extends AdminBaseController
     {
         $admin = $adminService->createAdmin($request->validated());
 
-        return redirect()->route('admin.identity.admins.show', $admin)->with('success', __('app.identity.admin.created'));
+        return redirect()
+            ->route('admin.identity.admins.show', $admin)
+            ->with('success', __('app.identity.admin.created'));
     }
 
     public function destroy(Admin $admin, AdminService $adminService): RedirectResponse

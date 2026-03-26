@@ -1,11 +1,11 @@
 <x-layouts.admin :title="__('view.admin.taxonomy.tags.show.title') . ' ' . $tag->id"
     :heading="__('view.admin.taxonomy.tags.show.heading', ['id' => $tag->id, 'name' => $tag->name])">
     <x-slot name="pageHeaderActions">
-        <x-ui.buttons.edit href="{{ route('admin.taxonomy.tags.edit', $tag->id) }}" class="me-1" />
+        <x-ui.buttons.admin.edit href="{{ route('admin.taxonomy.tags.edit', $tag->id) }}" class="me-1" />
         <form action="{{ route('admin.taxonomy.tags.destroy', $tag->id) }}" method="POST">
             @csrf
             @method('DELETE')
-            <x-ui.buttons.delete class="deleteTagButton"
+            <x-ui.buttons.admin.delete class="deleteTagButton"
                 data-confirm-message="{{ __('view.admin.taxonomy.tags.index.delete_confirm') }}" />
         </form>
     </x-slot>
@@ -63,15 +63,15 @@
                                 <strong>{{ __('view.admin.taxonomy.tags.show.updated_at') }}: </strong>
                                 <p class="ms-2">{{ date('d-m-Y H:i:s', strtotime($tag->tagCategory->updated_at)) }}</p>
                                 <div class="d-flex">
-                                    <x-ui.buttons.view href="{{ route('admin.taxonomy.tag-categories.show', $tag->tagCategory->id) }}"
+                                    <x-ui.buttons.admin.view href="{{ route('admin.taxonomy.tag-categories.show', $tag->tagCategory->id) }}"
                                         class="me-1" />
-                                    <x-ui.buttons.edit href="{{ route('admin.taxonomy.tag-categories.edit', $tag->tagCategory->id) }}"
+                                    <x-ui.buttons.admin.edit href="{{ route('admin.taxonomy.tag-categories.edit', $tag->tagCategory->id) }}"
                                         class="me-1" />
                                     <form action="{{ route('admin.taxonomy.tag-categories.destroy', $tag->tagCategory->id) }}"
                                         method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <x-ui.buttons.delete class="deleteCategoryButton"
+                                        <x-ui.buttons.admin.delete class="deleteCategoryButton"
                                             data-confirm-message="{{ __('view.admin.taxonomy.tag_categories.delete_confirm') }}" />
                                     </form>
                                 </div>

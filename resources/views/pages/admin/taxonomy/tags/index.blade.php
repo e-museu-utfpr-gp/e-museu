@@ -25,14 +25,14 @@
                                 <td>{{ date('d-m-Y H:i:s', strtotime($tag->tag_updated)) }}</td>
                                 <td>
                                     <div class="d-flex justify-content-center align-items-center">
-                                        <x-ui.buttons.view href="{{ route('admin.taxonomy.tags.show', $tag->id) }}"
+                                        <x-ui.buttons.admin.view href="{{ route('admin.taxonomy.tags.show', $tag->id) }}"
                                             class="me-1" />
-                                        <x-ui.buttons.edit href="{{ route('admin.taxonomy.tags.edit', $tag->id) }}"
+                                        <x-ui.buttons.admin.edit href="{{ route('admin.taxonomy.tags.edit', $tag->id) }}"
                                             class="me-1" />
                                         <form action="{{ route('admin.taxonomy.tags.destroy', $tag->id) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <x-ui.buttons.delete class="deleteTagButton"
+                                            <x-ui.buttons.admin.delete class="deleteTagButton"
                                                 data-confirm-message="{{ __('view.admin.taxonomy.tags.index.delete_confirm') }}" />
                                         </form>
                                     </div>

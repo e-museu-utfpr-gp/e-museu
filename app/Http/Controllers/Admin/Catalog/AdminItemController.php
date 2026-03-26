@@ -57,7 +57,9 @@ class AdminItemController extends AdminBaseController
         $item = $itemService->createItemWithIdentificationCode($request);
         $itemImagesService->storeImagesFromStoreRequest($item, $request);
 
-        return redirect()->route('admin.catalog.items.show', $item->id)->with('success', __('app.catalog.item.created'));
+        return redirect()
+            ->route('admin.catalog.items.show', $item->id)
+            ->with('success', __('app.catalog.item.created'));
     }
 
     public function edit(
@@ -129,6 +131,8 @@ class AdminItemController extends AdminBaseController
         $lockService->requireUnlocked($item);
         $itemImagesService->deleteImage($item, $image);
 
-        return redirect()->route('admin.catalog.items.edit', $item)->with('success', __('app.catalog.item_image.deleted'));
+        return redirect()
+            ->route('admin.catalog.items.edit', $item)
+            ->with('success', __('app.catalog.item_image.deleted'));
     }
 }

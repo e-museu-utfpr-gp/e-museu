@@ -1,12 +1,12 @@
 <x-layouts.admin :title="__('view.admin.catalog.item_categories.show.title', ['id' =>
     $itemCategory->id])" :heading="__('view.admin.catalog.item_categories.show.heading', ['id' => $itemCategory->id, 'name' => $itemCategory->name])">
     <x-slot name="pageHeaderActions">
-        <x-ui.buttons.edit href="{{ route('admin.catalog.item-categories.edit', $itemCategory->id) }}"
+        <x-ui.buttons.admin.edit href="{{ route('admin.catalog.item-categories.edit', $itemCategory->id) }}"
             class="me-1" />
         <form action="{{ route('admin.catalog.item-categories.destroy', $itemCategory->id) }}" method="POST">
             @csrf
             @method('DELETE')
-            <x-ui.buttons.delete class="deleteItemCategoryButton"
+            <x-ui.buttons.admin.delete class="deleteItemCategoryButton"
                 data-confirm-message="{{ __('view.admin.catalog.item_categories.delete_confirm') }}" />
         </form>
     </x-slot>

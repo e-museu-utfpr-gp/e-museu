@@ -26,14 +26,14 @@
                                     <td>{{ date('d-m-Y H:i:s', strtotime($extra->extra_updated)) }}</td>
                                     <td>
                                         <div class="d-flex justify-content-center align-items-center">
-                                            <x-ui.buttons.view href="{{ route('admin.catalog.extras.show', $extra->id) }}"
+                                            <x-ui.buttons.admin.view href="{{ route('admin.catalog.extras.show', $extra->id) }}"
                                                 class="me-1" />
-                                            <x-ui.buttons.edit href="{{ route('admin.catalog.extras.edit', $extra->id) }}"
+                                            <x-ui.buttons.admin.edit href="{{ route('admin.catalog.extras.edit', $extra->id) }}"
                                                 class="me-1" />
                                             <form action="{{ route('admin.catalog.extras.destroy', $extra->id) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <x-ui.buttons.delete class="deleteExtraButton"
+                                                <x-ui.buttons.admin.delete class="deleteExtraButton"
                                                     data-confirm-message="{{ __('view.admin.catalog.extras.index.delete_confirm') }}" />
                                             </form>
                                         </div>

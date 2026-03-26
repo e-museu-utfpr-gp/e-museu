@@ -9,167 +9,74 @@
             @csrf
             <div class="row">
                 <div class="col-md-6">
-                    <div>
-                        <label for="name">
-                            <h5>{{ __('view.catalog.items.create.name_label') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.create.name_help')" />
-                            </h5>
-                        </label>
-                        <div class="input-div">
-                            <input class="form-control me-2 input-form  @error('name') is-invalid @enderror" type="text"
-                                name="name" id="name" autocomplete="off" placeholder="" value="{{ old('name') }}"
-                                required>
-                            @error('name')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-                    </div>
+                    <x-ui.inputs.text
+                        name="name"
+                        id="name"
+                        autocomplete="off"
+                        :label="__('view.catalog.items.create.name_label')"
+                        :help="__('view.catalog.items.create.name_help')"
+                        required
+                    />
                     <div class="row">
                         <div class="col-md-6">
-                            <label for="category_id">
-                                <h5>{{ __('view.catalog.items.create.category_label') }}
-                                    <x-ui.info-popover :content="__('view.catalog.items.create.category_help')" />
-                                </h5>
-                            </label>
-                            <div class="input-div rounded-top">
-                                <select required class="form-select me-2 input-form  @error('category_id') is-invalid @enderror"
-                                    name="category_id" id="category_id">
-                                    <option selected="selected" value="">-</option>
-                                    @foreach ($itemCategories as $itemCategory)
-                                        <option value="{{ $itemCategory->id }}"
-                                            {{ old('category_id') == $itemCategory->id ? 'selected' : '' }}>{{ $itemCategory->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            <x-ui.inputs.select
+                                name="category_id"
+                                id="category_id"
+                                :label="__('view.catalog.items.create.category_label')"
+                                :help="__('view.catalog.items.create.category_help')"
+                                required
+                                :roundedTop="true"
+                            >
+                                <option value="" @selected(old('category_id') === null || old('category_id') === '')>-</option>
+                                @foreach ($itemCategories as $itemCategory)
+                                    <option value="{{ $itemCategory->id }}" @selected(old('category_id') == $itemCategory->id)>
+                                        {{ $itemCategory->name }}
+                                    </option>
+                                @endforeach
+                            </x-ui.inputs.select>
                         </div>
                         <div class="col-md-6">
-                            <label for="date">
-                                <h5>{{ __('view.catalog.items.create.release_date') }}
-                                    <x-ui.info-popover :content="__('view.catalog.items.create.release_date_help')" />
-                                </h5>
-                            </label>
-                            <div class="input-div">
-                                <input class="form-control me-2 input-form  @error('date') is-invalid @enderror"
-                                    type="date" name="date" placeholder="" value="{{ old('date') }}">
-                                @error('date')
-                                    <div class="invalid-feedback">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
+                            <x-ui.inputs.text
+                                name="date"
+                                id="date"
+                                type="date"
+                                :label="__('view.catalog.items.create.release_date')"
+                                :help="__('view.catalog.items.create.release_date_help')"
+                            />
                         </div>
                     </div>
+                    <x-ui.inputs.textarea
+                        name="description"
+                        id="description"
+                        :rows="6"
+                        :label="__('view.catalog.items.create.short_description')"
+                        :help="__('view.catalog.items.create.short_description_help')"
+                        required
+                    />
+                    <x-ui.inputs.textarea
+                        name="detail"
+                        id="detail"
+                        :rows="6"
+                        :label="__('view.catalog.items.create.technical_details')"
+                        :help="__('view.catalog.items.create.technical_details_help')"
+                    />
+                    <x-ui.inputs.textarea
+                        name="history"
+                        id="history"
+                        :rows="24"
+                        :label="__('view.catalog.items.create.history_label')"
+                        :help="__('view.catalog.items.create.history_help')"
+                    />
+                    @include('pages.catalog.items._partials.create.images-upload')
                     <div>
-                        <label for="description">
-                            <h5>{{ __('view.catalog.items.create.short_description') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.create.short_description_help')" />
-                            </h5>
-                        </label>
-                        <div class="input-div">
-                            <textarea class="form-control me-2 input-form  @error('description') is-invalid @enderror" type="text"
-                                name="description" placeholder="" rows="6" required>{{ old('description') }}</textarea>
-                            @error('description')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div>
-                        <label for="detail">
-                            <h5>{{ __('view.catalog.items.create.technical_details') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.create.technical_details_help')" />
-                            </h5>
-                        </label>
-                        <div class="input-div">
-                            <textarea class="form-control me-2 input-form  @error('detail') is-invalid @enderror" type="text" name="detail"
-                                placeholder="" rows="6">{{ old('detail') }}</textarea>
-                            @error('detail')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div>
-                        <label for="history">
-                            <h5>{{ __('view.catalog.items.create.history_label') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.create.history_help')" />
-                            </h5>
-                        </label>
-                        <div class="input-div">
-                            <textarea class="form-control me-2 input-form  @error('history') is-invalid @enderror" type="text" name="history"
-                                placeholder="" rows="24">{{ old('history') }}</textarea>
-                            @error('history')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <h5 class="mb-2">{{ __('view.catalog.items.create.cover_label') }} <span class="text-danger">*</span>
-                            <x-ui.info-popover :content="__('view.catalog.items.create.cover_help')" />
-                        </h5>
-                        <div id="cover-drop-zone" class="upload-drop-zone rounded-3 border-2 border-dashed d-flex flex-column align-items-center justify-content-center p-4 text-center" style="min-height: 140px; border-color: #c8e6c9; background: #f1f8e9; cursor: pointer;">
-                            <input type="file" name="cover_image" id="cover_image" accept="image/jpeg,image/png,image/jpg,image/webp" class="d-none">
-                            <div id="cover-placeholder">
-                                <i class="bi bi-image text-secondary mb-2" style="font-size: 2rem;"></i>
-                                <p class="text-muted small mb-0">{{ __('view.catalog.items.create.cover_drop_here') }}</p>
-                            </div>
-                            <div id="cover-preview" class="d-none position-relative">
-                                <img id="cover-preview-img" src="" alt="" class="rounded shadow-sm" style="max-height: 120px; max-width: 100%; object-fit: contain;">
-                                <span class="badge bg-primary position-absolute top-0 start-0 m-1">{{ __('app.catalog.item_image.cover') }}</span>
-                                <x-ui.buttons.default type="button" variant="outline-secondary" size="sm"
-                                    class="position-absolute bottom-0 end-0 m-1" id="cover-replace-btn">
-                                    {{ __('view.catalog.items.create.replace_image') }}
-                                </x-ui.buttons.default>
-                            </div>
-                        </div>
-                        <p id="cover-required-msg" class="text-danger small mt-1 d-none">{{ __('view.catalog.items.create.cover_required') }}</p>
-                        @error('cover_image')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="mb-3">
-                        <h5 class="mb-2">{{ __('view.catalog.items.create.gallery_label') }}
-                            <x-ui.info-popover :content="__('view.catalog.items.create.gallery_help')" />
-                        </h5>
-                        <div id="gallery-drop-zone" class="upload-drop-zone rounded-3 border-2 border-dashed d-flex flex-column align-items-center justify-content-center p-4 text-center" style="min-height: 100px; border-color: #c8e6c9; background: #f1f8e9; cursor: pointer;">
-                            <input type="file" name="gallery_images[]" id="gallery_input" accept="image/jpeg,image/png,image/jpg,image/webp" class="d-none" multiple>
-                            <i class="bi bi-images text-secondary mb-2" style="font-size: 1.5rem;"></i>
-                            <p class="text-muted small mb-0">{{ __('view.catalog.items.create.gallery_drop_here') }}</p>
-                        </div>
-                        @error('gallery_images.*')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="mb-4 rounded-3 p-3 mt-3" style="background-color: #e8f5e9;">
-                        <h5 class="mb-3">{{ __('view.catalog.items.create.images_preview_title') }}</h5>
-                        <div id="images-preview" class="d-flex flex-wrap gap-3 align-items-start">
-                            <p class="text-muted mb-0" id="images-preview-empty">{{ __('view.catalog.items.create.images_preview_empty') }}</p>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="e-mail">
-                            <h5>{{ __('view.catalog.items.create.email_label') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.create.email_help')" />
-                            </h5>
-                        </label>
-                        <div class="input-div">
-                            <input class="form-control me-2 input-form  @error('contact') is-invalid @enderror"
-                                type="email" name="contact" id="contact" placeholder=""
-                                value="{{ old('contact') }}"
-                                required>
-                            @error('email')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
+                        <x-ui.inputs.text
+                            name="contact"
+                            id="contact"
+                            type="email"
+                            :label="__('view.catalog.items.create.email_label')"
+                            :help="__('view.catalog.items.create.email_help')"
+                            required
+                        />
                         <div class="warning-div px-1 mx-5 mb-3" id="contact-warning" hidden>
                             <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create.contact_not_found') }}
                         </div>
@@ -177,85 +84,16 @@
                             <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create.contact_found') }}
                         </div>
                     </div>
-                    <div>
-                        <label for="full_name">
-                            <h5>{{ __('view.catalog.items.create.full_name_label') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.create.full_name_help')" />
-                            </h5>
-                        </label>
-                        <div class="input-div">
-                            <input class="form-control me-2 input-form  @error('full_name') is-invalid @enderror"
-                                type="text" name="full_name" id="full_name" placeholder=""
-                                value="{{ old('full_name') }}" required>
-                            @error('full_name')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-                    </div>
+                    <x-ui.inputs.text
+                        name="full_name"
+                        id="full_name"
+                        :label="__('view.catalog.items.create.full_name_label')"
+                        :help="__('view.catalog.items.create.full_name_help')"
+                        required
+                    />
                 </div>
                 <div class="col-md-6">
-                    <div>
-                        <div class="d-flex justify-content-between">
-                            <h5>{{ __('view.catalog.items.create.tags_label') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.create.tags_help')" />
-                            </h5>
-                            <h4 class="me-2" id="tag-count-text">0/10</h4>
-                        </div>
-                        <div class="tagContainer mb-4">
-                            <div class="tags ms-3" id="tags">
-                                <p class="text-center p-1 empty-text" id="tag-empty-text">{{ __('view.catalog.items.create.tags_empty') }}</p>
-                            </div>
-                            <div class="d-flex justify-content-center mt-3">
-                                <div class="warning-div px-1 mx-5 mb-3" id="tag-full-text" hidden>
-                                    <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create.tags_limit') }}
-                                </div>
-                                <x-ui.buttons.catalog-modal-add target="#addTagModal" id="add-tag-button" />
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="d-flex justify-content-between">
-                            <h5>{{ __('view.catalog.items.create.extra_label') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.create.extra_help')" />
-                            </h5>
-                            <h4 class="me-2" id="extra-count-text">0/10</h4>
-                        </div>
-                        <div class="extraContainer mb-4">
-                            <div class="extras ms-3" id="extras">
-                                <p class="text-center p-1 empty-text" id="extra-empty-text">{{ __('view.catalog.items.create.extra_empty') }}</p>
-                            </div>
-                            <div class="d-flex justify-content-center mt-3">
-                                <div class="warning-div px-1 mx-5 mb-3" id="extra-full-text" hidden>
-                                    <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create.extra_limit') }}
-                                </div>
-                                <x-ui.buttons.catalog-modal-add target="#addExtraModal" id="add-extra-button" />
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="d-flex justify-content-between">
-                            <h5>{{ __('view.catalog.items.create.components_label') }}
-                                <x-ui.info-popover :content="__('view.catalog.items.create.components_help')" />
-                            </h5>
-                            <h4 class="me-2" id="component-count-text">0/10</h4>
-                        </div>
-                        <div class="componentContainer mb-4">
-                            <div class="components ms-3" id="components">
-                                <p class="text-center p-1 empty-text" id="component-empty-text">{{ __('view.catalog.items.create.components_empty') }}</p>
-                            </div>
-                            <div class="d-flex justify-content-center mt-3">
-                                <div class="warning-div px-1 mx-5 mb-3" id="component-full-text" hidden>
-                                    <i class="bi bi-exclamation-circle-fill mx-1 h5"></i>{{ __('view.catalog.items.create.components_limit') }}
-                                </div>
-                                <x-ui.buttons.catalog-modal-add target="#addComponentModal" id="add-component-button" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col d-flex align-items-center justify-content-end">
-                        <x-ui.buttons.submit variant="plain" class="button nav-link py-2 px-3 fw-bold">{{ __('view.catalog.items.create.submit') }}</x-ui.buttons.submit>
-                    </div>
+                    @include('pages.catalog.items._partials.create.tags-extras-components')
                 </div>
             </div>
         </form>
@@ -284,9 +122,11 @@
     @include('pages.catalog.items._partials.create.extra-modal')
 
     @include('pages.catalog.items._partials.create.tag-modal')
+    <x-ui.images.catalog.upload-assets />
 
     <script type="text/javascript">
         (function() {
+            if (window.__catalogItemImagesUploadInitializedForms && window.__catalogItemImagesUploadInitializedForms['item-create-form']) return;
             var coverLabel = @json(__('app.catalog.item_image.cover'));
             var galleryLabel = @json(__('app.catalog.item_image.gallery'));
             var removeLabel = @json(__('view.catalog.items.create.remove_image'));
@@ -294,7 +134,7 @@
 
             var galleryFiles = [];
 
-            function isImage(file) { return file && file.type && file.type.indexOf('image/') === 0; }
+            function isImage(file) { return window.__catalogUploadUtils && window.__catalogUploadUtils.isImage(file); }
 
             function setCoverFromFile(file) {
                 if (!isImage(file)) return;
@@ -325,12 +165,7 @@
                     if (input.files && input.files[0]) setCoverFromFile(input.files[0]);
                 });
                 if (replaceBtn) replaceBtn.addEventListener('click', function(e) { e.stopPropagation(); input.click(); });
-                ['dragenter', 'dragover'].forEach(function(ev) {
-                    zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.add('upload-drop-zone--over'); });
-                });
-                ['dragleave', 'drop'].forEach(function(ev) {
-                    zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.remove('upload-drop-zone--over'); });
-                });
+                window.__catalogUploadUtils && window.__catalogUploadUtils.attachDropZoneState(zone);
                 zone.addEventListener('drop', function(e) {
                     var f = e.dataTransfer.files[0];
                     if (isImage(f)) setCoverFromFile(f);
@@ -360,12 +195,7 @@
                         input.value = '';
                     }
                 });
-                ['dragenter', 'dragover'].forEach(function(ev) {
-                    zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.add('upload-drop-zone--over'); });
-                });
-                ['dragleave', 'drop'].forEach(function(ev) {
-                    zone.addEventListener(ev, function(e) { e.preventDefault(); zone.classList.remove('upload-drop-zone--over'); });
-                });
+                window.__catalogUploadUtils && window.__catalogUploadUtils.attachDropZoneState(zone);
                 zone.addEventListener('drop', function(e) {
                     addGalleryFiles(Array.from(e.dataTransfer.files));
                 });
@@ -425,18 +255,9 @@
             function injectGalleryInputs() {
                 var form = document.getElementById('item-create-form');
                 if (!form) return;
-                form.querySelectorAll('input[name="gallery_images[]"]').forEach(function(inp) { inp.remove(); });
-                galleryFiles.forEach(function(file) {
-                    if (typeof DataTransfer === 'undefined') return;
-                    var inp = document.createElement('input');
-                    inp.type = 'file';
-                    inp.name = 'gallery_images[]';
-                    inp.className = 'd-none';
-                    var dt = new DataTransfer();
-                    dt.items.add(file);
-                    inp.files = dt.files;
-                    form.appendChild(inp);
-                });
+                if (window.__catalogUploadUtils) {
+                    window.__catalogUploadUtils.setFileInputs(form, 'gallery_images[]', galleryFiles);
+                }
             }
 
             function validateAndSubmit(e) {
@@ -473,13 +294,8 @@
             else init();
         })();
     </script>
-    <style>
-        .upload-drop-zone--over { border-color: #81c784 !important; background: #c8e6c9 !important; }
-        .upload-drop-zone:hover { border-color: #a5d6a7 !important; }
-        .upload-drop-zone--invalid { border-color: #e57373 !important; background: #ffebee !important; }
-    </style>
     <script type="text/javascript">
-        // Disponibiliza a rota para o componente checkContact.js
+        // Exposes the route for the checkContact.js component.
         window.checkContactRoute = "{{ route('catalog.collaborators.check-contact') }}";
 
         (function() {
