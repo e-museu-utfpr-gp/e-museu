@@ -9,6 +9,7 @@ use App\Services\Catalog\ExtraService;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Identity\LockService;
+use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,22 +20,22 @@ class AdminExtraController extends AdminBaseController
     {
         $result = $extraService->getPaginatedExtrasForAdminIndex($request);
 
-        return view('admin.catalog.extras.index', [
+        return view('pages.admin.catalog.extras.index', array_merge([
             'extras' => $result['extras'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::catalogExtras()));
     }
 
     public function show(Extra $extra): View
     {
-        return view('admin.catalog.extras.show', compact('extra'));
+        return view('pages.admin.catalog.extras.show', compact('extra'));
     }
 
     public function create(
         ItemCategoryService $itemCategoryService,
         CollaboratorService $collaboratorService
     ): View {
-        return view('admin.catalog.extras.create', [
+        return view('pages.admin.catalog.extras.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
         ]);
@@ -44,7 +45,7 @@ class AdminExtraController extends AdminBaseController
     {
         $extra = $extraService->createExtra($request->validated());
 
-        return redirect()->route('admin.extras.show', $extra)->with('success', __('app.catalog.extra.created'));
+        return redirect()->route('admin.catalog.extras.show', $extra)->with('success', __('app.catalog.extra.created'));
     }
 
     public function edit(
@@ -56,7 +57,7 @@ class AdminExtraController extends AdminBaseController
         $lockService->requireUnlocked($extra);
         $lockService->lock($extra);
 
-        return view('admin.catalog.extras.edit', [
+        return view('pages.admin.catalog.extras.edit', [
             'extra' => $extra,
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
@@ -75,7 +76,7 @@ class AdminExtraController extends AdminBaseController
 
         $lockService->unlock($extra);
 
-        return redirect()->route('admin.extras.show', $extra)->with('success', __('app.catalog.extra.updated'));
+        return redirect()->route('admin.catalog.extras.show', $extra)->with('success', __('app.catalog.extra.updated'));
     }
 
     public function destroy(Extra $extra, ExtraService $extraService, LockService $lockService): RedirectResponse
@@ -85,6 +86,6 @@ class AdminExtraController extends AdminBaseController
         $lockService->unlock($extra);
         $extraService->deleteExtra($extra);
 
-        return redirect()->route('admin.extras.index')->with('success', __('app.catalog.extra.deleted'));
+        return redirect()->route('admin.catalog.extras.index')->with('success', __('app.catalog.extra.deleted'));
     }
 }

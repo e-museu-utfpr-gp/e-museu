@@ -16,35 +16,42 @@
     $isBooleanSelected = $hasBoolean && in_array($currentColumn, $booleanColumns, true);
 @endphp
 <form action="{{ $action }}" class="d-flex admin-search-form" method="GET">
-    <select class="form-select me-2 admin-search-column" name="search_column"
+    <select
+        class="form-select me-2 admin-search-column"
+        name="search_column"
+        aria-label="{{ $placeholder }}"
         @if ($hasBoolean) data-boolean-columns="{{ implode(',', $booleanColumns) }}" @endif
-        aria-label="{{ $placeholder }}">
+    >
         @foreach ($options as $option)
-            <option value="{{ $option['value'] }}" @if ((string) $currentColumn === (string) $option['value']) selected @endif>
+            <option value="{{ $option['value'] }}" @selected((string) $currentColumn === (string) $option['value'])>
                 {{ $option['label'] }}
             </option>
         @endforeach
     </select>
-    <input type="search"
+    <input
+        type="search"
         name="search"
         class="form-control me-2 admin-search-text"
         placeholder="{{ $placeholder }}"
         value="{{ $isBooleanSelected ? '' : $currentSearch }}"
-        @if ($isBooleanSelected) disabled @endif
-        style="{{ $isBooleanSelected ? 'display: none;' : '' }}"
-        aria-label="{{ $placeholder }}">
+        aria-label="{{ $placeholder }}"
+        @disabled($isBooleanSelected)
+        @style(['display: none' => $isBooleanSelected])
+    />
     @if ($hasBoolean)
-        <select name="search"
+        <select
+            name="search"
             class="form-select me-2 admin-search-boolean"
-            style="display: {{ $isBooleanSelected ? '' : 'none' }};"
-            @if (! $isBooleanSelected) disabled @endif
-            aria-label="{{ $placeholder }} ({{ $yesLabel }}/{{ $noLabel }})">
+            aria-label="{{ $placeholder }} ({{ $yesLabel }}/{{ $noLabel }})"
+            @disabled(! $isBooleanSelected)
+            @style(['display: none' => ! $isBooleanSelected])
+        >
             <option value="">{{ $placeholder }}</option>
-            <option value="1" @if ($isBooleanSelected && ($currentSearch === '1' || $currentSearch === 1)) selected @endif>{{ $yesLabel }}</option>
-            <option value="0" @if ($isBooleanSelected && ($currentSearch === '0' || $currentSearch === 0)) selected @endif>{{ $noLabel }}</option>
+            <option value="1" @selected($isBooleanSelected && ($currentSearch === '1' || $currentSearch === 1))>{{ $yesLabel }}</option>
+            <option value="0" @selected($isBooleanSelected && ($currentSearch === '0' || $currentSearch === 0))>{{ $noLabel }}</option>
         </select>
     @endif
-    <button class="btn btn-secondary" type="submit">{{ $buttonLabel }}</button>
+    <x-ui.buttons.submit variant="secondary">{{ $buttonLabel }}</x-ui.buttons.submit>
 </form>
 @if ($hasBoolean)
     @push('scripts')

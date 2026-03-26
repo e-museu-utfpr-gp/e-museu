@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Catalog\AdminItemCategoryRequest;
 use App\Models\Catalog\ItemCategory;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Identity\LockService;
+use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,20 +18,20 @@ class AdminItemCategoryController extends AdminBaseController
     {
         $result = $itemCategoryService->getPaginatedItemCategoriesForAdminIndex($request);
 
-        return view('admin.catalog.item-categories.index', [
+        return view('pages.admin.catalog.item-categories.index', array_merge([
             'itemCategories' => $result['itemCategories'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::catalogItemCategories()));
     }
 
     public function show(ItemCategory $itemCategory): View
     {
-        return view('admin.catalog.item-categories.show', compact('itemCategory'));
+        return view('pages.admin.catalog.item-categories.show', compact('itemCategory'));
     }
 
     public function create(): View
     {
-        return view('admin.catalog.item-categories.create');
+        return view('pages.admin.catalog.item-categories.create');
     }
 
     public function store(AdminItemCategoryRequest $request, ItemCategoryService $itemCategoryService): RedirectResponse
@@ -38,7 +39,7 @@ class AdminItemCategoryController extends AdminBaseController
         $itemCategory = $itemCategoryService->createItemCategory($request->validated());
 
         return redirect()
-            ->route('admin.item-categories.show', $itemCategory)
+            ->route('admin.catalog.item-categories.show', $itemCategory)
             ->with('success', __('app.catalog.item_category.created'));
     }
 
@@ -47,7 +48,7 @@ class AdminItemCategoryController extends AdminBaseController
         $lockService->requireUnlocked($itemCategory);
         $lockService->lock($itemCategory);
 
-        return view('admin.catalog.item-categories.edit', compact('itemCategory'));
+        return view('pages.admin.catalog.item-categories.edit', compact('itemCategory'));
     }
 
     public function update(
@@ -63,7 +64,7 @@ class AdminItemCategoryController extends AdminBaseController
         $lockService->unlock($itemCategory);
 
         return redirect()
-            ->route('admin.item-categories.show', $itemCategory)
+            ->route('admin.catalog.item-categories.show', $itemCategory)
             ->with('success', __('app.catalog.item_category.updated'));
     }
 
@@ -78,7 +79,7 @@ class AdminItemCategoryController extends AdminBaseController
         $itemCategoryService->deleteItemCategory($itemCategory);
 
         return redirect()
-            ->route('admin.item-categories.index')
+            ->route('admin.catalog.item-categories.index')
             ->with('success', __('app.catalog.item_category.deleted'));
     }
 }

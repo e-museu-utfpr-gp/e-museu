@@ -12,4 +12,24 @@ return [
         'internal' => 'Internal',
         'external' => 'External',
     ],
+    'admin' => [
+        'collaborators' => [
+            'index' => [
+                'search_option_id' => 'Id',
+                'search_option_full_name' => 'Full name',
+                'search_option_contact' => 'Contact',
+                'search_option_role' => 'Role',
+                'search_option_blocked' => 'Blocked',
+                'search_option_created_at' => 'Created at',
+                'search_option_updated_at' => 'Updated at',
+                'sort_id' => 'Id',
+                'sort_full_name' => 'Full name',
+                'sort_contact' => 'Contact',
+                'sort_role' => 'Role',
+                'sort_blocked' => 'Blocked',
+                'sort_created_at' => 'Created at',
+                'sort_updated_at' => 'Updated at',
+            ],
+        ],
+    ],
 ];

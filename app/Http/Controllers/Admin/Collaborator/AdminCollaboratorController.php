@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\Collaborator\AdminUpdateCollaboratorRequest;
 use App\Models\Collaborator\Collaborator;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Identity\LockService;
+use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,20 +19,20 @@ class AdminCollaboratorController extends AdminBaseController
     {
         $result = $collaboratorService->getPaginatedCollaboratorsForAdminIndex($request);
 
-        return view('admin.collaborators.index', [
+        return view('pages.admin.collaborators.index', array_merge([
             'collaborators' => $result['collaborators'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::collaborators()));
     }
 
     public function show(Collaborator $collaborator): View
     {
-        return view('admin.collaborators.show', compact('collaborator'));
+        return view('pages.admin.collaborators.show', compact('collaborator'));
     }
 
     public function create(): View
     {
-        return view('admin.collaborators.create');
+        return view('pages.admin.collaborators.create');
     }
 
     public function store(
@@ -54,7 +55,7 @@ class AdminCollaboratorController extends AdminBaseController
         $lockService->requireUnlocked($collaborator);
         $lockService->lock($collaborator);
 
-        return view('admin.collaborators.edit', compact('collaborator'));
+        return view('pages.admin.collaborators.edit', compact('collaborator'));
     }
 
     public function update(
