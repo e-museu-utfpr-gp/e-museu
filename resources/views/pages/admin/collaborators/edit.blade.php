@@ -1,6 +1,7 @@
 <x-layouts.admin :title="__('view.admin.collaborator.collaborators.edit.title', ['id' => $collaborator->id])"
     :heading="__('view.admin.collaborator.collaborators.edit.heading', ['id' => $collaborator->id, 'name' => $collaborator->full_name])">
-        <form action="{{ route('admin.collaborators.update', $collaborator->id) }}" method="POST">
+        <form action="{{ route('admin.collaborators.update', $collaborator->id) }}" method="POST"
+            data-check-contact-route="{{ route('catalog.collaborators.check-contact') }}">
             @csrf
             @method('PATCH')
             <div class="row">
@@ -52,6 +53,6 @@
                     </div>
                 </div>
             </div>
+            <x-release-lock-on-leave type="collaborators" :id="$collaborator->id" />
         </form>
-    <x-release-lock-on-leave type="collaborators" :id="$collaborator->id" />
 </x-layouts.admin>

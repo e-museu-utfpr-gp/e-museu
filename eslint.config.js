@@ -17,6 +17,12 @@ export default [
                 localStorage: 'readonly',
                 sessionStorage: 'readonly',
                 // Browser APIs
+                AbortController: 'readonly',
+                fetch: 'readonly',
+                URL: 'readonly',
+                URLSearchParams: 'readonly',
+                DataTransfer: 'readonly',
+                FormData: 'readonly',
                 setTimeout: 'readonly',
                 clearTimeout: 'readonly',
                 setInterval: 'readonly',
@@ -24,8 +30,6 @@ export default [
                 confirm: 'readonly',
                 alert: 'readonly',
                 prompt: 'readonly',
-                // Event objects
-                event: 'readonly',
                 Event: 'readonly',
                 // jQuery (if used globally)
                 $: 'readonly',
