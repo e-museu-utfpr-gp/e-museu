@@ -4,6 +4,8 @@ namespace App\Services\Taxonomy;
 
 use App\Models\Taxonomy\TagCategory;
 use App\Support\Admin\AdminIndexConfig;
+use App\Support\Content\TranslatablePayload;
+use App\Support\Content\TranslationDisplaySql;
 use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,7 +19,10 @@ class TagCategoryService
     public function getPaginatedTagCategoriesForAdminIndex(Request $request): array
     {
         $count = TagCategory::count();
-        $query = TagCategory::query();
+        $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
+        $query = TagCategory::query()
+            ->select('tag_categories.*')
+            ->selectRaw("({$nameSql}) AS name");
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::tagCategories());
 
@@ -31,7 +36,16 @@ class TagCategoryService
      */
     public function getForIndex(): Collection
     {
-        return TagCategory::select('name', 'id')->orderBy('name', 'asc')->get();
+        $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
+
+        return TagCategory::query()
+            ->select(['tag_categories.id'])
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderBy('name')
+            ->with([
+                'tags.translations.language',
+            ])
+            ->get();
     }
 
     /**
@@ -39,7 +53,13 @@ class TagCategoryService
      */
     public function getForForm(): Collection
     {
-        return TagCategory::orderBy('name', 'asc')->get();
+        $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
+
+        return TagCategory::query()
+            ->select('tag_categories.*')
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -47,7 +67,13 @@ class TagCategoryService
      */
     public function createTagCategory(array $data): TagCategory
     {
-        return TagCategory::create($data);
+        $split = TranslatablePayload::split($data, TranslatablePayload::TAG_CATEGORY_KEYS);
+        $category = TagCategory::create($split['persist']);
+        $category->syncPrimaryLocaleTranslation([
+            'name' => (string) ($split['translation']['name'] ?? ''),
+        ]);
+
+        return $category;
     }
 
     /**
@@ -55,7 +81,15 @@ class TagCategoryService
      */
     public function updateTagCategory(TagCategory $tagCategory, array $data): void
     {
-        $tagCategory->update($data);
+        $split = TranslatablePayload::split($data, TranslatablePayload::TAG_CATEGORY_KEYS);
+        if ($split['persist'] !== []) {
+            $tagCategory->update($split['persist']);
+        }
+        if (array_key_exists('name', $split['translation'])) {
+            $tagCategory->syncPrimaryLocaleTranslation([
+                'name' => (string) $split['translation']['name'],
+            ]);
+        }
     }
 
     public function deleteTagCategory(TagCategory $tagCategory): void

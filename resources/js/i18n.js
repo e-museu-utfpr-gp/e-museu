@@ -1,6 +1,6 @@
 import i18next from 'i18next';
 
-// Any <html lang> that is not Portuguese or English falls back to pt_BR; add branches when new UI locales ship.
+// Infer i18next locale from <html lang>. Layouts should set lang from app()->getLocale() on the same response as Blade __(); otherwise JS strings and server-rendered text can diverge. Non-pt/non-en values fall back to pt_BR until more branches are added.
 const localeFromDocument = () => {
     const lang = document.documentElement?.getAttribute?.('lang') || '';
     if (lang.startsWith('pt')) return 'pt_BR';

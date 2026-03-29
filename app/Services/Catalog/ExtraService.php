@@ -8,6 +8,7 @@ use App\Models\Catalog\Item;
 use App\Models\Collaborator\Collaborator;
 use App\Services\Collaborator\CollaboratorService;
 use App\Support\Admin\AdminIndexConfig;
+use App\Support\Content\TranslatablePayload;
 use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
@@ -34,7 +35,13 @@ class ExtraService
      */
     public function createExtra(array $data): Extra
     {
-        return Extra::create($data);
+        $split = TranslatablePayload::split($data, TranslatablePayload::EXTRA_KEYS);
+        $extra = Extra::create($split['persist']);
+        $extra->syncPrimaryLocaleTranslation([
+            'info' => (string) ($split['translation']['info'] ?? ''),
+        ]);
+
+        return $extra;
     }
 
     /**
@@ -42,7 +49,15 @@ class ExtraService
      */
     public function updateExtra(Extra $extra, array $data): void
     {
-        $extra->update($data);
+        $split = TranslatablePayload::split($data, TranslatablePayload::EXTRA_KEYS);
+        if ($split['persist'] !== []) {
+            $extra->update($split['persist']);
+        }
+        if (array_key_exists('info', $split['translation'])) {
+            $extra->syncPrimaryLocaleTranslation([
+                'info' => (string) $split['translation']['info'],
+            ]);
+        }
     }
 
     public function deleteExtra(Extra $extra): void
@@ -56,9 +71,13 @@ class ExtraService
     public function createForItem(Item $item, Collaborator $collaborator, array $extrasData): void
     {
         foreach ($extrasData as $extraItemData) {
-            $extraItemData['collaborator_id'] = $collaborator->id;
-            $extraItemData['item_id'] = $item->id;
-            Extra::create($extraItemData);
+            $split = TranslatablePayload::split($extraItemData, TranslatablePayload::EXTRA_KEYS);
+            $split['persist']['collaborator_id'] = $collaborator->id;
+            $split['persist']['item_id'] = $item->id;
+            $extra = Extra::create($split['persist']);
+            $extra->syncPrimaryLocaleTranslation([
+                'info' => (string) ($split['translation']['info'] ?? ''),
+            ]);
         }
     }
 
@@ -67,9 +86,14 @@ class ExtraService
      */
     public function create(array $extraData, Collaborator $collaborator): Extra
     {
-        $extraData['collaborator_id'] = $collaborator->id;
+        $split = TranslatablePayload::split($extraData, TranslatablePayload::EXTRA_KEYS);
+        $split['persist']['collaborator_id'] = $collaborator->id;
+        $extra = Extra::create($split['persist']);
+        $extra->syncPrimaryLocaleTranslation([
+            'info' => (string) ($split['translation']['info'] ?? ''),
+        ]);
 
-        return Extra::create($extraData);
+        return $extra;
     }
 
     /**

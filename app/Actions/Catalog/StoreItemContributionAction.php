@@ -8,6 +8,7 @@ use App\Models\Collaborator\Collaborator;
 use App\Services\Catalog\ExtraService;
 use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemService;
+use App\Support\Content\TranslatablePayload;
 use App\Services\Catalog\ItemTagService;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Taxonomy\TagService;
@@ -147,8 +148,15 @@ class StoreItemContributionAction
         $itemData['collaborator_id'] = $collaborator->id;
         $itemData['identification_code'] = '000';
 
-        return DB::transaction(function () use ($itemData): Item {
-            $item = Item::create($itemData);
+        $split = TranslatablePayload::split($itemData, TranslatablePayload::ITEM_KEYS);
+        $translationData = $split['translation'];
+        $persist = $split['persist'];
+
+        return DB::transaction(function () use ($persist, $translationData): Item {
+            $item = Item::create($persist);
+            if ($translationData !== []) {
+                $item->syncPrimaryLocaleTranslation($translationData);
+            }
             $item->update([
                 'identification_code' => $this->itemService->createIdentificationCode($item),
             ]);

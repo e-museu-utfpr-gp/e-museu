@@ -25,7 +25,12 @@ class StoreItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|min:1|max:200|unique:items',
+            'name' => [
+                'required',
+                'string',
+                'min:1',
+                'max:200',
+            ],
             'date' => 'nullable|date',
             'description' => 'required|string|min:1|max:1000',
             'detail' => 'nullable|max:10000',

@@ -40,4 +40,8 @@ parameters:
         - '#Method App\\Support\\Catalog\\ItemIndexQueryBuilder::apply.*\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types#'
         - '#.*applyIndex(Search|Sort).*parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types#'
         - '#Parameter \#1 \$query of static method\s+App\\Support\\Admin\\AdminIndexQueryBuilder::build\(\) expects#'
+        - '#generic class App\\Support\\Content\\ResolvedTranslation does not specify its types: T#'
+        - '#TranslationDisplaySql::itemNameExpression\(\)#'
+        - '#TranslationDisplaySql::itemDescriptionExpression\(\)#'
+        - '#TranslationDisplaySql::itemCatalogListSelectAliases\(\)#'
     reportUnmatchedIgnoredErrors: false

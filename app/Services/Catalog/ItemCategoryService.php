@@ -4,6 +4,8 @@ namespace App\Services\Catalog;
 
 use App\Models\Catalog\ItemCategory;
 use App\Support\Admin\AdminIndexConfig;
+use App\Support\Content\TranslatablePayload;
+use App\Support\Content\TranslationDisplaySql;
 use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,7 +19,10 @@ class ItemCategoryService
     public function getPaginatedItemCategoriesForAdminIndex(Request $request): array
     {
         $count = ItemCategory::count();
-        $query = ItemCategory::query();
+        $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
+        $query = ItemCategory::query()
+            ->select('item_categories.*')
+            ->selectRaw("({$nameSql}) AS name");
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::itemCategories());
 
@@ -31,7 +36,13 @@ class ItemCategoryService
      */
     public function getForIndex(): Collection
     {
-        return ItemCategory::select('name', 'id')->orderBy('name', 'asc')->get();
+        $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
+
+        return ItemCategory::query()
+            ->select('item_categories.id')
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -39,7 +50,13 @@ class ItemCategoryService
      */
     public function getForForm(): Collection
     {
-        return ItemCategory::orderBy('name')->get();
+        $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
+
+        return ItemCategory::query()
+            ->select('item_categories.*')
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -47,7 +64,13 @@ class ItemCategoryService
      */
     public function createItemCategory(array $data): ItemCategory
     {
-        return ItemCategory::create($data);
+        $split = TranslatablePayload::split($data, TranslatablePayload::ITEM_CATEGORY_KEYS);
+        $category = ItemCategory::create($split['persist']);
+        $category->syncPrimaryLocaleTranslation([
+            'name' => (string) ($split['translation']['name'] ?? ''),
+        ]);
+
+        return $category;
     }
 
     /**
@@ -55,7 +78,15 @@ class ItemCategoryService
      */
     public function updateItemCategory(ItemCategory $itemCategory, array $data): void
     {
-        $itemCategory->update($data);
+        $split = TranslatablePayload::split($data, TranslatablePayload::ITEM_CATEGORY_KEYS);
+        if ($split['persist'] !== []) {
+            $itemCategory->update($split['persist']);
+        }
+        if (array_key_exists('name', $split['translation'])) {
+            $itemCategory->syncPrimaryLocaleTranslation([
+                'name' => (string) $split['translation']['name'],
+            ]);
+        }
     }
 
     public function deleteItemCategory(ItemCategory $itemCategory): void

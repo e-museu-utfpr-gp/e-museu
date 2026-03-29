@@ -9,7 +9,6 @@ use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemService;
 use App\Services\Taxonomy\TagCategoryService;
-use App\Models\Taxonomy\TagCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -87,9 +86,9 @@ class ItemController extends Controller
         $itemCategories = $itemCategoryService->getForIndex();
         $categories = $tagCategoryService->getForIndex();
 
-        $seriesCategoryId = TagCategory::query()
-            ->where('name', 'Série')
-            ->value('id');
+        $seriesCategoryId = $categories
+            ->first(static fn ($c): bool => in_array($c->name, ['Série', 'Series'], true))
+            ?->id;
 
         return view('pages.catalog.items.show', compact('item', 'itemCategories', 'categories', 'seriesCategoryId'));
     }

@@ -1,9 +1,11 @@
 <x-layouts.app :title="$item->name">
 
 @php
+    $itemTranslationResolved = $item->resolveTranslation();
+
     $hasNoSeries = $item->itemTags
         ->filter(function ($tagItem) use ($seriesCategoryId) {
-            return $tagItem->tag->category?->id == $seriesCategoryId && $tagItem->validation == true;
+            return $tagItem->tag->tagCategory?->id == $seriesCategoryId && $tagItem->validation == true;
         })
         ->isEmpty();
 
@@ -27,6 +29,7 @@
 
             <div class="col-md-8 order-md-1">
                 <h1>{{ $item->name }}</h1>
+                @include('pages.catalog.items._partials.show.translation-fallback-notice', ['resolved' => $itemTranslationResolved])
                 <div class="m-4">
                     <p class="fw-bold">{{ __('view.catalog.items.show.identification_code') }}: {{ $item->identification_code }}</p>
                     <p>{{ $item->description }}</p>
@@ -47,6 +50,10 @@
                     @foreach ($item->extras as $extra)
                         @if ($extra->validation == '1')
                             <div class="m-4">
+                                @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                    'resolved' => $extra->resolveTranslation(),
+                                    'messageKey' => 'view.catalog.translation_fallback_notice_extra',
+                                ])
                                 <p>{{ $extra->info }}</p>
                                 <div class="row">
                                     <p class="fw-bold col-2">{{ __('view.catalog.items.show.added_by') }} </p>

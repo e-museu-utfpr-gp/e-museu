@@ -8,6 +8,15 @@ use Illuminate\Http\Request;
 
 class ItemContributionValidator
 {
+    /** @var list<string> */
+    private const TAG_ROW_KEYS = ['category_id', 'tag_category_id', 'name'];
+
+    /** @var list<string> */
+    private const EXTRA_ROW_KEYS = ['info', 'collaborator_id', 'item_id'];
+
+    /** @var list<string> */
+    private const COMPONENT_ROW_KEYS = ['item_id'];
+
     /**
      * @return array{
      *   collaborator: array<string, mixed>,
@@ -40,10 +49,38 @@ class ItemContributionValidator
         return [
             'collaborator' => $collaborator,
             'item' => $item,
-            'tags' => (array) $request->tags,
-            'extras' => (array) $request->extras,
-            'components' => (array) $request->components,
+            'tags' => $this->whitelistNestedRows(
+                (array) $request->input('tags', []),
+                self::TAG_ROW_KEYS
+            ),
+            'extras' => $this->whitelistNestedRows(
+                (array) $request->input('extras', []),
+                self::EXTRA_ROW_KEYS
+            ),
+            'components' => $this->whitelistNestedRows(
+                (array) $request->input('components', []),
+                self::COMPONENT_ROW_KEYS
+            ),
         ];
+    }
+
+    /**
+     * @param  array<int, mixed>  $rows
+     * @param  list<string>  $allowedKeys
+     * @return list<array<string, mixed>>
+     */
+    private function whitelistNestedRows(array $rows, array $allowedKeys): array
+    {
+        $flip = array_flip($allowedKeys);
+        $out = [];
+        foreach ($rows as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $out[] = array_intersect_key($row, $flip);
+        }
+
+        return $out;
     }
 
     /**

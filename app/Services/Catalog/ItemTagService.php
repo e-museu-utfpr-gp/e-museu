@@ -53,9 +53,10 @@ class ItemTagService
      */
     public function attachTagsToItem(Item $item, array $tagsData, TagService $tagService): void
     {
+        $ids = [];
         foreach ($tagsData as $tagData) {
-            $tag = $tagService->findOrCreate($tagData);
-            $item->tags()->attach($tag->id);
+            $ids[] = $tagService->findOrCreate($tagData)->id;
         }
+        $item->tags()->syncWithoutDetaching(array_values(array_unique($ids)));
     }
 }

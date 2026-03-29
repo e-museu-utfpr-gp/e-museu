@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
 use App\Http\Requests\Admin\Catalog\AdminUpdateItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemImage;
+use App\Models\Language;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemService;
@@ -45,7 +46,7 @@ class AdminItemController extends AdminBaseController
 
     public function show(Item $item): View
     {
-        $item->load('images');
+        $item->load(['images', 'translations.language']);
 
         return view('pages.admin.catalog.items.show', compact('item'));
     }
@@ -77,12 +78,16 @@ class AdminItemController extends AdminBaseController
         CollaboratorService $collaboratorService,
         LockService $lockService
     ): View {
-        $item->load(['images', 'coverImage']);
+        $item->load(['images', 'coverImage', 'translations.language']);
         $lockService->requireUnlocked($item);
         $lockService->lock($item);
 
+        $formLangId = Language::idForPreferredFormLocale();
+        $itemAdminFormTranslation = $item->translations->firstWhere('language_id', $formLangId);
+
         return view('pages.admin.catalog.items.edit', [
             'item' => $item,
+            'itemAdminFormTranslation' => $itemAdminFormTranslation,
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
         ]);

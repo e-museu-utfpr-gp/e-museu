@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Requests\Catalog\SingleExtraRequest;
+use App\Http\Requests\Admin\Catalog\AdminStoreExtraRequest;
 use App\Models\Catalog\Extra;
 use App\Services\Catalog\ExtraService;
 use App\Services\Catalog\ItemCategoryService;
@@ -28,6 +28,15 @@ class AdminExtraController extends AdminBaseController
 
     public function show(Extra $extra): View
     {
+        $extra->load([
+            'collaborator',
+            'item.translations.language',
+            'item.images',
+            'item.coverImage',
+            'item.itemCategory.translations.language',
+            'item.collaborator',
+        ]);
+
         return view('pages.admin.catalog.extras.show', compact('extra'));
     }
 
@@ -41,7 +50,7 @@ class AdminExtraController extends AdminBaseController
         ]);
     }
 
-    public function store(SingleExtraRequest $request, ExtraService $extraService): RedirectResponse
+    public function store(AdminStoreExtraRequest $request, ExtraService $extraService): RedirectResponse
     {
         $extra = $extraService->createExtra($request->validated());
 
@@ -65,7 +74,7 @@ class AdminExtraController extends AdminBaseController
     }
 
     public function update(
-        SingleExtraRequest $request,
+        AdminStoreExtraRequest $request,
         Extra $extra,
         ExtraService $extraService,
         LockService $lockService

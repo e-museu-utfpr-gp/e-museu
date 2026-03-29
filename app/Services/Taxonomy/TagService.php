@@ -2,8 +2,11 @@
 
 namespace App\Services\Taxonomy;
 
+use App\Models\Language;
 use App\Models\Taxonomy\Tag;
 use App\Support\Admin\AdminIndexConfig;
+use App\Support\Content\TranslatablePayload;
+use App\Support\Content\TranslationDisplaySql;
 use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,15 +20,17 @@ class TagService
     public function getPaginatedTagsForAdminIndex(Request $request): array
     {
         $count = Tag::count();
+        $tagNameSql = TranslationDisplaySql::tagNameSubquerySql('tags');
+        $catNameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
         $query = Tag::query();
         $query->leftJoin('tag_categories', 'tags.tag_category_id', '=', 'tag_categories.id');
         $query->select([
             'tags.*',
-            'tags.name AS tag_name',
             'tags.created_at AS tag_created',
             'tags.updated_at AS tag_updated',
-            'tag_categories.name AS category_name',
         ]);
+        $query->selectRaw("({$tagNameSql}) AS tag_name");
+        $query->selectRaw("({$catNameSql}) AS category_name");
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::tags());
 
@@ -42,7 +47,13 @@ class TagService
         $data['tag_category_id'] = $data['category_id'];
         unset($data['category_id']);
 
-        return Tag::create($data);
+        $split = TranslatablePayload::split($data, TranslatablePayload::TAG_KEYS);
+        $tag = Tag::create($split['persist']);
+        $tag->syncPrimaryLocaleTranslation([
+            'name' => (string) ($split['translation']['name'] ?? ''),
+        ]);
+
+        return $tag;
     }
 
     /**
@@ -53,7 +64,16 @@ class TagService
         $data['tag_category_id'] = $data['category_id'];
         unset($data['category_id']);
 
-        $tag->update($data);
+        $split = TranslatablePayload::split($data, TranslatablePayload::TAG_KEYS);
+        if ($split['persist'] !== []) {
+            $tag->update($split['persist']);
+        }
+
+        if (array_key_exists('name', $split['translation'])) {
+            $tag->syncPrimaryLocaleTranslation([
+                'name' => (string) $split['translation']['name'],
+            ]);
+        }
     }
 
     public function deleteTag(Tag $tag): void
@@ -66,8 +86,17 @@ class TagService
      */
     public function getByCategory(string $categoryId): Collection
     {
-        return Tag::where('tag_category_id', 'LIKE', $categoryId)
-            ->orderBy('name', 'asc')
+        if ($categoryId === '') {
+            return new Collection();
+        }
+
+        $nameSql = TranslationDisplaySql::tagNameSubquerySql('tags');
+
+        return Tag::query()
+            ->where('tag_category_id', $categoryId)
+            ->select('tags.*')
+            ->orderByRaw("({$nameSql}) asc")
+            ->limit(500)
             ->get();
     }
 
@@ -76,10 +105,14 @@ class TagService
      */
     public function getValidatedByCategory(string $categoryId): Collection
     {
-        return Tag::select('name', 'id')
+        $nameSql = TranslationDisplaySql::tagNameSubquerySql('tags');
+
+        return Tag::query()
             ->where('validation', true)
             ->where('tag_category_id', $categoryId)
-            ->orderBy('name', 'asc')
+            ->select('tags.id')
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderByRaw("({$nameSql}) asc")
             ->get();
     }
 
@@ -88,22 +121,35 @@ class TagService
      */
     public function getValidatedNamesForAutocomplete(string $query, string $categoryId): Collection
     {
-        $qb = Tag::select('name')
-            ->where('tag_category_id', 'LIKE', $categoryId)
-            ->where('validation', true);
-
-        if ($query !== '') {
-            $qb = $qb->where('name', 'LIKE', '%' . $query . '%');
+        if ($categoryId === '') {
+            return new Collection();
         }
 
-        return $qb->limit(10)->get();
+        $nameSql = TranslationDisplaySql::tagNameSubquerySql('tags');
+
+        $qb = Tag::query()
+            ->where('tag_category_id', $categoryId)
+            ->where('validation', true)
+            ->selectRaw("({$nameSql}) AS name");
+
+        if ($query !== '') {
+            $qb->whereRaw("({$nameSql}) LIKE ?", ['%' . $query . '%']);
+        }
+
+        return $qb->limit(50)->get();
     }
 
     public function countValidatedByNameAndCategory(string $name, string $categoryId): int
     {
-        return Tag::where('tag_category_id', $categoryId)
-            ->where('name', 'LIKE', $name)
+        $langId = Language::idForPreferredFormLocale();
+
+        return Tag::query()
+            ->where('tag_category_id', $categoryId)
             ->where('validation', true)
+            ->whereHas('translations', function ($q) use ($name, $langId): void {
+                $q->where('language_id', $langId)
+                    ->where('name', 'LIKE', $name);
+            })
             ->count();
     }
 
@@ -113,18 +159,27 @@ class TagService
     public function findOrCreate(array $tagData): Tag
     {
         $tagCategoryId = $tagData['tag_category_id'] ?? $tagData['category_id'] ?? null;
-        $tag = Tag::where('tag_category_id', '=', $tagCategoryId)
-            ->where('name', '=', $tagData['name'])
+        $normalized = $tagData;
+        $normalized['tag_category_id'] = $tagCategoryId;
+        unset($normalized['category_id']);
+        $split = TranslatablePayload::split($normalized, TranslatablePayload::TAG_KEYS);
+        $tagName = (string) ($split['translation']['name'] ?? '');
+        $langId = Language::idForPreferredFormLocale();
+
+        $tag = Tag::query()
+            ->where('tag_category_id', '=', $tagCategoryId)
+            ->whereHas('translations', function ($q) use ($tagName, $langId): void {
+                $q->where('language_id', $langId)->where('name', $tagName);
+            })
             ->first();
 
         if ($tag !== null) {
             return $tag;
         }
 
-        $createData = $tagData;
-        $createData['tag_category_id'] = $tagCategoryId;
-        unset($createData['category_id']);
+        $tag = Tag::create($split['persist']);
+        $tag->syncPrimaryLocaleTranslation(['name' => $tagName]);
 
-        return Tag::create($createData);
+        return $tag;
     }
 }

@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'content_language_names' => [
+        'pt_BR' => 'português (Brasil)',
+        'en' => 'inglês',
+        'neutral' => 'rótulo universal',
+    ],
+    'translation_fallback_notice' => 'Título, descrição e história estão em :language; não há versão no idioma selecionado no site.',
+    'translation_fallback_notice_extra' => 'Esta nota está em :language; não há versão no idioma selecionado no site.',
     'items' => [
         'index' => [
             'title' => 'Itens do acervo',

@@ -41,6 +41,11 @@
                     <a href="{{ route('catalog.items.index', ['item_category' => $item->itemCategory?->id]) }}">
                         <p class="show-item-link">{{ $item->itemCategory?->name }}</p>
                     </a>
+                    @if ($item->itemCategory)
+                        @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                            'resolved' => $item->itemCategory->resolveTranslation(),
+                        ])
+                    @endif
                 </div>
             </div>
 
@@ -61,12 +66,20 @@
                 @if ($tagItem->validation == true && $tagItem->tag->validation == true)
                     <div class="row">
                         <div class="col-md-5">
-                            <p class="fw-bold">{{ $tagItem->tag->category?->name }}</p>
+                            <p class="fw-bold">{{ $tagItem->tag->tagCategory?->name }}</p>
+                            @if ($tagItem->tag->tagCategory)
+                                @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                    'resolved' => $tagItem->tag->tagCategory->resolveTranslation(),
+                                ])
+                            @endif
                         </div>
                         <div class="col-md-7">
                             <a href="{{ route('catalog.items.index', ['tag[]' => $tagItem->tag->id]) }}">
                                 <p class="show-item-link">{{ $tagItem->tag->name }}</p>
                             </a>
+                            @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                'resolved' => $tagItem->tag->resolveTranslation(),
+                            ])
                         </div>
                     </div>
                 @endif
@@ -96,8 +109,16 @@
                                     </div>
                                 @endif
                                 <div class="p-1">
+                                    @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                        'resolved' => $itemComponent->component->resolveTranslation(),
+                                    ])
                                     <p class="mb-1 fw-bold">
                                         {{ Str::limit($itemComponent->component->name, 30) }}</p>
+                                    @if ($itemComponent->component->itemCategory)
+                                        @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                            'resolved' => $itemComponent->component->itemCategory->resolveTranslation(),
+                                        ])
+                                    @endif
                                     <p class="mb-0">
                                         {{ Str::limit($itemComponent->component->itemCategory?->name) }}</p>
                                 </div>

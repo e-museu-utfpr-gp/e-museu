@@ -199,6 +199,7 @@ return [
         'item_component_different' => 'O item e o componente precisam ser diferentes.',
         'item_tag_different' => 'O item e a etiqueta precisam ser diferentes.',
         'components_items_different' => 'Os itens precisam ser diferentes.',
+        'tags_duplicate_in_request' => 'Não repita a mesma etiqueta (categoria e nome) mais do que uma vez.',
     ],
 
     /*

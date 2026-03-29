@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin\Catalog;
 
+use App\Models\Catalog\Item;
+use App\Models\Language;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,16 +21,26 @@ class AdminUpdateItemRequest extends FormRequest
     {
         $route = $this->route();
         $item = $route ? $route->parameter('item') : null;
-        $itemId = $item instanceof \App\Models\Catalog\Item ? $item->id : null;
+        $formLangId = Language::idForPreferredFormLocale();
+        $ignoreTranslationId = $item instanceof Item
+            ? $item->translations()->where('language_id', $formLangId)->value('id')
+            : null;
+
+        $nameRules = [
+            'required',
+            'string',
+            'min:1',
+            'max:200',
+        ];
+        if ($item instanceof Item) {
+            $nameRules[] = Rule::unique('item_translations', 'name')
+                ->where('language_id', $formLangId)
+                ->where('item_id', $item->id)
+                ->ignore($ignoreTranslationId);
+        }
 
         return [
-            'name' => [
-                'required',
-                'string',
-                'min:1',
-                'max:200',
-                Rule::unique('items')->ignore($itemId),
-            ],
+            'name' => $nameRules,
             'date' => 'nullable|date',
             'description' => 'required|string|min:1|max:1000',
             'detail' => 'max:10000',

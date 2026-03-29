@@ -1,5 +1,5 @@
-<x-layouts.admin :title="__('view.admin.catalog.items.edit.title') . ' ' . $item->
-    id" :heading="__('view.admin.catalog.items.edit.heading', ['id' => $item->id, 'name' => $item->name])">
+<x-layouts.admin :title="__('view.admin.catalog.items.edit.title') . ' ' . $item->id"
+    :heading="__('view.admin.catalog.items.edit.heading', ['id' => $item->id, 'name' => old('name', $itemAdminFormTranslation?->name ?? '—')])">
             <form action="{{ route('admin.catalog.items.update', $item->id) }}" method="POST" enctype="multipart/form-data" id="admin-item-edit-form"
                 data-label-cover="{{ __('app.catalog.item_image.cover') }}"
                 data-label-gallery="{{ __('app.catalog.item_image.gallery') }}"
@@ -14,7 +14,7 @@
                             name="name"
                             id="name"
                             :label="__('view.admin.catalog.items.edit.name')"
-                            :value="$item->name"
+                            :value="old('name', $itemAdminFormTranslation?->name ?? '')"
                         />
                         <x-ui.inputs.admin.textarea
                             name="description"
@@ -28,7 +28,7 @@
                             id="detail"
                             :rows="7"
                             :label="__('view.admin.catalog.items.edit.detail')"
-                            :value="$item->detail"
+                            :value="old('detail', $itemAdminFormTranslation?->detail ?? '')"
                         />
                         <div class="row">
                             <div class="col-md-6">
@@ -94,7 +94,7 @@
                             id="history"
                             :rows="46"
                             :label="__('view.admin.catalog.items.edit.history')"
-                            :value="$item->history"
+                            :value="old('history', $itemAdminFormTranslation?->history ?? '')"
                         />
                         <div class="mb-3">
                             <x-ui.buttons.submit variant="warning" icon="bi bi-pencil-fill">{{ __('view.admin.catalog.items.edit.submit') }}</x-ui.buttons.submit>

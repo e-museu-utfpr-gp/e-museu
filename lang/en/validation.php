@@ -198,6 +198,7 @@ return [
         'item_component_different' => 'The item and the component must be different.',
         'item_tag_different' => 'The item and the tag must be different.',
         'components_items_different' => 'The items must be different.',
+        'tags_duplicate_in_request' => 'Do not repeat the same tag (category and name) more than once.',
     ],
 
     /*

@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'content_language_names' => [
+        'pt_BR' => 'Portuguese (Brazil)',
+        'en' => 'English',
+        'neutral' => 'universal label',
+    ],
+    'translation_fallback_notice' => 'Title, description, and history are shown in :language; there is no version in your selected site language.',
+    'translation_fallback_notice_extra' => 'This note is shown in :language; there is no version in your selected site language.',
     'items' => [
         'index' => [
             'title' => 'Collection items',

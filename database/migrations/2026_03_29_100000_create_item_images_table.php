@@ -11,6 +11,11 @@ return new class extends Migration
      *
      * Creates the item_images table: one-to-many with items. Each row stores one image
      * (path, type: cover|gallery, sort_order).
+     *
+     * The ENUM values below are duplicated on purpose — do not import
+     * {@see \App\Enums\Catalog\ItemImageType} here. If the PHP enum changes without a
+     * deliberate migration that alters this column, MySQL can reject writes or coerce data.
+     * Keep this list identical to `ItemImageType` case values; add new types via a new migration.
      */
     public function up(): void
     {
@@ -18,7 +23,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->string('path');
-            $table->string('type'); // 'cover' | 'gallery'
+            $table->enum('type', ['cover', 'gallery']);
             $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
 
