@@ -9,11 +9,12 @@
      */
     'variant' => 'primary',
     /**
-     * Bootstrap justify-content key: center | start | end
+     * Kept for backward compatibility; pagination row is always full width with
+     * summary on the left and page links on the right (see vendor pagination view).
      */
-    'align' => 'center',
+    'align' => 'between',
     /**
-     * Optional extra classes applied to the outer <nav>.
+     * Optional extra classes applied to the outer wrapper.
      */
     'class' => '',
 ])
@@ -30,17 +31,10 @@
     ];
 
     $activeColor = $activeColorMap[$variant] ?? $activeColorMap['primary'];
-    $alignClassMap = [
-        'start' => 'justify-content-start',
-        'center' => 'justify-content-center',
-        'end' => 'justify-content-end',
-    ];
-    $alignClass = $alignClassMap[$align] ?? $alignClassMap['center'];
 @endphp
 
-<div class="d-flex {{ $alignClass }} {{ $class }}"
+<div class="w-100 {{ $class }}"
     style="--bs-pagination-color: {{ $activeColor }}; --bs-pagination-hover-color: {{ $activeColor }}; --bs-pagination-active-bg: {{ $activeColor }}; --bs-pagination-active-border-color: {{ $activeColor }}; --bs-pagination-active-color: #fff;">
     {{-- Laravel generates this markup; it is not user-provided HTML. --}}
     {!! $paginator->links('pagination::bootstrap-5') !!}
 </div>
-

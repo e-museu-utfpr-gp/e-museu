@@ -8,7 +8,8 @@
                              data-section-selector="#item_category" 
                              data-item-selector="#item_id" 
                              data-original-item-id="{{ request()->query('id') }}"
-                             data-get-items-url="{{ route('catalog.items.byCategory') }}">
+                             data-old-selected-id="{{ old('item_id', '') }}"
+                             data-get-items-url="{{ route('admin.catalog.items.by-item-category') }}">
                             <div class="col-md-4">
                                 <x-ui.inputs.admin.select
                                     name="item_category"
@@ -30,10 +31,16 @@
                                     :label="__('view.admin.catalog.item_tags.create.item')"
                                     required
                                 >
+                                    <option value="">-</option>
                                 </x-ui.inputs.admin.select>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row" data-section-item-selector
+                             data-section-selector="#tag_category_id"
+                             data-item-selector="#tag_id"
+                             data-category-query-key="category"
+                             data-old-selected-id="{{ old('tag_id', '') }}"
+                             data-get-items-url="{{ route('catalog.tags.index') }}">
                             <div class="col-md-4">
                                 <x-ui.inputs.admin.select
                                     name="category_id"
@@ -54,6 +61,7 @@
                                     :label="__('view.admin.catalog.item_tags.create.tag')"
                                     required
                                 >
+                                    <option value="">-</option>
                                 </x-ui.inputs.admin.select>
                             </div>
                         </div>

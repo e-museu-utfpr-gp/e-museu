@@ -2,7 +2,7 @@
     <h6 class="mb-2">{{ __('view.admin.catalog.items.edit.current_images') }}</h6>
     <div id="admin-images-preview" class="d-flex flex-wrap gap-2 align-items-start">
         @if ($item->images->isEmpty())
-            <p class="text-muted small mb-0">{{ __('view.admin.catalog.items.show.no_images') }}</p>
+            <p class="text-muted small mb-0" data-role="gallery-empty-hint">{{ __('view.admin.catalog.items.show.no_images') }}</p>
         @else
             @php
                 $sortedImages = $item->images->sortBy('sort_order')->values();

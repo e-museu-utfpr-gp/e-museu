@@ -41,7 +41,7 @@ Route::prefix('catalog')->name('catalog.')->group(function () {
     Route::get('tags', [TagController::class, 'index'])->name('tags.index');
     Route::get('tags/autocomplete', [TagController::class, 'autocomplete'])->name('tags.autocomplete');
     Route::get('tags/check-name', [TagController::class, 'checkName'])->name('tags.check-name');
-    Route::get('collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
+    Route::match(['get', 'post'], 'collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
         ->name('collaborators.check-contact');
 });
 
@@ -51,6 +51,8 @@ Route::middleware('authenticate')->prefix('admin')->name('admin.')->group(functi
     Route::prefix('catalog')->name('catalog.')->group(function () {
         Route::delete('items/{item}/images/{image}', [AdminItemController::class, 'destroyImage'])
             ->name('items.images.destroy');
+        Route::get('items/by-item-category', [AdminItemController::class, 'byItemCategory'])
+            ->name('items.by-item-category');
         Route::resource('items', AdminItemController::class);
         Route::resource('item-categories', AdminItemCategoryController::class);
         Route::resource('extras', AdminExtraController::class);

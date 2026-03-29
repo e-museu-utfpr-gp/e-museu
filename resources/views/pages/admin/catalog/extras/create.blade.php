@@ -14,7 +14,8 @@
                              data-section-selector="#category_id" 
                              data-item-selector="#item_id" 
                              data-original-item-id="{{ request()->query('id') }}"
-                             data-get-items-url="{{ route('catalog.items.byCategory') }}">
+                             data-old-selected-id="{{ old('item_id', '') }}"
+                             data-get-items-url="{{ route('admin.catalog.items.by-item-category') }}">
                             <div class="col-md-4">
                                 <x-ui.inputs.admin.select
                                     name="category_id"
@@ -67,8 +68,4 @@
                     </div>
                 </div>
             </form>
-            <x-admin.dependent-select-fetch
-                containerSelector='[data-section-item-selector][data-item-selector="#item_id"]'
-                :oldSelectedId="old('item_id', '')"
-            />
 </x-layouts.admin>

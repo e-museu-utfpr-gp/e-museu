@@ -13,6 +13,7 @@ use App\Services\Catalog\ItemService;
 use App\Services\Collaborator\CollaboratorService;
 use App\Support\Admin\AdminIndexTableView;
 use App\Services\Identity\LockService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -32,6 +33,14 @@ class AdminItemController extends AdminBaseController
             'items' => $result['items'],
             'count' => $result['count'],
         ], AdminIndexTableView::catalogItems()));
+    }
+
+    public function byItemCategory(Request $request, ItemService $itemService): JsonResponse
+    {
+        $itemCategoryId = (string) ($request->input('item_category') ?? '');
+        $items = $itemService->getItemsByItemCategoryForAdminSelect($itemCategoryId);
+
+        return response()->json($items);
     }
 
     public function show(Item $item): View

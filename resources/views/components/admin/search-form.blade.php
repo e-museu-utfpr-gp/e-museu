@@ -53,36 +53,3 @@
     @endif
     <x-ui.buttons.submit variant="secondary">{{ $buttonLabel }}</x-ui.buttons.submit>
 </form>
-@if ($hasBoolean)
-    @push('scripts')
-    <script>
-        (function () {
-            var forms = document.querySelectorAll('form.admin-search-form');
-            forms.forEach(function (form) {
-                var searchColumn = form.querySelector('.admin-search-column');
-                var searchText = form.querySelector('.admin-search-text');
-                var searchBoolean = form.querySelector('.admin-search-boolean');
-                if (!searchColumn || !searchText || !searchBoolean) return;
-                var booleanColumns = (searchColumn.getAttribute('data-boolean-columns') || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean);
-                function toggleSearchInput() {
-                    var col = searchColumn.value;
-                    var isBoolean = booleanColumns.indexOf(col) !== -1;
-                    if (isBoolean) {
-                        searchText.style.display = 'none';
-                        searchText.disabled = true;
-                        searchBoolean.style.display = '';
-                        searchBoolean.disabled = false;
-                    } else {
-                        searchText.style.display = '';
-                        searchText.disabled = false;
-                        searchBoolean.style.display = 'none';
-                        searchBoolean.disabled = true;
-                    }
-                }
-                searchColumn.addEventListener('change', toggleSearchInput);
-                toggleSearchInput();
-            });
-        })();
-    </script>
-    @endpush
-@endif

@@ -106,6 +106,16 @@ To skip the confirmation:
 ./run setup-hard -env -y
 ```
 
+To keep the local MySQL data directory (`mysql_data`) while still resetting containers, vendor, and Node assets (useful when you do not want to lose the database volume):
+
+```bash
+./run setup-hard -y -db
+# or
+./run setup-hard -db -y
+```
+
+The same `-db` flag works with `./run remove-all` and `./run remove-all-files` (e.g. `./run remove-all -y -db`).
+
 ### Main Commands
 
 #### Container Management
@@ -214,6 +224,9 @@ To skip the confirmation:
 
 # Clean environment (no confirmation with -y)
 ./run remove-all -y
+
+# Full cleanup but keep local MySQL volume (mysql_data)
+./run remove-all -y -db
 ```
 
 ---
@@ -275,7 +288,7 @@ Stop the local MySQL service if necessary, or adjust the port in `.env`.
 - **First initialization**: MySQL may take 10-30 seconds to start the first time
 - **Production environment**: Always use the `-y` flag in automated scripts to skip confirmations
 - **Docker group**: After adding your user to the docker group, you no longer need to use sudo
-- **Complete reset**: `setup-hard` removes ALL data. Use with caution!
+- **Complete reset**: `setup-hard` removes ALL data by default. Use with caution! Pass **`-db`** to keep `mysql_data` (see Option 3 above).
 
 ---
 
@@ -290,6 +303,9 @@ Stop the local MySQL service if necessary, or adjust the port in `.env`.
 
 # Complete reset (careful!)
 ./run setup-hard -env -y
+
+# Hard reset but keep local DB volume
+./run setup-hard -y -db
 
 # Start containers
 ./run up

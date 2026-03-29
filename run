@@ -68,6 +68,7 @@ function setup {
   if [ "$APP_ENV" == "local" ]; then
     echo ">> Starting Vite dev server in background..."
     npm-local-bg || echo "[warn] Failed to start Vite dev server in background; continuing..."
+    ensure-vite-assets-local || echo "[warn] Failed to ensure Vite assets (hot/manifest); continuing..."
   fi
 
   if [[ "$1" == "-y" || "$2" == "-y" ]]; then
@@ -82,9 +83,24 @@ function setup {
 }
 
 function setup-hard {
-  if [[ "$1" != "-y" && "$2" != "-y" ]]; then
+  local has_y=false
+  local has_env=false
+  local keep_db=false
+  for arg in "$@"; do
+    case "$arg" in
+      -y) has_y=true ;;
+      -env) has_env=true ;;
+      -db) keep_db=true ;;
+    esac
+  done
+
+  if [[ "$has_y" != true ]]; then
     echo "WARNING: You are about to run setup-hard."
-    echo "This will delete and recreate your database, node_modules, vendor, and all Docker containers."
+    if [[ "$keep_db" == true ]]; then
+      echo "This will remove node_modules, vendor, and all Docker containers, but keep mysql_data (local MySQL data volume)."
+    else
+      echo "This will delete and recreate your database, node_modules, vendor, and all Docker containers."
+    fi
     echo -n "Proceed only if you are sure. (y/n): "
     read confirm
 
@@ -94,22 +110,26 @@ function setup-hard {
     fi
   fi
 
-  if [[ "$1" == "-env" || "$2" == "-env" ]]; then
+  if [[ "$has_env" == true ]]; then
     env || echo "[warn] Failed to copy .env (env); continuing..."
   fi
 
   echo "Running setup-hard..."
 
-  remove-all -y || echo "[warn] Could not complete cleanup (remove-all); continuing..."
+  if [[ "$keep_db" == true ]]; then
+    remove-all -y -db || echo "[warn] Could not complete cleanup (remove-all); continuing..."
+  else
+    remove-all -y || echo "[warn] Could not complete cleanup (remove-all); continuing..."
+  fi
 
-  if [[ "$1" == "-env" || "$2" == "-env" ]]; then
-    if [[ "$1" == "-y" || "$2" == "-y" ]]; then
+  if [[ "$has_env" == true ]]; then
+    if [[ "$has_y" == true ]]; then
       setup -env -y || echo "[warn] Setup process failed (setup)."
     else
       setup -env || echo "[warn] Setup process failed (setup)."
     fi
   else
-    if [[ "$1" == "-y" || "$2" == "-y" ]]; then
+    if [[ "$has_y" == true ]]; then
       setup -y || echo "[warn] Setup process failed (setup)."
     else
       setup || echo "[warn] Setup process failed (setup)."
@@ -184,6 +204,32 @@ function build-vite {
   docker compose -f "$(get_compose_file)" exec app rm -rf public/build public/hot 2>/dev/null || true
   echo ">> Building assets with Vite for production..."
   docker compose -f "$(get_compose_file)" exec vite npm run build
+}
+
+# After setup-hard, public/build and public/hot are gone. Local setup relies on the Vite dev
+# server writing public/hot; if that is slow or fails, Laravel falls back to manifest.json
+# and throws ViteManifestNotFoundException. We wait for hot or manifest, then build if needed.
+function ensure-vite-assets-local {
+  source .env
+  if [ "$APP_ENV" != "local" ]; then
+    return 0
+  fi
+
+  local compose_file
+  compose_file=$(get_compose_file)
+  echo ">> Waiting for Vite assets (public/hot from dev server or public/build/manifest.json)..."
+  local i=0
+  while [ $i -lt 90 ]; do
+    if [ -f public/hot ] || [ -f public/build/manifest.json ]; then
+      echo ">> Vite assets ready."
+      return 0
+    fi
+    sleep 2
+    i=$((i + 1))
+  done
+
+  echo ">> Timed out waiting for Vite; running npm run build (creates manifest.json)..."
+  docker compose -f "$compose_file" exec vite npm run build
 }
 
 function seed {
@@ -439,9 +485,22 @@ function composer {
 }
 
 function remove-all {
-  if [[ "$1" != "-y" ]]; then
+  local has_y=false
+  local keep_db=false
+  for arg in "$@"; do
+    case "$arg" in
+      -y) has_y=true ;;
+      -db) keep_db=true ;;
+    esac
+  done
+
+  if [[ "$has_y" != true ]]; then
     echo "WARNING: You are about to run remove-all."
-    echo "This will delete and recreate your production database, node_modules, vendor, and all Docker containers."
+    if [[ "$keep_db" == true ]]; then
+      echo "This will remove node_modules, vendor, and all Docker containers, but keep mysql_data (local MySQL data volume)."
+    else
+      echo "This will delete and recreate your production database, node_modules, vendor, and all Docker containers."
+    fi
     echo -n "Proceed only if you are sure. (y/n): "
     read confirm
 
@@ -451,7 +510,9 @@ function remove-all {
     fi
   fi
 
-  remove-all-files -y || echo "[warn] Could not complete file cleanup (remove-all-files); continuing..."
+  local file_args=(-y)
+  [[ "$keep_db" == true ]] && file_args+=(-db)
+  remove-all-files "${file_args[@]}" || echo "[warn] Could not complete file cleanup (remove-all-files); continuing..."
 
   remove-all-docker || echo "[warn] Could not complete Docker cleanup (remove-all-docker); continuing..."
 
@@ -459,9 +520,22 @@ function remove-all {
 }
 
 function remove-all-files {
-  if [[ "$1" != "-y" ]]; then
+  local has_y=false
+  local keep_db=false
+  for arg in "$@"; do
+    case "$arg" in
+      -y) has_y=true ;;
+      -db) keep_db=true ;;
+    esac
+  done
+
+  if [[ "$has_y" != true ]]; then
     echo "WARNING: You are about to run remove-all-files."
-    echo "This will delete mysql_data, vendor, node_modules, public/hot and public/build."
+    if [[ "$keep_db" == true ]]; then
+      echo "This will delete vendor, node_modules, public/hot and public/build (mysql_data is kept)."
+    else
+      echo "This will delete mysql_data, vendor, node_modules, public/hot and public/build."
+    fi
     echo -n "Proceed only if you are sure. (y/n): "
     read confirm
 
@@ -471,9 +545,13 @@ function remove-all-files {
     fi
   fi
 
-  echo ">> Removing mysql_data, vendor, node_modules, public/hot and public/build..."
+  if [[ "$keep_db" == true ]]; then
+    echo ">> Removing vendor, node_modules, public/hot and public/build (keeping mysql_data)..."
+  else
+    echo ">> Removing mysql_data, vendor, node_modules, public/hot and public/build..."
+    rm -rf mysql_data 2>/dev/null || echo "mysql_data directory not found, skipping removal"
+  fi
 
-  rm -rf mysql_data 2>/dev/null || echo "mysql_data directory not found, skipping removal"
   rm -rf vendor 2>/dev/null || echo "vendor directory not found, skipping removal"
   rm -rf node_modules 2>/dev/null || echo "node_modules directory not found, skipping removal"
   rm -rf public/hot 2>/dev/null || echo "public/hot file not found, skipping removal"
@@ -586,11 +664,14 @@ function help {
   echo "  setup-hard -env    - Same as setup-hard but copies .env.example to .env first"
   echo "  setup-hard -y      - Hard reset without confirmation prompt"
   echo "  setup-hard -env -y - Hard reset with new .env file and no confirmation"
+  echo "  setup-hard -db     - Hard reset but keep mysql_data (local DB volume); combine with -y: setup-hard -y -db"
   echo "  up                 - Start Docker containers"
   echo "  down               - Stop Docker containers"
   echo "  ps                 - Show container status"
   echo "  remove-all         - Clean up environment (remove mysql_data, vendor, containers, images, volumes)"
+  echo "  remove-all -db     - Same as remove-all but keep mysql_data (pass with -y: remove-all -y -db)"
   echo "  remove-all-files   - Remove only files (mysql_data, vendor, node_modules, public/hot, public/build)"
+  echo "  remove-all-files -db - Same but keep mysql_data (e.g. remove-all-files -y -db)"
   echo "  remove-all-docker  - Remove only Docker containers, images, and volumes"
   echo ""
   echo "Node.js & Vite (local only; staging/prod-local use built assets):"
@@ -671,10 +752,13 @@ function help {
   echo "  ./run simulate-ci -y         # Simulate CI pipeline without confirmation"
   echo "  ./run exec php artisan tinker  # Open Laravel tinker"
   echo "  ./run remove-all -y        # Remove all without confirmation prompt"
+  echo "  ./run setup-hard -y -db    # Hard reset without prompt, keep local MySQL data (mysql_data)"
+  echo "  ./run remove-all -y -db    # Full cleanup but keep mysql_data"
   echo ""
   echo "Options:"
   echo "  -y                 - Skip confirmation prompts (works with setup, setup-hard, gen_key, remove-all, remove-all-files)"
   echo "  -env               - Copy .env.example to .env before running setup commands"
+  echo "  -db                - Keep mysql_data (local Docker MySQL volume); use with setup-hard, remove-all, or remove-all-files"
 }
 
 TIMEFORMAT='\nTask completed in %3lR'

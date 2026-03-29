@@ -1,5 +1,3 @@
-/* global FormData, fetch */
-
 document.addEventListener('DOMContentLoaded', () => {
     const marker = document.querySelector('[data-release-lock="true"]');
     if (!marker) {
@@ -20,21 +18,23 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const form = document.querySelector('form');
+    const form = marker.closest('form');
     if (!form) {
         return;
     }
 
     let formSubmitted = false;
+    let lockReleased = false;
 
     form.addEventListener('submit', () => {
         formSubmitted = true;
     });
 
     function releaseLock() {
-        if (formSubmitted) {
+        if (formSubmitted || lockReleased) {
             return;
         }
+        lockReleased = true;
 
         const data = new FormData();
         data.append('_token', token);

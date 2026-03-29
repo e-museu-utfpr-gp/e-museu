@@ -1,6 +1,7 @@
 <x-layouts.admin :title="__('view.admin.collaborator.collaborators.create.title')"
     :heading="__('view.admin.collaborator.collaborators.create.heading')">
-        <form action="{{ route('admin.collaborators.store') }}" method="POST">
+        <form action="{{ route('admin.collaborators.store') }}" method="POST"
+            data-check-contact-route="{{ route('catalog.collaborators.check-contact') }}">
             @csrf
             <div class="row">
                 <div class="col-md-6">

@@ -1,7 +1,6 @@
 import i18next from 'i18next';
-import ptBR from '../../lang/js/pt_BR.json';
-import en from '../../lang/js/en.json';
 
+// Any <html lang> that is not Portuguese or English falls back to pt_BR; add branches when new UI locales ship.
 const localeFromDocument = () => {
     const lang = document.documentElement?.getAttribute?.('lang') || '';
     if (lang.startsWith('pt')) return 'pt_BR';
@@ -9,12 +8,23 @@ const localeFromDocument = () => {
     return 'pt_BR';
 };
 
-i18next.init({
-    lng: localeFromDocument(),
-    fallbackLng: 'pt_BR',
+const lng = localeFromDocument();
+
+let translation;
+try {
+    translation =
+        lng === 'en'
+            ? (await import('../../lang/js/en.json')).default
+            : (await import('../../lang/js/pt_BR.json')).default;
+} catch {
+    translation = (await import('../../lang/js/pt_BR.json')).default;
+}
+
+await i18next.init({
+    lng,
+    fallbackLng: lng,
     resources: {
-        pt_BR: { translation: ptBR },
-        en: { translation: en },
+        [lng]: { translation },
     },
 });
 

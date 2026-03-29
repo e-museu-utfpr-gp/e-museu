@@ -14,4 +14,5 @@ return [
         'administrators' => 'Administradores',
     ],
     'logout' => 'Sair',
+    'dependent_select_load_failed' => 'Não foi possível carregar a lista. Tente novamente ou atualize a página.',
 ];

@@ -158,27 +158,32 @@ class StoreItemContributionAction
     }
 
     /**
-     * Attach components to an item (create ItemComponent records for each component found by category+name).
+     * Attach components using the validated ComponentRequest payload: each entry's
+     * `item_id` is the catalog item that acts as the component (stored as `component_id`).
      *
      * @param  array<int, array<string, mixed>>  $componentsData
      */
     private function attachComponentsToItem(Item $item, array $componentsData): void
     {
         foreach ($componentsData as $componentItemData) {
-            $component = Item::where('category_id', '=', $componentItemData['category_id'])
-                ->where('name', '=', $componentItemData['name'])
-                ->first();
-            if (! $component) {
+            $componentId = (int) ($componentItemData['item_id'] ?? 0);
+            if ($componentId <= 0) {
+                continue;
+            }
+
+            if (! Item::query()->whereKey($componentId)->exists()) {
                 logger()->info('Component item not found for contribution', [
                     'item_id' => $item->id,
-                    'component_category_id' => $componentItemData['category_id'] ?? null,
-                    'component_name' => $componentItemData['name'] ?? null,
+                    'component_item_id' => $componentId,
                 ]);
                 continue;
             }
-            $componentItemData['component_id'] = $component->id;
-            $componentItemData['item_id'] = $item->id;
-            ItemComponent::create($componentItemData);
+
+            ItemComponent::create([
+                'item_id' => $item->id,
+                'component_id' => $componentId,
+                'validation' => (int) ($componentItemData['validation'] ?? 0),
+            ]);
         }
     }
 }

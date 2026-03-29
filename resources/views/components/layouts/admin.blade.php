@@ -4,7 +4,8 @@
 ])
 
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    data-admin-dependent-select-error="{{ __('view.admin.layout.dependent_select_load_failed') }}">
 
 <head>
     <meta charset="utf-8">
@@ -13,11 +14,7 @@
 
     <title>E-museu: {{ $title }}</title>
 
-    @if (file_exists(public_path('build/manifest.json')))
-        @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    @else
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    @endif
+    @vite(['resources/sass/app.scss', 'resources/js/admin.js'])
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -132,9 +129,6 @@
             </div>
         </div>
     </div>
-    @if (! file_exists(public_path('build/manifest.json')))
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    @endif
     @stack('scripts')
 </body>
 

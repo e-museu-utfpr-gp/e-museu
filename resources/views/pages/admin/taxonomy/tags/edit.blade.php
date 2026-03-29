@@ -36,6 +36,6 @@
                     </div>
                 </div>
             </div>
+            <x-release-lock-on-leave type="tags" :id="$tag->id" />
         </form>
-    <x-release-lock-on-leave type="tags" :id="$tag->id" />
 </x-layouts.admin>

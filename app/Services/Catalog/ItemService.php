@@ -85,6 +85,23 @@ class ItemService
     }
 
     /**
+     * Items in an item category for admin dependent selects (includes non-validated).
+     *
+     * @return Collection<int, Item>
+     */
+    public function getItemsByItemCategoryForAdminSelect(string $itemCategoryId): Collection
+    {
+        if ($itemCategoryId === '') {
+            return new Collection();
+        }
+
+        return Item::query()
+            ->where('category_id', 'LIKE', $itemCategoryId)
+            ->orderBy('name', 'asc')
+            ->get(['id', 'name']);
+    }
+
+    /**
      * Random validated items for the public home page carousel.
      *
      * @return Collection<int, Item>
