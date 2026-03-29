@@ -18,6 +18,6 @@
                     </div>
                 </div>
             </div>
+            <x-release-lock-on-leave type="tag-categories" :id="$tagCategory->id" />
         </form>
-    <x-release-lock-on-leave type="tag-categories" :id="$tagCategory->id" />
 </x-layouts.admin>

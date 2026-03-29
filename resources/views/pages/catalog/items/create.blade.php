@@ -5,7 +5,33 @@
         <div class="ms-4 mb-4">
             <x-ui.flash-messages variant="app" />
         </div>
-        <form action="{{ route('catalog.items.store') }}" method="POST" enctype="multipart/form-data" id="item-create-form">
+        @php
+            $createModalsI18n = [
+                'component' => [
+                    'alert_category_required' => __('view.catalog.items.create_modals.component.alert_category_required'),
+                    'alert_name_required' => __('view.catalog.items.create_modals.component.alert_name_required'),
+                ],
+                'extra' => [
+                    'alert_required' => __('view.catalog.items.create_modals.extra.alert_required'),
+                ],
+                'tag' => [
+                    'alert_category_required' => __('view.catalog.items.create_modals.tag.alert_category_required'),
+                    'alert_name_required' => __('view.catalog.items.create_modals.tag.alert_name_required'),
+                ],
+            ];
+        @endphp
+        <form action="{{ route('catalog.items.store') }}" method="POST" enctype="multipart/form-data" id="item-create-form"
+            data-modals-i18n='@json($createModalsI18n)'
+            data-route-tags-autocomplete="{{ route('catalog.tags.autocomplete') }}"
+            data-route-tags-check-name="{{ route('catalog.tags.check-name') }}"
+            data-route-items-by-category="{{ route('catalog.items.byCategory') }}"
+            data-check-contact-route="{{ route('catalog.collaborators.check-contact') }}"
+            data-label-cover="{{ __('app.catalog.item_image.cover') }}"
+            data-label-gallery="{{ __('app.catalog.item_image.gallery') }}"
+            data-label-remove-image="{{ __('view.catalog.items.create.remove_image') }}"
+            data-recover-confirm='@json(__('view.catalog.items.create.recover_confirm'))'
+            data-session-flash='@json(['hasSuccess' => session()->has('success'), 'hasErrors' => session()->has('errors')])'
+        >
             @csrf
             <div class="row">
                 <div class="col-md-6">
@@ -99,278 +125,11 @@
         </form>
     </div>
 
-    @php
-        $createModalsI18n = [
-            'component' => [
-                'alert_category_required' => __('view.catalog.items.create_modals.component.alert_category_required'),
-                'alert_name_required' => __('view.catalog.items.create_modals.component.alert_name_required'),
-            ],
-            'extra' => [
-                'alert_required' => __('view.catalog.items.create_modals.extra.alert_required'),
-            ],
-            'tag' => [
-                'alert_category_required' => __('view.catalog.items.create_modals.tag.alert_category_required'),
-                'alert_name_required' => __('view.catalog.items.create_modals.tag.alert_name_required'),
-            ],
-        ];
-    @endphp
-    <script type="text/javascript">
-        window.createModalsI18n = @json($createModalsI18n);
-    </script>
     @include('pages.catalog.items._partials.create.component-modal')
 
     @include('pages.catalog.items._partials.create.extra-modal')
 
     @include('pages.catalog.items._partials.create.tag-modal')
     <x-ui.images.catalog.upload-assets />
-
-    <script type="text/javascript">
-        (function() {
-            if (window.__catalogItemImagesUploadInitializedForms && window.__catalogItemImagesUploadInitializedForms['item-create-form']) return;
-            var coverLabel = @json(__('app.catalog.item_image.cover'));
-            var galleryLabel = @json(__('app.catalog.item_image.gallery'));
-            var removeLabel = @json(__('view.catalog.items.create.remove_image'));
-            var acceptTypes = 'image/jpeg,image/png,image/jpg,image/webp';
-
-            var galleryFiles = [];
-
-            function isImage(file) { return window.__catalogUploadUtils && window.__catalogUploadUtils.isImage(file); }
-
-            function setCoverFromFile(file) {
-                if (!isImage(file)) return;
-                var input = document.getElementById('cover_image');
-                if (input && typeof DataTransfer !== 'undefined') {
-                    var dt = new DataTransfer();
-                    dt.items.add(file);
-                    input.files = dt.files;
-                }
-                var placeholder = document.getElementById('cover-placeholder');
-                var preview = document.getElementById('cover-preview');
-                var img = document.getElementById('cover-preview-img');
-                if (placeholder && preview && img) {
-                    placeholder.classList.add('d-none');
-                    preview.classList.remove('d-none');
-                    img.src = URL.createObjectURL(file);
-                }
-                renderPreviews();
-            }
-
-            function setupCover() {
-                var zone = document.getElementById('cover-drop-zone');
-                var input = document.getElementById('cover_image');
-                var replaceBtn = document.getElementById('cover-replace-btn');
-                if (!zone || !input) return;
-                zone.addEventListener('click', function(e) { if (!e.target.closest('#cover-replace-btn')) input.click(); });
-                input.addEventListener('change', function() {
-                    if (input.files && input.files[0]) setCoverFromFile(input.files[0]);
-                });
-                if (replaceBtn) replaceBtn.addEventListener('click', function(e) { e.stopPropagation(); input.click(); });
-                window.__catalogUploadUtils && window.__catalogUploadUtils.attachDropZoneState(zone);
-                zone.addEventListener('drop', function(e) {
-                    var f = e.dataTransfer.files[0];
-                    if (isImage(f)) setCoverFromFile(f);
-                });
-            }
-
-            function addGalleryFiles(files) {
-                for (var i = 0; i < files.length; i++) {
-                    if (isImage(files[i])) galleryFiles.push(files[i]);
-                }
-                renderPreviews();
-            }
-
-            function removeGalleryIndex(i) {
-                galleryFiles.splice(i, 1);
-                renderPreviews();
-            }
-
-            function setupGallery() {
-                var zone = document.getElementById('gallery-drop-zone');
-                var input = document.getElementById('gallery_input');
-                if (!zone || !input) return;
-                zone.addEventListener('click', function() { input.click(); });
-                input.addEventListener('change', function() {
-                    if (input.files && input.files.length) {
-                        addGalleryFiles(Array.from(input.files));
-                        input.value = '';
-                    }
-                });
-                window.__catalogUploadUtils && window.__catalogUploadUtils.attachDropZoneState(zone);
-                zone.addEventListener('drop', function(e) {
-                    addGalleryFiles(Array.from(e.dataTransfer.files));
-                });
-            }
-
-            function renderPreviews() {
-                var container = document.getElementById('images-preview');
-                var emptyEl = document.getElementById('images-preview-empty');
-                if (!container || !emptyEl) return;
-                var existing = container.querySelectorAll('.image-preview-thumb');
-                existing.forEach(function(el) { el.remove(); });
-                emptyEl.style.display = 'block';
-
-                var coverInput = document.getElementById('cover_image');
-                var coverFile = coverInput && coverInput.files && coverInput.files[0];
-                var hasAny = !!coverFile || galleryFiles.length > 0;
-                if (!hasAny) return;
-
-                function thumb(file, label, onRemove) {
-                    var wrap = document.createElement('div');
-                    wrap.className = 'image-preview-thumb position-relative d-inline-block rounded-2 overflow-hidden shadow-sm';
-                    wrap.style.width = '88px'; wrap.style.height = '88px';
-                    var img = document.createElement('img');
-                    img.src = URL.createObjectURL(file);
-                    img.alt = '';
-                    img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
-                    wrap.appendChild(img);
-                    if (label) {
-                        var badge = document.createElement('span');
-                        badge.className = 'badge bg-primary position-absolute top-0 start-0 m-1';
-                        badge.style.fontSize = '10px';
-                        badge.textContent = label;
-                        wrap.appendChild(badge);
-                    }
-                    if (onRemove) {
-                        var btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'btn btn-danger btn-sm position-absolute bottom-0 end-0 m-1 p-1';
-                        btn.style.fontSize = '10px';
-                        btn.innerHTML = '&times;';
-                        btn.title = removeLabel;
-                        btn.addEventListener('click', onRemove);
-                        wrap.appendChild(btn);
-                    }
-                    container.appendChild(wrap);
-                    emptyEl.style.display = 'none';
-                }
-
-                if (coverFile) thumb(coverFile, coverLabel, null);
-                galleryFiles.forEach(function(file, i) {
-                    (function(idx) {
-                        thumb(file, galleryLabel, function() { removeGalleryIndex(idx); });
-                    })(i);
-                });
-            }
-
-            function injectGalleryInputs() {
-                var form = document.getElementById('item-create-form');
-                if (!form) return;
-                if (window.__catalogUploadUtils) {
-                    window.__catalogUploadUtils.setFileInputs(form, 'gallery_images[]', galleryFiles);
-                }
-            }
-
-            function validateAndSubmit(e) {
-                var form = document.getElementById('item-create-form');
-                var coverInput = document.getElementById('cover_image');
-                if (!coverInput || !coverInput.files || !coverInput.files[0]) {
-                    e.preventDefault();
-                    var zone = document.getElementById('cover-drop-zone');
-                    if (zone) {
-                        zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        zone.classList.add('upload-drop-zone--invalid');
-                        setTimeout(function() { zone.classList.remove('upload-drop-zone--invalid'); }, 2000);
-                    }
-                    var msg = document.getElementById('cover-required-msg');
-                    if (msg) msg.classList.remove('d-none');
-                    return false;
-                }
-                var msg = document.getElementById('cover-required-msg');
-                if (msg) msg.classList.add('d-none');
-                injectGalleryInputs();
-            }
-
-            function init() {
-                setupCover();
-                setupGallery();
-                var form = document.getElementById('item-create-form');
-                if (form) {
-                    form.addEventListener('submit', function(e) {
-                        validateAndSubmit(e);
-                    });
-                }
-            }
-            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-            else init();
-        })();
-    </script>
-    <script type="text/javascript">
-        // Exposes the route for the checkContact.js component.
-        window.checkContactRoute = "{{ route('catalog.collaborators.check-contact') }}";
-
-        (function() {
-            function init() {
-                if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
-                    setTimeout(init, 50);
-                    return;
-                }
-                
-                function getSessionStorage() {
-                    tagCount = parseInt(sessionStorage.getItem("tagCount"));
-                    extraCount = parseInt(sessionStorage.getItem("extraCount"));
-                    componentCount = parseInt(sessionStorage.getItem("componentCount"));
-
-                    if (tagCount > 0) {
-                        for (let i = 0; i < tagCount; i++) {
-                            let tagCategoryText = sessionStorage.getItem("tag" + tagIds + "categoryText");
-                            let tagCategoryVal = sessionStorage.getItem("tag" + tagIds + "categoryVal");
-                            let tagName = sessionStorage.getItem("tag" + tagIds + "name");
-
-                            tagBuilder(tagCategoryText, tagCategoryVal, tagName, tagIds);
-
-                            tagIds++;
-                        }
-                        checkTags();
-                    }
-
-                    if (extraCount > 0) {
-                        for (let i = 0; i < extraCount; i++) {
-                            let extraInfo = sessionStorage.getItem("extra" + extraIds + "info");
-
-                            extraBuilder(extraInfo, extraIds);
-
-                            extraIds++;
-                        }
-                        checkExtras();
-                    }
-
-                    if (componentCount > 0) {
-                        for (let i = 0; i < componentCount; i++) {
-                            let componentCategoryText = sessionStorage.getItem("component" + componentIds + "categoryText");
-                            let componentCategoryVal = sessionStorage.getItem("component" + componentIds + "categoryVal");
-                            let componentName = sessionStorage.getItem("component" + componentIds + "name");
-
-                            componentBuilder(componentCategoryText, componentCategoryVal, componentName, componentIds);
-
-                            componentIds++;
-                        }
-                        checkComponents();
-                    }
-                }
-
-                $(document).ready(function() {
-                    @if (session()->has('success'))
-                        sessionStorage.clear();
-                    @endif
-
-                    if (sessionStorage.getItem("itemCreateForm") === null) {
-                        return;
-                    } else {
-                        @if (session()->has('errors'))
-                            getSessionStorage();
-                            return;
-                        @endif
-
-                        if (confirm(
-                                @json(__('view.catalog.items.create.recover_confirm'))
-                            )) {
-                            getSessionStorage();
-                        }
-                    }
-                });
-            }
-            init();
-        })();
-    </script>
 
 </x-layouts.app>
