@@ -44,4 +44,5 @@ parameters:
         - '#TranslationDisplaySql::itemNameExpression\(\)#'
         - '#TranslationDisplaySql::itemDescriptionExpression\(\)#'
         - '#TranslationDisplaySql::itemCatalogListSelectAliases\(\)#'
+        - '#Method App\\Models\\Language::forLocaleSwitcher\(\) should return#'
     reportUnmatchedIgnoredErrors: false

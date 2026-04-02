@@ -95,7 +95,7 @@
                     </li>
                 </ul>
                 <hr/>
-                @if ($adminLanguages->isNotEmpty())
+                @if ($localeSwitcherLanguages->isNotEmpty())
                     <div class="px-3 mb-3">
                         <label class="form-label small text-muted mb-1" for="adminLocale">
                             {{ __('view.admin.layout.locale_label') }}
@@ -105,7 +105,7 @@
                             <select class="form-select form-select-sm" id="adminLocale" name="locale"
                                 aria-label="{{ __('view.admin.layout.locale_label') }}"
                                 onchange="this.form.requestSubmit()">
-                                @foreach ($adminLanguages as $lang)
+                                @foreach ($localeSwitcherLanguages as $lang)
                                     @php
                                         $hasUi = $lang->hasUiTranslationPack();
                                     @endphp

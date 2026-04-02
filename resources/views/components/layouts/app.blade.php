@@ -50,6 +50,35 @@
                         <a class="nav-link p-3 fw-bold @if (Route::currentRouteName() == 'about') explore-button @endif"
                             href="{{ route('about') }}">{{ __('view.layout.nav.about') }}</a>
                     </li>
+                    @if ($localeSwitcherLanguages->isNotEmpty())
+                        <li class="nav-item d-flex align-items-center">
+                            <form action="{{ route('locale.update') }}" method="post"
+                                class="d-flex align-items-center mb-0 px-2 px-lg-0">
+                                @csrf
+                                <div class="locale-nav-select">
+                                    <label class="visually-hidden" for="publicLocale">
+                                        {{ __('view.layout.locale_label') }}
+                                    </label>
+                                    <select class="form-select locale-nav-select-input fw-bold" id="publicLocale"
+                                        name="locale" aria-label="{{ __('view.layout.locale_label') }}"
+                                        onchange="this.form.requestSubmit()">
+                                        @foreach ($localeSwitcherLanguages as $lang)
+                                            @php
+                                                $hasUi = $lang->hasUiTranslationPack();
+                                            @endphp
+                                            <option value="{{ $lang->code }}"
+                                                @selected(app()->getLocale() === $lang->code)
+                                                @disabled(! $hasUi)>
+                                                {{ $lang->name }}@if (! $hasUi)
+                                                    ({{ __('view.layout.locale_no_ui') }})
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </form>
+                        </li>
+                    @endif
                 </ul>
             </div>
         </div>

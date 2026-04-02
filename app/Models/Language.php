@@ -5,8 +5,9 @@ namespace App\Models;
 use App\Enums\Content\ContentLanguage;
 use App\Support\Content\ContentLocaleFallback;
 use Illuminate\Database\Eloquent\Model;
-use RuntimeException;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use RuntimeException;
 
 /**
  * @property string $code Unique locale key (matches {@see ContentLanguage} values in use).
@@ -86,6 +87,19 @@ class Language extends Model
         $language = static::query()->where('code', $code)->first();
 
         return $language !== null && $language->hasUiTranslationPack();
+    }
+
+    /**
+     * Languages listed in public/admin locale switchers (excludes neutral; ordered by display name).
+     *
+     * @return Collection<int, Language>
+     */
+    public static function forLocaleSwitcher(): Collection
+    {
+        return static::query()
+            ->where('code', '!=', ContentLanguage::NEUTRAL->value)
+            ->orderBy('name')
+            ->get();
     }
 
     /**
