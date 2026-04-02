@@ -194,6 +194,13 @@ return [
         ],
     ],
 
+    'items' => [
+        'translations' => [
+            'incomplete_for_locale' => 'For :locale, fill in both name and description if any field in that language has text.',
+            'at_least_one_locale' => 'Fill in name and description in at least one language.',
+        ],
+    ],
+
     'catalog' => [
         'item_component_different' => 'The item and the component must be different.',
         'item_tag_different' => 'The item and the tag must be different.',

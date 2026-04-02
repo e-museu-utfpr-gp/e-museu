@@ -195,6 +195,13 @@ return [
         ],
     ],
 
+    'items' => [
+        'translations' => [
+            'incomplete_for_locale' => 'Em :locale, preencha nome e descrição se houver qualquer texto nesse idioma.',
+            'at_least_one_locale' => 'Preencha nome e descrição em pelo menos um idioma.',
+        ],
+    ],
+
     'catalog' => [
         'item_component_different' => 'O item e o componente precisam ser diferentes.',
         'item_tag_different' => 'O item e a etiqueta precisam ser diferentes.',

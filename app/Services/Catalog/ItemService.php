@@ -15,6 +15,7 @@ use App\Support\StringHelper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -171,18 +172,13 @@ class ItemService
             'identification_code' => '000',
         ];
 
-        $translationFields = [
-            'name' => (string) $request->input('name'),
-            'description' => (string) $request->input('description'),
-            'history' => $request->input('history'),
-            'detail' => $request->input('detail'),
-        ];
+        $translations = $request->validated('translations');
 
         $item = null;
 
-        DB::transaction(function () use ($itemAttributes, $translationFields, &$item): void {
+        DB::transaction(function () use ($itemAttributes, $translations, &$item): void {
             $item = Item::create($itemAttributes);
-            $item->syncPrimaryLocaleTranslation($translationFields);
+            $item->syncTranslationsFromAdminForm($translations);
             $item->update([
                 'identification_code' => $this->createIdentificationCode($item),
             ]);
@@ -219,16 +215,16 @@ class ItemService
      */
     public function updateItem(Item $item, array $attributes): void
     {
-        $split = TranslatablePayload::split($attributes, TranslatablePayload::ITEM_KEYS);
-        $translationData = $split['translation'];
-        $itemData = $split['persist'];
+        $translations = $attributes['translations'] ?? [];
+        $itemData = Arr::except($attributes, ['translations']);
+        $split = TranslatablePayload::split($itemData, TranslatablePayload::ITEM_KEYS);
 
-        if ($itemData !== []) {
-            $item->update($itemData);
+        if ($split['persist'] !== []) {
+            $item->update($split['persist']);
         }
 
-        if ($translationData !== []) {
-            $item->syncPrimaryLocaleTranslation($translationData);
+        if ($translations !== []) {
+            $item->syncTranslationsFromAdminForm($translations);
         }
 
         $item->normalizeSingleCover();

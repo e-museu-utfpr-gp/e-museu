@@ -42,6 +42,13 @@ return [
             'no' => 'Não',
             'delete_confirm' => 'Tem certeza que deseja excluir o item e todas as vezes que é referenciado em outros registros?',
         ],
+        'form' => [
+            'content_by_language' => 'Conteúdo por idioma',
+            'name' => 'Nome',
+            'description' => 'Descrição',
+            'detail' => 'Detalhe',
+            'history' => 'História',
+        ],
         'create' => [
             'title' => 'Criar item',
             'heading' => 'Adicionar Item',

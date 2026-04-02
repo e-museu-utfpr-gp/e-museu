@@ -56,6 +56,8 @@ class AdminItemController extends AdminBaseController
         return view('pages.admin.catalog.items.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
+            'contentLanguages' => Language::forAdminContentForms(),
+            'preferredContentTabLanguageId' => Language::idForPreferredFormLocale(),
         ]);
     }
 
@@ -82,12 +84,17 @@ class AdminItemController extends AdminBaseController
         $lockService->requireUnlocked($item);
         $lockService->lock($item);
 
-        $formLangId = Language::idForPreferredFormLocale();
-        $itemAdminFormTranslation = $item->translations->firstWhere('language_id', $formLangId);
+        $preferredId = Language::idForPreferredFormLocale();
+        $headingTranslation = $item->translations->firstWhere('language_id', $preferredId)
+            ?? $item->translations->first();
+        $preferredContentTabLanguageCode = Language::query()->whereKey($preferredId)->value('code');
 
         return view('pages.admin.catalog.items.edit', [
             'item' => $item,
-            'itemAdminFormTranslation' => $itemAdminFormTranslation,
+            'headingTranslation' => $headingTranslation,
+            'preferredContentTabLanguageId' => $preferredId,
+            'preferredContentTabLanguageCode' => $preferredContentTabLanguageCode,
+            'contentLanguages' => Language::forAdminContentForms(),
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
         ]);

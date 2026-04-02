@@ -147,6 +147,51 @@ class Item extends Model
         }
     }
 
+    /**
+     * Upsert or remove `item_translations` rows from admin payloads keyed by {@see Language::code}.
+     * Empty blocks (all fields blank) remove the row for that language.
+     *
+     * @param  array<string, array<string, mixed>|null>  $translationsByCode
+     */
+    public function syncTranslationsFromAdminForm(array $translationsByCode): void
+    {
+        foreach (Language::forAdminContentForms() as $lang) {
+            $code = $lang->code;
+            $block = $translationsByCode[$code] ?? [];
+            if (! is_array($block)) {
+                continue;
+            }
+
+            $name = trim((string) ($block['name'] ?? ''));
+            $description = trim((string) ($block['description'] ?? ''));
+            $detailRaw = trim((string) ($block['detail'] ?? ''));
+            $detail = $detailRaw === '' ? null : $detailRaw;
+            $historyRaw = trim((string) ($block['history'] ?? ''));
+            $history = $historyRaw === '' ? null : $historyRaw;
+
+            if ($name === '' && $description === '' && $detail === null && $history === null) {
+                $this->translations()->where('language_id', $lang->id)->delete();
+
+                continue;
+            }
+
+            $this->translations()->updateOrCreate(
+                ['language_id' => $lang->id],
+                [
+                    'name' => $name,
+                    'description' => $description,
+                    'detail' => $detail,
+                    'history' => $history,
+                ]
+            );
+        }
+
+        $this->resolvedTranslationMemo = null;
+        if ($this->relationLoaded('translations')) {
+            $this->unsetRelation('translations');
+        }
+    }
+
     public function refresh()
     {
         $this->resolvedTranslationMemo = null;

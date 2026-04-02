@@ -103,6 +103,16 @@ class Language extends Model
     }
 
     /**
+     * All catalog content languages for admin create/edit forms (includes neutral).
+     *
+     * @return Collection<int, Language>
+     */
+    public static function forAdminContentForms(): Collection
+    {
+        return static::query()->orderBy('name')->get();
+    }
+
+    /**
      * @return HasMany<\App\Models\Catalog\ItemTranslation, $this>
      */
     public function itemTranslations(): HasMany

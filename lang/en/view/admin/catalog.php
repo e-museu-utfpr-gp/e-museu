@@ -42,6 +42,13 @@ return [
             'no' => 'No',
             'delete_confirm' => 'Are you sure you want to delete this item and all references to it in other records?',
         ],
+        'form' => [
+            'content_by_language' => 'Content by language',
+            'name' => 'Name',
+            'description' => 'Description',
+            'detail' => 'Detail',
+            'history' => 'History',
+        ],
         'create' => [
             'title' => 'Create item',
             'heading' => 'Add Item',
