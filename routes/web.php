@@ -17,15 +17,14 @@ use App\Http\Controllers\Admin\Collaborator\AdminCollaboratorController;
 use App\Http\Controllers\StorageProxyController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagCategoryController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagController;
-use App\Enums\Content\ContentLanguage;
+use App\Models\Language;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/storage/{path}', StorageProxyController::class)->where('path', '.*')->name('storage.proxy');
 
 Route::post('/locale', function (\Illuminate\Http\Request $request) {
     $locale = (string) $request->input('locale');
-    $allowed = [ContentLanguage::PT_BR->value, ContentLanguage::EN->value];
-    if (in_array($locale, $allowed, true)) {
+    if (Language::isValidSessionUiLocale($locale)) {
         $request->session()->put('locale', $locale);
     }
 

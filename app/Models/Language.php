@@ -71,6 +71,24 @@ class Language extends Model
     }
 
     /**
+     * Whether Laravel has a `lang/{code}/` directory so `__()` / `app()->setLocale()` work for this code.
+     */
+    public function hasUiTranslationPack(): bool
+    {
+        return is_dir(lang_path($this->code));
+    }
+
+    /**
+     * Session locale is stored only for rows in `languages` that also have UI translation files.
+     */
+    public static function isValidSessionUiLocale(string $code): bool
+    {
+        $language = static::query()->where('code', $code)->first();
+
+        return $language !== null && $language->hasUiTranslationPack();
+    }
+
+    /**
      * @return HasMany<\App\Models\Catalog\ItemTranslation, $this>
      */
     public function itemTranslations(): HasMany

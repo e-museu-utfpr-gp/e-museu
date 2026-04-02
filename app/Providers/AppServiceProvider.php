@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Enums\Content\ContentLanguage;
+use App\Models\Language;
+use App\Providers\Concerns\AdminDatabaseSessionHandler;
 use App\Providers\Concerns\GuessesFactoryName;
 use App\Providers\Concerns\GuessesModelName;
-use App\Providers\Concerns\AdminDatabaseSessionHandler;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -33,6 +36,16 @@ class AppServiceProvider extends ServiceProvider
             $dbConnection = $app['db']->connection($connection);
 
             return new AdminDatabaseSessionHandler($dbConnection, $table, $lifetime, $app);
+        });
+
+        View::composer('components.layouts.admin', function ($view): void {
+            $view->with(
+                'adminLanguages',
+                Language::query()
+                    ->where('code', '!=', ContentLanguage::NEUTRAL->value)
+                    ->orderBy('name')
+                    ->get()
+            );
         });
     }
 }

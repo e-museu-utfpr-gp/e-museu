@@ -95,6 +95,32 @@
                     </li>
                 </ul>
                 <hr/>
+                @if ($adminLanguages->isNotEmpty())
+                    <div class="px-3 mb-3">
+                        <label class="form-label small text-muted mb-1" for="adminLocale">
+                            {{ __('view.admin.layout.locale_label') }}
+                        </label>
+                        <form action="{{ route('locale.update') }}" method="post">
+                            @csrf
+                            <select class="form-select form-select-sm" id="adminLocale" name="locale"
+                                aria-label="{{ __('view.admin.layout.locale_label') }}"
+                                onchange="this.form.requestSubmit()">
+                                @foreach ($adminLanguages as $lang)
+                                    @php
+                                        $hasUi = $lang->hasUiTranslationPack();
+                                    @endphp
+                                    <option value="{{ $lang->code }}"
+                                        @selected(app()->getLocale() === $lang->code)
+                                        @disabled(! $hasUi)>
+                                        {{ $lang->name }}@if (! $hasUi)
+                                            ({{ __('view.admin.layout.locale_no_ui') }})
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+                    </div>
+                @endif
                 <div class="dropdown mt-2">
                     <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle ms-3"
                         id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">

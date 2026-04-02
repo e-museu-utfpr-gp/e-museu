@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\Content\ContentLanguage;
+use App\Models\Language;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,11 +19,7 @@ class SetLocaleFromSession
             return $next($request);
         }
 
-        $allowed = [
-            ContentLanguage::PT_BR->value,
-            ContentLanguage::EN->value,
-        ];
-        if (in_array($locale, $allowed, true)) {
+        if (Language::isValidSessionUiLocale($locale)) {
             app()->setLocale($locale);
         }
 
