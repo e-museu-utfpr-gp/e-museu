@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Catalog;
 
+use App\Models\Language;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreItemRequest extends FormRequest
 {
@@ -24,7 +26,10 @@ class StoreItemRequest extends FormRequest
      */
     public function rules(): array
     {
+        $languageCodes = once(fn (): array => Language::query()->pluck('code')->all());
+
         return [
+            'content_locale' => ['required', 'string', Rule::in($languageCodes)],
             'name' => [
                 'required',
                 'string',

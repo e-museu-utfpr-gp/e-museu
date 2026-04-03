@@ -174,7 +174,7 @@ return [
         ],
         'edit' => [
             'title' => 'Edit extra information',
-            'heading' => 'Edit Extra Information: :id',
+            'heading' => 'Edit Extra Information: :id — :preview',
             'info' => 'Information',
             'item_category' => 'Item Category',
             'item' => 'Item',

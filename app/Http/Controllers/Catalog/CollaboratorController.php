@@ -11,10 +11,23 @@ class CollaboratorController extends Controller
 {
     public function checkContact(Request $request, CollaboratorService $collaboratorService): JsonResponse
     {
-        $contact = (string) ($request->input('contact') ?? '');
+        $request->validate([
+            'contact' => 'nullable|string|max:200',
+        ]);
+
+        $contact = trim((string) $request->input('contact', ''));
+        if ($contact === '') {
+            return response()->json([
+                'exists' => false,
+                'full_name' => '',
+            ]);
+        }
 
         $collaborator = $collaboratorService->findExternalByContact($contact);
 
-        return response()->json($collaborator ?? false);
+        return response()->json([
+            'exists' => $collaborator !== null,
+            'full_name' => $collaborator !== null ? (string) $collaborator->full_name : '',
+        ]);
     }
 }

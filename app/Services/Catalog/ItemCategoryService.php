@@ -4,9 +4,9 @@ namespace App\Services\Catalog;
 
 use App\Models\Catalog\ItemCategory;
 use App\Support\Admin\AdminIndexConfig;
-use App\Support\Content\TranslatablePayload;
 use App\Support\Content\TranslationDisplaySql;
 use App\Support\Admin\AdminIndexQueryBuilder;
+use Illuminate\Support\Arr;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -18,17 +18,20 @@ class ItemCategoryService
      */
     public function getPaginatedItemCategoriesForAdminIndex(Request $request): array
     {
-        $count = ItemCategory::count();
         $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
         $query = ItemCategory::query()
             ->select('item_categories.*')
-            ->selectRaw("({$nameSql}) AS name");
+            ->selectRaw("({$nameSql}) AS name")
+            ->with('locks');
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::itemCategories());
 
         $itemCategories = $query->paginate(50)->withQueryString();
 
-        return ['itemCategories' => $itemCategories, 'count' => $count];
+        return [
+            'itemCategories' => $itemCategories,
+            'count' => $itemCategories->total(),
+        ];
     }
 
     /**
@@ -64,11 +67,9 @@ class ItemCategoryService
      */
     public function createItemCategory(array $data): ItemCategory
     {
-        $split = TranslatablePayload::split($data, TranslatablePayload::ITEM_CATEGORY_KEYS);
-        $category = ItemCategory::create($split['persist']);
-        $category->syncPrimaryLocaleTranslation([
-            'name' => (string) ($split['translation']['name'] ?? ''),
-        ]);
+        $translations = $data['translations'] ?? [];
+        $category = ItemCategory::create(Arr::except($data, ['translations']));
+        $category->syncTranslationsFromAdminForm($translations);
 
         return $category;
     }
@@ -78,14 +79,13 @@ class ItemCategoryService
      */
     public function updateItemCategory(ItemCategory $itemCategory, array $data): void
     {
-        $split = TranslatablePayload::split($data, TranslatablePayload::ITEM_CATEGORY_KEYS);
-        if ($split['persist'] !== []) {
-            $itemCategory->update($split['persist']);
+        $translations = $data['translations'] ?? [];
+        $persist = Arr::except($data, ['translations']);
+        if ($persist !== []) {
+            $itemCategory->update($persist);
         }
-        if (array_key_exists('name', $split['translation'])) {
-            $itemCategory->syncPrimaryLocaleTranslation([
-                'name' => (string) $split['translation']['name'],
-            ]);
+        if ($translations !== []) {
+            $itemCategory->syncTranslationsFromAdminForm($translations);
         }
     }
 

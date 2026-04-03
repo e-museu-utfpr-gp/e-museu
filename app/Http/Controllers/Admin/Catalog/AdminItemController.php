@@ -12,6 +12,7 @@ use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemService;
 use App\Services\Collaborator\CollaboratorService;
+use App\Support\Admin\AdminEditHeadingLocale;
 use App\Support\Admin\AdminIndexTableView;
 use App\Services\Identity\LockService;
 use Illuminate\Http\JsonResponse;
@@ -46,7 +47,7 @@ class AdminItemController extends AdminBaseController
 
     public function show(Item $item): View
     {
-        $item->load(['images', 'translations.language']);
+        $item->load(Item::eagerLoadRelationsForAdminShow());
 
         return view('pages.admin.catalog.items.show', compact('item'));
     }
@@ -57,7 +58,7 @@ class AdminItemController extends AdminBaseController
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
             'contentLanguages' => Language::forAdminContentForms(),
-            'preferredContentTabLanguageId' => Language::idForPreferredFormLocale(),
+            'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
         ]);
     }
 
@@ -78,26 +79,18 @@ class AdminItemController extends AdminBaseController
         Item $item,
         ItemCategoryService $itemCategoryService,
         CollaboratorService $collaboratorService,
-        LockService $lockService
+        LockService $lockService,
+        AdminEditHeadingLocale $headingLocale
     ): View {
-        $item->load(['images', 'coverImage', 'translations.language']);
-        $lockService->requireUnlocked($item);
-        $lockService->lock($item);
+        $item->load(['images', 'translations.language']);
+        $lockService->requireUnlockedThenLock($item);
 
-        $preferredId = Language::idForPreferredFormLocale();
-        $headingTranslation = $item->translations->firstWhere('language_id', $preferredId)
-            ?? $item->translations->first();
-        $preferredContentTabLanguageCode = Language::query()->whereKey($preferredId)->value('code');
-
-        return view('pages.admin.catalog.items.edit', [
+        return view('pages.admin.catalog.items.edit', array_merge([
             'item' => $item,
-            'headingTranslation' => $headingTranslation,
-            'preferredContentTabLanguageId' => $preferredId,
-            'preferredContentTabLanguageCode' => $preferredContentTabLanguageCode,
             'contentLanguages' => Language::forAdminContentForms(),
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
-        ]);
+        ], $headingLocale->resolveFor($item)));
     }
 
     public function update(

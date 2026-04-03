@@ -7,6 +7,7 @@ use App\Models\Collaborator\Collaborator;
 use App\Models\Language;
 use App\Enums\Catalog\ItemImageType;
 use App\Models\Taxonomy\Tag;
+use App\Models\Taxonomy\TagCategory;
 use App\Support\Content\ContentLocaleFallback;
 use App\Support\Content\ResolvedTranslation;
 use App\Support\Content\TranslationDisplaySql;
@@ -39,6 +40,7 @@ use Illuminate\Support\Facades\DB;
  * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  * @SuppressWarnings(PHPMD.TooManyMethods)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class Item extends Model
 {
@@ -89,6 +91,9 @@ class Item extends Model
     /**
      * Single translation row chosen with the same locale order as {@see TranslationResolution} and
      * {@see TranslationDisplaySql} (MySQL FIELD on `languages.code`).
+     *
+     * Prefer {@see resolveTranslation()} or SQL-injected columns ({@see scopeForAdminList}, catalog index query)
+     * for collections: eager-loading this relation can produce heavy or awkward SQL at scale.
      */
     public function translation(): HasOne
     {
@@ -136,7 +141,14 @@ class Item extends Model
      */
     public function syncPrimaryLocaleTranslation(array $fields): void
     {
-        $languageId = Language::idForPreferredFormLocale();
+        $this->syncTranslationForLanguage(Language::idForPreferredFormLocale(), $fields);
+    }
+
+    /**
+     * @param  array{name?: string, description?: string, history?: string|null, detail?: string|null}  $fields
+     */
+    public function syncTranslationForLanguage(int $languageId, array $fields): void
+    {
         $this->translations()->updateOrCreate(
             ['language_id' => $languageId],
             $fields
@@ -156,40 +168,43 @@ class Item extends Model
     public function syncTranslationsFromAdminForm(array $translationsByCode): void
     {
         foreach (Language::forAdminContentForms() as $lang) {
-            $code = $lang->code;
-            $block = $translationsByCode[$code] ?? [];
-            if (! is_array($block)) {
-                continue;
-            }
-
-            $name = trim((string) ($block['name'] ?? ''));
-            $description = trim((string) ($block['description'] ?? ''));
-            $detailRaw = trim((string) ($block['detail'] ?? ''));
-            $detail = $detailRaw === '' ? null : $detailRaw;
-            $historyRaw = trim((string) ($block['history'] ?? ''));
-            $history = $historyRaw === '' ? null : $historyRaw;
-
-            if ($name === '' && $description === '' && $detail === null && $history === null) {
-                $this->translations()->where('language_id', $lang->id)->delete();
-
-                continue;
-            }
-
-            $this->translations()->updateOrCreate(
-                ['language_id' => $lang->id],
-                [
-                    'name' => $name,
-                    'description' => $description,
-                    'detail' => $detail,
-                    'history' => $history,
-                ]
-            );
+            $this->syncAdminFormTranslationBlock($lang, $translationsByCode[$lang->code] ?? []);
         }
 
         $this->resolvedTranslationMemo = null;
         if ($this->relationLoaded('translations')) {
             $this->unsetRelation('translations');
         }
+    }
+
+    private function syncAdminFormTranslationBlock(Language $lang, mixed $block): void
+    {
+        if (! is_array($block)) {
+            return;
+        }
+
+        $name = trim((string) ($block['name'] ?? ''));
+        $description = trim((string) ($block['description'] ?? ''));
+        $detailRaw = trim((string) ($block['detail'] ?? ''));
+        $detail = $detailRaw === '' ? null : $detailRaw;
+        $historyRaw = trim((string) ($block['history'] ?? ''));
+        $history = $historyRaw === '' ? null : $historyRaw;
+
+        if ($name === '' && $description === '' && $detail === null && $history === null) {
+            $this->translations()->where('language_id', $lang->id)->delete();
+
+            return;
+        }
+
+        $this->translations()->updateOrCreate(
+            ['language_id' => $lang->id],
+            [
+                'name' => $name,
+                'description' => $description,
+                'detail' => $detail,
+                'history' => $history,
+            ]
+        );
     }
 
     public function refresh()
@@ -216,7 +231,9 @@ class Item extends Model
 
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Tag::class, 'item_tag', 'item_id', 'tag_id');
+        return $this->belongsToMany(Tag::class, 'item_tag', 'item_id', 'tag_id')
+            ->using(ItemTag::class)
+            ->withPivot('validation');
     }
 
     public function composedOf(): BelongsToMany
@@ -255,6 +272,40 @@ class Item extends Model
     }
 
     /**
+     * Eager-load `tag.items` (+ images and translation languages) only for tags in the series category,
+     * to avoid loading every related item for every tag on the public show page.
+     */
+    public function loadSeriesTimelineForCatalog(?int $seriesTagCategoryId): void
+    {
+        if ($seriesTagCategoryId === null) {
+            return;
+        }
+
+        foreach ($this->itemTags as $itemTag) {
+            $tag = $itemTag->tag;
+            if ($tag === null || (int) $tag->tag_category_id !== $seriesTagCategoryId) {
+                continue;
+            }
+
+            $tag->loadMissing([
+                'items.images',
+                'items.translations.language',
+            ]);
+        }
+    }
+
+    /**
+     * Catalog item show: resolve stable series tag category id and eager-load series timeline data.
+     */
+    public function loadCatalogSeriesTimelineForShow(): ?int
+    {
+        $seriesCategoryId = TagCategory::idForSeriesCategory();
+        $this->loadSeriesTimelineForCatalog($seriesCategoryId);
+
+        return $seriesCategoryId;
+    }
+
+    /**
      * @param  Builder<Item>  $query
      * @return Builder<Item>
      */
@@ -267,14 +318,31 @@ class Item extends Model
             'collaborator',
             'itemTags.tag.translations.language',
             'itemTags.tag.tagCategory.translations.language',
-            'itemTags.tag.items.images',
-            'itemTags.tag.items.translations.language',
             'itemComponents.component.images',
             'itemComponents.component.itemCategory.translations.language',
             'itemComponents.component.translations.language',
             'extras.collaborator',
             'extras.translations.language',
         ]);
+    }
+
+    /**
+     * Relations for the read-only admin item show page (avoids N+1 on nested rows).
+     *
+     * @return list<string|array<string, mixed>>
+     */
+    public static function eagerLoadRelationsForAdminShow(): array
+    {
+        return [
+            'translations.language',
+            'images',
+            'itemCategory.translations.language',
+            'collaborator',
+            'itemTags.tag.translations.language',
+            'itemComponents.component.translations.language',
+            'extras.collaborator',
+            'extras.translations.language',
+        ];
     }
 
     /**
@@ -289,7 +357,7 @@ class Item extends Model
         $detailSql = TranslationDisplaySql::itemTranslationSubquerySql('detail', 'items');
         $catNameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
 
-        $query->with('coverImage')
+        $query->with(['coverImage', 'locks'])
             ->leftJoin('collaborators', 'items.collaborator_id', '=', 'collaborators.id')
             ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
             ->select([

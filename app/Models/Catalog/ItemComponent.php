@@ -21,6 +21,10 @@ class ItemComponent extends Model
 
     protected $table = 'item_component';
 
+    protected $casts = [
+        'validation' => 'boolean',
+    ];
+
     /**
      * @param  Builder<ItemComponent>  $query
      * @return Builder<ItemComponent>

@@ -69,16 +69,49 @@ class LockService
         }
     }
 
+    /**
+     * Ensures the subject is not locked by another admin, then creates or extends the current admin's lock.
+     * Uses one lock row lookup (avoids duplicate query vs {@see requireUnlocked()} then {@see lock()}).
+     *
+     * @throws AuthorizationException
+     */
+    public function requireUnlockedThenLock(EloquentModel $subject): Lock
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            throw new AuthorizationException(__('app.identity.lock_blocked'));
+        }
+
+        $lock = Lock::findByModel($subject);
+        $userId = (string) $user->getAuthIdentifier();
+
+        if ($lock && $lock->expiresAt()) {
+            if (Carbon::parse($lock->expiry_date)->isPast()) {
+                $lock->delete();
+                $lock = null;
+            } elseif ((string) $lock->admin_id !== $userId) {
+                throw new AuthorizationException(__('app.identity.lock_blocked'));
+            }
+        }
+
+        return $this->materializeLock($subject, $lock, $userId);
+    }
+
     public function lock(EloquentModel $subject): Lock
     {
-        $lock = Lock::findByModel($subject);
-        $now = Carbon::now();
-        $newExpiry = $now->copy()->addHours(1);
+        return $this->materializeLock($subject, Lock::findByModel($subject), (string) Auth::id());
+    }
+
+    /**
+     * Creates a new lock or extends an existing one for the current admin (subject must already be editable).
+     */
+    private function materializeLock(EloquentModel $subject, ?Lock $lock, string $userId): Lock
+    {
+        $newExpiry = Carbon::now()->addHour();
 
         if ($lock) {
             $isExpired = $lock->expiresAt() && Carbon::parse($lock->expiry_date)->isPast();
-            $isOwnLock = (string) $lock->admin_id === (string) Auth::id();
-
+            $isOwnLock = (string) $lock->admin_id === $userId;
             if ($isExpired || ! $isOwnLock) {
                 $lock->delete();
                 $lock = null;
@@ -89,15 +122,16 @@ class LockService
             }
         }
 
-        Lock::where('admin_id', Auth::id())->delete();
+        Lock::where('admin_id', $userId)->delete();
+        Lock::flushFindByModelCache();
 
-        /** @var Lock $lock */
-        $lock = $subject->locks()->create([
-            'admin_id' => Auth::id(),
+        /** @var Lock $created */
+        $created = $subject->locks()->create([
+            'admin_id' => $userId,
             'expiry_date' => $newExpiry,
         ]);
 
-        return $lock;
+        return $created;
     }
 
     public function unlock(EloquentModel $subject): bool

@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Admin\Catalog;
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Catalog\AdminStoreExtraRequest;
 use App\Models\Catalog\Extra;
+use App\Models\Language;
 use App\Services\Catalog\ExtraService;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Identity\LockService;
+use App\Support\Admin\AdminEditHeadingLocale;
 use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,6 +49,8 @@ class AdminExtraController extends AdminBaseController
         return view('pages.admin.catalog.extras.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
+            'contentLanguages' => Language::forAdminContentForms(),
+            'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
         ]);
     }
 
@@ -61,16 +65,19 @@ class AdminExtraController extends AdminBaseController
         Extra $extra,
         ItemCategoryService $itemCategoryService,
         CollaboratorService $collaboratorService,
-        LockService $lockService
+        LockService $lockService,
+        AdminEditHeadingLocale $headingLocale
     ): View {
-        $lockService->requireUnlocked($extra);
-        $lockService->lock($extra);
+        $lockService->requireUnlockedThenLock($extra);
 
-        return view('pages.admin.catalog.extras.edit', [
+        $extra->load(['translations.language', 'item.itemCategory', 'collaborator']);
+
+        return view('pages.admin.catalog.extras.edit', array_merge([
             'extra' => $extra,
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
-        ]);
+            'contentLanguages' => Language::forAdminContentForms(),
+        ], $headingLocale->resolveFor($extra)));
     }
 
     public function update(

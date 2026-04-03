@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin\Taxonomy;
 
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Taxonomy\AdminTagCategoryRequest;
+use App\Models\Language;
 use App\Models\Taxonomy\TagCategory;
 use App\Services\Identity\LockService;
 use App\Services\Taxonomy\TagCategoryService;
+use App\Support\Admin\AdminEditHeadingLocale;
 use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +28,10 @@ class AdminTagCategoryController extends AdminBaseController
 
     public function create(): View
     {
-        return view('pages.admin.taxonomy.tag-categories.create');
+        return view('pages.admin.taxonomy.tag-categories.create', [
+            'contentLanguages' => Language::forAdminContentForms(),
+            'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
+        ]);
     }
 
     public function store(AdminTagCategoryRequest $request, TagCategoryService $tagCategoryService): RedirectResponse
@@ -43,13 +48,17 @@ class AdminTagCategoryController extends AdminBaseController
         return view('pages.admin.taxonomy.tag-categories.show', compact('tagCategory'));
     }
 
-    public function edit(TagCategory $tagCategory, LockService $lockService): View
-    {
-        $lockService->requireUnlocked($tagCategory);
+    public function edit(
+        TagCategory $tagCategory,
+        LockService $lockService,
+        AdminEditHeadingLocale $headingLocale
+    ): View {
+        $lockService->requireUnlockedThenLock($tagCategory);
 
-        $lockService->lock($tagCategory);
-
-        return view('pages.admin.taxonomy.tag-categories.edit', compact('tagCategory'));
+        return view('pages.admin.taxonomy.tag-categories.edit', array_merge([
+            'tagCategory' => $tagCategory,
+            'contentLanguages' => Language::forAdminContentForms(),
+        ], $headingLocale->resolveFor($tagCategory)));
     }
 
     public function update(

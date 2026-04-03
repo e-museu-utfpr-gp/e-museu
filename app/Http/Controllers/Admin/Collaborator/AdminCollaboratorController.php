@@ -52,8 +52,7 @@ class AdminCollaboratorController extends AdminBaseController
 
     public function edit(Collaborator $collaborator, LockService $lockService): View
     {
-        $lockService->requireUnlocked($collaborator);
-        $lockService->lock($collaborator);
+        $lockService->requireUnlockedThenLock($collaborator);
 
         return view('pages.admin.collaborators.edit', compact('collaborator'));
     }

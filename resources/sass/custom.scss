@@ -507,3 +507,18 @@ footer {
 .orange-text {
     color: #ed6e38;
 }
+
+// Neutral language: keep label + info icon on one row inside the tab (no nested <button>)
+.nav-tabs .nav-item .nav-link:has(.language-tab-label) {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    white-space: nowrap;
+}
+
+.tab-info-popover-icon {
+    font-size: 1rem;
+    line-height: 1;
+    display: block;
+}

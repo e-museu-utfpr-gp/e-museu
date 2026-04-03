@@ -24,19 +24,14 @@ return new class extends Migration
             throw new RuntimeException('Expected pt_BR and en rows in languages (see 2026_03_29_000000_create_languages_table).');
         }
 
-        $categoryIds = DB::table('tag_categories')->orderBy('id')->pluck('id');
-        if ($categoryIds->count() < 2) {
-            throw new RuntimeException('Expected at least two tag_categories rows (seeded in 2026_03_29_000005_create_tag_categories_table).');
-        }
-
-        $labelsByOrder = [
-            ['pt_BR' => 'Marca', 'en' => 'Brand'],
-            ['pt_BR' => 'Série', 'en' => 'Series'],
+        /** @see 2026_03_29_000005_create_tag_categories_table fixed ids: 1 = brand, 2 = series */
+        $labelsByCategoryId = [
+            1 => ['pt_BR' => 'Marca', 'en' => 'Brand'],
+            2 => ['pt_BR' => 'Série', 'en' => 'Series'],
         ];
 
         $now = now();
-        foreach ($labelsByOrder as $index => $namesByCode) {
-            $categoryId = $categoryIds[$index];
+        foreach ($labelsByCategoryId as $categoryId => $namesByCode) {
             foreach ($namesByCode as $code => $name) {
                 $languageId = DB::table('languages')->where('code', $code)->value('id');
                 if ($languageId === null) {

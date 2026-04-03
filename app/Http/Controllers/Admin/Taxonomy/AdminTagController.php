@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin\Taxonomy;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Requests\Admin\Taxonomy\AdminSingleTagRequest;
-use App\Services\Taxonomy\TagService;
+use App\Http\Requests\Admin\Taxonomy\AdminTagRequest;
+use App\Models\Language;
 use App\Services\Identity\LockService;
 use App\Services\Taxonomy\TagCategoryService;
+use App\Services\Taxonomy\TagService;
+use App\Support\Admin\AdminEditHeadingLocale;
 use App\Support\Admin\AdminIndexTableView;
 use App\Models\Taxonomy\Tag;
 use Illuminate\Http\RedirectResponse;
@@ -34,10 +36,14 @@ class AdminTagController extends AdminBaseController
     {
         $categories = $tagCategoryService->getForForm();
 
-        return view('pages.admin.taxonomy.tags.create', compact('categories'));
+        return view('pages.admin.taxonomy.tags.create', [
+            'categories' => $categories,
+            'contentLanguages' => Language::forAdminContentForms(),
+            'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
+        ]);
     }
 
-    public function store(AdminSingleTagRequest $request, TagService $tagService): RedirectResponse
+    public function store(AdminTagRequest $request, TagService $tagService): RedirectResponse
     {
         $data = $request->validated();
         $tag = $tagService->createFromAdminRequestData($data);
@@ -45,19 +51,25 @@ class AdminTagController extends AdminBaseController
         return redirect()->route('admin.taxonomy.tags.show', $tag)->with('success', __('app.taxonomy.tag.created'));
     }
 
-    public function edit(Tag $tag, TagCategoryService $tagCategoryService, LockService $lockService): View
-    {
-        $lockService->requireUnlocked($tag);
+    public function edit(
+        Tag $tag,
+        TagCategoryService $tagCategoryService,
+        LockService $lockService,
+        AdminEditHeadingLocale $headingLocale
+    ): View {
+        $lockService->requireUnlockedThenLock($tag);
 
         $categories = $tagCategoryService->getForForm();
 
-        $lockService->lock($tag);
-
-        return view('pages.admin.taxonomy.tags.edit', compact('tag', 'categories'));
+        return view('pages.admin.taxonomy.tags.edit', array_merge([
+            'tag' => $tag,
+            'categories' => $categories,
+            'contentLanguages' => Language::forAdminContentForms(),
+        ], $headingLocale->resolveFor($tag)));
     }
 
     public function update(
-        AdminSingleTagRequest $request,
+        AdminTagRequest $request,
         Tag $tag,
         TagService $tagService,
         LockService $lockService

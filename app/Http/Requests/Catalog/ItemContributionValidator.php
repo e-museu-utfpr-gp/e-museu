@@ -28,12 +28,12 @@ class ItemContributionValidator
      */
     public function validateStore(Request $request): array
     {
+        $this->mergeTrimmedTagNamesIntoRequest($request);
+
         $collaboratorRequest = new CollaboratorRequest();
         $storeItemRequest = new StoreItemRequest();
         $tagRequest = new TagRequest();
         $extraRequest = new ExtraRequest();
-        $componentRequest = new ComponentRequest();
-
         $collaborator = $request->validate(
             $collaboratorRequest->rules(),
             $collaboratorRequest->messages()
@@ -44,6 +44,7 @@ class ItemContributionValidator
         );
         $request->validate($tagRequest->rules(), $tagRequest->messages());
         $request->validate($extraRequest->rules(), $extraRequest->messages());
+        $componentRequest = ComponentRequest::createFrom($request);
         $request->validate($componentRequest->rules(), $componentRequest->messages());
 
         return [
@@ -62,6 +63,18 @@ class ItemContributionValidator
                 self::COMPONENT_ROW_KEYS
             ),
         ];
+    }
+
+    /** Normalizes `tags.*.name` before {@see \App\Http\Requests\Taxonomy\TagRequest} rules run (avoids logical duplicates with surrounding spaces). */
+    private function mergeTrimmedTagNamesIntoRequest(Request $request): void
+    {
+        $tags = (array) $request->input('tags', []);
+        foreach ($tags as $k => $row) {
+            if (is_array($row) && array_key_exists('name', $row)) {
+                $tags[$k]['name'] = trim((string) $row['name']);
+            }
+        }
+        $request->merge(['tags' => $tags]);
     }
 
     /**

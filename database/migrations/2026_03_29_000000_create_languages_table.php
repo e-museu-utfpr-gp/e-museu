@@ -11,6 +11,7 @@ return new class extends Migration
      * Run the migrations.
      *
      * Allowed `languages.code` values align with {@see \App\Enums\Content\ContentLanguage} (app layer).
+     * Explicit ids: 1 = neutral, 2 = pt_BR, 3 = en (display order in UI is still enforced in PHP, not by id).
      */
     public function up(): void
     {
@@ -23,9 +24,9 @@ return new class extends Migration
 
         $now = now();
         DB::table('languages')->insert([
-            ['code' => 'pt_BR', 'name' => 'Português (Brasil)', 'created_at' => $now, 'updated_at' => $now],
-            ['code' => 'en', 'name' => 'English', 'created_at' => $now, 'updated_at' => $now],
-            ['code' => 'neutral', 'name' => 'Neutral', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 1, 'code' => 'neutral', 'name' => 'Neutral', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'code' => 'pt_BR', 'name' => 'Português (Brasil)', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 3, 'code' => 'en', 'name' => 'English', 'created_at' => $now, 'updated_at' => $now],
         ]);
     }
 

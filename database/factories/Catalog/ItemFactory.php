@@ -17,7 +17,7 @@ class ItemFactory extends Factory
     {
         return [
             'date' => $this->faker->date,
-            'identification_code' => $this->faker->unique()->numberBetween(1, 1000),
+            'identification_code' => 'FACTORY_' . $this->faker->unique()->uuid(),
             'validation' => $this->faker->boolean,
             'category_id' => ItemCategory::pluck('id')->random(),
             'collaborator_id' => Collaborator::pluck('id')->random(),

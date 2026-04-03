@@ -6,18 +6,30 @@ use App\Models\Taxonomy\Tag;
 use App\Models\Taxonomy\TagCategory;
 use App\Services\Taxonomy\TagService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('mysql')]
 class TagFindOrCreateTest extends TestCase
 {
     use RefreshDatabase;
 
     protected function setUp(): void
     {
-        if (! extension_loaded('pdo_mysql') && ! extension_loaded('pdo_sqlite')) {
-            $this->markTestSkipped('PDO database driver not available.');
+        if (! extension_loaded('pdo_mysql')) {
+            $this->markTestSkipped(
+                'Catalog tests require pdo_mysql (install the extension or run tests in the app Docker container).'
+            );
         }
+
         parent::setUp();
+
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            $this->markTestSkipped(
+                'Set DB_CONNECTION=mysql in .env.testing (catalog seeds and SQL assume MySQL).'
+            );
+        }
     }
 
     public function test_find_or_create_reuses_same_tag_for_same_category_and_name(): void

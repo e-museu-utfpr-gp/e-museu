@@ -25,8 +25,9 @@
 <body class="bd-light d-flex flex-column min-vh-100">
     <div class="row">
         <div class="col-md-2 flex-column flex-shrink-0 p-3">
-            <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
-                <a class="text-decoration-none" href="{{ route('home') }}"><span class="fs-4 ms-2">E-Museu</span></a>
+            <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none"
+                href="{{ route('home') }}">
+                <span class="fs-4 ms-2">E-Museu</span>
             </a>
             <hr>
             <x-ui.buttons.default href="#" variant="secondary" class="d-block d-md-none mb-3" role="button"

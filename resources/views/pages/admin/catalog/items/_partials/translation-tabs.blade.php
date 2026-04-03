@@ -18,7 +18,7 @@
                     aria-controls="tab-pane-{{ $lang->code }}"
                     aria-selected="{{ $lang->id === $preferredContentTabLanguageId ? 'true' : 'false' }}"
                 >
-                    {{ $lang->name }}
+                    <x-ui.language-tab-label :lang="$lang" />
                 </button>
             </li>
         @endforeach

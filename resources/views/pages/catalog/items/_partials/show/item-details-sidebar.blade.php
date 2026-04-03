@@ -63,7 +63,7 @@
             </div>
 
             @foreach ($item->itemTags as $tagItem)
-                @if ($tagItem->validation == true && $tagItem->tag->validation == true)
+                @if ($tagItem->validation && $tagItem->tag && $tagItem->tag->validation)
                     <div class="row">
                         <div class="col-md-5">
                             <p class="fw-bold">{{ $tagItem->tag->tagCategory?->name }}</p>
@@ -142,7 +142,7 @@
                 <p class="fw-bold">{{ __('view.catalog.items.show.added_by') }}</p>
             </div>
             <div class="col-md-7">
-                <p>{{ $item->collaborator->full_name }}</p>
+                <p>{{ $item->collaborator?->full_name ?? __('view.catalog.items.show.collaborator_unknown') }}</p>
             </div>
         </div>
 
@@ -156,13 +156,13 @@
                     <ul class="list-group p-2">
                         <div class="card-body">
                             @foreach ($item->extras as $extra)
-                                @if ($extra->validation == true)
+                                @if ($extra->validation)
                                     <div class="row">
                                         <div class="col-md-5">
                                             <p class="fw-bold">{{ __('view.catalog.items.show.collaborator') }}</p>
                                         </div>
                                         <div class="col-md-7">
-                                            <p>{{ $extra->collaborator->full_name }}</p>
+                                            <p>{{ $extra->collaborator?->full_name ?? __('view.catalog.items.show.collaborator_unknown') }}</p>
                                         </div>
                                     </div>
                                 @endif

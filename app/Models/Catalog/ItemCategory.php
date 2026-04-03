@@ -2,11 +2,9 @@
 
 namespace App\Models\Catalog;
 
+use App\Models\Concerns\SyncsAdminFormNameTranslations;
 use App\Models\Identity\Lock;
 use App\Models\Language;
-use App\Support\Content\ResolvedTranslation;
-use App\Support\Content\TranslationResolution;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class ItemCategory extends Model
 {
     use HasFactory;
+    use SyncsAdminFormNameTranslations;
 
     protected $table = 'item_categories';
 
@@ -46,32 +45,11 @@ class ItemCategory extends Model
         return $row?->name ?? '';
     }
 
-    public function resolveTranslation(): ResolvedTranslation
-    {
-        if (! $this->relationLoaded('translations')) {
-            $this->load('translations');
-        }
-
-        return TranslationResolution::fromCollection($this->translations);
-    }
-
     public function resolvedTranslation(): ?ItemCategoryTranslation
     {
         $t = $this->resolveTranslation()->translation;
 
         return $t instanceof ItemCategoryTranslation ? $t : null;
-    }
-
-    /**
-     * @param  array{name: string}  $fields
-     */
-    public function syncPrimaryLocaleTranslation(array $fields): void
-    {
-        $languageId = Language::idForPreferredFormLocale();
-        $this->translations()->updateOrCreate(
-            ['language_id' => $languageId],
-            $fields
-        );
     }
 
     public function items(): HasMany
@@ -82,19 +60,5 @@ class ItemCategory extends Model
     public function locks(): MorphMany
     {
         return $this->morphMany(Lock::class, 'lockable');
-    }
-
-    /**
-     * @return Attribute<string, never>
-     */
-    protected function name(): Attribute
-    {
-        return Attribute::get(function (): string {
-            if (array_key_exists('name', $this->attributes) && $this->attributes['name'] !== null) {
-                return (string) $this->attributes['name'];
-            }
-
-            return (string) ($this->resolvedTranslation()?->name ?? '');
-        });
     }
 }

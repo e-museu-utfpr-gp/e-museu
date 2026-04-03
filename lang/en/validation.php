@@ -201,11 +201,36 @@ return [
         ],
     ],
 
+    'item_categories' => [
+        'translations' => [
+            'at_least_one_locale' => 'Enter a name in at least one language.',
+        ],
+    ],
+
+    'tag_categories' => [
+        'translations' => [
+            'at_least_one_locale' => 'Enter a name in at least one language.',
+        ],
+    ],
+
+    'tags' => [
+        'translations' => [
+            'at_least_one_locale' => 'Enter a name in at least one language.',
+        ],
+    ],
+
+    'extras' => [
+        'translations' => [
+            'at_least_one_locale' => 'Enter the extra information in at least one language.',
+        ],
+    ],
+
     'catalog' => [
         'item_component_different' => 'The item and the component must be different.',
         'item_tag_different' => 'The item and the tag must be different.',
         'components_items_different' => 'The items must be different.',
         'tags_duplicate_in_request' => 'Do not repeat the same tag (category and name) more than once.',
+        'component_item_not_found' => 'One of the selected component items no longer exists. Refresh the page and try again.',
     ],
 
     /*

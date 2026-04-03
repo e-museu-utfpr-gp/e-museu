@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Correlated subqueries for ordering/filtering/display by translated strings (MySQL FIELD fallback order).
+ *
+ * **Performance:** each {@see itemTranslationSubquerySql()} call is a separate correlated subquery. On large
+ * catalog listings, run {@code EXPLAIN ANALYZE} and consider a derived table / window ranking
+ * ({@code ROW_NUMBER() OVER (PARTITION BY item_id ORDER BY FIELD(...))}) to resolve name and description in one pass.
  */
 final class TranslationDisplaySql
 {
@@ -120,6 +124,7 @@ final class TranslationDisplaySql
 
     /**
      * Virtual columns for public catalog list cards (name + description by locale fallback).
+     * Uses two correlated subqueries per row; profile before scaling (see class docblock).
      *
      * @return list<Expression>
      */

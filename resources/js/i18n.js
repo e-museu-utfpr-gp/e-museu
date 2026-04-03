@@ -1,23 +1,36 @@
 import i18next from 'i18next';
 
-// Infer i18next locale from <html lang>. Layouts should set lang from app()->getLocale() on the same response as Blade __(); otherwise JS strings and server-rendered text can diverge. Non-pt/non-en values fall back to pt_BR until more branches are added.
+/**
+ * Map `<html lang>` (from `app()->getLocale()`) to a client bundle key.
+ * To add a UI language: add `lang/js/{code}.json`, register it in `bundleLoaders`, and ship matching `lang/{code}/` for Blade.
+ */
 const localeFromDocument = () => {
     const lang = document.documentElement?.getAttribute?.('lang') || '';
-    if (lang.startsWith('pt')) return 'pt_BR';
-    if (lang.startsWith('en')) return 'en';
+    const normalized = lang.replace(/-/g, '_');
+    if (normalized.toLowerCase().startsWith('pt')) {
+        return 'pt_BR';
+    }
+    if (normalized.toLowerCase().startsWith('en')) {
+        return 'en';
+    }
     return 'pt_BR';
 };
 
 const lng = localeFromDocument();
 
+const bundleLoaders = {
+    en: () => import('../../lang/js/en.json'),
+    pt_BR: () => import('../../lang/js/pt_BR.json'),
+};
+
+const defaultLoader = bundleLoaders.pt_BR;
+
 let translation;
 try {
-    translation =
-        lng === 'en'
-            ? (await import('../../lang/js/en.json')).default
-            : (await import('../../lang/js/pt_BR.json')).default;
+    const loader = bundleLoaders[lng] ?? defaultLoader;
+    translation = (await loader()).default;
 } catch {
-    translation = (await import('../../lang/js/pt_BR.json')).default;
+    translation = (await defaultLoader()).default;
 }
 
 await i18next.init({

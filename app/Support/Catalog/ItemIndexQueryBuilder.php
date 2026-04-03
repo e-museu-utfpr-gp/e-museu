@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 
 /**
  * Builds the query for the public catalog item index (validated items, filters and sort). Caller paginates.
+ *
+ * Listing columns use {@see \App\Support\Content\TranslationDisplaySql::itemCatalogListSelectAliases()}; see that
+ * class for performance notes on correlated subqueries at scale.
  */
 class ItemIndexQueryBuilder
 {

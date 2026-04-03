@@ -3,9 +3,8 @@
 namespace App\Http\Requests\Admin\Catalog;
 
 use App\Models\Catalog\ItemCategory;
-use App\Models\Language;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class AdminItemCategoryRequest extends FormRequest
 {
@@ -14,32 +13,34 @@ class AdminItemCategoryRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $raw = $this->input('translations', []);
+        if (! is_array($raw)) {
+            return;
+        }
+        $this->merge([
+            'translations' => AdminItemCategoryTranslationsRules::normalizeEmptyStringsToNull($raw),
+        ]);
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            AdminItemCategoryTranslationsRules::validateTranslationConsistency(
+                $validator,
+                $this->input('translations', [])
+            );
+        });
+    }
+
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        $formLangId = Language::idForPreferredFormLocale();
         $category = $this->route('item_category');
-        $ignoreTranslationId = $category instanceof ItemCategory
-            ? $category->translations()->where('language_id', $formLangId)->value('id')
-            : null;
 
-        $nameRules = [
-            'required',
-            'string',
-            'min:1',
-            'max:200',
-        ];
-        if ($category instanceof ItemCategory) {
-            $nameRules[] = Rule::unique('item_category_translations', 'name')
-                ->where('language_id', $formLangId)
-                ->where('item_category_id', $category->id)
-                ->ignore($ignoreTranslationId);
-        }
-
-        return [
-            'name' => $nameRules,
-        ];
+        return AdminItemCategoryTranslationsRules::rules($category instanceof ItemCategory ? $category : null);
     }
 }

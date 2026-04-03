@@ -16,9 +16,13 @@ return new class extends Migration
 
         $now = now();
         DB::table('tag_categories')->insert([
-            ['created_at' => $now, 'updated_at' => $now],
-            ['created_at' => $now, 'updated_at' => $now],
+            ['id' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'created_at' => $now, 'updated_at' => $now],
         ]);
+
+        if (Schema::getConnection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE tag_categories AUTO_INCREMENT = 3');
+        }
     }
 
     public function down(): void

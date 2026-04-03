@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Database column limits: `name` varchar(255); `description`, `history`, `detail` text.
- * Validation is enforced in Form Requests; direct use in code should respect these limits.
+ * Public/admin forms cap `name` at 200 chars — treat that as the supported UX limit unless rules change.
  */
 class ItemTranslation extends Model
 {

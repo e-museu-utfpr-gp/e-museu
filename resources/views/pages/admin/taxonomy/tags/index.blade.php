@@ -10,7 +10,7 @@
         />
         <x-admin.sortable-table :action="route('admin.taxonomy.tags.index')" :columns="$sortColumns">
                         @foreach ($tags as $tag)
-                            <tr class="@if (!$tag->locks->isEmpty() && $tag->locks->first()->user_id != auth()->user()->id) table-warning @endif">
+                            <tr class="@if (!$tag->locks->isEmpty() && (string) $tag->locks->first()->admin_id !== (string) auth()->id()) table-warning @endif">
                                 <th scope="row">{{ $tag->id }}</th>
                                 <td>{{ $tag->tag_name }}</td>
                                 <td>

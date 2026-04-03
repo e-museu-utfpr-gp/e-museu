@@ -5,6 +5,9 @@ namespace App\Enums\Content;
 /**
  * Content locale codes stored in `languages.code` (varchar + seed).
  * Must match rows seeded in the `languages` migration.
+ *
+ * Adding a language requires updating this enum, seeds, `lang/{code}/`, and (for client strings) `lang/js` + `i18n.js`;
+ * see README “Adding a catalog / content language”.
  */
 enum ContentLanguage: string
 {
@@ -16,6 +19,20 @@ enum ContentLanguage: string
     public static function defaultForForms(): self
     {
         return self::PT_BR;
+    }
+
+    /**
+     * Order for content-language selects (admin + public contribute). Independent of `languages.id`.
+     *
+     * @return list<string>
+     */
+    public static function orderedCodesForAdminForms(): array
+    {
+        return [
+            self::NEUTRAL->value,
+            self::PT_BR->value,
+            self::EN->value,
+        ];
     }
 
     /**

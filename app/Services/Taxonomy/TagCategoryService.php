@@ -2,14 +2,16 @@
 
 namespace App\Services\Taxonomy;
 
+use App\Models\Taxonomy\Tag;
 use App\Models\Taxonomy\TagCategory;
+use Illuminate\Database\Eloquent\Model;
 use App\Support\Admin\AdminIndexConfig;
-use App\Support\Content\TranslatablePayload;
 use App\Support\Content\TranslationDisplaySql;
 use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class TagCategoryService
 {
@@ -38,7 +40,7 @@ class TagCategoryService
     {
         $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
 
-        return TagCategory::query()
+        $categories = TagCategory::query()
             ->select(['tag_categories.id'])
             ->selectRaw("({$nameSql}) AS name")
             ->orderBy('name')
@@ -46,6 +48,19 @@ class TagCategoryService
                 'tags.translations.language',
             ])
             ->get();
+
+        $categories->each(function (TagCategory $category): void {
+            $category->setRelation(
+                'tags',
+                $category->tags->sortBy(
+                    function (Model $tag): string {
+                        return mb_strtolower($tag instanceof Tag ? (string) $tag->name : '');
+                    }
+                )->values()
+            );
+        });
+
+        return $categories;
     }
 
     /**
@@ -67,11 +82,9 @@ class TagCategoryService
      */
     public function createTagCategory(array $data): TagCategory
     {
-        $split = TranslatablePayload::split($data, TranslatablePayload::TAG_CATEGORY_KEYS);
-        $category = TagCategory::create($split['persist']);
-        $category->syncPrimaryLocaleTranslation([
-            'name' => (string) ($split['translation']['name'] ?? ''),
-        ]);
+        $translations = $data['translations'] ?? [];
+        $category = TagCategory::create(Arr::except($data, ['translations']));
+        $category->syncTranslationsFromAdminForm($translations);
 
         return $category;
     }
@@ -81,14 +94,13 @@ class TagCategoryService
      */
     public function updateTagCategory(TagCategory $tagCategory, array $data): void
     {
-        $split = TranslatablePayload::split($data, TranslatablePayload::TAG_CATEGORY_KEYS);
-        if ($split['persist'] !== []) {
-            $tagCategory->update($split['persist']);
+        $translations = $data['translations'] ?? [];
+        $persist = Arr::except($data, ['translations']);
+        if ($persist !== []) {
+            $tagCategory->update($persist);
         }
-        if (array_key_exists('name', $split['translation'])) {
-            $tagCategory->syncPrimaryLocaleTranslation([
-                'name' => (string) $split['translation']['name'],
-            ]);
+        if ($translations !== []) {
+            $tagCategory->syncTranslationsFromAdminForm($translations);
         }
     }
 

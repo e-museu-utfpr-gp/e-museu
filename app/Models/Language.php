@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Content\ContentLanguage;
 use App\Support\Content\ContentLocaleFallback;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
@@ -11,6 +12,10 @@ use RuntimeException;
 
 /**
  * @property string $code Unique locale key (matches {@see ContentLanguage} values in use).
+ *
+ * **IDs by code:** {@see idForCode()} throws if the row is missing; id lookup is cached until a {@see Language}
+ * save/delete clears it. For untrusted or optional input, use {@see tryIdForCode()}.
+ * Keep `languages` seeds aligned with {@see ContentLanguage}.
  */
 class Language extends Model
 {
@@ -30,6 +35,9 @@ class Language extends Model
      */
     private static array $idByCodeCache = [];
 
+    /**
+     * @throws RuntimeException When no row exists for {@code $code}.
+     */
     public static function idForCode(string $code): int
     {
         if (! isset(self::$idByCodeCache[$code])) {
@@ -104,12 +112,28 @@ class Language extends Model
 
     /**
      * All catalog content languages for admin create/edit forms (includes neutral).
+     * Order: neutral → pt_BR → en, then any other rows by name.
      *
-     * @return Collection<int, Language>
+     * @return EloquentCollection<int, Language>
      */
-    public static function forAdminContentForms(): Collection
+    public static function forAdminContentForms(): EloquentCollection
     {
-        return static::query()->orderBy('name')->get();
+        $ordered = ContentLanguage::orderedCodesForAdminForms();
+        $caseParts = [];
+        $bindings = [];
+        foreach ($ordered as $i => $code) {
+            $caseParts[] = 'WHEN ? THEN ' . ($i + 1);
+            $bindings[] = $code;
+        }
+        $caseSql = 'CASE code ' . implode(' ', $caseParts) . ' ELSE 99 END';
+
+        /** @var list<Language> $rows */
+        $rows = static::query()
+            ->orderByRaw($caseSql . ', name', $bindings)
+            ->get()
+            ->all();
+
+        return new EloquentCollection($rows);
     }
 
     /**

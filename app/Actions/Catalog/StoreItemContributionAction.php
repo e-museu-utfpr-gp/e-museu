@@ -14,6 +14,7 @@ use App\Services\Collaborator\CollaboratorService;
 use App\Services\Taxonomy\TagService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class StoreItemContributionAction
 {
@@ -49,6 +50,7 @@ class StoreItemContributionAction
     public function handle(
         array $collaboratorData,
         array $itemData,
+        int $contentLanguageId,
         array $tags,
         array $extras,
         array $components,
@@ -71,12 +73,13 @@ class StoreItemContributionAction
         $item = $this->createItemWithImages(
             $itemData,
             $collaborator,
+            $contentLanguageId,
             $coverImage,
             $galleryImages ?? [],
         );
 
-        $this->itemTagService->attachTagsToItem($item, $tags, $this->tagService);
-        $this->extraService->createForItem($item, $collaborator, $extras);
+        $this->itemTagService->attachTagsToItem($item, $tags, $this->tagService, $contentLanguageId);
+        $this->extraService->createForItem($item, $collaborator, $extras, $contentLanguageId);
         $this->attachComponentsToItem($item, $components);
 
         return [
@@ -126,10 +129,11 @@ class StoreItemContributionAction
     private function createItemWithImages(
         array $itemData,
         Collaborator $collaborator,
+        int $contentLanguageId,
         ?UploadedFile $coverImage,
         array $galleryImages
     ): Item {
-        $item = $this->createItemForContribution($itemData, $collaborator);
+        $item = $this->createItemForContribution($itemData, $collaborator, $contentLanguageId);
         if ($coverImage !== null) {
             $this->itemImagesService->storeCoverImage($item, $coverImage);
         }
@@ -143,8 +147,11 @@ class StoreItemContributionAction
      *
      * @param  array<string, mixed>  $itemData
      */
-    private function createItemForContribution(array $itemData, Collaborator $collaborator): Item
-    {
+    private function createItemForContribution(
+        array $itemData,
+        Collaborator $collaborator,
+        int $contentLanguageId
+    ): Item {
         $itemData['collaborator_id'] = $collaborator->id;
         $itemData['identification_code'] = '000';
 
@@ -152,10 +159,10 @@ class StoreItemContributionAction
         $translationData = $split['translation'];
         $persist = $split['persist'];
 
-        return DB::transaction(function () use ($persist, $translationData): Item {
+        return DB::transaction(function () use ($persist, $translationData, $contentLanguageId): Item {
             $item = Item::create($persist);
             if ($translationData !== []) {
-                $item->syncPrimaryLocaleTranslation($translationData);
+                $item->syncTranslationForLanguage($contentLanguageId, $translationData);
             }
             $item->update([
                 'identification_code' => $this->itemService->createIdentificationCode($item),
@@ -180,11 +187,9 @@ class StoreItemContributionAction
             }
 
             if (! Item::query()->whereKey($componentId)->exists()) {
-                logger()->info('Component item not found for contribution', [
-                    'item_id' => $item->id,
-                    'component_item_id' => $componentId,
+                throw ValidationException::withMessages([
+                    'components' => [__('validation.catalog.component_item_not_found')],
                 ]);
-                continue;
             }
 
             ItemComponent::create([

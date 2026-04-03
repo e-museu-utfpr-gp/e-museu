@@ -15,6 +15,23 @@ This guide describes how to configure the development environment and initialize
 - Docker and Docker Compose installed
 - Git (for cloning the repository)
 
+## Database (MySQL)
+
+The application targets **MySQL** in development, staging, and production. Catalog translations and admin listings rely on MySQL-specific SQL (for example `FIELD()` for locale fallback order). **SQLite is not supported** for those code paths.
+
+Automated tests under the **`mysql` group** (for example `tests/Feature/Catalog/TranslationResolutionTest.php`) **require** `DB_CONNECTION=mysql` and a migrated database. If you run PHPUnit without MySQL, those tests are skipped.
+
+### Adding a catalog / content language
+
+A new language is not only a row in `languages`. To keep SQL `FIELD()`, PHP fallback, admin forms, and UI packs aligned:
+
+1. Add the case to `App\Enums\Content\ContentLanguage` (and `orderedNonNeutralLocales()` / form ordering if it should participate in fallback priority).
+2. Seed the `languages` table (migration or seeder) with a stable `code` matching the enum value.
+3. Add Laravel translation files under `lang/{code}/` (at minimum what you expose in the locale switcher).
+4. For strings used by i18next on the client, add `lang/js/{code}.json` and register the dynamic import in `resources/js/i18n.js` (`bundleLoaders`).
+
+Skipping any of the above leaves the language missing from `ContentLocaleFallback::orderedCodes()` or without UI strings until those pieces are updated.
+
 ## Initial Docker Configuration (Avoid using sudo)
 
 By default, Docker commands require administrator privileges (sudo). To avoid having to use `sudo` for every command, add your user to the `docker` group:

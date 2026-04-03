@@ -71,7 +71,10 @@
                             </div>
                             <div class="col-md-6">
                                 @php
-                                    $currentCoverImage = $item->coverImage ?? $item->images->sortBy('sort_order')->first();
+                                    $sortedEditImages = $item->images->sortBy('sort_order')->values();
+                                    $currentCoverImage = $sortedEditImages->first(
+                                        fn ($img) => $img->type === \App\Enums\Catalog\ItemImageType::COVER
+                                    ) ?? $sortedEditImages->first();
                                 @endphp
                                 @include('pages.admin.catalog.items._partials.edit.cover-upload')
                                 @include('pages.admin.catalog.items._partials.edit.gallery-upload')

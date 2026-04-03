@@ -10,7 +10,7 @@
             />
             <x-admin.sortable-table :action="route('admin.catalog.items.index')" :columns="$sortColumns">
                             @foreach ($items as $item)
-                                <tr class="@if (!$item->locks->isEmpty() && $item->locks->first()->user_id != auth()->user()->id) table-warning @endif">
+                                <tr class="@if (!$item->locks->isEmpty() && (string) $item->locks->first()->admin_id !== (string) auth()->id()) table-warning @endif">
                                     <th scope="row">{{ $item->id }}</th>
                                     <td>{{ $item->name }}</td>
                                     <td>{{ $item->description}}</td>

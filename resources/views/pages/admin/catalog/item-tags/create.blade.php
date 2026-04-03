@@ -40,7 +40,7 @@
                              data-item-selector="#tag_id"
                              data-category-query-key="category"
                              data-old-selected-id="{{ old('tag_id', '') }}"
-                             data-get-items-url="{{ route('catalog.tags.index') }}">
+                             data-get-items-url="{{ route('admin.catalog.tags.by-category') }}">
                             <div class="col-md-4">
                                 <x-ui.inputs.admin.select
                                     name="category_id"

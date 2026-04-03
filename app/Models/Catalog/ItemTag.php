@@ -6,17 +6,20 @@ use App\Support\Content\TranslationDisplaySql;
 use App\Models\Taxonomy\Tag;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Admin listings use {@see scopeForAdminList()} with names resolved via SQL ({@see TranslationDisplaySql});
- * keep this consistent with exports/views that rely on those columns.
+ * Pivot for {@see Item::tags()}; also queried directly for admin listings ({@see scopeForAdminList()}).
  */
-class ItemTag extends Model
+class ItemTag extends Pivot
 {
     use HasFactory;
+
+    public $incrementing = true;
+
+    protected $table = 'item_tag';
 
     protected $fillable = [
         'item_id',
@@ -24,7 +27,9 @@ class ItemTag extends Model
         'validation',
     ];
 
-    protected $table = 'item_tag';
+    protected $casts = [
+        'validation' => 'boolean',
+    ];
 
     /**
      * @param  Builder<ItemTag>  $query

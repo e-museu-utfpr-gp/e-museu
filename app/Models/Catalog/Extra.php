@@ -29,6 +29,10 @@ class Extra extends Model
 
     protected $table = 'extras';
 
+    protected $casts = [
+        'validation' => 'boolean',
+    ];
+
     public function translations(): HasMany
     {
         return $this->hasMany(ExtraTranslation::class, 'extra_id')
@@ -41,11 +45,44 @@ class Extra extends Model
      */
     public function syncPrimaryLocaleTranslation(array $fields): void
     {
-        $languageId = Language::idForPreferredFormLocale();
+        $this->syncTranslationForLanguage(Language::idForPreferredFormLocale(), $fields);
+    }
+
+    /**
+     * @param  array{info: string}  $fields
+     */
+    public function syncTranslationForLanguage(int $languageId, array $fields): void
+    {
         $this->translations()->updateOrCreate(
             ['language_id' => $languageId],
             $fields
         );
+    }
+
+    /**
+     * @param  array<string, array<string, mixed>|null>  $translationsByCode
+     */
+    public function syncTranslationsFromAdminForm(array $translationsByCode): void
+    {
+        foreach (Language::forAdminContentForms() as $lang) {
+            $code = $lang->code;
+            $block = $translationsByCode[$code] ?? [];
+            $info = trim((string) ($block['info'] ?? ''));
+            if ($info === '') {
+                $this->translations()->where('language_id', $lang->id)->delete();
+
+                continue;
+            }
+
+            $this->translations()->updateOrCreate(
+                ['language_id' => $lang->id],
+                ['info' => $info]
+            );
+        }
+
+        if ($this->relationLoaded('translations')) {
+            $this->unsetRelation('translations');
+        }
     }
 
     public function resolveTranslation(): ResolvedTranslation

@@ -51,11 +51,15 @@ class ItemTagService
     /**
      * @param  array<int, array<string, mixed>>  $tagsData
      */
-    public function attachTagsToItem(Item $item, array $tagsData, TagService $tagService): void
-    {
+    public function attachTagsToItem(
+        Item $item,
+        array $tagsData,
+        TagService $tagService,
+        ?int $contentLanguageId = null
+    ): void {
         $ids = [];
         foreach ($tagsData as $tagData) {
-            $ids[] = $tagService->findOrCreate($tagData)->id;
+            $ids[] = $tagService->findOrCreate($tagData, $contentLanguageId)->id;
         }
         $item->tags()->syncWithoutDetaching(array_values(array_unique($ids)));
     }
