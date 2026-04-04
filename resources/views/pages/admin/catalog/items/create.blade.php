@@ -6,25 +6,13 @@
                 data-label-remove-image="{{ __('view.catalog.items.create.remove_image') }}"
             >
                 @csrf
+                @include('pages.admin.catalog.items._partials.translation-tabs', [
+                    'contentLanguages' => $contentLanguages,
+                    'preferredContentTabLanguageId' => $preferredContentTabLanguageId,
+                    'item' => null,
+                ])
                 <div class="row">
                     <div class="col-md-6">
-                        <x-ui.inputs.admin.text
-                            name="name"
-                            id="name"
-                            :label="__('view.admin.catalog.items.create.name')"
-                        />
-                        <x-ui.inputs.admin.textarea
-                            name="description"
-                            id="description"
-                            :rows="5"
-                            :label="__('view.admin.catalog.items.create.description')"
-                        />
-                        <x-ui.inputs.admin.textarea
-                            name="detail"
-                            id="detail"
-                            :rows="7"
-                            :label="__('view.admin.catalog.items.create.detail')"
-                        />
                         <div class="row">
                             <div class="col-md-6">
                                 <x-ui.inputs.admin.select
@@ -73,17 +61,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <x-ui.inputs.admin.textarea
-                            name="history"
-                            id="history"
-                            :rows="46"
-                            :label="__('view.admin.catalog.items.create.history')"
-                        />
-                        <div class="mb-3">
-                            <x-ui.buttons.submit variant="success" icon="bi bi-plus-circle">{{ __('view.admin.catalog.items.create.submit') }}</x-ui.buttons.submit>
-                        </div>
-                    </div>
+                </div>
+                <div class="mb-3">
+                    <x-ui.buttons.submit variant="success" icon="bi bi-plus-circle">{{ __('view.admin.catalog.items.create.submit') }}</x-ui.buttons.submit>
                 </div>
             </form>
         <x-ui.images.catalog.upload-assets />

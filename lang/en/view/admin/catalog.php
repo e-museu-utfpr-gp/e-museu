@@ -42,6 +42,13 @@ return [
             'no' => 'No',
             'delete_confirm' => 'Are you sure you want to delete this item and all references to it in other records?',
         ],
+        'form' => [
+            'content_by_language' => 'Content by language',
+            'name' => 'Name',
+            'description' => 'Description',
+            'detail' => 'Detail',
+            'history' => 'History',
+        ],
         'create' => [
             'title' => 'Create item',
             'heading' => 'Add Item',
@@ -167,7 +174,7 @@ return [
         ],
         'edit' => [
             'title' => 'Edit extra information',
-            'heading' => 'Edit Extra Information: :id',
+            'heading' => 'Edit Extra Information: :id — :preview',
             'info' => 'Information',
             'item_category' => 'Item Category',
             'item' => 'Item',

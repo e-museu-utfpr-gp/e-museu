@@ -29,6 +29,7 @@ class Collaborator extends Model
      */
     protected $casts = [
         'role' => CollaboratorRole::class,
+        'blocked' => 'boolean',
     ];
 
     public function items(): HasMany

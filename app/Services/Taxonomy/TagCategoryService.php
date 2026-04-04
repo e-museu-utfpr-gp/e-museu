@@ -2,12 +2,16 @@
 
 namespace App\Services\Taxonomy;
 
+use App\Models\Taxonomy\Tag;
 use App\Models\Taxonomy\TagCategory;
+use Illuminate\Database\Eloquent\Model;
 use App\Support\Admin\AdminIndexConfig;
+use App\Support\Content\TranslationDisplaySql;
 use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class TagCategoryService
 {
@@ -17,7 +21,10 @@ class TagCategoryService
     public function getPaginatedTagCategoriesForAdminIndex(Request $request): array
     {
         $count = TagCategory::count();
-        $query = TagCategory::query();
+        $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
+        $query = TagCategory::query()
+            ->select('tag_categories.*')
+            ->selectRaw("({$nameSql}) AS name");
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::tagCategories());
 
@@ -31,7 +38,29 @@ class TagCategoryService
      */
     public function getForIndex(): Collection
     {
-        return TagCategory::select('name', 'id')->orderBy('name', 'asc')->get();
+        $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
+
+        $categories = TagCategory::query()
+            ->select(['tag_categories.id'])
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderBy('name')
+            ->with([
+                'tags.translations.language',
+            ])
+            ->get();
+
+        $categories->each(function (TagCategory $category): void {
+            $category->setRelation(
+                'tags',
+                $category->tags->sortBy(
+                    function (Model $tag): string {
+                        return mb_strtolower($tag instanceof Tag ? (string) $tag->name : '');
+                    }
+                )->values()
+            );
+        });
+
+        return $categories;
     }
 
     /**
@@ -39,7 +68,13 @@ class TagCategoryService
      */
     public function getForForm(): Collection
     {
-        return TagCategory::orderBy('name', 'asc')->get();
+        $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
+
+        return TagCategory::query()
+            ->select('tag_categories.*')
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -47,7 +82,11 @@ class TagCategoryService
      */
     public function createTagCategory(array $data): TagCategory
     {
-        return TagCategory::create($data);
+        $translations = $data['translations'] ?? [];
+        $category = TagCategory::create(Arr::except($data, ['translations']));
+        $category->syncTranslationsFromAdminForm($translations);
+
+        return $category;
     }
 
     /**
@@ -55,7 +94,14 @@ class TagCategoryService
      */
     public function updateTagCategory(TagCategory $tagCategory, array $data): void
     {
-        $tagCategory->update($data);
+        $translations = $data['translations'] ?? [];
+        $persist = Arr::except($data, ['translations']);
+        if ($persist !== []) {
+            $tagCategory->update($persist);
+        }
+        if ($translations !== []) {
+            $tagCategory->syncTranslationsFromAdminForm($translations);
+        }
     }
 
     public function deleteTagCategory(TagCategory $tagCategory): void

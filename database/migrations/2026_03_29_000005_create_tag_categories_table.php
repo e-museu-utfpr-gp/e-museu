@@ -2,25 +2,29 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tag_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
             $table->timestamps();
         });
+
+        $now = now();
+        DB::table('tag_categories')->insert([
+            ['id' => 1, 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        if (Schema::getConnection()->getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE tag_categories AUTO_INCREMENT = 3');
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('tag_categories');

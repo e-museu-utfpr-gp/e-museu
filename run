@@ -66,8 +66,8 @@ function setup {
   docker compose -f "$(get_compose_file)" exec -u root app sh -c 'mkdir -p /var/www/storage/logs /var/www/storage/framework/sessions /var/www/storage/framework/views /var/www/storage/framework/cache && chown -R laravel:www-data /var/www/vendor /var/www/bootstrap/cache /var/www/storage && (touch /var/www/.env && chown laravel:www-data /var/www/.env) 2>/dev/null || true'
 
   if [ "$APP_ENV" == "local" ]; then
-    echo ">> Starting Vite dev server in background..."
-    npm-local-bg || echo "[warn] Failed to start Vite dev server in background; continuing..."
+    echo ">> Preparing Vite (compose vite service + npm install)..."
+    npm-local-bg || echo "[warn] Failed to prepare Vite in container; continuing..."
     ensure-vite-assets-local || echo "[warn] Failed to ensure Vite assets (hot/manifest); continuing..."
   fi
 
@@ -144,17 +144,14 @@ function npm-local-bg {
     return 1
   fi
 
-  echo ">> Installing Node.js dependencies in container..."
+  echo ">> Ensuring Node.js dependencies in vite container..."
   docker compose -f "$(get_compose_file)" exec vite npm install
 
-  echo ">> Starting Vite dev server in background..."
+  # Vite is already started by docker-compose.local.yml (vite service command). Do not run a
+  # second npm run dev here — it fights for port 5173 and can break public/hot.
+  echo ">> Vite runs via the compose vite service (see vite.config.js server.origin for Docker)."
   echo "Access your site at: http://localhost:$(grep WEB_SERVER_PORT_LOCAL .env | cut -d'=' -f2)"
-  echo ""
-
-  docker compose -f "$(get_compose_file)" exec -d vite npm run dev -- --host 0.0.0.0 --port 5173
-    
-    echo "Vite dev server started in background!"
-    echo "Access Vite at: http://localhost:5173"
+  echo "Access Vite dev server at: http://localhost:5173"
 }
 
 function stop-vite-local {

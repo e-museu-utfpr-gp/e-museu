@@ -6,14 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('extras', function (Blueprint $table) {
             $table->id();
-            $table->text('info');
             $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
             $table->foreignId('collaborator_id')->nullable()->constrained('collaborators')->nullOnDelete();
             $table->boolean('validation')->default(0);
@@ -21,9 +17,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('extras');

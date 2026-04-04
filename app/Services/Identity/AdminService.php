@@ -17,14 +17,16 @@ class AdminService
      */
     public function getPaginatedAdminsForAdminIndex(Request $request): array
     {
-        $count = Admin::count();
-        $query = Admin::query();
+        $query = Admin::query()->with('locks');
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::admins());
 
         $admins = $query->paginate(50)->withQueryString();
 
-        return ['admins' => $admins, 'count' => $count];
+        return [
+            'admins' => $admins,
+            'count' => $admins->total(),
+        ];
     }
 
     /**

@@ -63,7 +63,7 @@ return [
                 if (! $sslCa) {
                     return [];
                 }
-                // PHP 8.5+ usa \Pdo\Mysql::ATTR_SSL_CA em vez de PDO::MYSQL_ATTR_SSL_CA
+                // PHP 8.5+ uses \Pdo\Mysql::ATTR_SSL_CA instead of PDO::MYSQL_ATTR_SSL_CA
                 $attr = (PHP_VERSION_ID >= 80500 && class_exists(\Pdo\Mysql::class))
                     ? \Pdo\Mysql::ATTR_SSL_CA
                     : PDO::MYSQL_ATTR_SSL_CA;

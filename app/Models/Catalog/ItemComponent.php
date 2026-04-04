@@ -2,10 +2,12 @@
 
 namespace App\Models\Catalog;
 
+use App\Support\Content\TranslationDisplaySql;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class ItemComponent extends Model
 {
@@ -19,14 +21,19 @@ class ItemComponent extends Model
 
     protected $table = 'item_component';
 
+    protected $casts = [
+        'validation' => 'boolean',
+    ];
+
     /**
-     * Scope for admin index list: joins items (item + component), selects columns with aliases for the index view.
-     *
      * @param  Builder<ItemComponent>  $query
      * @return Builder<ItemComponent>
      */
     public function scopeForAdminList(Builder $query): Builder
     {
+        $itemNameSql = TranslationDisplaySql::itemNameSubquerySql('item');
+        $componentNameSql = TranslationDisplaySql::itemNameSubquerySql('component');
+
         $query->leftJoin('items as item', 'item_component.item_id', '=', 'item.id')
             ->leftJoin('items as component', 'item_component.component_id', '=', 'component.id')
             ->select([
@@ -36,8 +43,8 @@ class ItemComponent extends Model
                 'item_component.validation AS item_component_validation',
                 'item_component.created_at AS item_component_created',
                 'item_component.updated_at AS item_component_updated',
-                'item.name AS item_name',
-                'component.name AS component_name',
+                DB::raw("({$itemNameSql}) AS item_name"),
+                DB::raw("({$componentNameSql}) AS component_name"),
             ]);
 
         return $query;

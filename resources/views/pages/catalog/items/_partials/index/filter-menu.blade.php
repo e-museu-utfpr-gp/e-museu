@@ -29,7 +29,7 @@
                             {{ in_array($category->id, request()->input('category', [])) ? 'checked' : '' }} />
                         <label class="custom-checkbox-label fw-bold" for="category-{{ $category->id }}">{{ __('view.catalog.items.filter.all') }}</label>
                         @foreach ($category->tags as $tag)
-                            @if ($tag->validation == 1)
+                            @if ($tag->validation)
                                 <div>
                                     <input type="checkbox" class="form-check-input" id="tag-{{ $tag->id }}"
                                         value="{{ $tag->id }}" name="tag[]"
