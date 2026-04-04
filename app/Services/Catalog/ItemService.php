@@ -5,16 +5,25 @@ namespace App\Services\Catalog;
 use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemCategory;
+use App\Models\Language;
 use App\Support\Admin\AdminIndexConfig;
 use App\Support\Admin\AdminIndexQueryBuilder;
 use App\Support\Catalog\ItemIndexQueryBuilder;
+use App\Support\Content\TranslatablePayload;
+use App\Support\Content\TranslationDisplaySql;
 use App\Support\StringHelper;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
+/**
+ * Catalog {@see Item} persistence, listings, and item-scoped public queries (not contribution-locale UI).
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class ItemService
 {
     /**
@@ -57,7 +66,9 @@ class ItemService
         if (! $id) {
             return '';
         }
-        $itemCategory = ItemCategory::find($id);
+        $itemCategory = ItemCategory::query()
+            ->with('translations.language')
+            ->find($id);
 
         return $itemCategory !== null ? $itemCategory->name : '';
     }
@@ -78,9 +89,47 @@ class ItemService
      */
     public function getPublicItemsByCategory(string $itemCategoryId): Collection
     {
-        return Item::where('category_id', 'LIKE', $itemCategoryId)
+        $categoryId = $this->normalizeItemCategoryFilterId($itemCategoryId);
+        if ($categoryId === null) {
+            return new Collection();
+        }
+
+        $nameSql = TranslationDisplaySql::itemNameSubquerySql('items');
+
+        return Item::query()
+            ->where('category_id', '=', $categoryId)
             ->where('validation', true)
-            ->orderBy('name', 'asc')
+            ->select('items.*')
+            ->orderByRaw("({$nameSql}) asc")
+            ->get();
+    }
+
+    /**
+     * Validated items in a category: `name` prefers the contribution language when present,
+     * otherwise the same fallback chain as the rest of the site ({@see TranslationDisplaySql::itemNameSubquerySql}).
+     *
+     * @return Collection<int, Item>
+     */
+    public function getPublicItemsByCategoryForLanguage(string $itemCategoryId, int $languageId): Collection
+    {
+        $categoryId = $this->normalizeItemCategoryFilterId($itemCategoryId);
+        if ($categoryId === null) {
+            return new Collection();
+        }
+
+        $fallbackNameSql = TranslationDisplaySql::itemNameSubquerySql('items');
+        $resolvedNameSql = 'COALESCE(it_contribution.name, (' . $fallbackNameSql . '))';
+
+        return Item::query()
+            ->where('category_id', '=', $categoryId)
+            ->where('validation', true)
+            ->leftJoin('item_translations as it_contribution', function ($join) use ($languageId): void {
+                $join->on('items.id', '=', 'it_contribution.item_id')
+                    ->where('it_contribution.language_id', '=', $languageId);
+            })
+            ->select('items.id')
+            ->selectRaw("{$resolvedNameSql} AS name")
+            ->orderByRaw("{$resolvedNameSql} asc")
             ->get();
     }
 
@@ -91,14 +140,19 @@ class ItemService
      */
     public function getItemsByItemCategoryForAdminSelect(string $itemCategoryId): Collection
     {
-        if ($itemCategoryId === '') {
+        $categoryId = $this->normalizeItemCategoryFilterId($itemCategoryId);
+        if ($categoryId === null) {
             return new Collection();
         }
 
+        $nameSql = TranslationDisplaySql::itemNameSubquerySql('items');
+
         return Item::query()
-            ->where('category_id', 'LIKE', $itemCategoryId)
-            ->orderBy('name', 'asc')
-            ->get(['id', 'name']);
+            ->where('category_id', '=', $categoryId)
+            ->select('items.id')
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderByRaw("({$nameSql}) asc")
+            ->get();
     }
 
     /**
@@ -120,32 +174,47 @@ class ItemService
      */
     public function getValidatedNamesForComponentAutocomplete(string $query, string $categoryId): Collection
     {
-        $qb = Item::select('name')
-            ->where('category_id', 'LIKE', $categoryId)
-            ->where('validation', true);
+        $itemCategoryId = $this->normalizeItemCategoryFilterId($categoryId);
+        if ($itemCategoryId === null) {
+            return new Collection();
+        }
+
+        $nameSql = TranslationDisplaySql::itemNameSubquerySql('items');
+
+        $qb = Item::query()
+            ->where('category_id', '=', $itemCategoryId)
+            ->where('validation', true)
+            ->selectRaw("({$nameSql}) AS name");
 
         if ($query !== '') {
-            $qb = $qb->where('name', 'LIKE', '%' . $query . '%');
+            $qb->whereRaw("({$nameSql}) LIKE ?", ['%' . $query . '%']);
         }
 
         return $qb->limit(10)->get();
     }
 
-    public function countValidatedByNameAndCategory(string $name, string $categoryId): int
+    public function countValidatedByNameAndCategory(string $name, string $categoryId, ?int $languageId = null): int
     {
-        return Item::where('category_id', $categoryId)
-            ->where('name', 'LIKE', $name)
+        $itemCategoryId = $this->normalizeItemCategoryFilterId($categoryId);
+        if ($itemCategoryId === null) {
+            return 0;
+        }
+
+        $langId = $languageId ?? Language::idForPreferredFormLocale();
+
+        return Item::query()
+            ->where('category_id', '=', $itemCategoryId)
             ->where('validation', true)
+            ->whereHas('translations', function ($q) use ($name, $langId): void {
+                $q->where('language_id', $langId)
+                    ->where('name', '=', $name);
+            })
             ->count();
     }
 
     public function createItemWithIdentificationCode(AdminStoreItemRequest $request): Item
     {
         $itemAttributes = [
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'history' => $request->input('history'),
-            'detail' => $request->input('detail'),
             'date' => $request->input('date'),
             'category_id' => $request->input('category_id'),
             'collaborator_id' => $request->input('collaborator_id'),
@@ -153,10 +222,13 @@ class ItemService
             'identification_code' => '000',
         ];
 
+        $translations = $request->validated('translations');
+
         $item = null;
 
-        DB::transaction(function () use ($itemAttributes, &$item): void {
+        DB::transaction(function () use ($itemAttributes, $translations, &$item): void {
             $item = Item::create($itemAttributes);
+            $item->syncTranslationsFromAdminForm($translations);
             $item->update([
                 'identification_code' => $this->createIdentificationCode($item),
             ]);
@@ -171,8 +243,10 @@ class ItemService
 
     public function createIdentificationCode(Item $item): string
     {
-        $itemCategory = ItemCategory::findOrFail($item->category_id);
-        $normalized = StringHelper::removeAccent($itemCategory->name);
+        $itemCategory = ItemCategory::query()
+            ->with('translations.language')
+            ->findOrFail($item->category_id);
+        $normalized = StringHelper::removeAccent($itemCategory->defaultLocaleName());
         $nameParts = explode(' ', $normalized);
         if (count($nameParts) === 1) {
             $nameParts = explode('-', $nameParts[0]);
@@ -191,12 +265,36 @@ class ItemService
      */
     public function updateItem(Item $item, array $attributes): void
     {
-        $item->update($attributes);
+        $translations = $attributes['translations'] ?? [];
+        $itemData = Arr::except($attributes, ['translations']);
+        $split = TranslatablePayload::split($itemData, TranslatablePayload::ITEM_KEYS);
+
+        if ($split['persist'] !== []) {
+            $item->update($split['persist']);
+        }
+
+        if ($translations !== []) {
+            $item->syncTranslationsFromAdminForm($translations);
+        }
+
         $item->normalizeSingleCover();
     }
 
     public function deleteItem(Item $item): void
     {
         $item->delete();
+    }
+
+    /**
+     * Strict id filter for `items.category_id` (admin selects, public JSON, autocomplete).
+     * Admin item index text search uses `AdminIndexQueryBuilder` LIKE subqueries on translations, not this helper.
+     */
+    private function normalizeItemCategoryFilterId(string $itemCategoryId): ?int
+    {
+        if ($itemCategoryId === '' || ! ctype_digit($itemCategoryId)) {
+            return null;
+        }
+
+        return (int) $itemCategoryId;
     }
 }

@@ -9,6 +9,8 @@ use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemTagService;
 use App\Support\Admin\AdminIndexTableView;
 use App\Services\Taxonomy\TagCategoryService;
+use App\Services\Taxonomy\TagService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -28,6 +30,15 @@ class AdminItemTagController extends AdminBaseController
     public function show(ItemTag $itemTag): View
     {
         return view('pages.admin.catalog.item-tags.show', compact('itemTag'));
+    }
+
+    public function tagsByCategory(Request $request, TagService $tagService): JsonResponse
+    {
+        $category = (string) ($request->input('category') ?? '');
+
+        return response()->json(
+            $tagService->jsonPayloadForAdminCategorySelect($category)
+        );
     }
 
     public function create(

@@ -1,12 +1,12 @@
 <h3>{{ __('view.catalog.items.show.timelines') }}</h3>
 @foreach ($item->itemTags as $tagItem)
-    @if ($tagItem->validation == true && $tagItem->tag->validation == true)
-        @if ($tagItem->tag->category?->id == $seriesCategoryId)
+    @if ($tagItem->validation && $tagItem->tag && $tagItem->tag->validation)
+        @if ($tagItem->tag->tagCategory?->id == $seriesCategoryId)
             <div class="mx-4 my-5">
                 <h4 class="mb-4 fw-bold">{{ $tagItem->tag->name }}</h4>
                 <div class="timeline m-2 px-2">
                     @foreach ($tagItem->tag->items->sortBy('date') as $timelineItem)
-                        @if ($timelineItem->validation == 1)
+                        @if ($timelineItem->validation)
                             <div class="my-4">
                                 <div class="d-flex align-items-start">
                                     <div class="timeline-circle me-2"></div>
@@ -27,6 +27,9 @@
                                         </div>
                                     @endif
                                     <div class="ms-2">
+                                        @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                            'resolved' => $timelineItem->resolveTranslation(),
+                                        ])
                                         <p class="fw-bold">{{ $timelineItem->name }}</p>
                                         <p>{{ $timelineItem->description }}</p>
                                         <a href="{{ route('catalog.items.show', $timelineItem->id) }}">

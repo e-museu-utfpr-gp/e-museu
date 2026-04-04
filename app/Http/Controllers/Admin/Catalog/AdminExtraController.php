@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Requests\Catalog\SingleExtraRequest;
+use App\Http\Requests\Admin\Catalog\AdminStoreExtraRequest;
 use App\Models\Catalog\Extra;
+use App\Models\Language;
 use App\Services\Catalog\ExtraService;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Identity\LockService;
+use App\Support\Admin\AdminEditHeadingLocale;
 use App\Support\Admin\AdminIndexTableView;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +30,15 @@ class AdminExtraController extends AdminBaseController
 
     public function show(Extra $extra): View
     {
+        $extra->load([
+            'collaborator',
+            'item.translations.language',
+            'item.images',
+            'item.coverImage',
+            'item.itemCategory.translations.language',
+            'item.collaborator',
+        ]);
+
         return view('pages.admin.catalog.extras.show', compact('extra'));
     }
 
@@ -38,10 +49,12 @@ class AdminExtraController extends AdminBaseController
         return view('pages.admin.catalog.extras.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
+            'contentLanguages' => Language::forAdminContentForms(),
+            'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
         ]);
     }
 
-    public function store(SingleExtraRequest $request, ExtraService $extraService): RedirectResponse
+    public function store(AdminStoreExtraRequest $request, ExtraService $extraService): RedirectResponse
     {
         $extra = $extraService->createExtra($request->validated());
 
@@ -52,20 +65,23 @@ class AdminExtraController extends AdminBaseController
         Extra $extra,
         ItemCategoryService $itemCategoryService,
         CollaboratorService $collaboratorService,
-        LockService $lockService
+        LockService $lockService,
+        AdminEditHeadingLocale $headingLocale
     ): View {
-        $lockService->requireUnlocked($extra);
-        $lockService->lock($extra);
+        $lockService->requireUnlockedThenLock($extra);
 
-        return view('pages.admin.catalog.extras.edit', [
+        $extra->load(['translations.language', 'item.itemCategory', 'collaborator']);
+
+        return view('pages.admin.catalog.extras.edit', array_merge([
             'extra' => $extra,
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
-        ]);
+            'contentLanguages' => Language::forAdminContentForms(),
+        ], $headingLocale->resolveFor($extra)));
     }
 
     public function update(
-        SingleExtraRequest $request,
+        AdminStoreExtraRequest $request,
         Extra $extra,
         ExtraService $extraService,
         LockService $lockService

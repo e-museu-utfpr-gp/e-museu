@@ -16,6 +16,10 @@ return [
         'yes' => 'Sim',
         'no' => 'Não',
         'info_popover_label' => 'Mais informações',
+        'languages' => [
+            'neutral_tooltip_short' => 'Sobre o idioma Neutral no conteúdo',
+            'neutral_tooltip' => 'Neutral é um idioma especial do catálogo para textos que devem aparecer iguais para todos os visitantes, independentemente do idioma do site (por exemplo nomes de instituições, marcas ou títulos que você não quer traduzir). Na exibição, o site prefere o idioma do visitante e pode usar Neutral se aquele idioma não tiver texto, antes de tentar outros. Deixe Neutral vazio se não precisar de uma única versão compartilhada.',
+        ],
         'images_upload' => [
             'cover_label' => 'Imagem de capa',
             'cover_help' => 'Imagem principal do item (obrigatória). Será exibida como capa.',

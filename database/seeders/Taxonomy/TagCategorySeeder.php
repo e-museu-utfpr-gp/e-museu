@@ -2,18 +2,14 @@
 
 namespace Database\Seeders\Taxonomy;
 
-use App\Models\Taxonomy\TagCategory;
 use Illuminate\Database\Seeder;
 
 class TagCategorySeeder extends Seeder
 {
     public function run(): void
     {
-        if (app()->environment('local')) {
-            TagCategory::create(['name' => 'Marca']);
-            TagCategory::create(['name' => 'Série']);
-            TagCategory::create(['name' => 'Tamanho']);
-            TagCategory::create(['name' => 'Cor']);
-        }
+        // Default tag categories (rows + pt_BR/en translations) are created in
+        // 2026_03_29_000005_create_tag_categories_table and
+        // 2026_03_29_000006_create_tag_category_translations_table.
     }
 }

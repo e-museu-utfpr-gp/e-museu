@@ -58,7 +58,7 @@
     <div class="card mb-3">
         <h5 class="card-header">{{ __('view.admin.catalog.items.show.detail') }}</h5>
         <div class="card-body">
-            <p class="card-text">{!! nl2br($item->detail) !!}</p>
+            <p class="card-text">{!! nl2br(e($item->detail)) !!}</p>
         </div>
     </div>
     <div class="card mb-3">

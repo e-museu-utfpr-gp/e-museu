@@ -17,9 +17,26 @@ use App\Http\Controllers\Admin\Collaborator\AdminCollaboratorController;
 use App\Http\Controllers\StorageProxyController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagCategoryController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagController;
+use App\Models\Language;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/storage/{path}', StorageProxyController::class)->where('path', '.*')->name('storage.proxy');
+
+Route::post('/locale', function (\Illuminate\Http\Request $request) {
+    $locale = (string) $request->input('locale');
+    if (Language::isValidSessionUiLocale($locale)) {
+        $request->session()->put('locale', $locale);
+    }
+
+    $previous = url()->previous();
+    $appUrl = rtrim((string) config('app.url'), '/');
+
+    if ($appUrl !== '' && str_starts_with($previous, $appUrl)) {
+        return redirect()->to($previous);
+    }
+
+    return redirect()->route('home');
+})->name('locale.update');
 
 Route::redirect('/', '/home');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
@@ -41,7 +58,7 @@ Route::prefix('catalog')->name('catalog.')->group(function () {
     Route::get('tags', [TagController::class, 'index'])->name('tags.index');
     Route::get('tags/autocomplete', [TagController::class, 'autocomplete'])->name('tags.autocomplete');
     Route::get('tags/check-name', [TagController::class, 'checkName'])->name('tags.check-name');
-    Route::match(['get', 'post'], 'collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
+    Route::post('collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
         ->name('collaborators.check-contact');
 });
 
@@ -58,6 +75,8 @@ Route::middleware('authenticate')->prefix('admin')->name('admin.')->group(functi
         Route::resource('extras', AdminExtraController::class);
         Route::resource('item-components', AdminItemComponentController::class)
             ->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+        Route::get('tags/by-category', [AdminItemTagController::class, 'tagsByCategory'])
+            ->name('tags.by-category');
         Route::resource('item-tags', AdminItemTagController::class)
             ->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
     });

@@ -4,15 +4,9 @@
                 @csrf
                 <div class="row">
                     <div class="col-md-6">
-                        <x-ui.inputs.admin.textarea
-                            name="info"
-                            id="info"
-                            :rows="5"
-                            :label="__('view.admin.catalog.extras.create.info')"
-                        />
-                        <div class="row" data-section-item-selector 
-                             data-section-selector="#category_id" 
-                             data-item-selector="#item_id" 
+                        <div class="row" data-section-item-selector
+                             data-section-selector="#category_id"
+                             data-item-selector="#item_id"
                              data-original-item-id="{{ request()->query('id') }}"
                              data-old-selected-id="{{ old('item_id', '') }}"
                              data-get-items-url="{{ route('admin.catalog.items.by-item-category') }}">
@@ -40,6 +34,11 @@
                                 </x-ui.inputs.admin.select>
                             </div>
                         </div>
+                        @include('pages.admin.catalog.extras._partials.translation-tabs', [
+                            'contentLanguages' => $contentLanguages,
+                            'preferredContentTabLanguageId' => $preferredContentTabLanguageId,
+                            'extra' => null,
+                        ])
                         <x-ui.inputs.admin.select
                             name="collaborator_id"
                             id="collaborator_id"

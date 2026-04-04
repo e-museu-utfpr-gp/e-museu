@@ -67,7 +67,8 @@ $(document).ready(function () {
                 contact: contact,
             },
             success: function (data) {
-                if (data === false) {
+                const exists = data && data.exists === true;
+                if (!exists) {
                     $contactWarning.prop('hidden', false);
                     $contactSuccess.prop('hidden', true);
                 } else {

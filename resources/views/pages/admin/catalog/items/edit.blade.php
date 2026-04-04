@@ -1,5 +1,11 @@
-<x-layouts.admin :title="__('view.admin.catalog.items.edit.title') . ' ' . $item->
-    id" :heading="__('view.admin.catalog.items.edit.heading', ['id' => $item->id, 'name' => $item->name])">
+@php
+    $headingCode = $preferredContentTabLanguageCode ?? '';
+    $headingName = $headingCode !== ''
+        ? old('translations.' . $headingCode . '.name', $headingTranslation?->name ?? '—')
+        : ($headingTranslation?->name ?? '—');
+@endphp
+<x-layouts.admin :title="__('view.admin.catalog.items.edit.title') . ' ' . $item->id"
+    :heading="__('view.admin.catalog.items.edit.heading', ['id' => $item->id, 'name' => $headingName])">
             <form action="{{ route('admin.catalog.items.update', $item->id) }}" method="POST" enctype="multipart/form-data" id="admin-item-edit-form"
                 data-label-cover="{{ __('app.catalog.item_image.cover') }}"
                 data-label-gallery="{{ __('app.catalog.item_image.gallery') }}"
@@ -8,28 +14,13 @@
                 @method('PATCH')
                 <div id="admin-delete-image-ids"></div>
                 <input type="hidden" name="set_cover_image_id" id="set_cover_image_id" value="">
+                @include('pages.admin.catalog.items._partials.translation-tabs', [
+                    'contentLanguages' => $contentLanguages,
+                    'preferredContentTabLanguageId' => $preferredContentTabLanguageId,
+                    'item' => $item,
+                ])
                 <div class="row">
                     <div class="col-md-6">
-                        <x-ui.inputs.admin.text
-                            name="name"
-                            id="name"
-                            :label="__('view.admin.catalog.items.edit.name')"
-                            :value="$item->name"
-                        />
-                        <x-ui.inputs.admin.textarea
-                            name="description"
-                            id="description"
-                            :rows="5"
-                            :label="__('view.admin.catalog.items.edit.description')"
-                            :value="$item->description"
-                        />
-                        <x-ui.inputs.admin.textarea
-                            name="detail"
-                            id="detail"
-                            :rows="7"
-                            :label="__('view.admin.catalog.items.edit.detail')"
-                            :value="$item->detail"
-                        />
                         <div class="row">
                             <div class="col-md-6">
                                 <x-ui.inputs.admin.select
@@ -80,7 +71,10 @@
                             </div>
                             <div class="col-md-6">
                                 @php
-                                    $currentCoverImage = $item->coverImage ?? $item->images->sortBy('sort_order')->first();
+                                    $sortedEditImages = $item->images->sortBy('sort_order')->values();
+                                    $currentCoverImage = $sortedEditImages->first(
+                                        fn ($img) => $img->type === \App\Enums\Catalog\ItemImageType::COVER
+                                    ) ?? $sortedEditImages->first();
                                 @endphp
                                 @include('pages.admin.catalog.items._partials.edit.cover-upload')
                                 @include('pages.admin.catalog.items._partials.edit.gallery-upload')
@@ -88,18 +82,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <x-ui.inputs.admin.textarea
-                            name="history"
-                            id="history"
-                            :rows="46"
-                            :label="__('view.admin.catalog.items.edit.history')"
-                            :value="$item->history"
-                        />
-                        <div class="mb-3">
-                            <x-ui.buttons.submit variant="warning" icon="bi bi-pencil-fill">{{ __('view.admin.catalog.items.edit.submit') }}</x-ui.buttons.submit>
-                        </div>
-                    </div>
+                </div>
+                <div class="mb-3">
+                    <x-ui.buttons.submit variant="warning" icon="bi bi-pencil-fill">{{ __('view.admin.catalog.items.edit.submit') }}</x-ui.buttons.submit>
                 </div>
                 <x-release-lock-on-leave type="items" :id="$item->id" />
             </form>

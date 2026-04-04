@@ -137,6 +137,43 @@ a {
     }
 }
 
+// Public navbar: match nav-link spacing; avoid .input-div / .input-form (form margins + underline)
+.navbar .locale-nav-select {
+    margin: 0;
+    padding: 0;
+
+    @media (max-width: 991.98px) {
+        width: 100%;
+    }
+}
+
+.navbar .locale-nav-select-input {
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    color: #0d233d;
+    cursor: pointer;
+    line-height: 1.5;
+    padding: 0.75rem 1.75rem 0.75rem 1rem;
+    min-width: min(100%, 11rem);
+    width: 100%;
+
+    @media (min-width: 992px) {
+        min-width: 11rem;
+        width: auto;
+    }
+
+    &:focus {
+        border-color: transparent;
+        box-shadow: none;
+        background-color: transparent;
+    }
+
+    &:hover {
+        background-color: rgba(91, 225, 185, 0.2);
+    }
+}
+
 .image-form {
     border-radius: 0;
     border: 0;
@@ -469,4 +506,19 @@ footer {
 
 .orange-text {
     color: #ed6e38;
+}
+
+// Neutral language: keep label + info icon on one row inside the tab (no nested <button>)
+.nav-tabs .nav-item .nav-link:has(.language-tab-label) {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    white-space: nowrap;
+}
+
+.tab-info-popover-icon {
+    font-size: 1rem;
+    line-height: 1;
+    display: block;
 }

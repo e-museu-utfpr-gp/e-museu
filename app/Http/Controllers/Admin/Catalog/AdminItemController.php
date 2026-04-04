@@ -7,10 +7,12 @@ use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
 use App\Http\Requests\Admin\Catalog\AdminUpdateItemRequest;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemImage;
+use App\Models\Language;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemService;
 use App\Services\Collaborator\CollaboratorService;
+use App\Support\Admin\AdminEditHeadingLocale;
 use App\Support\Admin\AdminIndexTableView;
 use App\Services\Identity\LockService;
 use Illuminate\Http\JsonResponse;
@@ -45,7 +47,7 @@ class AdminItemController extends AdminBaseController
 
     public function show(Item $item): View
     {
-        $item->load('images');
+        $item->load(Item::eagerLoadRelationsForAdminShow());
 
         return view('pages.admin.catalog.items.show', compact('item'));
     }
@@ -55,6 +57,8 @@ class AdminItemController extends AdminBaseController
         return view('pages.admin.catalog.items.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
+            'contentLanguages' => Language::forAdminContentForms(),
+            'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
         ]);
     }
 
@@ -75,17 +79,18 @@ class AdminItemController extends AdminBaseController
         Item $item,
         ItemCategoryService $itemCategoryService,
         CollaboratorService $collaboratorService,
-        LockService $lockService
+        LockService $lockService,
+        AdminEditHeadingLocale $headingLocale
     ): View {
-        $item->load(['images', 'coverImage']);
-        $lockService->requireUnlocked($item);
-        $lockService->lock($item);
+        $item->load(['images', 'translations.language']);
+        $lockService->requireUnlockedThenLock($item);
 
-        return view('pages.admin.catalog.items.edit', [
+        return view('pages.admin.catalog.items.edit', array_merge([
             'item' => $item,
+            'contentLanguages' => Language::forAdminContentForms(),
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
-        ]);
+        ], $headingLocale->resolveFor($item)));
     }
 
     public function update(

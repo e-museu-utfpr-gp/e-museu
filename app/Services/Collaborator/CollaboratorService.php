@@ -17,14 +17,16 @@ class CollaboratorService
      */
     public function getPaginatedCollaboratorsForAdminIndex(Request $request): array
     {
-        $count = Collaborator::count();
-        $query = Collaborator::query();
+        $query = Collaborator::query()->with('locks');
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::collaborators());
 
         $collaborators = $query->paginate(10)->withQueryString();
 
-        return ['collaborators' => $collaborators, 'count' => $count];
+        return [
+            'collaborators' => $collaborators,
+            'count' => $collaborators->total(),
+        ];
     }
 
     /**
@@ -78,7 +80,10 @@ class CollaboratorService
 
     public function findExternalByContact(string $contact): ?Collaborator
     {
-        return Collaborator::where('contact', 'LIKE', $contact)
+        $contact = trim($contact);
+
+        return Collaborator::query()
+            ->where('contact', '=', $contact)
             ->where('role', CollaboratorRole::EXTERNAL)
             ->where('blocked', false)
             ->first();

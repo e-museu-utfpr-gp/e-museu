@@ -42,6 +42,11 @@ async function loadComponentsByCategory(categoryId, signal) {
     try {
         const urlObj = new URL(base, window.location.origin);
         urlObj.searchParams.set('item_category', categoryId);
+        const locEl = document.getElementById('contribution_content_locale');
+        const loc = locEl ? String(locEl.value || '') : '';
+        if (loc) {
+            urlObj.searchParams.set('content_locale', loc);
+        }
         const res = await fetch(urlObj.toString(), {
             headers: { Accept: 'application/json' },
             signal,

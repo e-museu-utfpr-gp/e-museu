@@ -1,16 +1,21 @@
+@php
+    $headingCode = $preferredContentTabLanguageCode ?? '';
+    $headingName = $headingCode !== ''
+        ? old('translations.' . $headingCode . '.name', $headingTranslation?->name ?? '—')
+        : ($headingTranslation?->name ?? '—');
+@endphp
 <x-layouts.admin :title="__('view.admin.taxonomy.tag_categories.edit.title', ['id' => $tagCategory->id])"
-    :heading="__('view.admin.taxonomy.tag_categories.edit.heading', ['id' => $tagCategory->id, 'name' => $tagCategory->name])">
-        <form action="{{ route('admin.taxonomy.tag-categories.update', $tagCategory->id) }}" method="POST" enctype="multipart/form-data">
+    :heading="__('view.admin.taxonomy.tag_categories.edit.heading', ['id' => $tagCategory->id, 'name' => $headingName])">
+        <form action="{{ route('admin.taxonomy.tag-categories.update', $tagCategory->id) }}" method="POST">
             @csrf
             @method('PATCH')
             <div class="row">
                 <div class="col-md-6">
-                    <x-ui.inputs.admin.text
-                        name="name"
-                        id="name"
-                        :label="__('view.admin.taxonomy.tag_categories.edit.name')"
-                        :value="$tagCategory->name"
-                    />
+                    @include('pages.admin.taxonomy.tag-categories._partials.translation-tabs', [
+                        'contentLanguages' => $contentLanguages,
+                        'preferredContentTabLanguageId' => $preferredContentTabLanguageId,
+                        'tagCategory' => $tagCategory,
+                    ])
                     <div class="mb-3">
                         <x-ui.buttons.submit variant="warning" icon="bi bi-pencil-fill">
                             {{ __('view.admin.taxonomy.tag_categories.edit.submit') }}

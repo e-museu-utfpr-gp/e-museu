@@ -108,7 +108,7 @@
                             <strong>{{ __('view.admin.catalog.items.show.history') }}: </strong>
                             <p class="card-text">{{ $extra->item->history }}</p>
                             <strong>{{ __('view.admin.catalog.items.show.detail') }}: </strong>
-                            <p class="ms-3">{!! nl2br($extra->item->detail) !!}</p>
+                            <p class="ms-3">{!! nl2br(e($extra->item->detail)) !!}</p>
                             <strong>{{ __('view.admin.catalog.items.show.date') }}: </strong>
                             <p class="card-text">{{ $extra->item->date ? date('d-m-Y', strtotime($extra->item->date)) : '—' }}</p>
                             <strong>{{ __('view.admin.catalog.items.show.identification_code') }}: </strong>

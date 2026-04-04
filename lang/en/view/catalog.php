@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'content_language_names' => [
+        'pt_BR' => 'Portuguese (Brazil)',
+        'en' => 'English',
+        'neutral' => 'universal label',
+    ],
+    'translation_fallback_notice' => 'Title, description, and history are shown in :language; there is no version in your selected site language.',
+    'translation_fallback_notice_extra' => 'This note is shown in :language; there is no version in your selected site language.',
     'items' => [
         'index' => [
             'title' => 'Collection items',
@@ -19,6 +26,9 @@ return [
             'title' => 'Contribute to the collection',
             'heading' => 'Contribute to the collection',
             'intro' => 'Fill in the fields below to suggest a new item to the collection.',
+            'content_language_label' => 'Content language',
+            'content_language_help' => 'Chooses the language used when saving the item, tags, and extra information. This does not change the site language. Other (Neutral) is for text that is not a Portuguese or English version—for example universal names, codes, or labels that should stay the same regardless of site language.',
+            'content_language_option_neutral' => 'Other (Neutral)',
             'name_label' => 'Item name',
             'name_help' => 'Name by which the item is known.',
             'category_label' => 'Item category',
@@ -125,6 +135,7 @@ return [
             'no_components' => 'No related components.',
             'credits' => 'Credits',
             'added_by' => 'Added by',
+            'collaborator_unknown' => 'Unknown',
             'physical_collection' => 'Physical collection item – :name',
             'collaborators' => 'Collaborators',
             'collaborator' => 'Collaborator',

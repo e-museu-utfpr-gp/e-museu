@@ -1,22 +1,26 @@
-<x-layouts.admin :title="__('view.admin.catalog.extras.edit.title') . ' ' . $extra->
-    id" :heading="__('view.admin.catalog.extras.edit.heading', ['id' => $extra->id])">
+@php
+    use Illuminate\Support\Str;
+
+    $headingCode = $preferredContentTabLanguageCode ?? '';
+    $headingInfoRaw = $headingCode !== ''
+        ? old('translations.' . $headingCode . '.info', $headingTranslation?->info ?? '')
+        : ($headingTranslation?->info ?? '');
+    $headingPreview = $headingInfoRaw !== ''
+        ? Str::limit(trim(strip_tags((string) $headingInfoRaw)), 80)
+        : '—';
+@endphp
+<x-layouts.admin :title="__('view.admin.catalog.extras.edit.title') . ' ' . $extra->id"
+    :heading="__('view.admin.catalog.extras.edit.heading', ['id' => $extra->id, 'preview' => $headingPreview])">
             <form action="{{ route('admin.catalog.extras.update', $extra->id) }}" method="POST">
                 @csrf
                 @method('PATCH')
                 <div class="row">
                     <div class="col-md-6">
-                        <x-ui.inputs.admin.textarea
-                            name="info"
-                            id="info"
-                            :rows="5"
-                            :label="__('view.admin.catalog.extras.edit.info')"
-                            :value="$extra->info"
-                        />
-                        <div class="row" data-section-item-selector 
-                             data-section-selector="#category_id" 
-                             data-item-selector="#item_id" 
+                        <div class="row" data-section-item-selector
+                             data-section-selector="#category_id"
+                             data-item-selector="#item_id"
                              data-original-item-id="{{ $extra->item->id }}"
-                             data-old-selected-id="{{ old('item_id', '') }}"
+                             data-old-selected-id="{{ old('item_id', $extra->item_id) }}"
                              data-get-items-url="{{ route('admin.catalog.items.by-item-category') }}">
                             <div class="col-md-4">
                                 <x-ui.inputs.admin.select
@@ -42,6 +46,11 @@
                                 </x-ui.inputs.admin.select>
                             </div>
                         </div>
+                        @include('pages.admin.catalog.extras._partials.translation-tabs', [
+                            'contentLanguages' => $contentLanguages,
+                            'preferredContentTabLanguageId' => $preferredContentTabLanguageId,
+                            'extra' => $extra,
+                        ])
                         <x-ui.inputs.admin.select
                             name="collaborator_id"
                             id="collaborator_id"

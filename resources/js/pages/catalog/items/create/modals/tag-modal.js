@@ -12,6 +12,11 @@ function i18nTag(key) {
     return t[key] || '';
 }
 
+function contributionContentLocale() {
+    const el = document.getElementById('contribution_content_locale');
+    return el ? String(el.value || '') : '';
+}
+
 function routesFromForm() {
     const form = getItemCreateForm();
     if (!form) {
@@ -226,6 +231,7 @@ function checkTagName() {
         data: {
             category: $('#tag-category').val(),
             name: $('#tag-name').val(),
+            content_locale: contributionContentLocale(),
         },
         success: function (data) {
             const n = Number(data);
@@ -273,6 +279,7 @@ function initTagAutocomplete(attempt) {
             return $.get(autocomplete, {
                 query: query,
                 category: $('#tag-category').find(':selected').val(),
+                content_locale: contributionContentLocale(),
             })
                 .done(function (data) {
                     if (!Array.isArray(data)) {
@@ -307,6 +314,9 @@ $(function () {
     });
     modal.on('change', '#tag-category', checkIfCategoryIsEmpty);
     modal.on('change', '#tag-name', checkTagName);
+    $(document).on('change', '#contribution_content_locale', function () {
+        checkTagName();
+    });
 
     modal.on('hidden.bs.modal', function () {
         $('#tag-category').val('');

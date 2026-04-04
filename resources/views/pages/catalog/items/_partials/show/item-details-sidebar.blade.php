@@ -41,6 +41,11 @@
                     <a href="{{ route('catalog.items.index', ['item_category' => $item->itemCategory?->id]) }}">
                         <p class="show-item-link">{{ $item->itemCategory?->name }}</p>
                     </a>
+                    @if ($item->itemCategory)
+                        @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                            'resolved' => $item->itemCategory->resolveTranslation(),
+                        ])
+                    @endif
                 </div>
             </div>
 
@@ -58,15 +63,23 @@
             </div>
 
             @foreach ($item->itemTags as $tagItem)
-                @if ($tagItem->validation == true && $tagItem->tag->validation == true)
+                @if ($tagItem->validation && $tagItem->tag && $tagItem->tag->validation)
                     <div class="row">
                         <div class="col-md-5">
-                            <p class="fw-bold">{{ $tagItem->tag->category?->name }}</p>
+                            <p class="fw-bold">{{ $tagItem->tag->tagCategory?->name }}</p>
+                            @if ($tagItem->tag->tagCategory)
+                                @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                    'resolved' => $tagItem->tag->tagCategory->resolveTranslation(),
+                                ])
+                            @endif
                         </div>
                         <div class="col-md-7">
                             <a href="{{ route('catalog.items.index', ['tag[]' => $tagItem->tag->id]) }}">
                                 <p class="show-item-link">{{ $tagItem->tag->name }}</p>
                             </a>
+                            @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                'resolved' => $tagItem->tag->resolveTranslation(),
+                            ])
                         </div>
                     </div>
                 @endif
@@ -96,8 +109,16 @@
                                     </div>
                                 @endif
                                 <div class="p-1">
+                                    @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                        'resolved' => $itemComponent->component->resolveTranslation(),
+                                    ])
                                     <p class="mb-1 fw-bold">
                                         {{ Str::limit($itemComponent->component->name, 30) }}</p>
+                                    @if ($itemComponent->component->itemCategory)
+                                        @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                            'resolved' => $itemComponent->component->itemCategory->resolveTranslation(),
+                                        ])
+                                    @endif
                                     <p class="mb-0">
                                         {{ Str::limit($itemComponent->component->itemCategory?->name) }}</p>
                                 </div>
@@ -121,7 +142,7 @@
                 <p class="fw-bold">{{ __('view.catalog.items.show.added_by') }}</p>
             </div>
             <div class="col-md-7">
-                <p>{{ $item->collaborator->full_name }}</p>
+                <p>{{ $item->collaborator?->full_name ?? __('view.catalog.items.show.collaborator_unknown') }}</p>
             </div>
         </div>
 
@@ -135,13 +156,13 @@
                     <ul class="list-group p-2">
                         <div class="card-body">
                             @foreach ($item->extras as $extra)
-                                @if ($extra->validation == true)
+                                @if ($extra->validation)
                                     <div class="row">
                                         <div class="col-md-5">
                                             <p class="fw-bold">{{ __('view.catalog.items.show.collaborator') }}</p>
                                         </div>
                                         <div class="col-md-7">
-                                            <p>{{ $extra->collaborator->full_name }}</p>
+                                            <p>{{ $extra->collaborator?->full_name ?? __('view.catalog.items.show.collaborator_unknown') }}</p>
                                         </div>
                                     </div>
                                 @endif

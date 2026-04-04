@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Catalog;
 use App\Actions\Catalog\StoreItemContributionAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\ItemContributionValidator;
+use App\Services\Catalog\ContributionContentLocaleService;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Catalog\ItemImagesService;
 use App\Services\Catalog\ItemService;
 use App\Services\Taxonomy\TagCategoryService;
-use App\Models\Taxonomy\TagCategory;
+use App\Support\Http\OptionalContentLocale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,27 +38,41 @@ class ItemController extends Controller
 
     public function create(
         ItemCategoryService $itemCategoryService,
-        TagCategoryService $tagCategoryService
+        TagCategoryService $tagCategoryService,
+        ContributionContentLocaleService $contributionContentLocaleService
     ): View {
         $categories = $tagCategoryService->getForIndex();
         $itemCategories = $itemCategoryService->getForIndex();
+        $localeForm = $contributionContentLocaleService->formOptions();
 
-        return view('pages.catalog.items.create', compact('categories', 'itemCategories'));
+        return view('pages.catalog.items.create', [
+            'categories' => $categories,
+            'itemCategories' => $itemCategories,
+            'contributionLanguages' => $localeForm['contributionLanguages'],
+            'defaultContributionContentLocale' => $localeForm['defaultContentLocale'],
+        ]);
     }
 
     public function store(
         Request $request,
         ItemContributionValidator $itemContributionValidator,
         StoreItemContributionAction $storeItemContributionAction,
-        ItemImagesService $itemImagesService
+        ItemImagesService $itemImagesService,
+        ContributionContentLocaleService $contributionContentLocaleService
     ): RedirectResponse {
         $validatedData = $itemContributionValidator->validateStore($request);
 
         $galleryFiles = $itemImagesService->filterValidGalleryFiles($request->file('gallery_images'));
 
+        $itemPayload = $validatedData['item'];
+        $contentLocaleCode = (string) ($itemPayload['content_locale'] ?? '');
+        unset($itemPayload['content_locale']);
+        $contentLanguageId = $contributionContentLocaleService->languageIdForValidatedCode($contentLocaleCode);
+
         $result = $storeItemContributionAction->handle(
             $validatedData['collaborator'],
-            $validatedData['item'],
+            $itemPayload,
+            $contentLanguageId,
             $validatedData['tags'],
             $validatedData['extras'],
             $validatedData['components'],
@@ -80,30 +95,36 @@ class ItemController extends Controller
         string $id,
         ItemCategoryService $itemCategoryService,
         TagCategoryService $tagCategoryService,
-        ItemService $itemService
+        ItemService $itemService,
+        ContributionContentLocaleService $contributionContentLocaleService
     ): View {
         $item = $itemService->getPublicItemForShow($id);
 
         $itemCategories = $itemCategoryService->getForIndex();
         $categories = $tagCategoryService->getForIndex();
 
-        $seriesCategoryId = TagCategory::query()
-            ->where('name', 'Série')
-            ->value('id');
+        $seriesCategoryId = $item->loadCatalogSeriesTimelineForShow();
 
-        return view('pages.catalog.items.show', compact('item', 'itemCategories', 'categories', 'seriesCategoryId'));
-    }
+        $localeForm = $contributionContentLocaleService->formOptions();
 
-    public function edit(): never
-    {
-        abort(404);
+        return view('pages.catalog.items.show', [
+            'item' => $item,
+            'itemCategories' => $itemCategories,
+            'categories' => $categories,
+            'seriesCategoryId' => $seriesCategoryId,
+            'contributionLanguages' => $localeForm['contributionLanguages'],
+            'defaultExtraContentLocale' => $localeForm['defaultContentLocale'],
+        ]);
     }
 
     public function byCategory(Request $request, ItemService $itemService): JsonResponse
     {
         $itemCategoryId = (string) ($request->input('item_category') ?? '');
+        $languageId = OptionalContentLocale::languageIdOrNull($request);
 
-        $items = $itemService->getPublicItemsByCategory($itemCategoryId);
+        $items = $languageId !== null
+            ? $itemService->getPublicItemsByCategoryForLanguage($itemCategoryId, $languageId)
+            : $itemService->getPublicItemsByCategory($itemCategoryId);
 
         return response()->json($items);
     }
@@ -122,8 +143,9 @@ class ItemController extends Controller
     {
         $category = (string) ($request->input('category') ?? '');
         $name = (string) ($request->input('name') ?? '');
+        $languageId = OptionalContentLocale::languageIdOrNull($request);
 
-        $count = $itemService->countValidatedByNameAndCategory($name, $category);
+        $count = $itemService->countValidatedByNameAndCategory($name, $category, $languageId);
 
         return response()->json($count);
     }

@@ -3,11 +3,15 @@
 namespace App\Support\Catalog;
 
 use App\Models\Catalog\Item;
+use App\Support\Content\TranslationDisplaySql;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 /**
  * Builds the query for the public catalog item index (validated items, filters and sort). Caller paginates.
+ *
+ * Listing columns use {@see \App\Support\Content\TranslationDisplaySql::itemCatalogListSelectAliases()}; see that
+ * class for performance notes on correlated subqueries at scale.
  */
 class ItemIndexQueryBuilder
 {
@@ -19,9 +23,10 @@ class ItemIndexQueryBuilder
     public static function build(Request $request): Builder
     {
         $query = Item::query()
-            ->with('coverImage')
-            ->select('id', 'name', 'date', 'category_id', 'description', 'identification_code')
-            ->where('validation', true);
+            ->with(['coverImage', 'itemCategory.translations.language'])
+            ->where('validation', true)
+            ->select('items.*')
+            ->addSelect(TranslationDisplaySql::itemCatalogListSelectAliases());
 
         $sortOption = (int) $request->input('order', 1);
         $itemCategoryId = $request->item_category ?? $request->input('item_category');
@@ -51,7 +56,13 @@ class ItemIndexQueryBuilder
     private static function applySearchFilter(Builder $query, ?string $searchTerm): void
     {
         if (isset($searchTerm) && $searchTerm !== '') {
-            $query->where('name', 'LIKE', "%{$searchTerm}%");
+            $needle = '%' . $searchTerm . '%';
+            $nameSql = TranslationDisplaySql::itemNameSubquerySql('items');
+            $descSql = TranslationDisplaySql::itemTranslationSubquerySql('description', 'items');
+            $query->where(function (Builder $q) use ($needle, $nameSql, $descSql): void {
+                $q->whereRaw("({$nameSql}) LIKE ?", [$needle])
+                    ->orWhereRaw("({$descSql}) LIKE ?", [$needle]);
+            });
         }
     }
 
@@ -95,6 +106,13 @@ class ItemIndexQueryBuilder
             4 => ['name', 'desc'],
         ];
         [$sortColumn, $sortDirection] = $sortOptionMap[$sortOption] ?? $sortOptionMap[1];
-        $query->orderBy($sortColumn, $sortDirection);
+        if ($sortColumn === 'name') {
+            $expr = TranslationDisplaySql::itemNameExpression();
+            $query->orderBy($expr, $sortDirection);
+
+            return;
+        }
+
+        $query->orderBy('items.' . $sortColumn, $sortDirection);
     }
 }

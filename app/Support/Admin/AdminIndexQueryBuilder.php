@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
  *   baseTable: string,
  *   searchBaseTable?: string,
  *   searchSpecial?: array<string, array{table: string, column: string}>,
+ *   searchLikeSubquery?: array<string, string>,
+ *   sortSubquery?: array<string, string>,
  *   sortSpecial?: array<string, string>,
  *   booleanColumns?: array<int, string>,
  *   exactColumns?: array<int, string>
@@ -55,6 +57,14 @@ class AdminIndexQueryBuilder
             return;
         }
 
+        $searchLikeSubquery = $config['searchLikeSubquery'] ?? [];
+        if (isset($searchLikeSubquery[$searchColumn])) {
+            $sql = $searchLikeSubquery[$searchColumn];
+            $query->whereRaw("{$sql} LIKE ?", ['%' . (string) $search . '%']);
+
+            return;
+        }
+
         if (in_array($searchColumn, $booleanColumns, true)) {
             $query->where("{$baseTable}.{$searchColumn}", self::normalizeSearchToBoolean($search));
 
@@ -93,6 +103,14 @@ class AdminIndexQueryBuilder
         }
 
         $baseTable = $config['baseTable'];
+        $sortSubquery = $config['sortSubquery'] ?? [];
+        if (isset($sortSubquery[$sort])) {
+            $dir = strtolower((string) $order) === 'desc' ? 'desc' : 'asc';
+            $query->orderByRaw("{$sortSubquery[$sort]} {$dir}");
+
+            return;
+        }
+
         $sortSpecialColumns = $config['sortSpecial'] ?? [];
         $orderColumn = isset($sortSpecialColumns[$sort])
             ? $sortSpecialColumns[$sort]

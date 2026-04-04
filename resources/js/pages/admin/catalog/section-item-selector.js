@@ -51,10 +51,18 @@ $(document).ready(function () {
             return oldStr || origStr || queryItemId;
         }
 
+        function $sectionField() {
+            return $(el).find(sectionSelector);
+        }
+
+        function $itemField() {
+            return $(el).find(itemSelector);
+        }
+
         function getItems() {
-            const itemCategoryId = $(sectionSelector).val();
+            const itemCategoryId = $sectionField().val();
             if (!itemCategoryId) {
-                $(itemSelector)
+                $itemField()
                     .empty()
                     .append($('<option>', { value: '', text: '-' }));
                 setLoadError(false);
@@ -71,14 +79,23 @@ $(document).ready(function () {
                 dataType: 'json',
                 success: function (data) {
                     setLoadError(false);
-                    const $select = $(itemSelector);
+                    const $select = $itemField();
                     $select.empty().append($('<option>', { value: '', text: '-' }));
-                    if (Array.isArray(data) && data.length > 0) {
-                        $.each(data, function (_index, item) {
+                    const rows = Array.isArray(data)
+                        ? data
+                        : data != null && typeof data === 'object' && Array.isArray(data.data)
+                          ? data.data
+                          : [];
+                    if (rows.length > 0) {
+                        $.each(rows, function (_index, item) {
+                            if (item === null || typeof item !== 'object') {
+                                return;
+                            }
+                            const label = String(item.name ?? item.label ?? item.id ?? '');
                             $select.append(
                                 $('<option>', {
                                     value: item.id,
-                                    text: item.name,
+                                    text: label,
                                 })
                             );
                         });
@@ -97,7 +114,7 @@ $(document).ready(function () {
                 },
                 error: function () {
                     setLoadError(true);
-                    $(itemSelector)
+                    $itemField()
                         .empty()
                         .append($('<option>', { value: '', text: '-' }));
                 },
@@ -106,6 +123,6 @@ $(document).ready(function () {
 
         getItems();
 
-        $(sectionSelector).on('change', getItems);
+        $(el).on('change.eMuseuSectionItem', sectionSelector, getItems);
     });
 });

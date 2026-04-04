@@ -11,7 +11,7 @@
         <x-admin.sortable-table :action="route('admin.collaborators.index')" :columns="$sortColumns">
                         @foreach ($collaborators as $collaborator)
                             <tr
-                                class="@if (!$collaborator->locks->isEmpty() && $collaborator->locks->first()->admin_id != auth()->user()->id) table-warning @endif">
+                                class="@if (!$collaborator->locks->isEmpty() && (string) $collaborator->locks->first()->admin_id !== (string) auth()->id()) table-warning @endif">
                                 <th scope="row">{{ $collaborator->id }}</th>
                                 <td>{{ $collaborator->full_name }}</td>
                                 <td>{{ $collaborator->contact }}</td>

@@ -34,6 +34,36 @@
         >
             @csrf
             <div class="row">
+                <div class="col-md-6 col-12">
+                    <div class="mb-4">
+                        <h5 class="mb-2" id="contribution_content_locale_heading">
+                            {{ __('view.catalog.items.create.content_language_label') }}
+                            <x-ui.info-popover :content="__('view.catalog.items.create.content_language_help')" />
+                        </h5>
+                        <select
+                            name="content_locale"
+                            id="contribution_content_locale"
+                            class="form-select w-100"
+                            required
+                            aria-labelledby="contribution_content_locale_heading"
+                        >
+                            @foreach ($contributionLanguages as $lang)
+                                <option value="{{ $lang->code }}" @selected(old('content_locale', $defaultContributionContentLocale) === $lang->code)>
+                                    @if ($lang->code === \App\Enums\Content\ContentLanguage::NEUTRAL->value)
+                                        {{ __('view.catalog.items.create.content_language_option_neutral') }}
+                                    @else
+                                        {{ $lang->name }}
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('content_locale')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-md-6">
                     <x-ui.inputs.text
                         name="name"

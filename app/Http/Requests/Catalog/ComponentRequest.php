@@ -30,7 +30,7 @@ class ComponentRequest extends FormRequest
                 'exists:items,id',
                 function ($attribute, $value, $fail) {
                     /** @var array<int, array<string, mixed>> $components */
-                    $components = request()->input('components', []);
+                    $components = $this->input('components', []);
                     $ids = collect($components)->pluck('item_id');
                     $count = $ids->count();
                     $uniqueCount = $ids->unique()->count();

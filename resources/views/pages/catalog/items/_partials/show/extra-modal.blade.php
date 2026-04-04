@@ -12,6 +12,32 @@
                     data-check-contact-route="{{ route('catalog.collaborators.check-contact') }}">
                     @csrf
                     <input name="item_id" value="{{ $item->id }}" hidden>
+                    <div class="mb-3">
+                        <label class="form-label" id="extra_content_locale_heading" for="extra_content_locale">
+                            {{ __('view.catalog.items.create.content_language_label') }}
+                            <x-ui.info-popover :content="__('view.catalog.items.create.content_language_help')" />
+                        </label>
+                        <select
+                            name="content_locale"
+                            id="extra_content_locale"
+                            class="form-select w-100"
+                            required
+                            aria-labelledby="extra_content_locale_heading"
+                        >
+                            @foreach ($contributionLanguages as $lang)
+                                <option value="{{ $lang->code }}" @selected(old('content_locale', $defaultExtraContentLocale) === $lang->code)>
+                                    @if ($lang->code === \App\Enums\Content\ContentLanguage::NEUTRAL->value)
+                                        {{ __('view.catalog.items.create.content_language_option_neutral') }}
+                                    @else
+                                        {{ $lang->name }}
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('content_locale')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
                     <x-ui.inputs.textarea
                         name="info"
                         id="info"

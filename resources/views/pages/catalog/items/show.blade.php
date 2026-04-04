@@ -1,23 +1,26 @@
 <x-layouts.app :title="$item->name">
 
 @php
+    $itemTranslationResolved = $item->resolveTranslation();
+
     $hasNoSeries = $item->itemTags
         ->filter(function ($tagItem) use ($seriesCategoryId) {
-            return $tagItem->tag->category?->id == $seriesCategoryId && $tagItem->validation == true;
+            return $tagItem->tag
+                && $tagItem->tag->tagCategory?->id == $seriesCategoryId
+                && $tagItem->validation
+                && $tagItem->tag->validation;
         })
         ->isEmpty();
 
     $hasNoComponents = $item->itemComponents
         ->filter(function ($itemComponent) {
-            return $itemComponent->validation == true && $itemComponent->component->validation == true;
+            return $itemComponent->validation
+                && $itemComponent->component
+                && $itemComponent->component->validation;
         })
         ->isEmpty();
 
-    $hasValidatedExtras = $item->extras
-        ->filter(function ($extra) {
-            return $extra->validation == true;
-        })
-        ->isNotEmpty();
+    $hasValidatedExtras = $item->extras->contains(fn ($extra) => (bool) $extra->validation);
 @endphp
 
     <div class="container main-container mb-auto">
@@ -27,6 +30,7 @@
 
             <div class="col-md-8 order-md-1">
                 <h1>{{ $item->name }}</h1>
+                @include('pages.catalog.items._partials.show.translation-fallback-notice', ['resolved' => $itemTranslationResolved])
                 <div class="m-4">
                     <p class="fw-bold">{{ __('view.catalog.items.show.identification_code') }}: {{ $item->identification_code }}</p>
                     <p>{{ $item->description }}</p>
@@ -43,14 +47,18 @@
                 </div>
                 @include('pages.catalog.items._partials.show.timelines-section')
                 <h3>{{ __('view.catalog.items.show.extra_info') }}</h3>
-                @if ($item->extras->isNotEmpty() && $item->extras->contains('validation', '1'))
+                @if ($item->extras->isNotEmpty() && $hasValidatedExtras)
                     @foreach ($item->extras as $extra)
-                        @if ($extra->validation == '1')
+                        @if ($extra->validation)
                             <div class="m-4">
+                                @include('pages.catalog.items._partials.show.translation-fallback-notice', [
+                                    'resolved' => $extra->resolveTranslation(),
+                                    'messageKey' => 'view.catalog.translation_fallback_notice_extra',
+                                ])
                                 <p>{{ $extra->info }}</p>
                                 <div class="row">
                                     <p class="fw-bold col-2">{{ __('view.catalog.items.show.added_by') }} </p>
-                                    <p class="col-10">{{ $extra->collaborator->full_name }}</p>
+                                    <p class="col-10">{{ $extra->collaborator?->full_name ?? __('view.catalog.items.show.collaborator_unknown') }}</p>
                                 </div>
                                 <div class="division-line my-1"></div>
                             </div>
@@ -66,6 +74,9 @@
     </div>
 
     <x-ui.image-modal />
-    @include('pages.catalog.items._partials.show.extra-modal')
+    @include('pages.catalog.items._partials.show.extra-modal', [
+        'contributionLanguages' => $contributionLanguages,
+        'defaultExtraContentLocale' => $defaultExtraContentLocale,
+    ])
 
 </x-layouts.app>

@@ -30,7 +30,7 @@
                                     @endif
                                 </p>
                                 <strong>{{ __('view.admin.catalog.items.show.item_label') }}: </strong>
-                                <p class="ms-3">{{ $extra->item->name }}</p>
+                                <p class="ms-3">{{ $item->name }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.collaborator') }}: </strong>
                                 <p class="ms-3">{{ $extra->collaborator->full_name }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.created_at') }}: </strong>
@@ -70,9 +70,9 @@
                                 <strong>{{ __('view.admin.catalog.items.show.id') }}: </strong>
                                 <p class="ms-3">{{ $tagItem->id }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.item_label') }}: </strong>
-                                <p class="ms-3">{{ $tagItem->item->name }}</p>
+                                <p class="ms-3">{{ $item->name }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.tag_label') }}: </strong>
-                                <p class="ms-3">{{ $tagItem->Tag->name }}</p>
+                                <p class="ms-3">{{ $tagItem->tag->name }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.validated') }}: </strong>
                                 <p class="ms-3">
                                     @if ($tagItem->validation == 1)
@@ -124,7 +124,7 @@
                                 <strong>{{ __('view.admin.catalog.items.show.id') }}: </strong>
                                 <p class="ms-3">{{ $itemComponent->id }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.main_item') }}: </strong>
-                                <p class="ms-3">{{ $itemComponent->item->name }}</p>
+                                <p class="ms-3">{{ $item->name }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.component_label') }}: </strong>
                                 <p class="ms-3">{{ $itemComponent->component->name }}</p>
                                 <strong>{{ __('view.admin.catalog.items.show.validated') }}: </strong>

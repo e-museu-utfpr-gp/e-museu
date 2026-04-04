@@ -25,8 +25,9 @@
 <body class="bd-light d-flex flex-column min-vh-100">
     <div class="row">
         <div class="col-md-2 flex-column flex-shrink-0 p-3">
-            <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
-                <a class="text-decoration-none" href="{{ route('home') }}"><span class="fs-4 ms-2">E-Museu</span></a>
+            <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none"
+                href="{{ route('home') }}">
+                <span class="fs-4 ms-2">E-Museu</span>
             </a>
             <hr>
             <x-ui.buttons.default href="#" variant="secondary" class="d-block d-md-none mb-3" role="button"
@@ -95,6 +96,32 @@
                     </li>
                 </ul>
                 <hr/>
+                @if ($localeSwitcherLanguages->isNotEmpty())
+                    <div class="px-3 mb-3">
+                        <label class="form-label small text-muted mb-1" for="adminLocale">
+                            {{ __('view.admin.layout.locale_label') }}
+                        </label>
+                        <form action="{{ route('locale.update') }}" method="post">
+                            @csrf
+                            <select class="form-select form-select-sm" id="adminLocale" name="locale"
+                                aria-label="{{ __('view.admin.layout.locale_label') }}"
+                                onchange="this.form.requestSubmit()">
+                                @foreach ($localeSwitcherLanguages as $lang)
+                                    @php
+                                        $hasUi = $lang->hasUiTranslationPack();
+                                    @endphp
+                                    <option value="{{ $lang->code }}"
+                                        @selected(app()->getLocale() === $lang->code)
+                                        @disabled(! $hasUi)>
+                                        {{ $lang->name }}@if (! $hasUi)
+                                            ({{ __('view.admin.layout.locale_no_ui') }})
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+                    </div>
+                @endif
                 <div class="dropdown mt-2">
                     <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle ms-3"
                         id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
