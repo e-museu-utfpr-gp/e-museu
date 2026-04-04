@@ -7,6 +7,7 @@
     'showErrors' => true,
     'wrapper' => true,
     'wrapperClass' => 'mb-3',
+    'enhanced' => true,
 ])
 
 @php
@@ -25,8 +26,13 @@
             name="{{ $name }}"
             id="{{ $id }}"
             @if ($required) required @endif
+            @if ($enhanced)
+                data-enhanced-search-placeholder="{{ __('view.shared.select_search_placeholder') }}"
+                data-enhanced-no-results="{{ __('view.shared.select_no_results') }}"
+            @endif
             {{ $attributes->class([
                 'form-select',
+                'js-enhanced-select' => $enhanced,
                 'is-invalid' => $hasError,
             ]) }}
         >{{ $slot }}</select>

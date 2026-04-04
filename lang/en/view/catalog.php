@@ -73,8 +73,11 @@ return [
             'components_help' => 'Add components related to the item.',
             'components_empty' => 'No components added.',
             'components_limit' => 'Component limit reached.',
+            'clear_form' => 'Clear form',
+            'clear_form_confirm' => 'Are you sure you want to clear the entire form? Filled fields, saved draft, and images will be lost.',
+            'clear_form_modal_cancel' => 'Cancel',
+            'clear_form_modal_confirm' => 'Clear',
             'submit' => 'Submit',
-            'recover_confirm' => 'Do you want to recover the form data that was being edited?',
         ],
         'create_modals' => [
             'component' => [

@@ -21,7 +21,9 @@
         <env name="APP_ENV" value="testing"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
-        <!-- Catalog: tests in #[Group('mysql')] and FIELD() SQL require MySQL — set DB_CONNECTION=mysql in .env.testing. -->
+        <!-- RefreshDatabase runs migrate:fresh: override DB name so the dev schema (e.g. laravel) is never dropped. Create this database once (see docker/mysql/init). -->
+        <env name="DB_DATABASE" value="emuseu_testing"/>
+        <!-- #[Group('mysql')]: same MySQL host/user as .env; seeds and FIELD() SQL need mysql. -->
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>

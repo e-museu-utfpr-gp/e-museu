@@ -1,8 +1,10 @@
 import $ from 'jquery';
 import {
     appendWizardOrder,
-    clearItemCreateWizardStorage,
+    clearTagWizardSectionStorage,
     removeWizardOrderId,
+    wizardRemoveItem,
+    wizardSetItem,
 } from '../../../../../shared/catalog/item-create-storage';
 import { hideBootstrapModal } from '../../../../../shared/catalog/hide-bootstrap-modal';
 import { getItemCreateForm, parseDataModalsI18n } from '../../../../../shared/catalog/item-create-modal-helpers';
@@ -10,6 +12,24 @@ import { getItemCreateForm, parseDataModalsI18n } from '../../../../../shared/ca
 function i18nTag(key) {
     const t = parseDataModalsI18n().tag || {};
     return t[key] || '';
+}
+
+function clearTagModalValidation() {
+    const el = document.getElementById('tag-modal-validation');
+    if (el) {
+        el.classList.add('d-none');
+        el.textContent = '';
+    }
+}
+
+function showTagModalValidation(message) {
+    const el = document.getElementById('tag-modal-validation');
+    if (!el) {
+        return;
+    }
+    el.textContent = message;
+    el.classList.remove('d-none');
+    el.focus();
 }
 
 function contributionContentLocale() {
@@ -28,40 +48,46 @@ function routesFromForm() {
     };
 }
 
+/** Native select (enhanced-select moves id to the toggle; never use $('#tag-category').) */
+function $tagCategory() {
+    return $('#addTagModal select[name="tag-category"]');
+}
+
 window.tagCount = 0;
 window.tagIds = 1;
 
 let checkTagNamePending = null;
 
 function saveTag() {
-    const tagCategoryText = $('#tag-category').find(':selected').text();
-    const tagCategoryVal = $('#tag-category').find(':selected').val();
+    const tagCategoryText = $tagCategory().find(':selected').text();
+    const tagCategoryVal = $tagCategory().find(':selected').val();
     const tagName = String($('#tag-name').val() ?? '').trim();
 
     if (tagCategoryVal === '') {
-        alert(i18nTag('alert_category_required'));
+        showTagModalValidation(i18nTag('alert_category_required'));
         return;
     }
 
     if (tagName === '') {
-        alert(i18nTag('alert_name_required'));
+        showTagModalValidation(i18nTag('alert_name_required'));
         return;
     }
 
     const assignedId = window.tagIds;
     window.tagBuilder(tagCategoryText, tagCategoryVal, tagName, assignedId);
 
-    sessionStorage.setItem('itemCreateForm', 'true');
-    sessionStorage.setItem('tag' + assignedId + 'categoryText', tagCategoryText);
-    sessionStorage.setItem('tag' + assignedId + 'categoryVal', tagCategoryVal);
-    sessionStorage.setItem('tag' + assignedId + 'name', tagName);
+    wizardSetItem('itemCreateForm', 'true');
+    wizardSetItem('tag' + assignedId + 'categoryText', tagCategoryText);
+    wizardSetItem('tag' + assignedId + 'categoryVal', String(tagCategoryVal));
+    wizardSetItem('tag' + assignedId + 'name', tagName);
     appendWizardOrder('tagIdOrder', assignedId);
 
     window.tagCount++;
     window.tagIds++;
 
-    sessionStorage.setItem('tagCount', String(window.tagCount));
+    wizardSetItem('tagCount', String(window.tagCount));
 
+    clearTagModalValidation();
     window.checkTags();
     hideBootstrapModal('#addTagModal');
 }
@@ -73,7 +99,7 @@ function editTag(tagId) {
     });
 
     $('#tag-id').attr('value', tagId);
-    $('#tag-category').val(inputs[0]);
+    $tagCategory().val(inputs[0]).trigger('change');
     $('#tag-name').val(inputs[1]);
 
     checkIfCategoryIsEmpty();
@@ -84,18 +110,18 @@ function editTag(tagId) {
 }
 
 function updateTag() {
-    const tagCategoryText = $('#tag-category').find(':selected').text();
-    const tagCategoryVal = $('#tag-category').find(':selected').val();
+    const tagCategoryText = $tagCategory().find(':selected').text();
+    const tagCategoryVal = $tagCategory().find(':selected').val();
     const tagName = String($('#tag-name').val() ?? '').trim();
     const tagId = $('#tag-id').val();
 
     if (tagCategoryVal === '') {
-        alert(i18nTag('alert_category_required'));
+        showTagModalValidation(i18nTag('alert_category_required'));
         return;
     }
 
     if (tagName === '') {
-        alert(i18nTag('alert_name_required'));
+        showTagModalValidation(i18nTag('alert_name_required'));
         return;
     }
 
@@ -104,10 +130,11 @@ function updateTag() {
     $('#name-tag-' + tagId).val(tagName);
     $('#tag-name-text-' + tagId).text(tagName);
 
-    sessionStorage.setItem('tag' + tagId + 'categoryText', tagCategoryText);
-    sessionStorage.setItem('tag' + tagId + 'categoryVal', tagCategoryVal);
-    sessionStorage.setItem('tag' + tagId + 'name', tagName);
+    wizardSetItem('tag' + tagId + 'categoryText', tagCategoryText);
+    wizardSetItem('tag' + tagId + 'categoryVal', String(tagCategoryVal));
+    wizardSetItem('tag' + tagId + 'name', tagName);
 
+    clearTagModalValidation();
     hideBootstrapModal('#addTagModal');
 }
 
@@ -115,17 +142,17 @@ function deleteTag(tagId) {
     $('#tag-' + tagId).remove();
     window.tagCount--;
 
-    sessionStorage.removeItem('tag' + tagId + 'categoryText');
-    sessionStorage.removeItem('tag' + tagId + 'categoryVal');
-    sessionStorage.removeItem('tag' + tagId + 'name');
+    wizardRemoveItem('tag' + tagId + 'categoryText');
+    wizardRemoveItem('tag' + tagId + 'categoryVal');
+    wizardRemoveItem('tag' + tagId + 'name');
     removeWizardOrderId('tagIdOrder', tagId);
-    sessionStorage.setItem('tagCount', String(window.tagCount));
+    wizardSetItem('tagCount', String(window.tagCount));
 
     window.checkTags();
 }
 
 function checkIfCategoryIsEmpty() {
-    if ($('#tag-category').find(':selected').val() === '') {
+    if ($tagCategory().find(':selected').val() === '') {
         $('#tag-name').prop('disabled', true);
     } else {
         $('#tag-name').prop('disabled', false);
@@ -145,7 +172,7 @@ window.checkTags = function checkTags() {
         }
     } else {
         $('#tag-empty-text').show();
-        clearItemCreateWizardStorage();
+        clearTagWizardSectionStorage();
     }
 
     $('#tag-count-text').text(window.tagCount + '/10');
@@ -229,7 +256,7 @@ function checkTagName() {
         type: 'GET',
         url: checkName,
         data: {
-            category: $('#tag-category').val(),
+            category: $tagCategory().val(),
             name: $('#tag-name').val(),
             content_locale: contributionContentLocale(),
         },
@@ -278,7 +305,7 @@ function initTagAutocomplete(attempt) {
         source: function (query, process) {
             return $.get(autocomplete, {
                 query: query,
-                category: $('#tag-category').find(':selected').val(),
+                category: $tagCategory().find(':selected').val(),
                 content_locale: contributionContentLocale(),
             })
                 .done(function (data) {
@@ -312,14 +339,15 @@ $(function () {
         e.preventDefault();
         updateTag();
     });
-    modal.on('change', '#tag-category', checkIfCategoryIsEmpty);
+    modal.on('change', 'select[name="tag-category"]', checkIfCategoryIsEmpty);
     modal.on('change', '#tag-name', checkTagName);
     $(document).on('change', '#contribution_content_locale', function () {
         checkTagName();
     });
 
     modal.on('hidden.bs.modal', function () {
-        $('#tag-category').val('');
+        clearTagModalValidation();
+        $tagCategory().val('').trigger('change');
         $('#tag-name').val('');
 
         $('#save-tag-button').prop('hidden', false);

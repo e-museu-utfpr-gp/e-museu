@@ -21,6 +21,13 @@ The application targets **MySQL** in development, staging, and production. Catal
 
 Automated tests under the **`mysql` group** (for example `tests/Feature/Catalog/TranslationResolutionTest.php`) **require** `DB_CONNECTION=mysql` and a migrated database. If you run PHPUnit without MySQL, those tests are skipped.
 
+### PHPUnit database `emuseu_testing`
+
+`phpunit.xml` sets `DB_DATABASE=emuseu_testing` so tests do not wipe your development database.
+
+- **`./run test`** runs `ensure-mysql-testing-database` first: it creates `emuseu_testing` and grants it to the application user using credentials **inside** the `db` container (`MYSQL_ROOT_PASSWORD` / `MYSQL_USER`, derived from `.env`).
+- On the **first** MySQL volume initialization, `docker/mysql/init/01-create-testing-database.sh` may also create that database; if your `mysql_data` volume was created earlier, rely on `./run test` (or run the same SQL manually) so the database and `GRANT` exist.
+
 ### Adding a catalog / content language
 
 A new language is not only a row in `languages`. To keep SQL `FIELD()`, PHP fallback, admin forms, and UI packs aligned:
@@ -196,7 +203,7 @@ The same `-db` flag works with `./run remove-all` and `./run remove-all-files` (
 # Setup project first (required for code quality tools)
 ./run setup
 
-# Run tests
+# Run tests (creates/grants emuseu_testing when using Docker MySQL — see "PHPUnit database emuseu_testing" above)
 ./run test
 
 # Analyze code (PHPStan)

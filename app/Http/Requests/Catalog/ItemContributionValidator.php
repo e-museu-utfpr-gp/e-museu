@@ -5,7 +5,19 @@ namespace App\Http\Requests\Catalog;
 use App\Http\Requests\Collaborator\CollaboratorRequest;
 use App\Http\Requests\Taxonomy\TagRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
+/**
+ * Orchestrates multiple rule sets against a raw {@see Request} (public contribution).
+ *
+ * Nested {@see \Illuminate\Foundation\Http\FormRequest} instances are only used for
+ * {@see \Illuminate\Foundation\Http\FormRequest::rules()} and
+ * {@see \Illuminate\Foundation\Http\FormRequest::messages()}. The full FormRequest lifecycle
+ * (constructor resolution, {@see \Illuminate\Foundation\Http\FormRequest::authorize()},
+ * {@see \Illuminate\Foundation\Http\FormRequest::prepareForValidation()}, container merge)
+ * does not run here. Keep those classes free of side effects that must apply to this flow, or
+ * duplicate that logic explicitly in this validator or a dedicated service.
+ */
 class ItemContributionValidator
 {
     /** @var list<string> */
@@ -28,7 +40,7 @@ class ItemContributionValidator
      */
     public function validateStore(Request $request): array
     {
-        $this->mergeTrimmedTagNamesIntoRequest($request);
+        self::mergeTrimmedTagNamesIntoRequest($request);
 
         $collaboratorRequest = new CollaboratorRequest();
         $storeItemRequest = new StoreItemRequest();
@@ -42,6 +54,11 @@ class ItemContributionValidator
             $storeItemRequest->rules(),
             $storeItemRequest->messages()
         );
+        // `Validator::validated()` omits keys missing from the request body; optional `date`
+        // may be absent when empty. Always take it from input so a sent value is never dropped.
+        if (! array_key_exists('date', $item)) {
+            $item['date'] = $request->input('date');
+        }
         $request->validate($tagRequest->rules(), $tagRequest->messages());
         $request->validate($extraRequest->rules(), $extraRequest->messages());
         $componentRequest = ComponentRequest::createFrom($request);
@@ -50,23 +67,40 @@ class ItemContributionValidator
         return [
             'collaborator' => $collaborator,
             'item' => $item,
-            'tags' => $this->whitelistNestedRows(
+            'tags' => self::whitelistNestedRows(
                 (array) $request->input('tags', []),
                 self::TAG_ROW_KEYS
             ),
-            'extras' => $this->whitelistNestedRows(
+            'extras' => self::whitelistNestedRows(
                 (array) $request->input('extras', []),
                 self::EXTRA_ROW_KEYS
             ),
-            'components' => $this->whitelistNestedRows(
+            'components' => self::whitelistNestedRows(
                 (array) $request->input('components', []),
                 self::COMPONENT_ROW_KEYS
             ),
         ];
     }
 
-    /** Normalizes `tags.*.name` before {@see \App\Http\Requests\Taxonomy\TagRequest} rules run (avoids logical duplicates with surrounding spaces). */
-    private function mergeTrimmedTagNamesIntoRequest(Request $request): void
+    /**
+     * @return array{collaborator: array<string, mixed>, extra: array<string, mixed>}
+     */
+    public function validateSingleExtra(SingleExtraRequest $request): array
+    {
+        $validated = $request->validated();
+        $collaborator = Arr::only($validated, ['full_name', 'contact']);
+        $extra = Arr::only($validated, [
+            'content_locale',
+            'info',
+            'item_id',
+            'collaborator_id',
+        ]);
+        $extra['validation'] = false;
+
+        return ['collaborator' => $collaborator, 'extra' => $extra];
+    }
+
+    private static function mergeTrimmedTagNamesIntoRequest(Request $request): void
     {
         $tags = (array) $request->input('tags', []);
         foreach ($tags as $k => $row) {
@@ -82,7 +116,7 @@ class ItemContributionValidator
      * @param  list<string>  $allowedKeys
      * @return list<array<string, mixed>>
      */
-    private function whitelistNestedRows(array $rows, array $allowedKeys): array
+    private static function whitelistNestedRows(array $rows, array $allowedKeys): array
     {
         $flip = array_flip($allowedKeys);
         $out = [];
@@ -94,21 +128,5 @@ class ItemContributionValidator
         }
 
         return $out;
-    }
-
-    /**
-     * @return array{collaborator: array<string, mixed>, extra: array<string, mixed>}
-     */
-    public function validateSingleExtra(SingleExtraRequest $request): array
-    {
-        $collaboratorRequest = new CollaboratorRequest();
-        $collaborator = $request->validate(
-            $collaboratorRequest->rules(),
-            $collaboratorRequest->messages()
-        );
-        $extra = $request->validated();
-        $extra['validation'] = 0;
-
-        return ['collaborator' => $collaborator, 'extra' => $extra];
     }
 }

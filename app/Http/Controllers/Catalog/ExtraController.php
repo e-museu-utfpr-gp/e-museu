@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Catalog\ItemContributionValidator;
-use App\Http\Requests\Catalog\SingleExtraRequest;
 use App\Services\Catalog\ExtraService;
 use App\Services\Collaborator\CollaboratorService;
 use Illuminate\Http\RedirectResponse;
+use App\Http\Requests\Catalog\{ItemContributionValidator, SingleExtraRequest};
 
 class ExtraController extends Controller
 {

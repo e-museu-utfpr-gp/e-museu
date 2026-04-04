@@ -2,26 +2,17 @@
 
 namespace App\Models\Catalog;
 
-use App\Models\Identity\Lock;
-use App\Models\Collaborator\Collaborator;
-use App\Models\Language;
 use App\Enums\Catalog\ItemImageType;
-use App\Models\Taxonomy\Tag;
-use App\Models\Taxonomy\TagCategory;
-use App\Support\Content\ContentLocaleFallback;
-use App\Support\Content\ResolvedTranslation;
-use App\Support\Content\TranslationDisplaySql;
-use App\Support\Content\TranslationResolution;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\Language;
+use App\Models\Collaborator\Collaborator;
+use App\Models\Identity\Lock;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
+use App\Models\Taxonomy\{Tag, TagCategory};
+use App\Support\Content\{ContentLocaleFallback, ResolvedTranslation, TranslationDisplaySql, TranslationResolution};
+use Illuminate\Database\Eloquent\{Builder, Model};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOne, MorphMany};
 
 /**
  * @property-read \Illuminate\Database\Eloquent\Collection<int, Tag> $tags
@@ -167,7 +158,7 @@ class Item extends Model
      */
     public function syncTranslationsFromAdminForm(array $translationsByCode): void
     {
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $this->syncAdminFormTranslationBlock($lang, $translationsByCode[$lang->code] ?? []);
         }
 

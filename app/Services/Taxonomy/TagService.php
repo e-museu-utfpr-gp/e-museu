@@ -4,15 +4,12 @@ namespace App\Services\Taxonomy;
 
 use App\Models\Language;
 use App\Models\Taxonomy\Tag;
-use Illuminate\Database\Eloquent\Builder;
-use App\Support\Admin\AdminIndexConfig;
-use App\Support\Content\TranslatablePayload;
-use App\Support\Content\TranslationDisplaySql;
-use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
+use App\Support\Content\{TranslatablePayload, TranslationDisplaySql};
+use Illuminate\Database\Eloquent\{Builder, Collection};
 
 class TagService
 {

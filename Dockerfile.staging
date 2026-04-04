@@ -30,6 +30,8 @@ WORKDIR /var/www
 FROM php-base AS vendor
 
 COPY composer.json composer.lock ./
+# Staging must match production posture: no require-dev (Ignition, Debugbar, PHPUnit in vendor, etc.).
+# Use local / Dockerfile.local for debugging with full Composer deps.
 RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
 
 # Copy only necessary files for dependencies caching

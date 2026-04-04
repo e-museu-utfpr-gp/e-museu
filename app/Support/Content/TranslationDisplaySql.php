@@ -2,9 +2,9 @@
 
 namespace App\Support\Content;
 
+    use Illuminate\Database\Query\Expression;
+    use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Illuminate\Database\Query\Expression;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Correlated subqueries for ordering/filtering/display by translated strings (MySQL FIELD fallback order).

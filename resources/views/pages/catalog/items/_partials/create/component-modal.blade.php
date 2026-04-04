@@ -8,6 +8,8 @@
             <div class="modal-body">
                 <form method="POST" id="addComponentForm">
                     @csrf
+                    <div id="component-modal-validation" class="alert alert-danger py-2 px-3 small mb-3 d-none"
+                        role="alert" tabindex="-1"></div>
                     <input type="text" name="component_id" id="component-id" hidden>
                     <x-ui.inputs.select
                         name="component-category"

@@ -1,14 +1,34 @@
 import $ from 'jquery';
 import {
     appendWizardOrder,
-    clearItemCreateWizardStorage,
+    clearExtraWizardSectionStorage,
     removeWizardOrderId,
+    wizardRemoveItem,
+    wizardSetItem,
 } from '../../../../../shared/catalog/item-create-storage';
 import { hideBootstrapModal } from '../../../../../shared/catalog/hide-bootstrap-modal';
 import { getItemCreateForm, parseDataModalsI18n } from '../../../../../shared/catalog/item-create-modal-helpers';
 
 function extraAlerts() {
     return parseDataModalsI18n().extra || { alert_required: '' };
+}
+
+function clearExtraModalValidation() {
+    const el = document.getElementById('extra-modal-validation');
+    if (el) {
+        el.classList.add('d-none');
+        el.textContent = '';
+    }
+}
+
+function showExtraModalValidation(message) {
+    const el = document.getElementById('extra-modal-validation');
+    if (!el) {
+        return;
+    }
+    el.textContent = message;
+    el.classList.remove('d-none');
+    el.focus();
 }
 
 window.extraCount = 0;
@@ -18,22 +38,23 @@ function saveExtra() {
     const extraInfo = String($('#extra-info').val() ?? '').trim();
 
     if (extraInfo === '') {
-        alert(extraAlerts().alert_required || '');
+        showExtraModalValidation(extraAlerts().alert_required || '');
         return;
     }
 
     const assignedId = window.extraIds;
     window.extraBuilder(extraInfo, assignedId);
 
-    sessionStorage.setItem('itemCreateForm', 'true');
-    sessionStorage.setItem('extra' + assignedId + 'info', extraInfo);
+    wizardSetItem('itemCreateForm', 'true');
+    wizardSetItem('extra' + assignedId + 'info', extraInfo);
     appendWizardOrder('extraIdOrder', assignedId);
 
     window.extraCount++;
     window.extraIds++;
 
-    sessionStorage.setItem('extraCount', String(window.extraCount));
+    wizardSetItem('extraCount', String(window.extraCount));
 
+    clearExtraModalValidation();
     window.checkExtras();
     hideBootstrapModal('#addExtraModal');
 }
@@ -53,15 +74,16 @@ function updateExtra() {
     const extraId = $('#extra-id').val();
 
     if (extraInfo === '') {
-        alert(extraAlerts().alert_required || '');
+        showExtraModalValidation(extraAlerts().alert_required || '');
         return;
     }
 
     $('#extra-info-' + extraId).val(extraInfo);
     $('#extra-info-text-' + extraId).text(extraInfo);
 
-    sessionStorage.setItem('extra' + extraId + 'info', extraInfo);
+    wizardSetItem('extra' + extraId + 'info', extraInfo);
 
+    clearExtraModalValidation();
     hideBootstrapModal('#addExtraModal');
 }
 
@@ -69,9 +91,9 @@ function deleteExtra(extraId) {
     $('#extra-' + extraId).remove();
     window.extraCount--;
 
-    sessionStorage.removeItem('extra' + extraId + 'info');
+    wizardRemoveItem('extra' + extraId + 'info');
     removeWizardOrderId('extraIdOrder', extraId);
-    sessionStorage.setItem('extraCount', String(window.extraCount));
+    wizardSetItem('extraCount', String(window.extraCount));
 
     window.checkExtras();
 }
@@ -89,7 +111,7 @@ window.checkExtras = function checkExtras() {
         }
     } else {
         $('#extra-empty-text').show();
-        clearItemCreateWizardStorage();
+        clearExtraWizardSectionStorage();
     }
 
     $('#extra-count-text').text(window.extraCount + '/10');
@@ -165,6 +187,7 @@ $(function () {
     });
 
     modal.on('hidden.bs.modal', function () {
+        clearExtraModalValidation();
         $('#extra-info').val('');
 
         $('#save-extra-button').prop('hidden', false);

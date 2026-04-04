@@ -5,15 +5,12 @@ namespace App\Http\Controllers\Admin\Taxonomy;
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Taxonomy\AdminTagRequest;
 use App\Models\Language;
-use App\Services\Identity\LockService;
-use App\Services\Taxonomy\TagCategoryService;
-use App\Services\Taxonomy\TagService;
-use App\Support\Admin\AdminEditHeadingLocale;
-use App\Support\Admin\AdminIndexTableView;
 use App\Models\Taxonomy\Tag;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use App\Services\Identity\LockService;
 use Illuminate\View\View;
+use App\Services\Taxonomy\{TagCategoryService, TagService};
+use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
+use Illuminate\Http\{RedirectResponse, Request};
 
 class AdminTagController extends AdminBaseController
 {
@@ -38,7 +35,7 @@ class AdminTagController extends AdminBaseController
 
         return view('pages.admin.taxonomy.tags.create', [
             'categories' => $categories,
-            'contentLanguages' => Language::forAdminContentForms(),
+            'contentLanguages' => Language::forCatalogContentForms(),
             'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
         ]);
     }
@@ -64,7 +61,7 @@ class AdminTagController extends AdminBaseController
         return view('pages.admin.taxonomy.tags.edit', array_merge([
             'tag' => $tag,
             'categories' => $categories,
-            'contentLanguages' => Language::forAdminContentForms(),
+            'contentLanguages' => Language::forCatalogContentForms(),
         ], $headingLocale->resolveFor($tag)));
     }
 

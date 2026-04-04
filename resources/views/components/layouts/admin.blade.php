@@ -14,6 +14,8 @@
 
     <title>E-museu: {{ $title }}</title>
 
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
     @vite(['resources/sass/app.scss', 'resources/js/admin.js'])
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,8 +24,8 @@
 
 </head>
 
-<body class="bd-light d-flex flex-column min-vh-100">
-    <div class="row">
+<body class="bd-light d-flex flex-column min-vh-100 admin-layout">
+    <div class="row g-0">
         <div class="col-md-2 flex-column flex-shrink-0 p-3">
             <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none"
                 href="{{ route('home') }}">
@@ -142,8 +144,8 @@
             </div>
             <hr>
         </div>
-        <div class="col-md-10 p-4">
-            <div class="mb-auto container-fluid">
+        <div class="col-md-10 p-4 admin-main">
+            <div class="mb-auto container-fluid min-w-0">
                 <x-ui.flash-messages />
                 @if (filled($heading))
                     <x-admin.page-header :text="$heading">

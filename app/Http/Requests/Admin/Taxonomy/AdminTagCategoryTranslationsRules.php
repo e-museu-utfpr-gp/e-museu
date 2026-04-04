@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\Admin\Taxonomy;
 
+use App\Http\Requests\Contracts\AdminTranslationsPayloadContract;
 use App\Models\Taxonomy\TagCategory;
 use App\Support\Admin\AdminTranslatableNameFormRules;
 use Illuminate\Validation\Validator;
 
-final class AdminTagCategoryTranslationsRules
+final class AdminTagCategoryTranslationsRules implements AdminTranslationsPayloadContract
 {
     /**
      * @return array<string, mixed>

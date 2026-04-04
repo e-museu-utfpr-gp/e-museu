@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use App\Enums\Content\ContentLanguage;
-use App\Support\Content\ContentLocaleFallback;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Collection;
+    use App\Enums\Content\ContentLanguage;
+    use App\Support\Content\ContentLocaleFallback;
+    use Illuminate\Database\Eloquent\{Collection as EloquentCollection, Model};
+    use Illuminate\Database\Eloquent\Relations\HasMany;
+    use Illuminate\Support\Collection;
 use RuntimeException;
 
 /**
@@ -111,12 +110,12 @@ class Language extends Model
     }
 
     /**
-     * All catalog content languages for admin create/edit forms (includes neutral).
-     * Order: neutral → pt_BR → en, then any other rows by name.
+     * Languages for translatable catalog content: admin create/edit forms and public contribution
+     * (includes neutral). Order: neutral → pt_BR → en, then any other rows by name.
      *
      * @return EloquentCollection<int, Language>
      */
-    public static function forAdminContentForms(): EloquentCollection
+    public static function forCatalogContentForms(): EloquentCollection
     {
         $ordered = ContentLanguage::orderedCodesForAdminForms();
         $caseParts = [];

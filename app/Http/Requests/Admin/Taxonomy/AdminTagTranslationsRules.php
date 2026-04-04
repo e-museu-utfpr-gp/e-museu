@@ -2,13 +2,13 @@
 
 namespace App\Http\Requests\Admin\Taxonomy;
 
+use App\Http\Requests\Contracts\AdminTranslationsPayloadContract;
 use App\Models\Language;
 use App\Models\Taxonomy\Tag;
 use App\Support\Admin\AdminTranslatableNameFormRules;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
+use Illuminate\Validation\{Rule, Validator};
 
-final class AdminTagTranslationsRules
+final class AdminTagTranslationsRules implements AdminTranslationsPayloadContract
 {
     /**
      * @return array<string, mixed>
@@ -23,7 +23,7 @@ final class AdminTagTranslationsRules
 
         $tagIdsInCategory = Tag::query()->where('tag_category_id', $categoryId)->pluck('id')->all();
 
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $c = $lang->code;
             $rules["translations.{$c}"] = ['nullable', 'array'];
             $ignoreId = $tag instanceof Tag

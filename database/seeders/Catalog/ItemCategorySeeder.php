@@ -3,8 +3,8 @@
 namespace Database\Seeders\Catalog;
 
 use App\Enums\Content\ContentLanguage;
-use App\Models\Catalog\ItemCategory;
 use App\Models\Language;
+use App\Models\Catalog\ItemCategory;
 use Illuminate\Database\Seeder;
 
 /**

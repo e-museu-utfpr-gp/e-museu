@@ -1,6 +1,6 @@
 <x-layouts.app :title="__('view.catalog.items.index.title')">
     @include('pages.catalog.items._partials.index.explore.menu')
-    <div class="container main-container mb-auto">
+    <div class="container main-container mb-auto min-w-0">
         @if (request()->query('item_category') == '')
             <h1>{{ __('view.catalog.items.index.heading_all') }}</h1>
         @else

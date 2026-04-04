@@ -358,7 +358,33 @@ function prettier-check {
   fi
 }
 
+function ensure-mysql-testing-database {
+  source .env
+  local compose_file
+  compose_file=$(get_compose_file)
+
+  if [[ "$DB_CONNECTION" != "mysql" ]]; then
+    return 0
+  fi
+
+  if [[ "$compose_file" != "docker-compose.local.yml" && "$compose_file" != "docker-compose.prod-local.yml" ]]; then
+    return 0
+  fi
+
+  echo ">> Ensuring MySQL database emuseu_testing exists and is granted to application user (MYSQL_USER in db container, from .env DB_USERNAME)..."
+  # Password and app user are expanded only inside the db container (see docker-compose MYSQL_* env), not passed as -p on the host shell.
+  if ! docker compose -f "$compose_file" exec -T db sh -c "
+    mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" mysql -e 'CREATE DATABASE IF NOT EXISTS emuseu_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;' &&
+    mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" mysql -e \"GRANT ALL PRIVILEGES ON emuseu_testing.* TO '\$MYSQL_USER'@'%';\" &&
+    mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" mysql -e 'FLUSH PRIVILEGES;'
+  "; then
+    echo "ERROR: Could not create or grant emuseu_testing. Is the db container up? Check MYSQL_ROOT_PASSWORD and MYSQL_USER in the container (from .env DB_ROOT_PASSWORD / DB_USERNAME)." >&2
+    return 1
+  fi
+}
+
 function test {
+  ensure-mysql-testing-database
   docker compose -f "$(get_compose_file)" exec app php artisan test
 }
 
@@ -582,6 +608,10 @@ function version {
   echo "E-Museu $(cat VERSION)"
 }
 
+# Running simulate-ci (e.g. ./run simulate-ci -y) executes scripts/ci/* jobs that call ./run down
+# at the end of each job, stopping the project's current Docker stack (app/db/web/vite per .env compose).
+# The "tests" and "code-quality" jobs also run ./run setup -env -y (overwrites .env from .env.example).
+# Bring dev back with ./run up or ./run setup afterwards.
 function simulate-ci {
   set -e
   
@@ -593,6 +623,10 @@ function simulate-ci {
   echo "  1. tests"
   echo "  2. code-quality"
   echo "  3. test-production-deploy"
+  echo ""
+  echo "Note: each job runs ./run down at the end and stops your current project Docker stack"
+  echo "(app/db/web/vite). Jobs 1 and 2 also run ./run setup -env -y, overwriting .env from"
+  echo ".env.example. When done, use ./run up or ./run setup to restore local development."
   echo ""
   
   if [[ "$1" != "-y" && "$2" != "-y" ]]; then

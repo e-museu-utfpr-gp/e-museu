@@ -4,8 +4,8 @@ namespace App\Services\Identity;
 
 use App\Models\Identity\Lock;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 

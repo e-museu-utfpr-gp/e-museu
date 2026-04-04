@@ -3,23 +3,16 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
-use App\Http\Requests\Admin\Catalog\AdminUpdateItemRequest;
-use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemImage;
 use App\Models\Language;
-use App\Services\Catalog\ItemCategoryService;
-use App\Services\Catalog\ItemImagesService;
-use App\Services\Catalog\ItemService;
 use App\Services\Collaborator\CollaboratorService;
-use App\Support\Admin\AdminEditHeadingLocale;
-use App\Support\Admin\AdminIndexTableView;
 use App\Services\Identity\LockService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\View\View;
+use App\Http\Requests\Admin\Catalog\{AdminStoreItemRequest, AdminUpdateItemRequest};
+use App\Models\Catalog\{Item, ItemImage};
+use App\Services\Catalog\{ItemCategoryService, ItemImagesService, ItemService};
+use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
+use Illuminate\Http\{JsonResponse, RedirectResponse, Request};
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
@@ -57,7 +50,7 @@ class AdminItemController extends AdminBaseController
         return view('pages.admin.catalog.items.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
-            'contentLanguages' => Language::forAdminContentForms(),
+            'contentLanguages' => Language::forCatalogContentForms(),
             'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
         ]);
     }
@@ -87,7 +80,7 @@ class AdminItemController extends AdminBaseController
 
         return view('pages.admin.catalog.items.edit', array_merge([
             'item' => $item,
-            'contentLanguages' => Language::forAdminContentForms(),
+            'contentLanguages' => Language::forCatalogContentForms(),
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
         ], $headingLocale->resolveFor($item)));
@@ -108,6 +101,11 @@ class AdminItemController extends AdminBaseController
             'delete_image_ids',
             'set_cover_image_id',
         ]);
+        // Same as contribution: validated() skips absent keys; cleared `<input type="date">`
+        // is often omitted from POST, so we must persist null explicitly.
+        if (! array_key_exists('date', $data)) {
+            $data['date'] = $request->input('date');
+        }
 
         $itemImagesService->processDeleteImageIds($item, $request);
         $itemImagesService->processCoverImage($item, $request);

@@ -5,10 +5,8 @@ namespace App\Models\Identity;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\{Model, Model as EloquentModel};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, MorphTo};
 
 class Lock extends Model
 {

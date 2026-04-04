@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware\Auth;
 
+    use Illuminate\Http\Request;
+    use Symfony\Component\HttpFoundation\Response;
 use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class StagingBasicAuth
 {

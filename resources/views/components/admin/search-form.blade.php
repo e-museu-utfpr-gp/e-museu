@@ -14,10 +14,14 @@
     $yesLabel = $yesLabel ?? __('view.shared.yes');
     $noLabel = $noLabel ?? __('view.shared.no');
     $isBooleanSelected = $hasBoolean && in_array($currentColumn, $booleanColumns, true);
+    $adminSearchResetQuery = collect(request()->except(['search_column', 'search', 'page']))
+        ->reject(static fn ($v) => $v === null || $v === '' || (is_array($v) && count($v) === 0))
+        ->all();
+    $adminSearchResetUrl = $action . (count($adminSearchResetQuery) > 0 ? '?' . http_build_query($adminSearchResetQuery) : '');
 @endphp
-<form action="{{ $action }}" class="d-flex admin-search-form" method="GET">
+<form action="{{ $action }}" class="d-flex flex-nowrap align-items-center gap-2 admin-search-form ms-auto" method="GET">
     <select
-        class="form-select me-2 admin-search-column"
+        class="form-select admin-search-column"
         name="search_column"
         aria-label="{{ $placeholder }}"
         @if ($hasBoolean) data-boolean-columns="{{ implode(',', $booleanColumns) }}" @endif
@@ -31,7 +35,7 @@
     <input
         type="search"
         name="search"
-        class="form-control me-2 admin-search-text"
+        class="form-control admin-search-text"
         placeholder="{{ $placeholder }}"
         value="{{ $isBooleanSelected ? '' : $currentSearch }}"
         aria-label="{{ $placeholder }}"
@@ -41,7 +45,7 @@
     @if ($hasBoolean)
         <select
             name="search"
-            class="form-select me-2 admin-search-boolean"
+            class="form-select admin-search-boolean"
             aria-label="{{ $placeholder }} ({{ $yesLabel }}/{{ $noLabel }})"
             @disabled(! $isBooleanSelected)
             @style(['display: none' => ! $isBooleanSelected])
@@ -52,4 +56,12 @@
         </select>
     @endif
     <x-ui.buttons.submit variant="secondary">{{ $buttonLabel }}</x-ui.buttons.submit>
+    <x-ui.buttons.default
+        :href="$adminSearchResetUrl"
+        variant="outline-secondary"
+        class="flex-shrink-0"
+        icon="bi bi-x-lg"
+    >
+        {{ __('view.shared.buttons.reset') }}
+    </x-ui.buttons.default>
 </form>

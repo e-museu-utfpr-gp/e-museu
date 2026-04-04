@@ -3,9 +3,8 @@
 namespace App\Models\Concerns;
 
 use App\Models\Language;
-use App\Support\Content\ResolvedTranslation;
-use App\Support\Content\TranslationResolution;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Support\Content\{ResolvedTranslation, TranslationResolution};
 
 /**
  * Shared {@see syncTranslationsFromAdminForm()} / resolution for models whose only translatable
@@ -39,7 +38,7 @@ trait SyncsAdminFormNameTranslations
      */
     public function syncTranslationsFromAdminForm(array $translationsByCode): void
     {
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $code = $lang->code;
             $block = $translationsByCode[$code] ?? [];
             $name = trim((string) ($block['name'] ?? ''));

@@ -2,13 +2,12 @@
 
 namespace App\Models\Catalog;
 
+use App\Models\Language;
 use App\Models\Concerns\SyncsAdminFormNameTranslations;
 use App\Models\Identity\Lock;
-use App\Models\Language;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\{HasMany, MorphMany};
 
 /**
  * Item categories have no text columns on the parent table: titles and labels live only in

@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Language;
+    use App\Models\Language;
+    use Illuminate\Http\Request;
+    use Symfony\Component\HttpFoundation\Response;
 use Closure;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * When {@see session()} has key {@code locale} set to a supported content code, overrides {@see app()->setLocale()}.

@@ -2,16 +2,13 @@
 
 namespace App\Services\Taxonomy;
 
-use App\Models\Taxonomy\Tag;
-use App\Models\Taxonomy\TagCategory;
-use Illuminate\Database\Eloquent\Model;
-use App\Support\Admin\AdminIndexConfig;
 use App\Support\Content\TranslationDisplaySql;
-use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use App\Models\Taxonomy\{Tag, TagCategory};
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
+use Illuminate\Database\Eloquent\{Collection, Model};
 
 class TagCategoryService
 {

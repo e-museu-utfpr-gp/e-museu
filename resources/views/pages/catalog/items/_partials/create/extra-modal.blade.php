@@ -8,6 +8,8 @@
             <div class="modal-body">
                 <form method="POST" id="addExtraForm" enctype="multipart/form-data">
                     @csrf
+                    <div id="extra-modal-validation" class="alert alert-danger py-2 px-3 small mb-3 d-none" role="alert"
+                        tabindex="-1"></div>
                     <input type="text" name="extra_id" id="extra-id" hidden>
                     <x-ui.inputs.textarea
                         name="extra-info"

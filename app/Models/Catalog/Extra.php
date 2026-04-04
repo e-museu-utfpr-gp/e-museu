@@ -2,20 +2,15 @@
 
 namespace App\Models\Catalog;
 
+use App\Models\Language;
 use App\Models\Collaborator\Collaborator;
 use App\Models\Identity\Lock;
-use App\Models\Language;
-use App\Support\Content\ResolvedTranslation;
-use App\Support\Content\TranslationResolution;
-use App\Support\Content\TranslationDisplaySql;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
+use App\Support\Content\{ResolvedTranslation, TranslationDisplaySql, TranslationResolution};
+use Illuminate\Database\Eloquent\{Builder, Model};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, MorphMany};
 
 class Extra extends Model
 {
@@ -64,7 +59,7 @@ class Extra extends Model
      */
     public function syncTranslationsFromAdminForm(array $translationsByCode): void
     {
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $code = $lang->code;
             $block = $translationsByCode[$code] ?? [];
             $info = trim((string) ($block['info'] ?? ''));

@@ -8,6 +8,8 @@
             <div class="modal-body">
                 <form method="POST" id="addTagForm">
                     @csrf
+                    <div id="tag-modal-validation" class="alert alert-danger py-2 px-3 small mb-3 d-none" role="alert"
+                        tabindex="-1"></div>
                     <input type="text" name="tag_id" id="tag-id" hidden>
                     <x-ui.inputs.select
                         name="tag-category"

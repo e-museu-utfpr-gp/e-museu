@@ -25,6 +25,7 @@
                     <x-ui.inputs.admin.select
                         name="role"
                         id="role"
+                        :enhanced="false"
                         :label="__('view.admin.collaborator.collaborators.edit.role')"
                     >
                         <option value="{{ \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value }}" @selected(old('role', $roleValue) === \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value)>
@@ -37,6 +38,7 @@
                     <x-ui.inputs.admin.select
                         name="blocked"
                         id="blocked"
+                        :enhanced="false"
                         :label="__('view.admin.collaborator.collaborators.edit.blocked')"
                     >
                         <option value="0" @selected(old('blocked', $collaborator->blocked) == 0)>

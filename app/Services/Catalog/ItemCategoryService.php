@@ -3,13 +3,12 @@
 namespace App\Services\Catalog;
 
 use App\Models\Catalog\ItemCategory;
-use App\Support\Admin\AdminIndexConfig;
 use App\Support\Content\TranslationDisplaySql;
-use App\Support\Admin\AdminIndexQueryBuilder;
-use Illuminate\Support\Arr;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 
 class ItemCategoryService
 {

@@ -19,6 +19,7 @@
                     <x-ui.inputs.admin.select
                         name="role"
                         id="role"
+                        :enhanced="false"
                         :label="__('view.admin.collaborator.collaborators.create.role')"
                     >
                         <option value="{{ \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value }}" @selected(old('role', \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value) === \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value)>
@@ -31,6 +32,7 @@
                     <x-ui.inputs.admin.select
                         name="blocked"
                         id="blocked"
+                        :enhanced="false"
                         :label="__('view.admin.collaborator.collaborators.create.blocked')"
                     >
                         <option value="0" @selected(old('blocked') == 0)>

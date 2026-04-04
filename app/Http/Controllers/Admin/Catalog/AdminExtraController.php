@@ -4,17 +4,14 @@ namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Catalog\AdminStoreExtraRequest;
-use App\Models\Catalog\Extra;
 use App\Models\Language;
-use App\Services\Catalog\ExtraService;
-use App\Services\Catalog\ItemCategoryService;
+use App\Models\Catalog\Extra;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Identity\LockService;
-use App\Support\Admin\AdminEditHeadingLocale;
-use App\Support\Admin\AdminIndexTableView;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Services\Catalog\{ExtraService, ItemCategoryService};
+use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
+use Illuminate\Http\{RedirectResponse, Request};
 
 class AdminExtraController extends AdminBaseController
 {
@@ -49,7 +46,7 @@ class AdminExtraController extends AdminBaseController
         return view('pages.admin.catalog.extras.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
-            'contentLanguages' => Language::forAdminContentForms(),
+            'contentLanguages' => Language::forCatalogContentForms(),
             'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
         ]);
     }
@@ -76,7 +73,7 @@ class AdminExtraController extends AdminBaseController
             'extra' => $extra,
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
-            'contentLanguages' => Language::forAdminContentForms(),
+            'contentLanguages' => Language::forCatalogContentForms(),
         ], $headingLocale->resolveFor($extra)));
     }
 

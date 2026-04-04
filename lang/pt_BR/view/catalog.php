@@ -73,8 +73,11 @@ return [
             'components_help' => 'Adicione componentes relacionados ao item.',
             'components_empty' => 'Nenhum componente adicionado.',
             'components_limit' => 'Limite de componentes atingido.',
+            'clear_form' => 'Limpar formulário',
+            'clear_form_confirm' => 'Tem certeza de que deseja limpar todo o formulário? Os dados preenchidos, rascunho salvo e imagens serão perdidos.',
+            'clear_form_modal_cancel' => 'Cancelar',
+            'clear_form_modal_confirm' => 'Limpar',
             'submit' => 'Enviar',
-            'recover_confirm' => 'Deseja recuperar os dados do formulário que estavam em edição?',
         ],
         'create_modals' => [
             'component' => [

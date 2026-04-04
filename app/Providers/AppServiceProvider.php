@@ -3,13 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Language;
-use App\Providers\Concerns\AdminDatabaseSessionHandler;
-use App\Providers\Concerns\GuessesFactoryName;
-use App\Providers\Concerns\GuessesModelName;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use App\Providers\Concerns\{AdminDatabaseSessionHandler, GuessesFactoryName, GuessesModelName};
+use Illuminate\Support\Facades\{Session, View};
 
 class AppServiceProvider extends ServiceProvider
 {

@@ -2,16 +2,12 @@
 
 namespace App\Models\Taxonomy;
 
-use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemTag;
 use App\Models\Concerns\SyncsAdminFormNameTranslations;
 use App\Models\Identity\Lock;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Catalog\{Item, ItemTag};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, MorphMany};
 
 class Tag extends Model
 {
