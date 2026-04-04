@@ -5,16 +5,11 @@ namespace App\Http\Controllers\Catalog;
 use App\Actions\Catalog\StoreItemContributionAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\ItemContributionValidator;
-use App\Services\Catalog\ContributionContentLocaleService;
-use App\Services\Catalog\ItemCategoryService;
-use App\Services\Catalog\ItemImagesService;
-use App\Services\Catalog\ItemService;
 use App\Services\Taxonomy\TagCategoryService;
 use App\Support\Http\OptionalContentLocale;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Services\Catalog\{ContributionContentLocaleService, ItemCategoryService, ItemImagesService, ItemService};
+use Illuminate\Http\{JsonResponse, RedirectResponse, Request};
 
 class ItemController extends Controller
 {
@@ -23,7 +18,17 @@ class ItemController extends Controller
         ItemCategoryService $itemCategoryService,
         TagCategoryService $tagCategoryService,
         ItemService $itemService
-    ): View {
+    ): View|RedirectResponse {
+        if ($request->getQueryString() === null || $request->getQueryString() === '') {
+            $defaultQuery = http_build_query([
+                'item_category' => '',
+                'search' => '',
+                'order' => '1',
+            ]);
+
+            return redirect()->to(route('catalog.items.index', [], false) . '?' . $defaultQuery);
+        }
+
         $data = $itemService->getPaginatedItemsForCatalogIndex($request);
         $itemCategories = $itemCategoryService->getForIndex();
         $categories = $tagCategoryService->getForIndex();

@@ -4,8 +4,7 @@ namespace App\Support\Admin;
 
 use App\Models\Language;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
+use Illuminate\Validation\{Rule, Validator};
 
 /**
  * Admin forms with one `name` field per content locale (category/tag translation tables).
@@ -32,7 +31,7 @@ final class AdminTranslatableNameFormRules
         string $translationsTable,
         string $parentForeignKeyColumn
     ): array {
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $c = $lang->code;
             $rules["translations.{$c}"] = ['nullable', 'array'];
             $ignoreId = $parent !== null
@@ -70,7 +69,7 @@ final class AdminTranslatableNameFormRules
         string $translationMessageKey
     ): void {
         $hasAny = false;
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $code = $lang->code;
             $block = $translations[$code] ?? [];
             if (! is_array($block)) {
@@ -93,7 +92,7 @@ final class AdminTranslatableNameFormRules
      */
     public static function normalizeEmptyNameStringsToNull(array $raw): array
     {
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $c = $lang->code;
             if (! isset($raw[$c]) || ! is_array($raw[$c])) {
                 continue;

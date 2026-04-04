@@ -3,15 +3,13 @@
 namespace App\Http\Controllers\Admin\Collaborator;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Requests\Admin\Collaborator\AdminStoreCollaboratorRequest;
-use App\Http\Requests\Admin\Collaborator\AdminUpdateCollaboratorRequest;
 use App\Models\Collaborator\Collaborator;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Identity\LockService;
 use App\Support\Admin\AdminIndexTableView;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Http\Requests\Admin\Collaborator\{AdminStoreCollaboratorRequest, AdminUpdateCollaboratorRequest};
+use Illuminate\Http\{RedirectResponse, Request};
 
 class AdminCollaboratorController extends AdminBaseController
 {

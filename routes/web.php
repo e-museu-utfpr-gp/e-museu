@@ -20,52 +20,63 @@ use App\Http\Controllers\Admin\Taxonomy\AdminTagController;
 use App\Models\Language;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/storage/{path}', StorageProxyController::class)->where('path', '.*')->name('storage.proxy');
+Route::get('/storage/{path}', StorageProxyController::class)
+    ->where('path', '.*')
+    ->middleware('throttle:web-storage')
+    ->name('storage.proxy');
 
-Route::post('/locale', function (\Illuminate\Http\Request $request) {
-    $locale = (string) $request->input('locale');
-    if (Language::isValidSessionUiLocale($locale)) {
-        $request->session()->put('locale', $locale);
-    }
-
-    $previous = url()->previous();
-    $appUrl = rtrim((string) config('app.url'), '/');
-
-    if ($appUrl !== '' && str_starts_with($previous, $appUrl)) {
-        return redirect()->to($previous);
-    }
-
-    return redirect()->route('home');
-})->name('locale.update');
-
-Route::redirect('/', '/home');
-Route::get('/home', [HomeController::class, 'index'])->name('home');
-Route::get('/about', function () {
-    return view('pages.about.index');
-})->name('about');
-
-Route::prefix('catalog')->name('catalog.')->group(function () {
-    Route::get('items', [ItemController::class, 'index'])->name('items.index');
-    Route::get('items/create', [ItemController::class, 'create'])->name('items.create');
-    Route::get('items/by-category', [ItemController::class, 'byCategory'])->name('items.byCategory');
+/** Registered before `items/{id}` so `{id}` does not capture these paths. */
+Route::middleware('throttle:web-catalog-light')->prefix('catalog')->name('catalog.')->group(function () {
     Route::get('items/component-autocomplete', [ItemController::class, 'componentAutocomplete'])
         ->name('items.component-autocomplete');
     Route::get('items/check-component-name', [ItemController::class, 'checkComponentName'])
         ->name('items.check-component-name');
-    Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show')->whereNumber('id');
-    Route::post('items', [ItemController::class, 'store'])->name('items.store');
-    Route::post('extras', [ExtraController::class, 'store'])->name('extras.store');
-    Route::get('tags', [TagController::class, 'index'])->name('tags.index');
     Route::get('tags/autocomplete', [TagController::class, 'autocomplete'])->name('tags.autocomplete');
     Route::get('tags/check-name', [TagController::class, 'checkName'])->name('tags.check-name');
-    Route::post('collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
-        ->name('collaborators.check-contact');
 });
 
-Route::middleware('authenticate')->prefix('admin')->name('admin.')->group(function () {
+Route::middleware('throttle:web-public')->group(function () {
+    Route::post('/locale', function (\Illuminate\Http\Request $request) {
+        $locale = (string) $request->input('locale');
+        if (Language::isValidSessionUiLocale($locale)) {
+            $request->session()->put('locale', $locale);
+        }
+
+        $previous = url()->previous();
+        $appUrl = rtrim((string) config('app.url'), '/');
+
+        if ($appUrl !== '' && str_starts_with($previous, $appUrl)) {
+            return redirect()->to($previous);
+        }
+
+        return redirect()->route('home');
+    })->name('locale.update');
+
+    Route::redirect('/', '/home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/about', function () {
+        return view('pages.about.index');
+    })->name('about');
+
+    Route::prefix('catalog')->name('catalog.')->group(function () {
+        Route::redirect('/', '/catalog/items')->name('root');
+        Route::get('items', [ItemController::class, 'index'])->name('items.index');
+        Route::get('items/create', [ItemController::class, 'create'])->name('items.create');
+        Route::get('items/by-category', [ItemController::class, 'byCategory'])->name('items.byCategory');
+        Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show')->whereNumber('id');
+        Route::post('items', [ItemController::class, 'store'])->name('items.store');
+        Route::post('extras', [ExtraController::class, 'store'])->name('extras.store');
+        Route::get('tags', [TagController::class, 'index'])->name('tags.index');
+        Route::post('collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
+            ->name('collaborators.check-contact');
+    });
+});
+
+Route::middleware(['authenticate', 'throttle:web-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/catalog/items');
 
     Route::prefix('catalog')->name('catalog.')->group(function () {
+        Route::redirect('/', '/admin/catalog/items');
         Route::delete('items/{item}/images/{image}', [AdminItemController::class, 'destroyImage'])
             ->name('items.images.destroy');
         Route::get('items/by-item-category', [AdminItemController::class, 'byItemCategory'])
@@ -82,6 +93,7 @@ Route::middleware('authenticate')->prefix('admin')->name('admin.')->group(functi
     });
 
     Route::prefix('taxonomy')->name('taxonomy.')->group(function () {
+        Route::redirect('/', '/admin/taxonomy/tags');
         Route::resource('tags', AdminTagController::class);
         Route::resource('tag-categories', AdminTagCategoryController::class);
     });
@@ -89,6 +101,7 @@ Route::middleware('authenticate')->prefix('admin')->name('admin.')->group(functi
     Route::resource('collaborators', AdminCollaboratorController::class);
 
     Route::prefix('identity')->name('identity.')->group(function () {
+        Route::redirect('/', '/admin/identity/admins');
         Route::resource('admins', AdminController::class)
             ->only(['index', 'create', 'store', 'show', 'destroy']);
         Route::delete('admins/{id}/delete-lock', [AdminController::class, 'destroyLock'])
@@ -98,8 +111,12 @@ Route::middleware('authenticate')->prefix('admin')->name('admin.')->group(functi
 });
 
 Route::middleware('redirectIfAuthenticated')->prefix('admin/auth')->group(function () {
-    Route::get('login', [AdminLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [AdminLoginController::class, 'login']);
+    Route::get('login', [AdminLoginController::class, 'showLoginForm'])
+        ->middleware('throttle:web-public')
+        ->name('login');
+    Route::post('login', [AdminLoginController::class, 'login'])->middleware('throttle:admin-login');
 });
 
-Route::post('admin/auth/logout', [AdminLoginController::class, 'logout'])->name('logout')->middleware('authenticate');
+Route::post('admin/auth/logout', [AdminLoginController::class, 'logout'])
+    ->name('logout')
+    ->middleware(['authenticate', 'throttle:web-admin']);

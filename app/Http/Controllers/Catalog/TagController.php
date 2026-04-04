@@ -5,8 +5,7 @@ namespace App\Http\Controllers\Catalog;
 use App\Http\Controllers\Controller;
 use App\Services\Taxonomy\TagService;
 use App\Support\Http\OptionalContentLocale;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\{JsonResponse, Request};
 
 class TagController extends Controller
 {

@@ -2,13 +2,12 @@
 
 namespace Tests\Feature\Catalog;
 
-use App\Models\Taxonomy\Tag;
-use App\Models\Taxonomy\TagCategory;
 use App\Services\Taxonomy\TagService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
+use App\Models\Taxonomy\{Tag, TagCategory};
 
 #[Group('mysql')]
 class TagFindOrCreateTest extends TestCase

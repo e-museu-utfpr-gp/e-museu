@@ -2,15 +2,13 @@
 
 namespace Tests\Feature\Catalog;
 
-use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemCategory;
-use App\Models\Catalog\ItemTranslation;
-use App\Models\Collaborator\Collaborator;
 use App\Models\Language;
+use App\Models\Collaborator\Collaborator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
+use App\Models\Catalog\{Item, ItemCategory, ItemTranslation};
 
 /**
  * Catalog translation resolution uses MySQL-specific SQL; the project targets MySQL.
@@ -86,5 +84,106 @@ class TranslationResolutionTest extends TestCase
         $freshEn = Item::query()->with('translations.language')->findOrFail($item->id);
         $this->assertSame('English name', $freshEn->resolveTranslation()->translation?->name);
         $this->assertTrue($freshEn->resolveTranslation()->isFromAppLocale);
+    }
+
+    public function test_resolve_translation_is_null_when_no_translation_rows(): void
+    {
+        config(['app.locale' => 'pt_BR', 'app.fallback_locale' => 'en']);
+        app()->setLocale('pt_BR');
+
+        $itemCategory = new ItemCategory();
+        $itemCategory->save();
+        $itemCategory->syncPrimaryLocaleTranslation(['name' => 'Cat']);
+
+        $collaborator = Collaborator::factory()->create();
+
+        $item = Item::query()->create([
+            'date' => null,
+            'identification_code' => 'TEST_RES_EMPTY',
+            'validation' => true,
+            'category_id' => $itemCategory->id,
+            'collaborator_id' => $collaborator->id,
+        ]);
+        ItemTranslation::query()->where('item_id', $item->id)->delete();
+
+        $fresh = Item::query()->with('translations.language')->findOrFail($item->id);
+        $resolved = $fresh->resolveTranslation();
+        $this->assertNull($resolved->translation);
+        $this->assertFalse($resolved->isFromAppLocale);
+    }
+
+    public function test_resolve_translation_falls_back_to_english_when_pt_missing(): void
+    {
+        config(['app.locale' => 'pt_BR', 'app.fallback_locale' => 'en']);
+        app()->setLocale('pt_BR');
+
+        $itemCategory = new ItemCategory();
+        $itemCategory->save();
+        $itemCategory->syncPrimaryLocaleTranslation(['name' => 'Cat']);
+
+        $collaborator = Collaborator::factory()->create();
+
+        $item = Item::query()->create([
+            'date' => null,
+            'identification_code' => 'TEST_RES_FB_EN',
+            'validation' => true,
+            'category_id' => $itemCategory->id,
+            'collaborator_id' => $collaborator->id,
+        ]);
+        ItemTranslation::query()->where('item_id', $item->id)->delete();
+
+        $enId = (int) Language::query()->where('code', 'en')->value('id');
+        ItemTranslation::query()->create([
+            'item_id' => $item->id,
+            'language_id' => $enId,
+            'name' => 'English only',
+            'description' => 'Desc EN',
+            'history' => null,
+            'detail' => null,
+        ]);
+
+        $fresh = Item::query()->with('translations.language')->findOrFail($item->id);
+        $resolved = $fresh->resolveTranslation();
+        $this->assertSame('English only', $resolved->translation?->name);
+        $this->assertTrue($resolved->usedFallback());
+    }
+
+    public function test_resolve_translation_uses_neutral_when_pt_and_en_missing(): void
+    {
+        config(['app.locale' => 'pt_BR', 'app.fallback_locale' => 'en']);
+        app()->setLocale('pt_BR');
+
+        $itemCategory = new ItemCategory();
+        $itemCategory->save();
+        $itemCategory->syncPrimaryLocaleTranslation(['name' => 'Cat']);
+
+        $collaborator = Collaborator::factory()->create();
+
+        $item = Item::query()->create([
+            'date' => null,
+            'identification_code' => 'TEST_RES_NEUT',
+            'validation' => true,
+            'category_id' => $itemCategory->id,
+            'collaborator_id' => $collaborator->id,
+        ]);
+        ItemTranslation::query()->where('item_id', $item->id)->delete();
+
+        $neutralId = (int) Language::query()->where('code', 'neutral')->value('id');
+        $this->assertGreaterThan(0, $neutralId);
+
+        ItemTranslation::query()->create([
+            'item_id' => $item->id,
+            'language_id' => $neutralId,
+            'name' => 'Neutral name',
+            'description' => 'Neutral desc',
+            'history' => null,
+            'detail' => null,
+        ]);
+
+        $fresh = Item::query()->with('translations.language')->findOrFail($item->id);
+        $resolved = $fresh->resolveTranslation();
+        $this->assertSame('Neutral name', $resolved->translation?->name);
+        $this->assertSame('neutral', $resolved->sourceLanguageCode);
+        $this->assertTrue($resolved->usedFallback());
     }
 }

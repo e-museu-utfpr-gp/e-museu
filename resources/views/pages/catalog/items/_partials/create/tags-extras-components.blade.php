@@ -67,7 +67,18 @@
     </div>
 </div>
 
-<div class="col d-flex align-items-center justify-content-end">
-    <x-ui.buttons.submit variant="plain" class="button nav-link py-2 px-3 fw-bold">{{ __('view.catalog.items.create.submit') }}</x-ui.buttons.submit>
+<div class="col-12 d-flex align-items-center justify-content-between flex-wrap gap-3 mt-2">
+    <x-ui.buttons.default
+        type="button"
+        variant="outline-secondary"
+        size="sm"
+        id="item-create-clear-btn"
+        icon="bi bi-eraser"
+    >
+        {{ __('view.catalog.items.create.clear_form') }}
+    </x-ui.buttons.default>
+    <x-ui.buttons.submit variant="plain" class="button nav-link py-2 px-3 fw-bold">
+        {{ __('view.catalog.items.create.submit') }}
+    </x-ui.buttons.submit>
 </div>
 

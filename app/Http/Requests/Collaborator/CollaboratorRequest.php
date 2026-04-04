@@ -8,11 +8,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CollaboratorRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * Rules for public contribution (external users). Contact must not belong to an INTERNAL collaborator.
      *

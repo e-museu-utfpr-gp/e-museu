@@ -3,13 +3,11 @@
 namespace App\Models\Collaborator;
 
 use App\Enums\Collaborator\CollaboratorRole;
-use App\Models\Catalog\Extra;
-use App\Models\Catalog\Item;
 use App\Models\Identity\Lock;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Catalog\{Extra, Item};
+use Illuminate\Database\Eloquent\Relations\{HasMany, MorphMany};
 
 class Collaborator extends Model
 {

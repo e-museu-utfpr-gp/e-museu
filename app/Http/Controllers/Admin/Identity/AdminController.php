@@ -7,9 +7,8 @@ use App\Http\Requests\Admin\Identity\AdminRequest;
 use App\Models\Identity\Admin;
 use App\Services\Identity\AdminService;
 use App\Support\Admin\AdminIndexTableView;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Http\{RedirectResponse, Request};
 
 class AdminController extends AdminBaseController
 {

@@ -6,11 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class AdminRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * @return array<string, string>
      */

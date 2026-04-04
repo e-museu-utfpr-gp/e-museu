@@ -5,12 +5,10 @@ namespace App\Http\Controllers\Admin\Catalog;
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Catalog\AdminSingleComponentRequest;
 use App\Models\Catalog\ItemComponent;
-use App\Services\Catalog\ItemCategoryService;
-use App\Services\Catalog\ItemComponentService;
 use App\Support\Admin\AdminIndexTableView;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Services\Catalog\{ItemCategoryService, ItemComponentService};
+use Illuminate\Http\{RedirectResponse, Request};
 
 class AdminItemComponentController extends AdminBaseController
 {

@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\Admin\Catalog;
 
+use App\Http\Requests\Contracts\AdminTranslationsPayloadContract;
 use App\Models\Catalog\ItemCategory;
 use App\Support\Admin\AdminTranslatableNameFormRules;
 use Illuminate\Validation\Validator;
 
-final class AdminItemCategoryTranslationsRules
+final class AdminItemCategoryTranslationsRules implements AdminTranslationsPayloadContract
 {
     /**
      * @return array<string, mixed>
