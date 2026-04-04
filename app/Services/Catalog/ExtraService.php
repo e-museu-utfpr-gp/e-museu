@@ -3,17 +3,15 @@
 namespace App\Services\Catalog;
 
 use App\Enums\Collaborator\CollaboratorRole;
-use App\Models\Catalog\Extra;
-use App\Models\Catalog\Item;
-use App\Models\Collaborator\Collaborator;
 use App\Models\Language;
+use App\Models\Collaborator\Collaborator;
 use App\Services\Collaborator\CollaboratorService;
-use App\Support\Admin\AdminIndexConfig;
 use App\Support\Content\TranslatablePayload;
-use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use App\Models\Catalog\{Extra, Item};
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 
 class ExtraService
 {

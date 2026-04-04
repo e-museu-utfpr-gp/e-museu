@@ -272,10 +272,44 @@ export function initCatalogItemImageUploadForm(options) {
         }
     }
 
+    function resetImageUploadState() {
+        galleryFiles.length = 0;
+        const coverInput = document.getElementById(c.inputId);
+        const galleryInput = document.getElementById(g.inputId);
+        if (coverInput && typeof DataTransfer !== 'undefined') {
+            coverInput.files = new DataTransfer().files;
+        } else if (coverInput) {
+            coverInput.value = '';
+        }
+        if (galleryInput) {
+            galleryInput.value = '';
+        }
+        revokeCoverPreviewBlob();
+        const placeholder = document.getElementById(c.placeholderId);
+        const preview = document.getElementById(c.previewWrapId);
+        const img = document.getElementById(c.previewImgId);
+        if (img) {
+            img.removeAttribute('src');
+        }
+        if (placeholder && preview) {
+            preview.classList.add('d-none');
+            placeholder.classList.remove('d-none');
+        }
+        if (c.requiredMsgId) {
+            const msg = document.getElementById(c.requiredMsgId);
+            if (msg) {
+                msg.classList.add('d-none');
+            }
+        }
+        renderPreviews();
+    }
+
     function init() {
         setupCover();
         setupGallery();
         form.addEventListener('submit', validateAndSubmit);
+        window.__catalogItemImageUploadReset = window.__catalogItemImageUploadReset || {};
+        window.__catalogItemImageUploadReset[options.initRegistryKey] = resetImageUploadState;
     }
 
     if (document.readyState === 'loading') {

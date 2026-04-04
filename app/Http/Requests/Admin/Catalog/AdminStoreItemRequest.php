@@ -2,35 +2,20 @@
 
 namespace App\Http\Requests\Admin\Catalog;
 
+use App\Http\Requests\Catalog\CatalogImageRules;
+use App\Http\Requests\Concerns\AppliesAdminTranslationsPayload;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 class AdminStoreItemRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
+    use AppliesAdminTranslationsPayload;
 
-    protected function prepareForValidation(): void
+    /**
+     * @return class-string<\App\Http\Requests\Contracts\AdminTranslationsPayloadContract>
+     */
+    protected function adminTranslationsPayloadRules(): string
     {
-        $raw = $this->input('translations', []);
-        if (! is_array($raw)) {
-            return;
-        }
-        $this->merge([
-            'translations' => AdminItemTranslationsRules::normalizeEmptyStringsToNull($raw),
-        ]);
-    }
-
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator): void {
-            AdminItemTranslationsRules::validateTranslationConsistency(
-                $validator,
-                $this->input('translations', [])
-            );
-        });
+        return AdminItemTranslationsRules::class;
     }
 
     /**
@@ -43,9 +28,6 @@ class AdminStoreItemRequest extends FormRequest
             'category_id' => 'required|integer|numeric|exists:item_categories,id',
             'collaborator_id' => 'required|integer|numeric|exists:collaborators,id',
             'validation' => 'required|boolean',
-            'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
-            'gallery_images' => 'sometimes|array',
-            'gallery_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:10240',
-        ]);
+        ], CatalogImageRules::requiredCoverAndOptionalGallery());
     }
 }

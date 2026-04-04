@@ -1,8 +1,10 @@
 import $ from 'jquery';
 import {
     appendWizardOrder,
-    clearItemCreateWizardStorage,
+    clearComponentWizardSectionStorage,
     removeWizardOrderId,
+    wizardRemoveItem,
+    wizardSetItem,
 } from '../../../../../shared/catalog/item-create-storage';
 import { hideBootstrapModal } from '../../../../../shared/catalog/hide-bootstrap-modal';
 import { getItemCreateForm, parseDataModalsI18n } from '../../../../../shared/catalog/item-create-modal-helpers';
@@ -23,9 +25,35 @@ function getComponentI18n(path) {
     }
 }
 
+function clearComponentModalValidation() {
+    const el = document.getElementById('component-modal-validation');
+    if (el) {
+        el.classList.add('d-none');
+        el.textContent = '';
+    }
+}
+
+function showComponentModalValidation(message) {
+    const el = document.getElementById('component-modal-validation');
+    if (!el) {
+        return;
+    }
+    el.textContent = message;
+    el.classList.remove('d-none');
+    el.focus();
+}
+
 function itemsByCategoryRoute() {
     const form = getItemCreateForm();
     return form ? form.getAttribute('data-route-items-by-category') || '' : '';
+}
+
+function $componentCategory() {
+    return $('#addComponentModal select[name="component-category"]');
+}
+
+function $componentName() {
+    return $('#addComponentModal select[name="component-name"]');
 }
 
 window.componentCount = 0;
@@ -65,8 +93,8 @@ async function loadComponentsByCategory(categoryId, signal) {
 }
 
 async function checkIfComponentCategoryIsEmpty() {
-    const categoryId = $('#component-category').find(':selected').val();
-    const select = $('#component-name');
+    const categoryId = $componentCategory().find(':selected').val();
+    const select = $componentName();
 
     if (componentsAbortController) {
         componentsAbortController.abort();
@@ -116,22 +144,23 @@ async function checkIfComponentCategoryIsEmpty() {
 }
 
 function saveComponent() {
-    const componentCategoryText = $('#component-category').find(':selected').text();
-    const componentCategoryVal = $('#component-category').find(':selected').val();
-    const componentName = $('#component-name').find(':selected').text().trim();
-    const componentSelectedId = $('#component-name').find(':selected').val();
+    const componentCategoryText = $componentCategory().find(':selected').text();
+    const componentCategoryVal = $componentCategory().find(':selected').val();
+    const componentName = $componentName().find(':selected').text().trim();
+    const componentSelectedId = $componentName().find(':selected').val();
 
     if (componentCategoryVal === '') {
-        alert(getComponentI18n('component.alert_category_required'));
+        showComponentModalValidation(getComponentI18n('component.alert_category_required'));
         return;
     }
 
     if (componentSelectedId === '' || componentName === '-' || componentName === '') {
-        alert(getComponentI18n('component.alert_name_required'));
+        showComponentModalValidation(getComponentI18n('component.alert_name_required'));
         return;
     }
 
     $('#component-name-warning').prop('hidden', true);
+    clearComponentModalValidation();
     addComponentToList(componentCategoryText, componentCategoryVal, componentName, componentSelectedId);
     hideBootstrapModal('#addComponentModal');
 }
@@ -140,17 +169,17 @@ function addComponentToList(componentCategoryText, componentCategoryVal, compone
     const assignedId = window.componentIds;
     window.componentBuilder(componentCategoryText, componentCategoryVal, componentName, componentItemId, assignedId);
 
-    sessionStorage.setItem('itemCreateForm', 'true');
-    sessionStorage.setItem('component' + assignedId + 'categoryText', componentCategoryText);
-    sessionStorage.setItem('component' + assignedId + 'categoryVal', componentCategoryVal);
-    sessionStorage.setItem('component' + assignedId + 'name', componentName);
-    sessionStorage.setItem('component' + assignedId + 'itemId', String(componentItemId));
+    wizardSetItem('itemCreateForm', 'true');
+    wizardSetItem('component' + assignedId + 'categoryText', componentCategoryText);
+    wizardSetItem('component' + assignedId + 'categoryVal', String(componentCategoryVal));
+    wizardSetItem('component' + assignedId + 'name', componentName);
+    wizardSetItem('component' + assignedId + 'itemId', String(componentItemId));
     appendWizardOrder('componentIdOrder', assignedId);
 
     window.componentCount++;
     window.componentIds++;
 
-    sessionStorage.setItem('componentCount', String(window.componentCount));
+    wizardSetItem('componentCount', String(window.componentCount));
 
     window.checkComponents();
 }
@@ -166,21 +195,25 @@ function editComponent(componentId) {
     const itemIdVal = inputs[2] || '';
 
     $('#component-id').attr('value', componentId);
-    $('#component-category').val(categoryVal);
+    $componentCategory().val(categoryVal).trigger('change');
     checkIfComponentCategoryIsEmpty().then(function () {
         if (itemIdVal) {
-            const $opt = $('#component-name option').filter(function () {
-                return String($(this).val()) === String(itemIdVal);
-            });
+            const $opt = $componentName()
+                .find('option')
+                .filter(function () {
+                    return String($(this).val()) === String(itemIdVal);
+                });
             if ($opt.length) {
-                $('#component-name').val(String(itemIdVal));
+                $componentName().val(String(itemIdVal)).trigger('change');
             }
         } else {
-            $('#component-name option')
+            $componentName()
+                .find('option')
                 .filter(function () {
                     return $(this).text().trim() === nameVal;
                 })
                 .prop('selected', true);
+            $componentName().trigger('change');
         }
         checkComponentName();
     });
@@ -190,19 +223,19 @@ function editComponent(componentId) {
 }
 
 function updateComponent() {
-    const componentCategoryText = $('#component-category').find(':selected').text();
-    const componentCategoryVal = $('#component-category').find(':selected').val();
-    const componentName = $('#component-name').find(':selected').text().trim();
-    const componentSelectedId = $('#component-name').find(':selected').val();
+    const componentCategoryText = $componentCategory().find(':selected').text();
+    const componentCategoryVal = $componentCategory().find(':selected').val();
+    const componentName = $componentName().find(':selected').text().trim();
+    const componentSelectedId = $componentName().find(':selected').val();
     const componentId = $('#component-id').val();
 
     if (componentCategoryVal === '') {
-        alert(getComponentI18n('component.alert_category_required'));
+        showComponentModalValidation(getComponentI18n('component.alert_category_required'));
         return;
     }
 
     if (componentSelectedId === '' || componentName === '-' || componentName === '') {
-        alert(getComponentI18n('component.alert_name_required'));
+        showComponentModalValidation(getComponentI18n('component.alert_name_required'));
         return;
     }
 
@@ -212,11 +245,12 @@ function updateComponent() {
     $('#item-component-' + componentId).val(componentSelectedId);
     $('#component-name-text-' + componentId).text(componentName);
 
-    sessionStorage.setItem('component' + componentId + 'categoryText', componentCategoryText);
-    sessionStorage.setItem('component' + componentId + 'categoryVal', componentCategoryVal);
-    sessionStorage.setItem('component' + componentId + 'name', componentName);
-    sessionStorage.setItem('component' + componentId + 'itemId', String(componentSelectedId));
+    wizardSetItem('component' + componentId + 'categoryText', componentCategoryText);
+    wizardSetItem('component' + componentId + 'categoryVal', String(componentCategoryVal));
+    wizardSetItem('component' + componentId + 'name', componentName);
+    wizardSetItem('component' + componentId + 'itemId', String(componentSelectedId));
 
+    clearComponentModalValidation();
     hideBootstrapModal('#addComponentModal');
 }
 
@@ -224,12 +258,12 @@ function deleteComponent(componentId) {
     $('#component-' + componentId).remove();
     window.componentCount--;
 
-    sessionStorage.removeItem('component' + componentId + 'categoryText');
-    sessionStorage.removeItem('component' + componentId + 'categoryVal');
-    sessionStorage.removeItem('component' + componentId + 'name');
-    sessionStorage.removeItem('component' + componentId + 'itemId');
+    wizardRemoveItem('component' + componentId + 'categoryText');
+    wizardRemoveItem('component' + componentId + 'categoryVal');
+    wizardRemoveItem('component' + componentId + 'name');
+    wizardRemoveItem('component' + componentId + 'itemId');
     removeWizardOrderId('componentIdOrder', componentId);
-    sessionStorage.setItem('componentCount', String(window.componentCount));
+    wizardSetItem('componentCount', String(window.componentCount));
 
     window.checkComponents();
 }
@@ -247,7 +281,7 @@ window.checkComponents = function checkComponents() {
         }
     } else {
         $('#component-empty-text').show();
-        clearItemCreateWizardStorage();
+        clearComponentWizardSectionStorage();
     }
 
     $('#component-count-text').text(window.componentCount + '/10');
@@ -333,7 +367,7 @@ window.componentBuilder = function componentBuilder(
 };
 
 function checkComponentName() {
-    const selectedId = $('#component-name').find(':selected').val();
+    const selectedId = $componentName().find(':selected').val();
     if (!selectedId) {
         $('#save-component-button').prop('disabled', true);
         return;
@@ -355,20 +389,22 @@ $(function () {
         e.preventDefault();
         updateComponent();
     });
-    modal.on('change', '#component-category', function () {
+    modal.on('change', 'select[name="component-category"]', function () {
         void checkIfComponentCategoryIsEmpty();
     });
-    modal.on('change', '#component-name', checkComponentName);
+    modal.on('change', 'select[name="component-name"]', checkComponentName);
 
     modal.on('hidden.bs.modal', function () {
-        $('#component-category').val('');
-        $('#component-name')
+        clearComponentModalValidation();
+        $componentCategory().val('').trigger('change');
+        $componentName()
             .empty()
-            .append($('<option>', { value: '', text: '-', selected: true }));
+            .append($('<option>', { value: '', text: '-', selected: true }))
+            .trigger('change');
 
         $('#save-component-button').prop('hidden', false);
         $('#update-component-button').prop('hidden', true);
-        $('#component-name').prop('disabled', true);
+        $componentName().prop('disabled', true);
         $('#component-name-warning').prop('hidden', true);
     });
 });

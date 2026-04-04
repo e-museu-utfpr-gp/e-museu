@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'logo_nav_alt' => 'E-Museu logo',
+    'footer_partner_e_lixo_alt' => 'E-lixo partner logo',
+    'footer_partner_tecnolixo_alt' => 'Tecnolixo partner logo',
     'nav' => [
         'home' => 'HOME',
         'explore' => 'EXPLORE',

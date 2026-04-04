@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'logo_nav_alt' => 'Logotipo E-Museu',
+    'footer_partner_e_lixo_alt' => 'Logotipo parceiro E-lixo',
+    'footer_partner_tecnolixo_alt' => 'Logotipo parceiro Tecnolixo',
     'nav' => [
         'home' => 'PÁGINA INICIAL',
         'explore' => 'EXPLORAR',

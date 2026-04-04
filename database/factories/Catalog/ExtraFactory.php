@@ -2,8 +2,7 @@
 
 namespace Database\Factories\Catalog;
 
-use App\Models\Catalog\Extra;
-use App\Models\Catalog\Item;
+use App\Models\Catalog\{Extra, Item};
 use App\Models\Collaborator\Collaborator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

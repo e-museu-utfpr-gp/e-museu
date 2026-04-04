@@ -10,6 +10,8 @@
 
     <title>E-museu: {{ $title }}</title>
 
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,14 +19,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
 </head>
 
-<body class="bd-light d-flex flex-column min-vh-100">
+<body class="bd-light d-flex flex-column min-vh-100 app-public-layout">
     <nav
         class="navbar navbar-border navbar-expand-lg navbar-light bg-light d-flex justify-content-between px-md-5 py-0 sticky-top">
         <div class="container-fluid">
             <div class="navbar-left d-flex py-1">
                 <div class="logo-div">
-                    <a class="navbar-brand fw-bold" href="{{ route('home') }}"><img src="/img/tecnolixo-logo.png" alt=""
-                            width="40" height="40"> E-MUSEU</a>
+                    <a class="navbar-brand fw-bold" href="{{ route('home') }}"><img src="/img/tecnolixo-logo.png"
+                            alt="{{ __('view.layout.logo_nav_alt') }}" width="40" height="40"> E-MUSEU</a>
                 </div>
             </div>
             <button class="button navbar-toggler p-1 nav-link" type="button" data-bs-toggle="collapse"
@@ -91,9 +93,11 @@
 
             <a href="{{ route('home') }}"
                 class="col-md-4 d-flex align-items-center justify-content-center my-3 me-md-auto link-dark text-decoration-none">
-                <img class="e-lixo-footer-logo" src="/img/e-lixo-footer-logo.png" alt="">
+                <img class="e-lixo-footer-logo" src="/img/e-lixo-footer-logo.png"
+                    alt="{{ __('view.layout.footer_partner_e_lixo_alt') }}">
                 <h2 class="mx-3">-</h2>
-                <img class="tecnolixo-footer-logo" src="/img/tecnolixo-footer-logo.png" alt="">
+                <img class="tecnolixo-footer-logo" src="/img/tecnolixo-footer-logo.png"
+                    alt="{{ __('view.layout.footer_partner_tecnolixo_alt') }}">
             </a>
 
             <p class="col-md-4 mb-0 d-flex justify-content-center">{{ __('view.layout.footer.copyright') }}</p>

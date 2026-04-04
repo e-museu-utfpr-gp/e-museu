@@ -20,7 +20,7 @@ final class ContributionContentLocaleService
      */
     public function formOptions(): array
     {
-        $contributionLanguages = Language::forAdminContentForms();
+        $contributionLanguages = Language::forCatalogContentForms();
         $defaultContentLocale = ContentLocaleFallback::normalizedAppLocaleCode();
         if (Language::tryIdForCode($defaultContentLocale) === null) {
             $defaultContentLocale = ContentLanguage::defaultForForms()->value;

@@ -1,10 +1,18 @@
 import $ from 'jquery';
 import {
     clearItemCreateWizardStorage,
+    ensureWizardStorageFresh,
     nextWizardIdAfterOrder,
     readWizardOrder,
+    wizardGetItem,
 } from '../../../../shared/catalog/item-create-storage';
 import { getItemCreateForm } from '../../../../shared/catalog/item-create-modal-helpers';
+import {
+    clearContributionFormDraft,
+    hasContributionFormDraft,
+    initContributionFormDraftAutosave,
+    restoreContributionFormDraft,
+} from './contribution-form-draft';
 
 function readSessionFlash() {
     const form = getItemCreateForm();
@@ -18,30 +26,18 @@ function readSessionFlash() {
     }
 }
 
-function recoverConfirmMessage() {
-    const form = getItemCreateForm();
-    if (!form) {
-        return '';
-    }
-    try {
-        return JSON.parse(form.getAttribute('data-recover-confirm') || '""');
-    } catch {
-        return '';
-    }
-}
-
-function getSessionStorage() {
-    const tagCount = parseInt(sessionStorage.getItem('tagCount'), 10) || 0;
-    const extraCount = parseInt(sessionStorage.getItem('extraCount'), 10) || 0;
-    const componentCount = parseInt(sessionStorage.getItem('componentCount'), 10) || 0;
+function restoreWizardRowsFromLocal() {
+    const tagCount = parseInt(wizardGetItem('tagCount') ?? '', 10) || 0;
+    const extraCount = parseInt(wizardGetItem('extraCount') ?? '', 10) || 0;
+    const componentCount = parseInt(wizardGetItem('componentCount') ?? '', 10) || 0;
 
     if (tagCount > 0) {
         const tagOrder = readWizardOrder('tagIdOrder', tagCount);
         for (let o = 0; o < tagOrder.length; o++) {
             const id = tagOrder[o];
-            const tagCategoryText = sessionStorage.getItem('tag' + id + 'categoryText');
-            const tagCategoryVal = sessionStorage.getItem('tag' + id + 'categoryVal');
-            const tagName = sessionStorage.getItem('tag' + id + 'name');
+            const tagCategoryText = wizardGetItem('tag' + id + 'categoryText');
+            const tagCategoryVal = wizardGetItem('tag' + id + 'categoryVal');
+            const tagName = wizardGetItem('tag' + id + 'name');
 
             window.tagBuilder(tagCategoryText, tagCategoryVal, tagName, id);
         }
@@ -54,7 +50,7 @@ function getSessionStorage() {
         const extraOrder = readWizardOrder('extraIdOrder', extraCount);
         for (let o = 0; o < extraOrder.length; o++) {
             const id = extraOrder[o];
-            const extraInfo = sessionStorage.getItem('extra' + id + 'info');
+            const extraInfo = wizardGetItem('extra' + id + 'info');
 
             window.extraBuilder(extraInfo, id);
         }
@@ -67,10 +63,10 @@ function getSessionStorage() {
         const componentOrder = readWizardOrder('componentIdOrder', componentCount);
         for (let o = 0; o < componentOrder.length; o++) {
             const id = componentOrder[o];
-            const componentCategoryText = sessionStorage.getItem('component' + id + 'categoryText');
-            const componentCategoryVal = sessionStorage.getItem('component' + id + 'categoryVal');
-            const componentName = sessionStorage.getItem('component' + id + 'name');
-            const componentItemId = sessionStorage.getItem('component' + id + 'itemId') || '';
+            const componentCategoryText = wizardGetItem('component' + id + 'categoryText');
+            const componentCategoryVal = wizardGetItem('component' + id + 'categoryVal');
+            const componentName = wizardGetItem('component' + id + 'name');
+            const componentItemId = wizardGetItem('component' + id + 'itemId') || '';
 
             window.componentBuilder(componentCategoryText, componentCategoryVal, componentName, componentItemId, id);
         }
@@ -87,24 +83,35 @@ function initWhenJqueryReady() {
     }
 
     $(document).ready(function () {
+        const form = getItemCreateForm();
+        initContributionFormDraftAutosave(form);
+
         const flash = readSessionFlash();
 
         if (flash.hasSuccess) {
             clearItemCreateWizardStorage();
-        }
-
-        if (sessionStorage.getItem('itemCreateForm') === null) {
+            clearContributionFormDraft();
             return;
         }
+
+        ensureWizardStorageFresh();
 
         if (flash.hasErrors) {
-            getSessionStorage();
+            restoreWizardRowsFromLocal();
             return;
         }
 
-        const msg = recoverConfirmMessage();
-        if (msg && confirm(msg)) {
-            getSessionStorage();
+        const hasWizard = wizardGetItem('itemCreateForm') !== null;
+        const hasDraft = hasContributionFormDraft();
+        if (!hasWizard && !hasDraft) {
+            return;
+        }
+
+        if (hasWizard) {
+            restoreWizardRowsFromLocal();
+        }
+        if (hasDraft && form) {
+            restoreContributionFormDraft(form);
         }
     });
 }

@@ -2,9 +2,7 @@
 
 namespace Database\Factories\Catalog;
 
-use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemCategory;
-use App\Models\Catalog\ItemImage;
+use App\Models\Catalog\{Item, ItemCategory, ItemImage};
 use App\Models\Collaborator\Collaborator;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

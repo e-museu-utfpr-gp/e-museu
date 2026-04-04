@@ -19,3 +19,5 @@ import './pages/admin/catalog/items/create-images-upload';
 import './pages/admin/catalog/items/edit-images-upload';
 
 import './pages/admin/collaborators/check-contact';
+
+import './shared/ui/enhanced-select';

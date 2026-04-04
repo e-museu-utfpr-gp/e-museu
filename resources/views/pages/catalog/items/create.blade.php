@@ -29,38 +29,30 @@
             data-label-cover="{{ __('app.catalog.item_image.cover') }}"
             data-label-gallery="{{ __('app.catalog.item_image.gallery') }}"
             data-label-remove-image="{{ __('view.catalog.items.create.remove_image') }}"
-            data-recover-confirm='@json(__('view.catalog.items.create.recover_confirm'))'
             data-session-flash='@json(['hasSuccess' => session()->has('success'), 'hasErrors' => session()->has('errors')])'
         >
             @csrf
             <div class="row">
-                <div class="col-md-6 col-12">
-                    <div class="mb-4">
-                        <h5 class="mb-2" id="contribution_content_locale_heading">
-                            {{ __('view.catalog.items.create.content_language_label') }}
-                            <x-ui.info-popover :content="__('view.catalog.items.create.content_language_help')" />
-                        </h5>
-                        <select
-                            name="content_locale"
-                            id="contribution_content_locale"
-                            class="form-select w-100"
-                            required
-                            aria-labelledby="contribution_content_locale_heading"
-                        >
-                            @foreach ($contributionLanguages as $lang)
-                                <option value="{{ $lang->code }}" @selected(old('content_locale', $defaultContributionContentLocale) === $lang->code)>
-                                    @if ($lang->code === \App\Enums\Content\ContentLanguage::NEUTRAL->value)
-                                        {{ __('view.catalog.items.create.content_language_option_neutral') }}
-                                    @else
-                                        {{ $lang->name }}
-                                    @endif
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('content_locale')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
-                        @enderror
-                    </div>
+                <div class="col-md-6 col-12 mb-4">
+                    <x-ui.inputs.select
+                        name="content_locale"
+                        id="contribution_content_locale"
+                        :label="__('view.catalog.items.create.content_language_label')"
+                        :help="__('view.catalog.items.create.content_language_help')"
+                        :roundedTop="true"
+                        :enhanced="false"
+                        required
+                    >
+                        @foreach ($contributionLanguages as $lang)
+                            <option value="{{ $lang->code }}" @selected(old('content_locale', $defaultContributionContentLocale) === $lang->code)>
+                                @if ($lang->code === \App\Enums\Content\ContentLanguage::NEUTRAL->value)
+                                    {{ __('view.catalog.items.create.content_language_option_neutral') }}
+                                @else
+                                    {{ $lang->name }}
+                                @endif
+                            </option>
+                        @endforeach
+                    </x-ui.inputs.select>
                 </div>
             </div>
             <div class="row">
@@ -160,6 +152,30 @@
     @include('pages.catalog.items._partials.create.extra-modal')
 
     @include('pages.catalog.items._partials.create.tag-modal')
+
+    <div class="modal fade" id="item-create-clear-modal" tabindex="-1" aria-labelledby="item-create-clear-modal-label"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="item-create-clear-modal-label">{{ __('view.catalog.items.create.clear_form') }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="{{ __('view.shared.modal_dismiss') }}"></button>
+                </div>
+                <div class="modal-body">{{ __('view.catalog.items.create.clear_form_confirm') }}</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        {{ __('view.catalog.items.create.clear_form_modal_cancel') }}
+                    </button>
+                    <button type="button" class="btn btn-danger" id="item-create-clear-confirm-btn">
+                        {{ __('view.catalog.items.create.clear_form_modal_confirm') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <x-ui.images.catalog.upload-assets />
 
 </x-layouts.app>

@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\Admin\Catalog;
 
-use App\Models\Catalog\Item;
+use App\Http\Requests\Contracts\AdminTranslationsPayloadContract;
 use App\Models\Language;
+use App\Models\Catalog\Item;
 use Illuminate\Validation\Validator;
 
-final class AdminItemTranslationsRules
+final class AdminItemTranslationsRules implements AdminTranslationsPayloadContract
 {
     /**
      * @param  Item|null  $item  Reserved for callers; keeps relation warm when building rules for an existing item.
@@ -20,7 +21,7 @@ final class AdminItemTranslationsRules
             'translations' => ['required', 'array'],
         ];
 
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $c = $lang->code;
             $rules["translations.{$c}"] = ['nullable', 'array'];
 
@@ -46,7 +47,7 @@ final class AdminItemTranslationsRules
     {
         $hasComplete = false;
 
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $block = $translations[$lang->code] ?? [];
             if (self::mergeLocaleConsistencyIntoState($validator, $lang, $block)) {
                 $hasComplete = true;
@@ -96,7 +97,7 @@ final class AdminItemTranslationsRules
      */
     public static function normalizeEmptyStringsToNull(array $raw): array
     {
-        foreach (Language::forAdminContentForms() as $lang) {
+        foreach (Language::forCatalogContentForms() as $lang) {
             $c = $lang->code;
             if (! isset($raw[$c]) || ! is_array($raw[$c])) {
                 continue;

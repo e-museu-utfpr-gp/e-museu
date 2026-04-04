@@ -2,8 +2,7 @@
 
 namespace Database\Factories\Taxonomy;
 
-use App\Models\Taxonomy\Tag;
-use App\Models\Taxonomy\TagCategory;
+use App\Models\Taxonomy\{Tag, TagCategory};
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

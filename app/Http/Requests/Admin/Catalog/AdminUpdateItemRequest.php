@@ -2,36 +2,21 @@
 
 namespace App\Http\Requests\Admin\Catalog;
 
+use App\Http\Requests\Catalog\CatalogImageRules;
+use App\Http\Requests\Concerns\AppliesAdminTranslationsPayload;
 use App\Models\Catalog\Item;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 class AdminUpdateItemRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
+    use AppliesAdminTranslationsPayload;
 
-    protected function prepareForValidation(): void
+    /**
+     * @return class-string<\App\Http\Requests\Contracts\AdminTranslationsPayloadContract>
+     */
+    protected function adminTranslationsPayloadRules(): string
     {
-        $raw = $this->input('translations', []);
-        if (! is_array($raw)) {
-            return;
-        }
-        $this->merge([
-            'translations' => AdminItemTranslationsRules::normalizeEmptyStringsToNull($raw),
-        ]);
-    }
-
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator): void {
-            AdminItemTranslationsRules::validateTranslationConsistency(
-                $validator,
-                $this->input('translations', [])
-            );
-        });
+        return AdminItemTranslationsRules::class;
     }
 
     /**
@@ -48,12 +33,6 @@ class AdminUpdateItemRequest extends FormRequest
             'collaborator_id' => 'required|integer|numeric|exists:collaborators,id',
             'identification_code' => 'required|string|min:1|max:50',
             'validation' => 'required|boolean',
-            'image' => 'sometimes|image|max:10240',
-            'gallery_images' => 'sometimes|array',
-            'gallery_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:10240',
-            'delete_image_ids' => 'sometimes|array',
-            'delete_image_ids.*' => 'integer|exists:item_images,id',
-            'set_cover_image_id' => 'sometimes|nullable|integer|exists:item_images,id',
-        ]);
+        ], CatalogImageRules::adminItemUpdate());
     }
 }

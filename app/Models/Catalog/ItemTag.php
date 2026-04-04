@@ -2,13 +2,12 @@
 
 namespace App\Models\Catalog;
 
-use App\Support\Content\TranslationDisplaySql;
 use App\Models\Taxonomy\Tag;
+use App\Support\Content\TranslationDisplaySql;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, Pivot};
 
 /**
  * Pivot for {@see Item::tags()}; also queried directly for admin listings ({@see scopeForAdminList()}).

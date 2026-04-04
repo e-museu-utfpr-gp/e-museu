@@ -2,13 +2,11 @@
 
 namespace App\Services\Identity;
 
-use App\Models\Identity\Admin;
-use App\Models\Identity\Lock;
-use App\Support\Admin\AdminIndexConfig;
-use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Identity\{Admin, Lock};
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 
 class AdminService
 {

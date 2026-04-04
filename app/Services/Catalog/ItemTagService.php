@@ -2,13 +2,11 @@
 
 namespace App\Services\Catalog;
 
-use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemTag;
 use App\Services\Taxonomy\TagService;
-use App\Support\Admin\AdminIndexConfig;
-use App\Support\Admin\AdminIndexQueryBuilder;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use App\Models\Catalog\{Item, ItemTag};
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 
 class ItemTagService
 {

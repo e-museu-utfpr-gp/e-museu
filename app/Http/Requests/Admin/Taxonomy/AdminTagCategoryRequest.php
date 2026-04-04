@@ -2,36 +2,20 @@
 
 namespace App\Http\Requests\Admin\Taxonomy;
 
+use App\Http\Requests\Concerns\AppliesAdminTranslationsPayload;
 use App\Models\Taxonomy\TagCategory;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
 class AdminTagCategoryRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
+    use AppliesAdminTranslationsPayload;
 
-    protected function prepareForValidation(): void
+    /**
+     * @return class-string<\App\Http\Requests\Contracts\AdminTranslationsPayloadContract>
+     */
+    protected function adminTranslationsPayloadRules(): string
     {
-        $raw = $this->input('translations', []);
-        if (! is_array($raw)) {
-            return;
-        }
-        $this->merge([
-            'translations' => AdminTagCategoryTranslationsRules::normalizeEmptyStringsToNull($raw),
-        ]);
-    }
-
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $validator): void {
-            AdminTagCategoryTranslationsRules::validateTranslationConsistency(
-                $validator,
-                $this->input('translations', [])
-            );
-        });
+        return AdminTagCategoryTranslationsRules::class;
     }
 
     /**

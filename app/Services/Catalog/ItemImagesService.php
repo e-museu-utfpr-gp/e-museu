@@ -48,6 +48,7 @@ class ItemImagesService
             $currentCovers = $item->images()->where('type', 'cover')->get();
             $currentCovers->each(fn (ItemImage $img) => $this->deleteItemImageFromStorage($img));
             $this->storeCoverImage($item, $coverFile);
+
             return;
         }
         if ($request->filled('set_cover_image_id')) {
@@ -116,7 +117,12 @@ class ItemImagesService
             }
             $contents = $file->get();
             if ($contents === false) {
-                continue;
+                report(new RuntimeException(sprintf(
+                    'Failed to read uploaded gallery image contents for item ID %s',
+                    (string) $item->id
+                )));
+
+                throw new RuntimeException(__('app.catalog.item.upload_read_failed'));
             }
             $ext = $file->getClientOriginalExtension() ?: 'png';
             $path = ItemImage::buildPath($item, $ext);
@@ -131,7 +137,18 @@ class ItemImagesService
         foreach ($item->images as $img) {
             $this->deleteItemImageFromStorage($img);
         }
-        $itemFolder = 'items/' . $item->id;
+        $this->deletePublicStorageFolderForItemId((int) $item->id);
+    }
+
+    /**
+     * Remove the `public` disk directory for an item (e.g. after a rolled-back contribution when DB rows are gone).
+     */
+    public function deletePublicStorageFolderForItemId(int $itemId): void
+    {
+        if ($itemId <= 0) {
+            return;
+        }
+        $itemFolder = 'items/' . $itemId;
         if (Storage::disk('public')->exists($itemFolder)) {
             Storage::disk('public')->deleteDirectory($itemFolder);
         }

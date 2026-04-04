@@ -3,24 +3,24 @@
 namespace App\Actions\Catalog;
 
 use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemComponent;
 use App\Models\Collaborator\Collaborator;
-use App\Services\Catalog\ExtraService;
-use App\Services\Catalog\ItemImagesService;
-use App\Services\Catalog\ItemService;
-use App\Support\Content\TranslatablePayload;
-use App\Services\Catalog\ItemTagService;
+use App\Services\Catalog\{ExtraService, ItemComponentService, ItemImagesService, ItemService, ItemTagService};
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Taxonomy\TagService;
+use App\Support\Content\TranslatablePayload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
+use Throwable;
 
+/**
+ * Store a public catalog contribution (item, images, tags, extras, components).
+ */
 class StoreItemContributionAction
 {
     public function __construct(
         private readonly CollaboratorService $collaboratorService,
         private readonly ExtraService $extraService,
+        private readonly ItemComponentService $itemComponentService,
         private readonly ItemTagService $itemTagService,
         private readonly TagService $tagService,
         private readonly ItemService $itemService,
@@ -30,7 +30,7 @@ class StoreItemContributionAction
 
     /**
      * Store a contributed item (public contribution flow).
-     * Resolves collaborator and creates item, images, tags, extras and components.
+     * Resolves collaborator and creates item, images, tags, extras and components in one database transaction.
      *
      * @param  array<string, mixed>  $collaboratorData  Collaborator data validated by the
      *                                                  request (e.g. name, contact).
@@ -70,22 +70,46 @@ class StoreItemContributionAction
             unset($itemData['image'], $itemData['cover_image']);
         }
 
-        $item = $this->createItemWithImages(
-            $itemData,
-            $collaborator,
-            $contentLanguageId,
-            $coverImage,
-            $galleryImages ?? [],
-        );
+        /** @var array{itemId: int|null} */
+        $cleanup = ['itemId' => null];
 
-        $this->itemTagService->attachTagsToItem($item, $tags, $this->tagService, $contentLanguageId);
-        $this->extraService->createForItem($item, $collaborator, $extras, $contentLanguageId);
-        $this->attachComponentsToItem($item, $components);
+        try {
+            return DB::transaction(function () use (
+                $itemData,
+                $collaborator,
+                $contentLanguageId,
+                $tags,
+                $extras,
+                $components,
+                $coverImage,
+                $galleryImages,
+                &$cleanup,
+            ): array {
+                $item = $this->createItemWithImages(
+                    $itemData,
+                    $collaborator,
+                    $contentLanguageId,
+                    $coverImage,
+                    $galleryImages ?? [],
+                    $cleanup,
+                );
 
-        return [
-            'status' => 'ok',
-            'item' => $item,
-        ];
+                $this->itemTagService->attachTagsToItem($item, $tags, $this->tagService, $contentLanguageId);
+                $this->extraService->createForItem($item, $collaborator, $extras, $contentLanguageId);
+                $this->itemComponentService->attachContributedComponents($item, $components);
+
+                return [
+                    'status' => 'ok',
+                    'item' => $item,
+                ];
+            });
+        } catch (Throwable $e) {
+            if ($cleanup['itemId'] !== null) {
+                $this->itemImagesService->deletePublicStorageFolderForItemId($cleanup['itemId']);
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -125,15 +149,19 @@ class StoreItemContributionAction
      *
      * @param  array<string, mixed>  $itemData
      * @param  array<int, UploadedFile>  $galleryImages
+     * @param  array{itemId: int|null}  $cleanup  Item id once the row exists; used to remove
+     *                                            public storage if the transaction rolls back.
      */
     private function createItemWithImages(
         array $itemData,
         Collaborator $collaborator,
         int $contentLanguageId,
         ?UploadedFile $coverImage,
-        array $galleryImages
+        array $galleryImages,
+        array &$cleanup,
     ): Item {
         $item = $this->createItemForContribution($itemData, $collaborator, $contentLanguageId);
+        $cleanup['itemId'] = (int) $item->id;
         if ($coverImage !== null) {
             $this->itemImagesService->storeCoverImage($item, $coverImage);
         }
@@ -143,7 +171,8 @@ class StoreItemContributionAction
     }
 
     /**
-     * Create an item for contribution flow (transaction with identification code).
+     * Create an item for contribution flow (identification code).
+     * Caller must wrap in {@see DB::transaction} together with images, tags, extras, and components.
      *
      * @param  array<string, mixed>  $itemData
      */
@@ -159,44 +188,14 @@ class StoreItemContributionAction
         $translationData = $split['translation'];
         $persist = $split['persist'];
 
-        return DB::transaction(function () use ($persist, $translationData, $contentLanguageId): Item {
-            $item = Item::create($persist);
-            if ($translationData !== []) {
-                $item->syncTranslationForLanguage($contentLanguageId, $translationData);
-            }
-            $item->update([
-                'identification_code' => $this->itemService->createIdentificationCode($item),
-            ]);
-
-            return $item;
-        });
-    }
-
-    /**
-     * Attach components using the validated ComponentRequest payload: each entry's
-     * `item_id` is the catalog item that acts as the component (stored as `component_id`).
-     *
-     * @param  array<int, array<string, mixed>>  $componentsData
-     */
-    private function attachComponentsToItem(Item $item, array $componentsData): void
-    {
-        foreach ($componentsData as $componentItemData) {
-            $componentId = (int) ($componentItemData['item_id'] ?? 0);
-            if ($componentId <= 0) {
-                continue;
-            }
-
-            if (! Item::query()->whereKey($componentId)->exists()) {
-                throw ValidationException::withMessages([
-                    'components' => [__('validation.catalog.component_item_not_found')],
-                ]);
-            }
-
-            ItemComponent::create([
-                'item_id' => $item->id,
-                'component_id' => $componentId,
-                'validation' => (int) ($componentItemData['validation'] ?? 0),
-            ]);
+        $item = Item::create($persist);
+        if ($translationData !== []) {
+            $item->syncTranslationForLanguage($contentLanguageId, $translationData);
         }
+        $item->update([
+            'identification_code' => $this->itemService->createIdentificationCode($item),
+        ]);
+
+        return $item;
     }
 }

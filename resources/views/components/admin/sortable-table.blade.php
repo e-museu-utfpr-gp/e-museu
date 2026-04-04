@@ -4,7 +4,8 @@
 ])
 
 <div class="row">
-    <div class="col">
+    <div class="col min-w-0">
+        <div class="table-responsive">
         <table class="table table-hover table-bordered">
             <thead>
                 <form action="{{ $action }}" method="GET">
@@ -27,5 +28,6 @@
                 {{ $slot }}
             </tbody>
         </table>
+        </div>
     </div>
 </div>
