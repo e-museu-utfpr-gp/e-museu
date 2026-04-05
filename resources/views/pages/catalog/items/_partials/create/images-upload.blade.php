@@ -34,9 +34,8 @@
         />
     </div>
 
-    <div class="mb-4 rounded-3 p-3 mt-3" style="background-color: #e8f5e9;">
-        <h5 class="mb-3">{{ __('view.shared.images_upload.images_preview_title') }}</h5>
-
+    <h5 class="mb-2 mt-3">{{ __('view.shared.images_upload.images_preview_title') }}</h5>
+    <div class="mb-4 catalog-images-preview-panel rounded-3 p-3">
         <div id="images-preview" class="d-flex flex-wrap gap-3 align-items-start">
             <p class="text-muted mb-0" id="images-preview-empty">{{ __('view.shared.images_upload.images_preview_empty') }}</p>
         </div>

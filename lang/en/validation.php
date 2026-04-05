@@ -297,7 +297,7 @@ return [
         'component_id' => 'component id',
         'tag_id' => 'tag id',
         'full_name' => 'full name',
-        'contact' => 'email',
+        'email' => 'email',
         'info' => 'extra information',
         'image' => 'image',
         'identification_code' => 'identification code',

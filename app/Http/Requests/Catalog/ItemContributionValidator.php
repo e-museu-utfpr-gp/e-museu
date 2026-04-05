@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Catalog;
 
-use App\Http\Requests\Collaborator\CollaboratorRequest;
+use App\Http\Requests\Collaborator\PublicCollaboratorRules;
 use App\Http\Requests\Taxonomy\TagRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -10,13 +10,11 @@ use Illuminate\Support\Arr;
 /**
  * Orchestrates multiple rule sets against a raw {@see Request} (public contribution).
  *
- * Nested {@see \Illuminate\Foundation\Http\FormRequest} instances are only used for
+ * Collaborator fields use {@see PublicCollaboratorRules::rules()}. Other nested
+ * {@see \Illuminate\Foundation\Http\FormRequest} instances are only used for
  * {@see \Illuminate\Foundation\Http\FormRequest::rules()} and
  * {@see \Illuminate\Foundation\Http\FormRequest::messages()}. The full FormRequest lifecycle
- * (constructor resolution, {@see \Illuminate\Foundation\Http\FormRequest::authorize()},
- * {@see \Illuminate\Foundation\Http\FormRequest::prepareForValidation()}, container merge)
- * does not run here. Keep those classes free of side effects that must apply to this flow, or
- * duplicate that logic explicitly in this validator or a dedicated service.
+ * does not run here — keep those classes free of required side effects, or duplicate logic here.
  */
 class ItemContributionValidator
 {
@@ -42,14 +40,10 @@ class ItemContributionValidator
     {
         self::mergeTrimmedTagNamesIntoRequest($request);
 
-        $collaboratorRequest = new CollaboratorRequest();
         $storeItemRequest = new StoreItemRequest();
         $tagRequest = new TagRequest();
         $extraRequest = new ExtraRequest();
-        $collaborator = $request->validate(
-            $collaboratorRequest->rules(),
-            $collaboratorRequest->messages()
-        );
+        $collaborator = $request->validate(PublicCollaboratorRules::rules());
         $item = $request->validate(
             $storeItemRequest->rules(),
             $storeItemRequest->messages()
@@ -88,7 +82,7 @@ class ItemContributionValidator
     public function validateSingleExtra(SingleExtraRequest $request): array
     {
         $validated = $request->validated();
-        $collaborator = Arr::only($validated, ['full_name', 'contact']);
+        $collaborator = Arr::only($validated, ['full_name', 'email']);
         $extra = Arr::only($validated, [
             'content_locale',
             'info',

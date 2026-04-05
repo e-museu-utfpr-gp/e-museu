@@ -11,30 +11,31 @@ use Illuminate\Validation\Rule;
 final class AdminCollaboratorRules
 {
     /**
-     * @param  mixed  $ignoreContactUnique  For update: route id or bound model; passed to
+     * @param  mixed  $ignoreEmailUnique  For update: route id or bound model; passed to
      *         {@see Rule::unique()->ignore()}.
      * @return array<string, mixed>
      */
-    public static function rules(mixed $ignoreContactUnique = null): array
+    public static function rules(mixed $ignoreEmailUnique = null): array
     {
-        $contact = [
+        $email = [
             'required',
-            'email:rfc,dns',
+            'email:rfc',
             'min:1',
             'max:200',
         ];
 
-        if ($ignoreContactUnique === null) {
-            $contact[] = 'unique:collaborators,contact';
+        if ($ignoreEmailUnique === null) {
+            $email[] = 'unique:collaborators,email';
         } else {
-            $contact[] = Rule::unique('collaborators')->ignore($ignoreContactUnique);
+            $email[] = Rule::unique('collaborators')->ignore($ignoreEmailUnique);
         }
 
         return [
             'full_name' => 'required|string|min:1|max:200',
-            'contact' => $contact,
+            'email' => $email,
             'role' => ['required', Rule::enum(CollaboratorRole::class)],
             'blocked' => 'sometimes|boolean',
+            'last_email_verification_at' => 'nullable|date',
         ];
     }
 }

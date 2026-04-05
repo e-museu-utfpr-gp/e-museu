@@ -23,7 +23,11 @@
         <env name="CACHE_DRIVER" value="array"/>
         <!-- RefreshDatabase runs migrate:fresh: override DB name so the dev schema (e.g. laravel) is never dropped. Create this database once (see docker/mysql/init). -->
         <env name="DB_DATABASE" value="emuseu_testing"/>
-        <!-- #[Group('mysql')]: same MySQL host/user as .env; seeds and FIELD() SQL need mysql. -->
+        <!--
+            Feature tests with #[Group('mysql')] require MySQL (pdo_mysql + migrated emuseu_testing).
+            CI runs ./run test with Docker MySQL — do not run that group against SQLite-only hosts without skipping.
+        -->
+        <!-- MAIL_MAILER=array: no Resend/network in tests; OutgoingMailIsConfigured still passes for the array driver. -->
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>

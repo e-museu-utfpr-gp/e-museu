@@ -13,6 +13,7 @@ import {
     initContributionFormDraftAutosave,
     restoreContributionFormDraft,
 } from './contribution-form-draft';
+import { devWarn } from '../../../../shared/dev-warn';
 
 function readSessionFlash() {
     const form = getItemCreateForm();
@@ -24,6 +25,27 @@ function readSessionFlash() {
     } catch {
         return { hasSuccess: false, hasErrors: false };
     }
+}
+
+const JQUERY_WAIT_DEADLINE_MS = 8000;
+
+/**
+ * Re-run check-contact after restoring draft values so banners match session state.
+ *
+ * @param {HTMLFormElement | null | undefined} form
+ */
+function triggerEmailCheckContactAfterRestore(form) {
+    if (!form) {
+        return;
+    }
+    const emailInput = form.querySelector('input[name="email"]');
+    if (!(emailInput instanceof HTMLInputElement)) {
+        return;
+    }
+    if (String(emailInput.value || '').trim() === '') {
+        return;
+    }
+    emailInput.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
 }
 
 function restoreWizardRowsFromLocal() {
@@ -76,8 +98,14 @@ function restoreWizardRowsFromLocal() {
     }
 }
 
+const jqueryWaitStartedAt = Date.now();
+
 function initWhenJqueryReady() {
     if (typeof window.$ === 'undefined' || typeof window.jQuery === 'undefined') {
+        if (Date.now() - jqueryWaitStartedAt > JQUERY_WAIT_DEADLINE_MS) {
+            devWarn('[form-session-restore] jQuery not available within wait window; skipping init.');
+            return;
+        }
         setTimeout(initWhenJqueryReady, 50);
         return;
     }
@@ -98,6 +126,10 @@ function initWhenJqueryReady() {
 
         if (flash.hasErrors) {
             restoreWizardRowsFromLocal();
+            if (form) {
+                restoreContributionFormDraft(form, { fillEmptyOnly: true });
+                triggerEmailCheckContactAfterRestore(form);
+            }
             return;
         }
 
@@ -112,6 +144,9 @@ function initWhenJqueryReady() {
         }
         if (hasDraft && form) {
             restoreContributionFormDraft(form);
+        }
+        if ((hasWizard || hasDraft) && form) {
+            triggerEmailCheckContactAfterRestore(form);
         }
     });
 }

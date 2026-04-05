@@ -20,14 +20,14 @@ class AdminIndexConfig
         return [
             'baseTable' => 'extras',
             'searchSpecial' => [
-                'collaborator_id' => ['table' => 'collaborators', 'column' => 'contact'],
+                'collaborator_id' => ['table' => 'collaborators', 'column' => 'email'],
             ],
             'searchLikeSubquery' => [
                 'info' => TranslationDisplaySql::extraInfoSubquerySql('extras'),
                 'item_id' => TranslationDisplaySql::itemNameSubquerySql('items'),
             ],
             'sortSpecial' => [
-                'collaborator_id' => 'collaborators.contact',
+                'collaborator_id' => 'collaborators.email',
                 'item_id' => 'item_name',
                 'info' => 'info',
             ],
@@ -50,7 +50,7 @@ class AdminIndexConfig
         return [
             'baseTable' => 'items',
             'searchSpecial' => [
-                'collaborator_id' => ['table' => 'collaborators', 'column' => 'contact'],
+                'collaborator_id' => ['table' => 'collaborators', 'column' => 'email'],
             ],
             'searchLikeSubquery' => [
                 'name' => TranslationDisplaySql::itemTranslationSubquerySql('name', 'items'),
@@ -67,7 +67,7 @@ class AdminIndexConfig
                 'detail' => TranslationDisplaySql::itemTranslationSubquerySql('detail', 'items'),
             ],
             'sortSpecial' => [
-                'collaborator_id' => 'collaborators.contact',
+                'collaborator_id' => 'collaborators.email',
                 'category_id' => 'item_category_name',
             ],
             'booleanColumns' => ['validation'],

@@ -60,7 +60,7 @@
                             @foreach ($collaborators as $collaborator)
                                 <option value="{{ $collaborator->id }}"
                                     @selected(old('collaborator_id', $extra->collaborator->id) == $collaborator->id)>
-                                    {{ $collaborator->contact }}</option>
+                                    {{ $collaborator->email }}</option>
                             @endforeach
                         </x-ui.inputs.admin.select>
                         <x-ui.inputs.admin.select

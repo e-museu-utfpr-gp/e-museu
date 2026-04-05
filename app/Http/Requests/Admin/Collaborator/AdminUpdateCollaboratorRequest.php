@@ -15,4 +15,14 @@ class AdminUpdateCollaboratorRequest extends FormRequest
             $this->route()?->parameter('collaborator')
         );
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'email.unique' => __('app.collaborator.email_unique'),
+        ];
+    }
 }

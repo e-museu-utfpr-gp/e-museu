@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Catalog;
 
+use App\Actions\Catalog\CompleteCatalogExtraContributionAction;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Catalog\{ItemContributionValidator, SingleExtraRequest};
+use App\Models\Language;
 use App\Services\Catalog\ExtraService;
+use App\Support\Catalog\PublicCatalogContributionOutcome;
 use App\Services\Collaborator\CollaboratorService;
 use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\Catalog\{ItemContributionValidator, SingleExtraRequest};
 
 class ExtraController extends Controller
 {
@@ -17,9 +20,13 @@ class ExtraController extends Controller
         SingleExtraRequest $request,
         ItemContributionValidator $itemContributionValidator,
         ExtraService $extraService,
-        CollaboratorService $collaboratorService
+        CollaboratorService $collaboratorService,
+        CompleteCatalogExtraContributionAction $completeCatalogExtraContribution,
     ): RedirectResponse {
         $validatedData = $itemContributionValidator->validateSingleExtra($request);
+
+        $contentLocaleCode = (string) ($validatedData['extra']['content_locale'] ?? '');
+        $contentLanguageId = Language::idForCode($contentLocaleCode);
 
         $result = $extraService->storeSingleExtra(
             $collaboratorService,
@@ -27,13 +34,9 @@ class ExtraController extends Controller
             $validatedData['extra']
         );
 
-        if ($result['status'] === 'internal_blocked') {
-            return back()->withErrors(['contact' => __('app.collaborator.contact_reserved_for_internal')]);
-        }
+        PublicCatalogContributionOutcome::throwUnlessOk($result);
 
-        if ($result['status'] === 'collaborator_blocked') {
-            return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
-        }
+        $completeCatalogExtraContribution->handle($result['extra'] ?? null, $contentLanguageId);
 
         return back()->with('success', __('app.catalog.extra.contribution_success'));
     }

@@ -1,4 +1,4 @@
-# Staging. Database is external: set DATABASE_URL in the environment (no db service).
+# Staging: same as production — external DB + Redis, storage volume for Laravel storage/.
 services:
   app-staging:
     build:
@@ -6,7 +6,6 @@ services:
       dockerfile: Dockerfile.staging
       target: app
     working_dir: /var/www
-    # Only for logs, sessions, framework cache. App data (images/files) is in S3 on Coolify (FILESYSTEM_DISK=s3).
     volumes:
       - staging_e_museu_storage:/var/www/storage
 
@@ -19,10 +18,10 @@ services:
       - app-staging
     expose:
       - "80"
-    # Same volume as app (logs/sessions/cache only; images are in S3 on Coolify).
     volumes:
       - staging_e_museu_storage:/var/www/storage
 
-# Named volume for Laravel storage (logs, sessions, framework cache). App data (images/files) is in S3 on Coolify.
+# Mount storage/ so logs and compiled views survive container rebuilds. Same volume on app + web.
+# App data (images/files) is in S3 on Coolify (FILESYSTEM_DISK=s3), not this volume.
 volumes:
   staging_e_museu_storage:

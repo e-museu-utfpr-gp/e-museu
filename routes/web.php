@@ -25,6 +25,15 @@ Route::get('/storage/{path}', StorageProxyController::class)
     ->middleware('throttle:web-storage')
     ->name('storage.proxy');
 
+/**
+ * JSON probe while typing — dedicated limiter (not shared with catalog form POST bucket).
+ * Same JSON contract as `admin.catalog.collaborators.check-contact` (see `CollaboratorController::checkContact`).
+ */
+Route::middleware('throttle:collaborator-check-contact')->group(function () {
+    Route::post('catalog/collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
+        ->name('catalog.collaborators.check-contact');
+});
+
 /** Registered before `items/{id}` so `{id}` does not capture these paths. */
 Route::middleware('throttle:web-catalog-light')->prefix('catalog')->name('catalog.')->group(function () {
     Route::get('items/component-autocomplete', [ItemController::class, 'componentAutocomplete'])
@@ -67,8 +76,24 @@ Route::middleware('throttle:web-public')->group(function () {
         Route::post('items', [ItemController::class, 'store'])->name('items.store');
         Route::post('extras', [ExtraController::class, 'store'])->name('extras.store');
         Route::get('tags', [TagController::class, 'index'])->name('tags.index');
-        Route::post('collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
-            ->name('collaborators.check-contact');
+        Route::post(
+            'collaborators/request-verification-code',
+            [CollaboratorController::class, 'requestVerificationCode'],
+        )
+            ->middleware('throttle:collaborator-verification-email')
+            ->name('collaborators.request-verification-code');
+        Route::post(
+            'collaborators/confirm-verification-code',
+            [CollaboratorController::class, 'confirmVerificationCode'],
+        )
+            ->middleware('throttle:collaborator-verification-confirm')
+            ->name('collaborators.confirm-verification-code');
+        Route::post(
+            'collaborators/clear-contribution-session',
+            [CollaboratorController::class, 'clearContributionSession'],
+        )
+            ->middleware('throttle:collaborator-clear-session')
+            ->name('collaborators.clear-contribution-session');
     });
 });
 
@@ -90,6 +115,8 @@ Route::middleware(['authenticate', 'throttle:web-admin'])->prefix('admin')->name
             ->name('tags.by-category');
         Route::resource('item-tags', AdminItemTagController::class)
             ->only(['index', 'create', 'store', 'show', 'update', 'destroy']);
+        Route::post('collaborators/check-contact', [CollaboratorController::class, 'checkContact'])
+            ->name('collaborators.check-contact');
     });
 
     Route::prefix('taxonomy')->name('taxonomy.')->group(function () {

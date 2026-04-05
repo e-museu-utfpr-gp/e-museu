@@ -3,18 +3,8 @@ import { lsGetJson, lsRemove, lsSetJson } from '../../../../shared/storage/local
 const DRAFT_KEY_SUFFIX = 'catalog.itemContribution.formDraft';
 const DRAFT_VERSION = 1;
 
-/** @type {readonly string[]} */
-const FIELD_NAMES = [
-    'content_locale',
-    'name',
-    'category_id',
-    'date',
-    'description',
-    'detail',
-    'history',
-    'contact',
-    'full_name',
-];
+/** @type {readonly string[]} — `full_name` omitted: not persisted (avoids draft/verification conflicts). */
+const FIELD_NAMES = ['content_locale', 'name', 'category_id', 'date', 'description', 'detail', 'history', 'email'];
 
 /** After this age the saved draft is ignored and removed (keeps localStorage from growing stale forever). */
 const DRAFT_TTL_MS = 3 * 24 * 60 * 60 * 1000;
@@ -125,8 +115,10 @@ export function hasContributionFormDraft() {
 
 /**
  * @param {HTMLFormElement} form
+ * @param {{ fillEmptyOnly?: boolean }} [opts]
  */
-export function restoreContributionFormDraft(form) {
+export function restoreContributionFormDraft(form, opts) {
+    const fillEmptyOnly = opts?.fillEmptyOnly === true;
     const raw = lsGetJson(DRAFT_KEY_SUFFIX, null);
     const payload = readValidDraftPayload(raw);
     if (!payload) {
@@ -146,6 +138,9 @@ export function restoreContributionFormDraft(form) {
             continue;
         }
         if (el instanceof HTMLInputElement && el.type === 'file') {
+            continue;
+        }
+        if (fillEmptyOnly && 'value' in el && String(el.value).trim() !== '') {
             continue;
         }
         if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {

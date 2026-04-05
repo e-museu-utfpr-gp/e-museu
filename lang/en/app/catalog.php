@@ -4,6 +4,7 @@ return [
     'item' => [
         'access_denied' => 'Access denied.',
         'upload_read_failed' => 'Could not read uploaded file.',
+        'upload_store_failed' => 'Could not save uploaded file to storage.',
         'contribution_success' => 'Thank you for your time! We will review your contribution before adding it to our museum.',
         'created' => 'Item added successfully.',
         'updated' => 'Item updated successfully.',

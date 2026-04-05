@@ -13,16 +13,18 @@ class CollaboratorSeeder extends Seeder
         if (app()->environment('local')) {
             Collaborator::create([
                 'full_name' => 'UNICENTRO',
-                'contact' => 'unicentro@unicentro.com',
+                'email' => 'unicentro@unicentro.com',
                 'role' => CollaboratorRole::INTERNAL,
                 'blocked' => false,
+                'last_email_verification_at' => now(),
             ]);
 
             Collaborator::create([
                 'full_name' => 'UTFPR',
-                'contact' => 'utfpr@utfpr.com',
+                'email' => 'utfpr@utfpr.com',
                 'role' => CollaboratorRole::INTERNAL,
                 'blocked' => false,
+                'last_email_verification_at' => now(),
             ]);
 
             Collaborator::factory(30)->create();

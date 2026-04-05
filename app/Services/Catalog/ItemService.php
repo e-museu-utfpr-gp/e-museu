@@ -2,18 +2,18 @@
 
 namespace App\Services\Catalog;
 
-    use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
-    use App\Models\Language;
-    use App\Models\Catalog\{Item, ItemCategory};
-    use App\Support\StringHelper;
-    use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
-    use App\Support\Catalog\ItemIndexQueryBuilder;
-    use App\Support\Content\{TranslatablePayload, TranslationDisplaySql};
-    use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-    use Illuminate\Database\Eloquent\Collection;
-    use Illuminate\Http\Request;
-    use Illuminate\Support\Arr;
-    use Illuminate\Support\Facades\DB;
+use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
+use App\Models\Language;
+use App\Models\Catalog\{Item, ItemCategory};
+use App\Support\StringHelper;
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
+use App\Support\Catalog\ItemIndexQueryBuilder;
+use App\Support\Content\{TranslatablePayload, TranslationDisplaySql};
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 /**

@@ -17,9 +17,10 @@ class CollaboratorFactory extends Factory
     {
         return [
             'full_name' => $this->faker->word,
-            'contact' => $this->faker->unique()->email,
+            'email' => $this->faker->unique()->safeEmail(),
             'role' => CollaboratorRole::EXTERNAL,
             'blocked' => false,
+            'last_email_verification_at' => now(),
         ];
     }
 }

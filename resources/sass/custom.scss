@@ -112,6 +112,16 @@ a {
     color: #0d233d;
     background-color: #f4da7a;
     border-radius: 0 0 0 0;
+
+    &:disabled {
+        background-color: #c4c4c4;
+    }
+}
+
+// Public catalog: verification hints align with .input-div gutters
+.catalog-verification-msg {
+    margin-left: 2rem;
+    margin-right: 2rem;
 }
 
 .button {
@@ -179,6 +189,11 @@ a {
     border: 0;
     background-color: #e6f6f1;
     padding-bottom: 0;
+}
+
+// Catalog item create: tinted preview area (no side accent — title uses global h5 bar)
+.catalog-images-preview-panel {
+    background-color: #e8f5e9;
 }
 
 .main-container {
@@ -543,6 +558,20 @@ footer {
 // Admin: sem scroll horizontal na página; só a área da tabela rola
 body.admin-layout {
     overflow-x: clip;
+
+    // Global `h5` (catálogo público: barra lateral mint) não deve vazar para cards / alertas do admin
+    .card-header {
+        border-left: 0;
+        padding-left: var(--bs-card-cap-padding-x, 1rem);
+    }
+
+    .alert h5 {
+        border-left: 0;
+        padding-left: 0;
+        font-size: inherit;
+        font-weight: inherit;
+        margin-bottom: 0;
+    }
 }
 
 .admin-layout .admin-main {
