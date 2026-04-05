@@ -19,5 +19,6 @@ import './pages/admin/catalog/items/create-images-upload';
 import './pages/admin/catalog/items/edit-images-upload';
 
 import './pages/admin/collaborators/check-contact';
+import './pages/admin/collaborators/mark-email-verified-at-now';
 
 import './shared/ui/enhanced-select';

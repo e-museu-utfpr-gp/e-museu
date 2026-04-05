@@ -5,11 +5,17 @@ import './shared/catalog/upload-utils';
 
 import './shared/ui/img-modal';
 import './shared/ui/popover-button';
+import './shared/ui/admin-password-toggle';
 import './shared/ui/enhanced-select';
 
 import './pages/catalog/items/index/explore-scroll';
 
+import './pages/catalog/collaborators/email-verification-code';
 import './pages/admin/collaborators/check-contact';
+
+if (document.querySelector('form[data-extra-clear-session-on-hide][data-route-clear-contribution-session]')) {
+    import('./pages/catalog/items/show/extra-modal-clear-session-on-hide');
+}
 
 /**
  * Item contribution wizard: only on the create page. Top-level await keeps this off other

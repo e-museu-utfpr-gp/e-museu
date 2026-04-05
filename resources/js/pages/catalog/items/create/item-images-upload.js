@@ -28,4 +28,6 @@ initCatalogItemImageUploadForm({
         removeBtnInlineStyle: { fontSize: '10px' },
     },
     requireCoverOnSubmit: true,
+    asyncSubmit: true,
+    asyncValidationMessagesHostId: 'item-create-flash-client-host',
 });

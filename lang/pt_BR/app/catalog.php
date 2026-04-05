@@ -4,6 +4,7 @@ return [
     'item' => [
         'access_denied' => 'Acesso negado.',
         'upload_read_failed' => 'Não foi possível ler o arquivo enviado.',
+        'upload_store_failed' => 'Não foi possível gravar o arquivo enviado no armazenamento.',
         'contribution_success' => 'Agradecemos pelo seu tempo! Analisaremos sua colaboração antes de adicionarmos ao nosso museu.',
         'created' => 'Item adicionado com sucesso.',
         'updated' => 'Item atualizado com sucesso.',

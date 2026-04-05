@@ -64,8 +64,8 @@
             <p class="ms-3">{{ $item->collaborator->id }}</p>
             <strong>{{ __('view.admin.catalog.items.show.full_name') }}: </strong>
             <p class="ms-3">{{ $item->collaborator->full_name }}</p>
-            <strong>{{ __('view.admin.catalog.items.show.contact') }}: </strong>
-            <p class="ms-3">{{ $item->collaborator->contact }}</p>
+            <strong>{{ __('view.admin.catalog.items.show.email') }}: </strong>
+            <p class="ms-3">{{ $item->collaborator->email }}</p>
             <strong>{{ __('view.admin.catalog.items.show.blocked') }}: </strong>
             <p class="ms-3">
                 @if ($item->collaborator->blocked == 1)

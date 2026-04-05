@@ -3,12 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Language;
-use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\{RateLimiter, Session, View};
+use Illuminate\Support\Facades\{Session, View};
 use Illuminate\Support\ServiceProvider;
-use App\Providers\Concerns\{AdminDatabaseSessionHandler, GuessesFactoryName, GuessesModelName};
+use App\Providers\Concerns\{AdminDatabaseSessionHandler, GuessesFactoryName, GuessesModelName, RegistersRateLimiters};
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,30 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(50)->by($request->user()?->id ?: $request->ip());
-        });
-
-        RateLimiter::for('web-public', function (Request $request) {
-            return Limit::perMinute(80)->by($request->ip());
-        });
-
-        /** Generous limit for catalog autocomplete / name-check JSON (shared IPs, many quick requests). */
-        RateLimiter::for('web-catalog-light', function (Request $request) {
-            return Limit::perMinute(300)->by($request->ip());
-        });
-
-        RateLimiter::for('web-admin', function (Request $request) {
-            return Limit::perMinute(480)->by($request->user()?->id ?: $request->ip());
-        });
-
-        RateLimiter::for('web-storage', function (Request $request) {
-            return Limit::perMinute(1200)->by($request->ip());
-        });
-
-        RateLimiter::for('admin-login', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip());
-        });
+        RegistersRateLimiters::register();
 
         Factory::guessFactoryNamesUsing([GuessesFactoryName::class, 'forModel']);
         Factory::guessModelNamesUsing([GuessesModelName::class, 'forFactory']);

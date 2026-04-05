@@ -14,7 +14,7 @@
                                     <th scope="row">{{ $extra->id }}</th>
                                     <td>{{ $extra->info }}</td>
                                     <td>{{ $extra->item_name }}</td>
-                                    <td>{{ $extra->collaborator_contact }}</td>
+                                    <td>{{ $extra->collaborator_email }}</td>
                                     <td>
                                         @if ($extra->extra_validation == 1)
                                             {{ __('view.admin.catalog.extras.index.yes') }}

@@ -11,6 +11,8 @@
     'errorKey' => null,
     'roundedTop' => false,
     'showErrors' => true,
+    /** When false, the input has no name attribute (not included on form submit). */
+    'submittable' => true,
 ])
 
 @php
@@ -33,7 +35,7 @@
     <div @class(['input-div', 'rounded-top' => $roundedTop])>
         <input
             type="{{ $type }}"
-            name="{{ $name }}"
+            @if ($submittable) name="{{ $name }}" @endif
             id="{{ $id }}"
             value="{{ old($name, $value) }}"
             @if ($placeholder !== null && $placeholder !== '') placeholder="{{ $placeholder }}" @endif

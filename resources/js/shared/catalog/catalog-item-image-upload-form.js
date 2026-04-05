@@ -5,6 +5,202 @@
 import { revokeObjectUrlIfBlob } from './revoke-blob-url';
 
 /**
+ * Laravel validation keys use dot notation (e.g. tags.0.name).
+ * @param {string} key
+ * @returns {string}
+ */
+function validationErrorKeyToHtmlName(key) {
+    if (typeof key !== 'string' || !key.includes('.')) {
+        return key;
+    }
+    const parts = key.split('.');
+    let name = parts[0];
+    for (let i = 1; i < parts.length; i++) {
+        name += `[${parts[i]}]`;
+    }
+    return name;
+}
+
+function clearCatalogAsyncFieldValidation(form) {
+    form.querySelectorAll('[data-catalog-async-validation-field="1"]').forEach(function (el) {
+        el.classList.remove('is-invalid');
+        el.removeAttribute('data-catalog-async-validation-field');
+    });
+    form.querySelectorAll('[data-catalog-async-validation-feedback="1"]').forEach(function (el) {
+        el.remove();
+    });
+}
+
+function clearCatalogAsyncGeneralValidation(root) {
+    if (!root) {
+        return;
+    }
+    root.querySelectorAll('[data-catalog-async-validation-general="1"]').forEach(function (el) {
+        el.remove();
+    });
+}
+
+/**
+ * @param {HTMLFormElement} form
+ * @param {Record<string, string | string[]>} errors
+ * @returns {string[]}
+ */
+function applyCatalogAsyncValidationErrors(form, errors) {
+    const general = [];
+    for (const [key, raw] of Object.entries(errors)) {
+        const msg = Array.isArray(raw) && raw.length ? raw[0] : String(raw ?? '');
+        const name = validationErrorKeyToHtmlName(key);
+        /** @type {Element | null} */
+        let el = null;
+        if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+            el = form.querySelector(`[name="${CSS.escape(name)}"]`);
+        } else {
+            el = form.querySelector(`[name="${name}"]`);
+        }
+        if (!el) {
+            general.push(msg);
+            continue;
+        }
+        if (el instanceof RadioNodeList) {
+            general.push(msg);
+            continue;
+        }
+        el.classList.add('is-invalid');
+        el.setAttribute('data-catalog-async-validation-field', '1');
+        const wrap = el.closest('.input-div') || el.parentElement;
+        if (!wrap) {
+            general.push(msg);
+            continue;
+        }
+        let fb = wrap.querySelector('.invalid-feedback[data-catalog-async-validation-feedback="1"]');
+        if (!fb) {
+            fb = document.createElement('div');
+            fb.className = 'invalid-feedback d-block';
+            fb.setAttribute('data-catalog-async-validation-feedback', '1');
+            wrap.appendChild(fb);
+        }
+        fb.textContent = msg;
+    }
+    return general;
+}
+
+/**
+ * @param {HTMLElement} host
+ * @param {string[]} messages
+ */
+function showCatalogAsyncGeneralErrors(host, messages) {
+    if (!host || messages.length === 0) {
+        return;
+    }
+    const insertBefore = host.firstChild;
+    for (let i = messages.length - 1; i >= 0; i--) {
+        const msg = messages[i];
+        const p = document.createElement('p');
+        p.className = 'error-div text-wrap fw-bold m-1 mb-2 p-1';
+        p.setAttribute('data-catalog-async-validation-general', '1');
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-exclamation-circle-fill mx-1 h5';
+        p.appendChild(icon);
+        p.appendChild(document.createTextNode(' ' + msg));
+        host.insertBefore(p, insertBefore);
+    }
+}
+
+/**
+ * @param {HTMLFormElement} form
+ * @param {HTMLElement | null} messagesHost
+ */
+function scrollToCatalogAsyncValidationError(form, messagesHost) {
+    const firstField = form.querySelector('[data-catalog-async-validation-field="1"]');
+    if (firstField) {
+        firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+    }
+    const root = messagesHost || form;
+    const firstGen = root.querySelector('[data-catalog-async-validation-general="1"]');
+    if (firstGen) {
+        firstGen.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+/**
+ * @param {HTMLFormElement} form
+ * @param {{ messagesHost?: HTMLElement | null }} [opts]
+ */
+async function submitCatalogItemFormViaFetch(form, opts) {
+    const messagesHost = opts?.messagesHost ?? null;
+    const generalRoot = messagesHost || form;
+    clearCatalogAsyncFieldValidation(form);
+    clearCatalogAsyncGeneralValidation(generalRoot);
+
+    const submitControls = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+    submitControls.forEach(function (btn) {
+        btn.disabled = true;
+    });
+
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    try {
+        const fd = new FormData(form);
+        const res = await fetch(form.action, {
+            method: 'POST',
+            body: fd,
+            credentials: 'same-origin',
+            redirect: 'manual',
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                ...(token ? { 'X-CSRF-TOKEN': token } : {}),
+            },
+        });
+
+        if (res.status === 422) {
+            const data = await res.json().catch(function () {
+                return {};
+            });
+            const bag = data.errors && typeof data.errors === 'object' ? data.errors : {};
+            const general = applyCatalogAsyncValidationErrors(form, bag);
+            if (general.length) {
+                showCatalogAsyncGeneralErrors(generalRoot, general);
+            }
+            scrollToCatalogAsyncValidationError(form, messagesHost);
+            return;
+        }
+
+        if (res.status === 419) {
+            window.location.reload();
+            return;
+        }
+
+        if (res.status >= 300 && res.status < 400) {
+            const loc = res.headers.get('Location');
+            if (loc) {
+                window.location.href = loc;
+                return;
+            }
+        }
+
+        if (res.ok && res.redirected) {
+            window.location.href = res.url;
+            return;
+        }
+
+        if (res.ok) {
+            window.location.href = res.url || form.action;
+            return;
+        }
+
+        window.location.reload();
+    } catch {
+        window.location.reload();
+    } finally {
+        submitControls.forEach(function (btn) {
+            btn.disabled = false;
+        });
+    }
+}
+
+/**
  * @param {object} options
  * @param {string} options.formId
  * @param {string} options.initRegistryKey
@@ -30,6 +226,8 @@ import { revokeObjectUrlIfBlob } from './revoke-blob-url';
  * @param {string} options.preview.removeBtnClassName
  * @param {object} [options.preview.removeBtnInlineStyle]
  * @param {boolean} [options.requireCoverOnSubmit]
+ * @param {boolean} [options.asyncSubmit] When true, submit via fetch + JSON errors so file inputs stay filled on validation failure.
+ * @param {string} [options.asyncValidationMessagesHostId] Element id for inline general error messages (e.g. blocked).
  */
 export function initCatalogItemImageUploadForm(options) {
     const form = document.getElementById(options.formId);
@@ -232,13 +430,30 @@ export function initCatalogItemImageUploadForm(options) {
     }
 
     function validateAndSubmit(e) {
+        const asyncSubmit = options.asyncSubmit === true;
+        if (asyncSubmit) {
+            e.preventDefault();
+        }
+
+        const messagesHostEl = options.asyncValidationMessagesHostId
+            ? document.getElementById(options.asyncValidationMessagesHostId)
+            : null;
+
         if (options.requireCoverOnSubmit === false) {
             injectGalleryInputs();
+            if (asyncSubmit) {
+                submitCatalogItemFormViaFetch(form, { messagesHost: messagesHostEl }).catch(function () {
+                    window.location.reload();
+                });
+            }
             return;
         }
+
         const coverInput = document.getElementById(c.inputId);
         if (!coverInput || !coverInput.files || !coverInput.files[0]) {
-            e.preventDefault();
+            if (!asyncSubmit) {
+                e.preventDefault();
+            }
             const zoneId = c.invalidHighlightZoneId || c.zoneId;
             const zone = document.getElementById(zoneId);
             if (zone) {
@@ -263,6 +478,16 @@ export function initCatalogItemImageUploadForm(options) {
             }
         }
         injectGalleryInputs();
+
+        if (asyncSubmit) {
+            // Do not revoke preview blob URLs here: on 422 the page stays open and previews must
+            // remain valid; on success we navigate away and the tab is torn down.
+            submitCatalogItemFormViaFetch(form, { messagesHost: messagesHostEl }).catch(function () {
+                window.location.reload();
+            });
+            return;
+        }
+
         revokeCoverPreviewBlob();
         const container = document.getElementById(p.containerId);
         if (container) {

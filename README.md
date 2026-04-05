@@ -39,6 +39,13 @@ A new language is not only a row in `languages`. To keep SQL `FIELD()`, PHP fall
 
 Skipping any of the above leaves the language missing from `ContentLocaleFallback::orderedCodes()` or without UI strings until those pieces are updated.
 
+## Outgoing mail (Resend)
+
+Production-oriented outbound mail uses the **Resend** driver by default (`config/mail.php`, `MAIL_MAILER=resend`). Set `RESEND_KEY` in `.env` (see `config/services.php`). The helper `App\Support\Mail\OutgoingMailIsConfigured` decides whether the app should attempt verification and notification e-mails; extend `mail.transport_required_config` when adding new transports.
+
+- **Deploy:** set `MAIL_MAILER`, `RESEND_KEY`, `MAIL_FROM_ADDRESS`, and `MAIL_FROM_NAME` (see `.env.example`).
+- **Tests:** `phpunit.xml` sets `MAIL_MAILER=array` so PHPUnit does not call Resend. Unit coverage for mail readiness lives in `tests/Unit/Support/Mail/OutgoingMailIsConfiguredTest.php`.
+
 ## Initial Docker Configuration (Avoid using sudo)
 
 By default, Docker commands require administrator privileges (sudo). To avoid having to use `sudo` for every command, add your user to the `docker` group:
@@ -86,17 +93,17 @@ The project uses a `./run` script to facilitate command execution. All operation
 
 #### Option 1: Complete Setup (Recommended)
 
-To perform a complete project setup (creates `.env`, starts containers, installs dependencies, runs migrations and seeders):
+To perform a complete project setup (creates `.env` if missing, starts containers, installs dependencies, runs migrations and seeders):
 
 ```bash
-./run setup -env
+./run setup
 ```
 
 This command:
-- Copies `.env.example` to `.env`
+- Ensures `.env` exists (copies from `.env.example` only if `.env` is missing; use `./run env -f` to replace `.env` from the example)
 - Starts Docker containers
 - Installs Composer dependencies
-- Generates Laravel application key
+- Generates `APP_KEY` only when it is not already set in `.env`
 - Runs database migrations
 - Runs seeders (initial data)
 - In local environment, starts Vite server
@@ -106,7 +113,7 @@ This command:
 For production environments or automation, use the `-y` flag to skip confirmations:
 
 ```bash
-./run setup -env -y
+./run setup -y
 ```
 
 #### Option 3: Complete Reset (Clean everything and start over)
@@ -114,7 +121,7 @@ For production environments or automation, use the `-y` flag to skip confirmatio
 If you want to start from scratch, removing all data, containers and generated files:
 
 ```bash
-./run setup-hard -env
+./run setup-hard
 ```
 
 **Warning:** This command removes:
@@ -127,7 +134,7 @@ If you want to start from scratch, removing all data, containers and generated f
 To skip the confirmation:
 
 ```bash
-./run setup-hard -env -y
+./run setup-hard -y
 ```
 
 To keep the local MySQL data directory (`mysql_data`) while still resetting containers, vendor, and Node assets (useful when you do not want to lose the database volume):
@@ -138,7 +145,7 @@ To keep the local MySQL data directory (`mysql_data`) while still resetting cont
 ./run setup-hard -db -y
 ```
 
-The same `-db` flag works with `./run remove-all` and `./run remove-all-files` (e.g. `./run remove-all -y -db`).
+`setup` / `setup-hard` never overwrite an existing `.env` from `.env.example`; they only create it when the file is missing. The same `-db` flag works with `./run remove-all` and `./run remove-all-files` (e.g. `./run remove-all -y -db`). The flag `-env` is still accepted for backwards compatibility but does nothing extra (older docs used `./run setup -env`).
 
 ### Main Commands
 
@@ -320,13 +327,13 @@ Stop the local MySQL service if necessary, or adjust the port in `.env`.
 
 ```bash
 # Complete initial setup
-./run setup -env
+./run setup
 
 # Setup with automatic confirmation
-./run setup -env -y
+./run setup -y
 
 # Complete reset (careful!)
-./run setup-hard -env -y
+./run setup-hard -y
 
 # Hard reset but keep local DB volume
 ./run setup-hard -y -db

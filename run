@@ -3,18 +3,56 @@
 set -o errexit
 set -o pipefail
 
-function env {
-  echo ">> Copying environment file..."
-  if [ -f .env ]; then
-    echo ".env already exists, overwriting..."
+# After Docker chown, .env / .phpunit.result.cache on the host can be uid 82 (www-data). Put them back on the
+# invoking user so the editor always works (honours SUDO_UID when using sudo ./run).
+function fix_host_env_files_owner {
+  local huid hgid f
+  if [[ -n "${SUDO_UID:-}" ]]; then
+    huid=$SUDO_UID
+    hgid=${SUDO_GID:-$SUDO_UID}
   else
-    echo "Creating .env file from .env.example"
+    huid=$(id -u)
+    hgid=$(id -g)
+  fi
+  for f in .env .phpunit.result.cache; do
+    if [ -f "$f" ]; then
+      chown "$huid:$hgid" "$f" 2>/dev/null || true
+      chmod 664 "$f" 2>/dev/null || true
+    fi
+  done
+}
+
+function env {
+  local force=false
+  for arg in "$@"; do
+    case "$arg" in
+      -f|--force) force=true ;;
+    esac
+  done
+
+  echo ">> Ensuring environment file..."
+  if [ -f .env ] && [[ "$force" != true ]]; then
+    echo ".env already exists — keeping it (use './run env -f' to replace from .env.example)"
+    chmod 664 .env 2>/dev/null || true
+    fix_host_env_files_owner
+    return 0
+  fi
+
+  if [ -f .env ]; then
+    echo "Overwriting .env from .env.example (-f/--force)"
+  else
+    echo "Creating .env from .env.example"
   fi
   cp -f .env.example .env
   chmod 664 .env
+  fix_host_env_files_owner
 }
 
 function get_compose_file {
+  if [[ -n "${E_MUSEU_COMPOSE_FILE:-}" ]]; then
+    echo "$E_MUSEU_COMPOSE_FILE"
+    return 0
+  fi
   source .env
   if [ "$APP_ENV" == "production" ]; then
     echo "docker-compose.prod-local.yml"
@@ -33,9 +71,7 @@ function get_compose_file {
 function setup {
   echo "Running setup..."
 
-  if [[ "$1" == "-env" || "$2" == "-env" ]]; then
-    env || echo "[warn] Failed to copy .env (env); continuing..."
-  fi
+  env || echo "[warn] Failed to ensure .env (env); continuing..."
 
   source .env
   compose_file=$(get_compose_file)
@@ -62,8 +98,25 @@ function setup {
 
   composer || echo "[warn] Composer install failed (composer); continuing..."
 
-  echo ">> Fixing permissions (storage, vendor, bootstrap/cache, .env)..."
-  docker compose -f "$(get_compose_file)" exec -u root app sh -c 'mkdir -p /var/www/storage/logs /var/www/storage/framework/sessions /var/www/storage/framework/views /var/www/storage/framework/cache && chown -R laravel:www-data /var/www/vendor /var/www/bootstrap/cache /var/www/storage && (touch /var/www/.env && chown laravel:www-data /var/www/.env) 2>/dev/null || true'
+  echo ">> Fixing permissions (bootstrap/cache, storage, .env, PHPUnit cache)..."
+  # Dockerfile.local uses user laravel; Dockerfile.prod-local uses www-data only — chown must match.
+  # Vendor is not chown'd: tests only read it; recursive chown there is slow and unnecessary for PHPUnit.
+  docker compose -f "$(get_compose_file)" exec -u root app sh -c '
+    mkdir -p /var/www/storage/logs /var/www/storage/framework/sessions /var/www/storage/framework/views /var/www/storage/framework/cache
+    if id laravel >/dev/null 2>&1; then
+      OWNER=laravel
+    else
+      OWNER=www-data
+    fi
+    chown -R "$OWNER:www-data" /var/www/bootstrap/cache /var/www/storage
+    if [ -f /var/www/.env ]; then
+      chown "$OWNER:www-data" /var/www/.env
+      chmod 664 /var/www/.env
+    fi
+    if [ -f /var/www/.phpunit.result.cache ]; then
+      chown "$OWNER:www-data" /var/www/.phpunit.result.cache
+    fi
+  '
 
   if [ "$APP_ENV" == "local" ]; then
     echo ">> Preparing Vite (compose vite service + npm install)..."
@@ -72,24 +125,26 @@ function setup {
   fi
 
   if [[ "$1" == "-y" || "$2" == "-y" ]]; then
-    gen_key -y || echo "[warn] Key generation failed (gen_key); continuing..."
+    gen_key_if_missing -y || echo "[warn] Key generation failed (gen_key_if_missing); continuing..."
   else
-    gen_key || echo "[warn] Key generation failed (gen_key); continuing..."
+    gen_key_if_missing || echo "[warn] Key generation failed (gen_key_if_missing); continuing..."
   fi
 
   migrate || echo "[warn] Migrations failed (migrate); continuing..."
 
   seed || echo "[warn] Seeding failed (seed); continuing..."
+
+  echo ">> Fixing host ownership of .env and .phpunit.result.cache (editable in your editor)..."
+  fix_host_env_files_owner
 }
 
 function setup-hard {
   local has_y=false
-  local has_env=false
   local keep_db=false
   for arg in "$@"; do
     case "$arg" in
       -y) has_y=true ;;
-      -env) has_env=true ;;
+      -env) ;; # legacy no-op: setup always runs env (create .env from example if missing)
       -db) keep_db=true ;;
     esac
   done
@@ -110,10 +165,6 @@ function setup-hard {
     fi
   fi
 
-  if [[ "$has_env" == true ]]; then
-    env || echo "[warn] Failed to copy .env (env); continuing..."
-  fi
-
   echo "Running setup-hard..."
 
   if [[ "$keep_db" == true ]]; then
@@ -122,18 +173,10 @@ function setup-hard {
     remove-all -y || echo "[warn] Could not complete cleanup (remove-all); continuing..."
   fi
 
-  if [[ "$has_env" == true ]]; then
-    if [[ "$has_y" == true ]]; then
-      setup -env -y || echo "[warn] Setup process failed (setup)."
-    else
-      setup -env || echo "[warn] Setup process failed (setup)."
-    fi
+  if [[ "$has_y" == true ]]; then
+    setup -y || echo "[warn] Setup process failed (setup)."
   else
-    if [[ "$has_y" == true ]]; then
-      setup -y || echo "[warn] Setup process failed (setup)."
-    else
-      setup || echo "[warn] Setup process failed (setup)."
-    fi
+    setup || echo "[warn] Setup process failed (setup)."
   fi
 }
 
@@ -457,6 +500,20 @@ function down {
   docker compose -f "$(get_compose_file)" down "${@}"
 }
 
+function gen_key_if_missing {
+  source .env
+  if [[ -n "${APP_KEY:-}" ]]; then
+    echo ">> APP_KEY already set — skipping key:generate"
+    return 0
+  fi
+  echo ">> Generating application key..."
+  if [[ "$1" == "-y" ]]; then
+    docker compose -f "$(get_compose_file)" exec app php artisan key:generate --force
+  else
+    docker compose -f "$(get_compose_file)" exec app php artisan key:generate
+  fi
+}
+
 function gen_key {
   source .env
   echo ">> Generating application key..."
@@ -608,10 +665,9 @@ function version {
   echo "E-Museu $(cat VERSION)"
 }
 
-# Running simulate-ci (e.g. ./run simulate-ci -y) executes scripts/ci/* jobs that call ./run down
-# at the end of each job, stopping the project's current Docker stack (app/db/web/vite per .env compose).
-# The "tests" and "code-quality" jobs also run ./run setup -env -y (overwrites .env from .env.example).
-# Bring dev back with ./run up or ./run setup afterwards.
+# simulate-ci runs scripts/ci/* : jobs 1–2 source prepare-ci-compose.sh (down local+prod-local, then
+# E_MUSEU_COMPOSE_FILE=docker-compose.local.yml like GitHub Actions). Job 3 is production deploy smoke test.
+# Unset E_MUSEU_COMPOSE_FILE when done if you want ./run to follow APP_ENV again.
 function simulate-ci {
   set -e
   
@@ -624,9 +680,8 @@ function simulate-ci {
   echo "  2. code-quality"
   echo "  3. test-production-deploy"
   echo ""
-  echo "Note: each job runs ./run down at the end and stops your current project Docker stack"
-  echo "(app/db/web/vite). Jobs 1 and 2 also run ./run setup -env -y, overwriting .env from"
-  echo ".env.example. When done, use ./run up or ./run setup to restore local development."
+  echo "Jobs 1–2: compose down (local + prod-local), then docker-compose.local.yml + ./run setup -y (same as CI)."
+  echo "Each job ends with ./run down. Afterward: unset E_MUSEU_COMPOSE_FILE; ./run up uses APP_ENV from .env again."
   echo ""
   
   if [[ "$1" != "-y" && "$2" != "-y" ]]; then
@@ -686,15 +741,12 @@ function help {
   echo "  prod-local - docker-compose.prod-local.yml (production-like stack locally)"
   echo ""
   echo "Environment & Setup:"
-  echo "  env                - Copy environment file (.env.example to .env)"
-  echo "  setup              - Complete environment setup (up, composer, gen_key, migrate, seed)"
-  echo "  setup -env         - Same as setup but copies .env.example to .env first"
-  echo "  setup -y           - Setup with automatic confirmation (skip prompts)"
-  echo "  setup -env -y      - Setup with new .env file and automatic confirmation"
-  echo "  setup-hard         - Hard reset: remove all data and containers, then run setup"
-  echo "  setup-hard -env    - Same as setup-hard but copies .env.example to .env first"
+  echo "  env                - Ensure .env exists (copy from .env.example only if missing)"
+  echo "  env -f             - Force: replace .env from .env.example (same as --force)"
+  echo "  setup              - Full setup (ensures .env if missing, up, composer, key if needed, migrate, seed)"
+  echo "  setup -y           - Same with automatic confirmation (skips key:generate if APP_KEY set)"
+  echo "  setup-hard         - Hard reset then setup (same .env rules as setup)"
   echo "  setup-hard -y      - Hard reset without confirmation prompt"
-  echo "  setup-hard -env -y - Hard reset with new .env file and no confirmation"
   echo "  setup-hard -db     - Hard reset but keep mysql_data (local DB volume); combine with -y: setup-hard -y -db"
   echo "  up                 - Start Docker containers"
   echo "  down               - Stop Docker containers"
@@ -712,8 +764,8 @@ function help {
   echo "  build-vite         - Build assets with Vite for production"
   echo ""
   echo "Laravel Commands:"
-  echo "  gen_key            - Generate Laravel application key"
-  echo "  gen_key -y         - Generate application key without confirmation (production)"
+  echo "  gen_key            - Generate or replace Laravel APP_KEY (always writes .env)"
+  echo "  gen_key -y         - Same with --force (no prompt in production-like envs)"
   echo "  migrate            - Run database migrations"
   echo "  seed               - Seed database with initial data"
   echo "  composer           - Install Composer dependencies"
@@ -762,9 +814,9 @@ function help {
   echo "  version            - Show E-Museu version"
   echo ""
   echo "Examples:"
-  echo "  ./run setup -env           # Complete project setup with new .env file"
-  echo "  ./run setup -env -y        # Setup with new .env and automatic confirmation"
-  echo "  ./run setup-hard -env -y   # Hard reset with new .env file and no confirmation"
+  echo "  ./run setup                # Setup (creates .env from example only if missing)"
+  echo "  ./run setup -y             # Setup non-interactive; keeps existing APP_KEY if set"
+  echo "  ./run setup-hard -y -db    # Hard reset, keep mysql_data and your .env / APP_KEY"
   echo "  ./run gen_key -y           # Generate app key without confirmation"
   echo "  ./run test                 # Run tests"
   echo "  ./run all-tests            # Run all checks (test, phpcs, pint-test, phpmd, phpstan, phpcpd, eslint, prettier)"
@@ -783,12 +835,11 @@ function help {
   echo "  ./run simulate-ci -y         # Simulate CI pipeline without confirmation"
   echo "  ./run exec php artisan tinker  # Open Laravel tinker"
   echo "  ./run remove-all -y        # Remove all without confirmation prompt"
-  echo "  ./run setup-hard -y -db    # Hard reset without prompt, keep local MySQL data (mysql_data)"
   echo "  ./run remove-all -y -db    # Full cleanup but keep mysql_data"
   echo ""
   echo "Options:"
   echo "  -y                 - Skip confirmation prompts (works with setup, setup-hard, gen_key, remove-all, remove-all-files)"
-  echo "  -env               - Copy .env.example to .env before running setup commands"
+  echo "  -env               - Ignored (kept for old scripts): setup always ensures .env if missing"
   echo "  -db                - Keep mysql_data (local Docker MySQL volume); use with setup-hard, remove-all, or remove-all-files"
 }
 

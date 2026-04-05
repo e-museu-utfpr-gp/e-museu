@@ -1,5 +1,41 @@
 import $ from 'jquery';
 
+/**
+ * Admin selects use enhanced-select: the visible toggle keeps the original id; the native <select> is
+ * visually hidden and id is removed. Resolve the real <select> for .val(), .empty(), and change events.
+ *
+ * @param {Element} container
+ * @param {string} selector
+ * @returns {HTMLSelectElement | null}
+ */
+function resolveNativeSelect(container, selector) {
+    const s = String(selector || '').trim();
+    if (!s) {
+        return null;
+    }
+    if (s.startsWith('#')) {
+        const id = s.slice(1);
+        let escaped = id;
+        if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+            escaped = CSS.escape(id);
+        }
+        const hit = container.querySelector(`#${escaped}`);
+        if (hit instanceof HTMLSelectElement) {
+            return hit;
+        }
+        if (hit instanceof HTMLElement) {
+            const root = hit.closest('.enhanced-select-root');
+            const sel = root?.querySelector('select');
+            if (sel instanceof HTMLSelectElement) {
+                return sel;
+            }
+        }
+        return null;
+    }
+    const elHit = container.querySelector(s);
+    return elHit instanceof HTMLSelectElement ? elHit : null;
+}
+
 $(document).ready(function () {
     $('[data-section-item-selector]').each(function () {
         const el = this;
@@ -51,18 +87,24 @@ $(document).ready(function () {
             return oldStr || origStr || queryItemId;
         }
 
-        function $sectionField() {
-            return $(el).find(sectionSelector);
+        function sectionNative() {
+            return resolveNativeSelect(el, sectionSelector);
         }
 
-        function $itemField() {
-            return $(el).find(itemSelector);
+        function itemNative() {
+            return resolveNativeSelect(el, itemSelector);
         }
 
         function getItems() {
-            const itemCategoryId = $sectionField().val();
+            const sectionEl = sectionNative();
+            const itemEl = itemNative();
+            if (!sectionEl || !itemEl) {
+                return;
+            }
+
+            const itemCategoryId = $(sectionEl).val();
             if (!itemCategoryId) {
-                $itemField()
+                $(itemEl)
                     .empty()
                     .append($('<option>', { value: '', text: '-' }));
                 setLoadError(false);
@@ -79,7 +121,7 @@ $(document).ready(function () {
                 dataType: 'json',
                 success: function (data) {
                     setLoadError(false);
-                    const $select = $itemField();
+                    const $select = $(itemEl);
                     $select.empty().append($('<option>', { value: '', text: '-' }));
                     const rows = Array.isArray(data)
                         ? data
@@ -114,7 +156,7 @@ $(document).ready(function () {
                 },
                 error: function () {
                     setLoadError(true);
-                    $itemField()
+                    $(itemEl)
                         .empty()
                         .append($('<option>', { value: '', text: '-' }));
                 },
@@ -123,6 +165,9 @@ $(document).ready(function () {
 
         getItems();
 
-        $(el).on('change.eMuseuSectionItem', sectionSelector, getItems);
+        const sec = sectionNative();
+        if (sec) {
+            $(sec).on('change.eMuseuSectionItem', getItems);
+        }
     });
 });

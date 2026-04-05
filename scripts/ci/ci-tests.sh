@@ -13,9 +13,13 @@ echo ""
 # Make run script executable
 chmod +x ./run
 
+# Same as GitHub Actions: stop any stack, then always docker-compose.local.yml (not APP_ENV prod-local).
+# shellcheck disable=SC1091
+. "$(dirname "$0")/prepare-ci-compose.sh"
+
 # Setup environment and run tests
 echo ">> Setting up environment..."
-./run setup -env -y
+./run setup -y
 
 echo ""
 echo ">> Running tests..."

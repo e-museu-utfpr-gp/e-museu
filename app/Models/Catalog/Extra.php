@@ -116,7 +116,7 @@ class Extra extends Model
                 'extras.item_id',
                 'extras.collaborator_id',
                 DB::raw("({$itemNameSql}) AS item_name"),
-                'collaborators.contact AS collaborator_contact',
+                'collaborators.email AS collaborator_email',
             ]);
 
         return $query;

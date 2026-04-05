@@ -361,7 +361,7 @@ class Item extends Model
                 DB::raw("LEFT(({$descSql}), 150) as description"),
                 DB::raw("LEFT(({$detailSql}), 150) as detail"),
                 DB::raw("({$catNameSql}) AS item_category_name"),
-                'collaborators.contact AS collaborator_contact',
+                'collaborators.email AS collaborator_email',
             ]);
 
         return $query;
