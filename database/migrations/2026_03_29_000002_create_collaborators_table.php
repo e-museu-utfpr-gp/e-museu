@@ -18,10 +18,13 @@ return new class extends Migration
         Schema::create('collaborators', function (Blueprint $table): void {
             $table->id();
             $table->string('full_name');
-            $table->string('contact');
+            $table->string('email');
             $table->enum('role', ['internal', 'external'])->default('external');
             $table->boolean('blocked')->default(0);
+            $table->timestamp('last_email_verification_at')->nullable();
             $table->timestamps();
+
+            $table->unique('email');
         });
     }
 

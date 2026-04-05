@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 /**
  * @property int $id
@@ -36,13 +37,23 @@ class ItemImage extends Model
 
     /**
      * Builds storage path for an item image: items/{id}/{uuid}_{id}.{ext}
+     *
+     * Requires a persisted item primary key. An empty id would produce `items//…`, which
+     * normalizes to files directly under `items/` with no per-item directory.
      */
     public static function buildPath(Item $item, string $extension = 'png'): string
     {
+        $itemId = (int) $item->getKey();
+        if ($itemId < 1) {
+            throw new InvalidArgumentException(
+                'Item must be saved with a valid id before building an image storage path.',
+            );
+        }
+
         $uuid = (string) Str::uuid7();
         $ext = preg_match('/^[a-z0-9]+$/i', $extension) ? strtolower($extension) : 'png';
 
-        return sprintf('items/%s/%s_%s.%s', $item->id, $uuid, $item->id, $ext);
+        return sprintf('items/%d/%s_%d.%s', $itemId, $uuid, $itemId, $ext);
     }
 
     /**

@@ -1,4 +1,11 @@
+# Local: bind mount, MySQL, Redis, Vite.
 services:
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    restart: unless-stopped
+
   app:
     build:
         context: .
@@ -8,6 +15,7 @@ services:
       - ./:/var/www
     depends_on:
       - db
+      - redis
 
   vite:
     image: node:25.4.0-alpine3.22

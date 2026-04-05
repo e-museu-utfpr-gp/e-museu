@@ -26,7 +26,7 @@
                                         @endif
                                     </td>
                                     <td>{{ $item->item_category_name }}</td>
-                                    <td>{{ $item->collaborator_contact }}</td>
+                                    <td>{{ $item->collaborator_email }}</td>
                                     <td>{{ date('d-m-Y H:i:s', strtotime($item->item_created)) }}</td>
                                     <td>{{ date('d-m-Y H:i:s', strtotime($item->item_updated)) }}</td>
                                     <td>

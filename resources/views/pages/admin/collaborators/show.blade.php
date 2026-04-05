@@ -30,10 +30,10 @@
                         </div>
                         <div class="card mb-3">
                             <h5 class="card-header">
-                                {{ __('view.admin.collaborator.collaborators.show.contact') }}
+                                {{ __('view.admin.collaborator.collaborators.show.email') }}
                             </h5>
                             <div class="card-body">
-                                <p class="card-text">{{ $collaborator->contact }}</p>
+                                <p class="card-text">{{ $collaborator->email }}</p>
                             </div>
                         </div>
                         <div class="card mb-3">
@@ -53,6 +53,20 @@
                             <div class="card-body">
                                 <p class="card-text">
                                     @if ($collaborator->blocked == 1)
+                                        {{ __('view.admin.collaborator.collaborators.show.yes') }}
+                                    @else
+                                        {{ __('view.admin.collaborator.collaborators.show.no') }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card mb-3">
+                            <h5 class="card-header">
+                                {{ __('view.admin.collaborator.collaborators.show.email_verified') }}
+                            </h5>
+                            <div class="card-body">
+                                <p class="card-text">
+                                    @if ($collaborator->hasVerifiedEmail())
                                         {{ __('view.admin.collaborator.collaborators.show.yes') }}
                                     @else
                                         {{ __('view.admin.collaborator.collaborators.show.no') }}

@@ -1,16 +1,39 @@
+import $ from 'jquery';
 import { Modal } from 'bootstrap';
 import { clearItemCreateWizardStorage } from '../../../../shared/catalog/item-create-storage';
 import { getItemCreateForm } from '../../../../shared/catalog/item-create-modal-helpers';
 import { clearContributionFormDraft } from './contribution-form-draft';
+import { resetVerificationUi } from '../../../catalog/collaborators/email-verification-code';
+import { clearContributionSessionOnServer } from '../../../../shared/catalog/clear-contribution-session';
 
 function hideContactHints() {
-    const w = document.getElementById('contact-warning');
-    const s = document.getElementById('contact-success');
+    const form = getItemCreateForm();
+    const w = document.getElementById('email-warning');
+    const s = document.getElementById('email-success');
+    const p = document.getElementById('email-pending-verification');
     if (w) {
         w.hidden = true;
     }
     if (s) {
         s.hidden = true;
+    }
+    if (p) {
+        p.hidden = true;
+    }
+    const net = form?.querySelector('.js-email-check-contact-network-error');
+    if (net) {
+        net.hidden = true;
+    }
+    if (form) {
+        form.querySelectorAll('.js-email-internal-reserved').forEach(function (el) {
+            el.hidden = true;
+        });
+        form.dispatchEvent(
+            new CustomEvent('catalog-check-contact', {
+                bubbles: true,
+                detail: { internalReserved: false, exists: false },
+            })
+        );
     }
 }
 
@@ -78,6 +101,8 @@ function performClear() {
         return;
     }
 
+    void clearContributionSessionOnServer(form);
+
     clearItemCreateWizardStorage();
     clearContributionFormDraft();
 
@@ -92,6 +117,7 @@ function performClear() {
     clearContributionReleaseDateDefault(form);
     resetWizardCountersAndUi();
     hideContactHints();
+    resetVerificationUi($(form));
 }
 
 function initClearButton() {

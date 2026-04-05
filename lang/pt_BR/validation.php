@@ -298,7 +298,7 @@ return [
         'component_id' => 'id do componente',
         'tag_id' => 'id da etiqueta',
         'full_name' => 'nome completo',
-        'contact' => 'e-mail',
+        'email' => 'e-mail',
         'info' => 'curiosidade',
         'image' => 'imagem',
         'identification_code' => 'código de identificação',

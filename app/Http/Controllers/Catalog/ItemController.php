@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Actions\Catalog\StoreItemContributionAction;
+use App\Actions\Catalog\{CompleteCatalogItemContributionAction, StoreItemContributionAction};
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\ItemContributionValidator;
 use App\Services\Taxonomy\TagCategoryService;
+use App\Support\Catalog\PublicCatalogContributionOutcome;
 use App\Support\Http\OptionalContentLocale;
 use Illuminate\View\View;
-use App\Services\Catalog\{ContributionContentLocaleService, ItemCategoryService, ItemImagesService, ItemService};
+use App\Services\Catalog\{
+    ContributionContentLocaleService,
+    ItemCategoryService,
+    ItemImagesService,
+    ItemService,
+};
 use Illuminate\Http\{JsonResponse, RedirectResponse, Request};
 
 class ItemController extends Controller
@@ -63,7 +69,8 @@ class ItemController extends Controller
         ItemContributionValidator $itemContributionValidator,
         StoreItemContributionAction $storeItemContributionAction,
         ItemImagesService $itemImagesService,
-        ContributionContentLocaleService $contributionContentLocaleService
+        ContributionContentLocaleService $contributionContentLocaleService,
+        CompleteCatalogItemContributionAction $completeCatalogItemContribution,
     ): RedirectResponse {
         $validatedData = $itemContributionValidator->validateStore($request);
 
@@ -85,13 +92,9 @@ class ItemController extends Controller
             $galleryFiles ?: null
         );
 
-        if ($result['status'] === 'internal_blocked') {
-            return back()->withErrors(['contact' => __('app.collaborator.contact_reserved_for_internal')]);
-        }
+        PublicCatalogContributionOutcome::throwUnlessOk($result);
 
-        if ($result['status'] === 'collaborator_blocked') {
-            return back()->withErrors(['blocked' => __('app.collaborator.blocked_from_registering')]);
-        }
+        $completeCatalogItemContribution->handle($result['item'] ?? null, $contentLanguageId);
 
         return redirect()->route('catalog.items.create')->with('success', __('app.catalog.item.contribution_success'));
     }

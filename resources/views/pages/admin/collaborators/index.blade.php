@@ -14,13 +14,20 @@
                                 class="@if (!$collaborator->locks->isEmpty() && (string) $collaborator->locks->first()->admin_id !== (string) auth()->id()) table-warning @endif">
                                 <th scope="row">{{ $collaborator->id }}</th>
                                 <td>{{ $collaborator->full_name }}</td>
-                                <td>{{ $collaborator->contact }}</td>
+                                <td>{{ $collaborator->email }}</td>
                                 <td>{{ __('app.collaborator.role.' . (optional($collaborator->role)?->value ?? \App\Enums\Collaborator\CollaboratorRole::EXTERNAL->value)) }}</td>
                                 <td>
                                     @if ($collaborator->blocked == 1)
                                         {{ __('view.admin.collaborator.collaborators.index.yes') }}
                                     @else
                                         {{ __('view.admin.collaborator.collaborators.index.no') }}
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($collaborator->last_email_verification_at)
+                                        {{ $collaborator->last_email_verification_at->format('d-m-Y H:i:s') }}
+                                    @else
+                                        {{ __('view.admin.collaborator.collaborators.index.last_email_verification_empty') }}
                                     @endif
                                 </td>
                                 <td>{{ date('d-m-Y H:i:s', strtotime($collaborator->created_at)) }}</td>

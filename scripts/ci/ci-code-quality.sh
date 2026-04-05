@@ -13,9 +13,11 @@ echo ""
 # Make run script executable
 chmod +x ./run
 
-# Setup environment
+# shellcheck disable=SC1091
+. "$(dirname "$0")/prepare-ci-compose.sh"
+
 echo ">> Setting up environment..."
-./run setup -env -y
+./run setup -y
 
 echo ""
 echo ">> See containers status..."

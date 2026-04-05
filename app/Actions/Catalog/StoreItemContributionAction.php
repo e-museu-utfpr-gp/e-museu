@@ -15,7 +15,7 @@ use Throwable;
 /**
  * Store a public catalog contribution (item, images, tags, extras, components).
  */
-class StoreItemContributionAction
+final class StoreItemContributionAction
 {
     public function __construct(
         private readonly CollaboratorService $collaboratorService,
@@ -33,7 +33,7 @@ class StoreItemContributionAction
      * Resolves collaborator and creates item, images, tags, extras and components in one database transaction.
      *
      * @param  array<string, mixed>  $collaboratorData  Collaborator data validated by the
-     *                                                  request (e.g. name, contact).
+     *                                                  request (e.g. name, email).
      * @param  array<string, mixed>  $itemData          Item data (name, category_id,
      *                                                  description, history, detail, date,
      *                                                  validation, etc.).
@@ -43,8 +43,8 @@ class StoreItemContributionAction
      *                                                        category and name.
      * @param  array<int, UploadedFile>|null  $galleryImages
      * @return array{
-     *     status: 'ok'|'internal_blocked'|'collaborator_blocked',
-     *     item?: Item
+     *     status: 'ok'|'internal_blocked'|'collaborator_blocked'|'email_unverified',
+     *     item?: Item,
      * }
      */
     public function handle(
@@ -77,6 +77,7 @@ class StoreItemContributionAction
             return DB::transaction(function () use (
                 $itemData,
                 $collaborator,
+                $collaboratorData,
                 $contentLanguageId,
                 $tags,
                 $extras,
@@ -85,6 +86,12 @@ class StoreItemContributionAction
                 $galleryImages,
                 &$cleanup,
             ): array {
+                $this->collaboratorService->applySubmittedFullNameAfterVerifiedContribution(
+                    $collaborator,
+                    (string) ($collaboratorData['full_name'] ?? ''),
+                );
+                $collaborator->refresh();
+
                 $item = $this->createItemWithImages(
                     $itemData,
                     $collaborator,
@@ -117,13 +124,22 @@ class StoreItemContributionAction
      *
      * @param  array<string, mixed>  $collaboratorData
      * @return array{
-     *     status: 'ok'|'internal_blocked'|'collaborator_blocked',
-     *     collaborator: Collaborator|null
+     *     status: 'ok'|'internal_blocked'|'collaborator_blocked'|'email_unverified',
+     *     collaborator: Collaborator|null,
      * }
      */
     private function resolveCollaboratorForContribution(array $collaboratorData): array
     {
-        $collaborator = $this->collaboratorService->resolveOrCreateCollaborator($collaboratorData);
+        $collaborator = $this->collaboratorService->findCollaboratorByEmailForPublicLookup(
+            (string) ($collaboratorData['email'] ?? ''),
+        );
+        if ($collaborator === null) {
+            return [
+                'status' => 'email_unverified',
+                'collaborator' => null,
+            ];
+        }
+
         if ($collaborator->role === \App\Enums\Collaborator\CollaboratorRole::INTERNAL) {
             return [
                 'status' => 'internal_blocked',
@@ -134,6 +150,14 @@ class StoreItemContributionAction
         if ($collaborator->blocked === true) {
             return [
                 'status' => 'collaborator_blocked',
+                'collaborator' => null,
+            ];
+        }
+
+        $gate = $this->collaboratorService->publicContributionCollaboratorGate($collaborator, $collaboratorData);
+        if ($gate === 'email_unverified') {
+            return [
+                'status' => 'email_unverified',
                 'collaborator' => null,
             ];
         }

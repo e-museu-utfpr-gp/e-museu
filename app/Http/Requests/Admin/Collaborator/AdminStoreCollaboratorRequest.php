@@ -13,4 +13,14 @@ class AdminStoreCollaboratorRequest extends FormRequest
     {
         return AdminCollaboratorRules::rules();
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'email.unique' => __('app.collaborator.email_unique'),
+        ];
+    }
 }

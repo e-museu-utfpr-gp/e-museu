@@ -8,6 +8,7 @@ use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -97,7 +98,7 @@ class ItemImagesService
 
             throw new RuntimeException(__('app.catalog.item.upload_read_failed'));
         }
-        Storage::disk('public')->put($path, $contents);
+        $this->putPublicFile($path, $contents);
         $item->images()->create(['path' => $path, 'type' => 'cover', 'sort_order' => 0]);
         $item->normalizeSingleCover();
     }
@@ -126,7 +127,7 @@ class ItemImagesService
             }
             $ext = $file->getClientOriginalExtension() ?: 'png';
             $path = ItemImage::buildPath($item, $ext);
-            Storage::disk('public')->put($path, $contents);
+            $this->putPublicFile($path, $contents);
             $item->images()->create(['path' => $path, 'type' => 'gallery', 'sort_order' => ++$maxOrder]);
         }
         $item->normalizeSingleCover();
@@ -194,5 +195,28 @@ class ItemImagesService
         }
         $item->images()->where('type', 'cover')->update(['type' => 'gallery']);
         $newCover->update(['type' => 'cover', 'sort_order' => 0]);
+    }
+
+    /**
+     * Writes to the public disk and ensures a per-item directory exists on local storage.
+     * Surfaces invalid paths (e.g. missing item id) instead of silently writing under `items/`.
+     */
+    private function putPublicFile(string $path, string $contents): void
+    {
+        if ($path === '' || str_contains($path, '..')) {
+            throw new InvalidArgumentException('Invalid storage path for item image.');
+        }
+
+        $disk = Storage::disk('public');
+        $directory = dirname($path);
+        if ($directory !== '.' && $directory !== '' && config('filesystems.disks.public.driver') === 'local') {
+            $disk->makeDirectory($directory);
+        }
+
+        if (! $disk->put($path, $contents)) {
+            report(new RuntimeException(sprintf('Failed to write item image to public disk at path %s', $path)));
+
+            throw new RuntimeException(__('app.catalog.item.upload_store_failed'));
+        }
     }
 }
