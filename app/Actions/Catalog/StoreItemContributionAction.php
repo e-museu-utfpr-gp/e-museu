@@ -4,7 +4,14 @@ namespace App\Actions\Catalog;
 
 use App\Models\Catalog\Item;
 use App\Models\Collaborator\Collaborator;
-use App\Services\Catalog\{ExtraService, ItemComponentService, ItemImagesService, ItemService, ItemTagService};
+use App\Services\Catalog\{
+    ExtraService,
+    ItemComponentService,
+    ItemImagesService,
+    ItemQrCodeService,
+    ItemService,
+    ItemTagService,
+};
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Taxonomy\TagService;
 use App\Support\Content\TranslatablePayload;
@@ -25,6 +32,7 @@ final class StoreItemContributionAction
         private readonly TagService $tagService,
         private readonly ItemService $itemService,
         private readonly ItemImagesService $itemImagesService,
+        private readonly ItemQrCodeService $itemQrCodeService,
     ) {
     }
 
@@ -217,8 +225,14 @@ final class StoreItemContributionAction
             $item->syncTranslationForLanguage($contentLanguageId, $translationData);
         }
         $item->update([
-            'identification_code' => $this->itemService->createIdentificationCode($item),
+            'identification_code' => $this->itemService->createIdentificationCode($item, $contentLanguageId),
         ]);
+        $item->refresh();
+        try {
+            $this->itemQrCodeService->regenerateForItem($item);
+        } catch (Throwable $e) {
+            report($e);
+        }
 
         return $item;
     }

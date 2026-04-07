@@ -37,8 +37,8 @@
                         >
                             @foreach ($contributionLanguages as $lang)
                                 <option value="{{ $lang->code }}" @selected(old('content_locale', $defaultExtraContentLocale) === $lang->code)>
-                                    @if ($lang->code === \App\Enums\Content\ContentLanguage::NEUTRAL->value)
-                                        {{ __('view.catalog.items.create.content_language_option_neutral') }}
+                                    @if ($lang->code === \App\Enums\Content\ContentLanguage::UNIVERSAL->value)
+                                        {{ __('view.catalog.items.create.content_language_option_universal') }}
                                     @else
                                         {{ $lang->name }}
                                     @endif

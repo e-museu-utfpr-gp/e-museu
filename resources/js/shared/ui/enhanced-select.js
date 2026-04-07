@@ -62,7 +62,11 @@ function shouldEnhance(select) {
     if (select.classList.contains('locale-nav-select-input')) {
         return false;
     }
-    if (select.classList.contains('admin-search-column') || select.classList.contains('admin-search-boolean')) {
+    if (
+        select.classList.contains('admin-search-column') ||
+        select.classList.contains('admin-search-boolean') ||
+        select.classList.contains('admin-search-select')
+    ) {
         return false;
     }
     if (select.multiple) {
@@ -356,6 +360,21 @@ function enhanceSelect(select) {
         subtree: true,
         attributes: true,
         attributeFilter: ['class', 'disabled'],
+    });
+
+    // Keep visual toggle label in sync when value changes programmatically
+    // (e.g. draft restore from localStorage).
+    select.addEventListener('input', () => {
+        syncButtonLabel();
+        if (open) {
+            applySearch();
+        }
+    });
+    select.addEventListener('change', () => {
+        syncButtonLabel();
+        if (open) {
+            applySearch();
+        }
     });
 
     syncButtonLabel();

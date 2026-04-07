@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'location' => [
+        'codes' => [
+            'INDEF' => 'Indefinido',
+        ],
+    ],
     'item' => [
         'access_denied' => 'Acesso negado.',
         'upload_read_failed' => 'Não foi possível ler o arquivo enviado.',
@@ -9,11 +14,14 @@ return [
         'created' => 'Item adicionado com sucesso.',
         'updated' => 'Item atualizado com sucesso.',
         'deleted' => 'Item excluído com sucesso.',
+        'qrcode_regenerated' => 'QRCode gerado com sucesso.',
+        'qrcode_deleted' => 'QRCode excluído com sucesso.',
     ],
     'item_image' => [
         'deleted' => 'Imagem excluída com sucesso.',
         'cover' => 'Capa',
         'gallery' => 'Galeria',
+        'qrcode' => 'QRCode',
     ],
     'item_category' => [
         'created' => 'Categoria de item adicionada com sucesso.',
@@ -49,6 +57,7 @@ return [
                 'search_option_validation' => 'Validação',
                 'search_option_collaborator' => 'Colaborador',
                 'search_option_item_category' => 'Categoria do Item',
+                'search_option_location' => 'Localização',
                 'search_option_created_at' => 'Criado em',
                 'search_option_updated_at' => 'Atualizado em',
                 'sort_id' => 'Id',
@@ -60,6 +69,7 @@ return [
                 'sort_code' => 'Código',
                 'sort_validation' => 'Validado',
                 'sort_item_category' => 'Categoria do Item',
+                'sort_location' => 'Localização',
                 'sort_collaborator' => 'Colaborador',
                 'sort_created_at' => 'Criado em',
                 'sort_updated_at' => 'Atualizado em',

@@ -1,6 +1,11 @@
 <?php
 
 return [
+    'location' => [
+        'codes' => [
+            'INDEF' => 'Undefined',
+        ],
+    ],
     'item' => [
         'access_denied' => 'Access denied.',
         'upload_read_failed' => 'Could not read uploaded file.',
@@ -9,11 +14,14 @@ return [
         'created' => 'Item added successfully.',
         'updated' => 'Item updated successfully.',
         'deleted' => 'Item deleted successfully.',
+        'qrcode_regenerated' => 'QRCode generated successfully.',
+        'qrcode_deleted' => 'QRCode deleted successfully.',
     ],
     'item_image' => [
         'deleted' => 'Image deleted successfully.',
         'cover' => 'Cover',
         'gallery' => 'Gallery',
+        'qrcode' => 'QRCode',
     ],
     'item_category' => [
         'created' => 'Item category added successfully.',
@@ -49,6 +57,7 @@ return [
                 'search_option_validation' => 'Validation',
                 'search_option_collaborator' => 'Collaborator',
                 'search_option_item_category' => 'Item Category',
+                'search_option_location' => 'Location',
                 'search_option_created_at' => 'Created at',
                 'search_option_updated_at' => 'Updated at',
                 'sort_id' => 'Id',
@@ -60,6 +69,7 @@ return [
                 'sort_code' => 'Code',
                 'sort_validation' => 'Validated',
                 'sort_item_category' => 'Item Category',
+                'sort_location' => 'Location',
                 'sort_collaborator' => 'Collaborator',
                 'sort_created_at' => 'Created at',
                 'sort_updated_at' => 'Updated at',

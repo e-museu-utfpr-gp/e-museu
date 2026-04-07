@@ -6,4 +6,5 @@ enum ItemImageType: string
 {
     case COVER = 'cover';
     case GALLERY = 'gallery';
+    case QRCODE = 'qrcode';
 }

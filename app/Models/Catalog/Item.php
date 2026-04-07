@@ -4,6 +4,7 @@ namespace App\Models\Catalog;
 
 use App\Enums\Catalog\ItemImageType;
 use App\Models\Language;
+use App\Models\Location;
 use App\Models\Collaborator\Collaborator;
 use App\Models\Identity\Lock;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -43,6 +44,7 @@ class Item extends Model
         'validation',
         'category_id',
         'collaborator_id',
+        'location_id',
     ];
 
     protected $table = 'items';
@@ -50,6 +52,7 @@ class Item extends Model
     protected $casts = [
         'date' => 'date',
         'validation' => 'boolean',
+        'location_id' => 'integer',
     ];
 
     private ?ResolvedTranslation $resolvedTranslationMemo = null;
@@ -61,7 +64,9 @@ class Item extends Model
     {
         return Attribute::get(function (): string {
             if ($this->relationLoaded('images')) {
-                $sorted = $this->images->sortBy('sort_order');
+                $sorted = $this->images
+                    ->filter(fn (ItemImage $i) => $i->type !== ItemImageType::QRCODE)
+                    ->sortBy('sort_order');
                 $img = $sorted->first(fn (ItemImage $i) => $i->type === ItemImageType::COVER)
                     ?? $sorted->first();
 
@@ -70,7 +75,14 @@ class Item extends Model
 
             $cover = $this->coverImage;
 
-            return $cover?->image_url ?? optional($this->images()->orderBy('sort_order')->first())?->image_url ?? '';
+            return $cover?->image_url
+                ?? optional(
+                    $this->images()
+                        ->where('type', '!=', ItemImageType::QRCODE->value)
+                        ->orderBy('sort_order')
+                        ->first()
+                )?->image_url
+                ?? '';
         });
     }
 
@@ -247,6 +259,11 @@ class Item extends Model
         return $this->belongsTo(ItemCategory::class, 'category_id');
     }
 
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class);
+    }
+
     public function itemComponents(): HasMany
     {
         return $this->hasMany(ItemComponent::class);
@@ -279,7 +296,9 @@ class Item extends Model
             }
 
             $tag->loadMissing([
-                'items.images',
+                'items.images' => function ($q): void {
+                    $q->whereIn('type', [ItemImageType::COVER->value, ItemImageType::GALLERY->value]);
+                },
                 'items.translations.language',
             ]);
         }
@@ -304,12 +323,17 @@ class Item extends Model
     {
         return $query->with([
             'translations.language',
-            'images',
+            'images' => function ($q): void {
+                $q->whereIn('type', [ItemImageType::COVER->value, ItemImageType::GALLERY->value]);
+            },
             'itemCategory.translations.language',
+            'location',
             'collaborator',
             'itemTags.tag.translations.language',
             'itemTags.tag.tagCategory.translations.language',
-            'itemComponents.component.images',
+            'itemComponents.component.images' => function ($q): void {
+                $q->whereIn('type', [ItemImageType::COVER->value, ItemImageType::GALLERY->value]);
+            },
             'itemComponents.component.itemCategory.translations.language',
             'itemComponents.component.translations.language',
             'extras.collaborator',
@@ -328,6 +352,7 @@ class Item extends Model
             'translations.language',
             'images',
             'itemCategory.translations.language',
+            'location',
             'collaborator',
             'itemTags.tag.translations.language',
             'itemComponents.component.translations.language',
@@ -348,7 +373,7 @@ class Item extends Model
         $detailSql = TranslationDisplaySql::itemTranslationSubquerySql('detail', 'items');
         $catNameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
 
-        $query->with(['coverImage', 'locks'])
+        $query->with(['coverImage', 'locks', 'location'])
             ->leftJoin('collaborators', 'items.collaborator_id', '=', 'collaborators.id')
             ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
             ->select([

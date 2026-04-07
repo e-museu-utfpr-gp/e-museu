@@ -25,6 +25,35 @@ class StringHelper
         return strtr($string, self::ACCENT_MAP);
     }
 
+    /**
+     * First up to {@code $maxLength} characters (multibyte safe).
+     */
+    public static function mbTakePrefix(string $value, int $maxLength): string
+    {
+        if ($maxLength < 1 || $value === '') {
+            return '';
+        }
+
+        $len = mb_strlen($value);
+
+        return mb_substr($value, 0, min($maxLength, $len));
+    }
+
+    /**
+     * Last up to {@code $maxLength} characters (multibyte safe).
+     */
+    public static function mbTakeSuffix(string $value, int $maxLength): string
+    {
+        if ($maxLength < 1 || $value === '') {
+            return '';
+        }
+
+        $len = mb_strlen($value);
+        $take = min($maxLength, $len);
+
+        return mb_substr($value, $len - $take, $take);
+    }
+
     /** @var array<string, string> Fallback when Intl is not available */
     private const ACCENT_MAP = [
         'á' => 'a', 'à' => 'a', 'ã' => 'a', 'â' => 'a', 'ä' => 'a',

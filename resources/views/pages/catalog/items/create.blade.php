@@ -55,11 +55,7 @@
                     >
                         @foreach ($contributionLanguages as $lang)
                             <option value="{{ $lang->code }}" @selected(old('content_locale', $defaultContributionContentLocale) === $lang->code)>
-                                @if ($lang->code === \App\Enums\Content\ContentLanguage::NEUTRAL->value)
-                                    {{ __('view.catalog.items.create.content_language_option_neutral') }}
-                                @else
-                                    {{ $lang->name }}
-                                @endif
+                                {{ $lang->name }}
                             </option>
                         @endforeach
                     </x-ui.inputs.select>
@@ -101,6 +97,25 @@
                                 :label="__('view.catalog.items.create.release_date')"
                                 :help="__('view.catalog.items.create.release_date_help')"
                             />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <x-ui.inputs.select
+                                name="location_id"
+                                id="location_id"
+                                :label="__('view.catalog.items.create.location_label')"
+                                :help="__('view.catalog.items.create.location_help')"
+                                required
+                                :roundedTop="true"
+                                :enhanced="false"
+                            >
+                                @foreach ($locations as $location)
+                                    <option value="{{ $location->id }}" @selected((string) old('location_id', $defaultCatalogLocationId) === (string) $location->id)>
+                                        {{ $location->localized_label }}
+                                    </option>
+                                @endforeach
+                            </x-ui.inputs.select>
                         </div>
                     </div>
                     <x-ui.inputs.textarea

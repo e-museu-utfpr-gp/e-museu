@@ -14,6 +14,7 @@
                     <input type="hidden" name="tag[]" value="{{ $tid }}">
                 @endforeach
                 <input type="hidden" name="order" value="{{ request()->query('order', 1) }}">
+                <input type="hidden" name="location_id" value="{{ request()->query('location_id', '') }}">
                 <div class="input-div m-0 mt-1 flex-grow-1 min-w-0">
                     <input class="form-control input-form" type="text" name="search" id="search"
                         value="{{ request('search', '') }}" placeholder="">

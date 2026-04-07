@@ -12,7 +12,10 @@
         </div>
     </div>
     @php
-        $sortedForShow = $item->images->sortBy('sort_order')->values();
+        $sortedForShow = $item->images
+            ->filter(fn ($img) => $img->type !== \App\Enums\Catalog\ItemImageType::QRCODE)
+            ->sortBy('sort_order')
+            ->values();
         $coverImage = $sortedForShow->first(fn ($img) => $img->type->value === 'cover') ?? $sortedForShow->first();
         $galleryImages = $coverImage
             ? $sortedForShow->filter(fn ($img) => $img->id !== $coverImage->id)
