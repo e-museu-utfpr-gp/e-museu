@@ -2,7 +2,7 @@
 
 #### Forked from https://github.com/tankesho/e-museu
 
-#### v4.0.0-beta
+#### v5.0.0-beta
 
 # 🚧 Work In Progress 
 
@@ -14,6 +14,41 @@ This guide describes how to configure the development environment and initialize
 
 - Docker and Docker Compose installed
 - Git (for cloning the repository)
+
+## Database (MySQL)
+
+The application targets **MySQL** in development, staging, and production. Catalog translations and admin listings rely on MySQL-specific SQL (for example `FIELD()` for locale fallback order). **SQLite is not supported** for those code paths.
+
+Automated tests under the **`mysql` group** (for example `tests/Feature/Catalog/TranslationResolutionTest.php`) **require** `DB_CONNECTION=mysql` and a migrated database. If you run PHPUnit without MySQL, those tests are skipped.
+
+### PHPUnit database `emuseu_testing`
+
+`phpunit.xml` sets `DB_DATABASE=emuseu_testing` so tests do not wipe your development database.
+
+- **`./run test`** runs `ensure-mysql-testing-database` first: it creates `emuseu_testing` and grants it to the application user using credentials **inside** the `db` container (`MYSQL_ROOT_PASSWORD` / `MYSQL_USER`, derived from `.env`).
+- On the **first** MySQL volume initialization, `docker/mysql/init/01-create-testing-database.sh` may also create that database; if your `mysql_data` volume was created earlier, rely on `./run test` (or run the same SQL manually) so the database and `GRANT` exist.
+
+### Adding a catalog / content language
+
+A new language is not only a row in `languages`. To keep SQL `FIELD()`, PHP fallback, admin forms, and UI packs aligned:
+
+1. Add the case to `App\Enums\Content\ContentLanguage` (and `orderedNonUniversalLocales()` / form ordering if it should participate in fallback priority).
+2. Seed the `languages` table (migration or seeder) with a stable `code` matching the enum value.
+3. Add Laravel translation files under `lang/{code}/` (at minimum what you expose in the locale switcher).
+4. For strings used by i18next on the client, add `lang/js/{code}.json` and register the dynamic import in `resources/js/i18n.js` (`bundleLoaders`).
+
+Skipping any of the above leaves the language missing from `ContentLocaleFallback::orderedCodes()` or without UI strings until those pieces are updated.
+
+### Catalog locations (`locations` table)
+
+Items reference a **location** (campus / site). Rows are **seeded reference data** with a stable uppercase `code` (for example `INDEF`, `UTFPR`, `UNCEN`). The label shown in forms and listings comes from translation keys under `app.catalog.location.codes.*` in `lang/{locale}/app/catalog.php` (with fallback to the row `name` when a key is missing). After changing codes or adding a location, update seeds and those translation entries together.
+
+## Outgoing mail (Resend)
+
+Production-oriented outbound mail uses the **Resend** driver by default (`config/mail.php`, `MAIL_MAILER=resend`). Set `RESEND_KEY` in `.env` (see `config/services.php`). The helper `App\Support\Mail\OutgoingMailIsConfigured` decides whether the app should attempt verification and notification e-mails; extend `mail.transport_required_config` when adding new transports.
+
+- **Deploy:** set `MAIL_MAILER`, `RESEND_KEY`, `MAIL_FROM_ADDRESS`, and `MAIL_FROM_NAME` (see `.env.example`).
+- **Tests:** `phpunit.xml` sets `MAIL_MAILER=array` so PHPUnit does not call Resend. Unit coverage for mail readiness lives in `tests/Unit/Support/Mail/OutgoingMailIsConfiguredTest.php`.
 
 ## Initial Docker Configuration (Avoid using sudo)
 
@@ -62,17 +97,17 @@ The project uses a `./run` script to facilitate command execution. All operation
 
 #### Option 1: Complete Setup (Recommended)
 
-To perform a complete project setup (creates `.env`, starts containers, installs dependencies, runs migrations and seeders):
+To perform a complete project setup (creates `.env` if missing, starts containers, installs dependencies, runs migrations and seeders):
 
 ```bash
-./run setup -env
+./run setup
 ```
 
 This command:
-- Copies `.env.example` to `.env`
+- Ensures `.env` exists (copies from `.env.example` only if `.env` is missing; use `./run env -f` to replace `.env` from the example)
 - Starts Docker containers
 - Installs Composer dependencies
-- Generates Laravel application key
+- Generates `APP_KEY` only when it is not already set in `.env`
 - Runs database migrations
 - Runs seeders (initial data)
 - In local environment, starts Vite server
@@ -82,7 +117,7 @@ This command:
 For production environments or automation, use the `-y` flag to skip confirmations:
 
 ```bash
-./run setup -env -y
+./run setup -y
 ```
 
 #### Option 3: Complete Reset (Clean everything and start over)
@@ -90,7 +125,7 @@ For production environments or automation, use the `-y` flag to skip confirmatio
 If you want to start from scratch, removing all data, containers and generated files:
 
 ```bash
-./run setup-hard -env
+./run setup-hard
 ```
 
 **Warning:** This command removes:
@@ -103,8 +138,18 @@ If you want to start from scratch, removing all data, containers and generated f
 To skip the confirmation:
 
 ```bash
-./run setup-hard -env -y
+./run setup-hard -y
 ```
+
+To keep the local MySQL data directory (`mysql_data`) while still resetting containers, vendor, and Node assets (useful when you do not want to lose the database volume):
+
+```bash
+./run setup-hard -y -db
+# or
+./run setup-hard -db -y
+```
+
+`setup` / `setup-hard` never overwrite an existing `.env` from `.env.example`; they only create it when the file is missing. The same `-db` flag works with `./run remove-all` and `./run remove-all-files` (e.g. `./run remove-all -y -db`). The flag `-env` is still accepted for backwards compatibility but does nothing extra (older docs used `./run setup -env`).
 
 ### Main Commands
 
@@ -169,7 +214,7 @@ To skip the confirmation:
 # Setup project first (required for code quality tools)
 ./run setup
 
-# Run tests
+# Run tests (creates/grants emuseu_testing when using Docker MySQL — see "PHPUnit database emuseu_testing" above)
 ./run test
 
 # Analyze code (PHPStan)
@@ -214,6 +259,9 @@ To skip the confirmation:
 
 # Clean environment (no confirmation with -y)
 ./run remove-all -y
+
+# Full cleanup but keep local MySQL volume (mysql_data)
+./run remove-all -y -db
 ```
 
 ---
@@ -275,7 +323,7 @@ Stop the local MySQL service if necessary, or adjust the port in `.env`.
 - **First initialization**: MySQL may take 10-30 seconds to start the first time
 - **Production environment**: Always use the `-y` flag in automated scripts to skip confirmations
 - **Docker group**: After adding your user to the docker group, you no longer need to use sudo
-- **Complete reset**: `setup-hard` removes ALL data. Use with caution!
+- **Complete reset**: `setup-hard` removes ALL data by default. Use with caution! Pass **`-db`** to keep `mysql_data` (see Option 3 above).
 
 ---
 
@@ -283,13 +331,16 @@ Stop the local MySQL service if necessary, or adjust the port in `.env`.
 
 ```bash
 # Complete initial setup
-./run setup -env
+./run setup
 
 # Setup with automatic confirmation
-./run setup -env -y
+./run setup -y
 
 # Complete reset (careful!)
-./run setup-hard -env -y
+./run setup-hard -y
+
+# Hard reset but keep local DB volume
+./run setup-hard -y -db
 
 # Start containers
 ./run up

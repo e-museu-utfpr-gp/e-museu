@@ -3,14 +3,16 @@
 namespace App\Services\Catalog;
 
 use App\Enums\Collaborator\CollaboratorRole;
-use App\Models\Catalog\Extra;
-use App\Models\Catalog\Item;
+use App\Models\Language;
 use App\Models\Collaborator\Collaborator;
 use App\Services\Collaborator\CollaboratorService;
-use App\Support\AdminIndexQueryBuilder;
-use App\Support\AdminIndexConfig;
+use App\Support\Content\TranslatablePayload;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use App\Models\Catalog\{Extra, Item};
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 
 class ExtraService
 {
@@ -34,7 +36,11 @@ class ExtraService
      */
     public function createExtra(array $data): Extra
     {
-        return Extra::create($data);
+        $translations = $data['translations'] ?? [];
+        $extra = Extra::create(Arr::except($data, ['translations']));
+        $extra->syncTranslationsFromAdminForm($translations);
+
+        return $extra;
     }
 
     /**
@@ -42,7 +48,14 @@ class ExtraService
      */
     public function updateExtra(Extra $extra, array $data): void
     {
-        $extra->update($data);
+        $translations = $data['translations'] ?? [];
+        $persist = Arr::except($data, ['translations']);
+        if ($persist !== []) {
+            $extra->update($persist);
+        }
+        if ($translations !== []) {
+            $extra->syncTranslationsFromAdminForm($translations);
+        }
     }
 
     public function deleteExtra(Extra $extra): void
@@ -53,23 +66,39 @@ class ExtraService
     /**
      * @param  array<int, array<string, mixed>>  $extrasData
      */
-    public function createForItem(Item $item, Collaborator $collaborator, array $extrasData): void
-    {
+    public function createForItem(
+        Item $item,
+        Collaborator $collaborator,
+        array $extrasData,
+        ?int $contentLanguageId = null
+    ): void {
+        $langId = $contentLanguageId ?? Language::idForPreferredFormLocale();
+
         foreach ($extrasData as $extraItemData) {
-            $extraItemData['collaborator_id'] = $collaborator->id;
-            $extraItemData['item_id'] = $item->id;
-            Extra::create($extraItemData);
+            $split = TranslatablePayload::split($extraItemData, TranslatablePayload::EXTRA_KEYS);
+            $split['persist']['collaborator_id'] = $collaborator->id;
+            $split['persist']['item_id'] = $item->id;
+            $extra = Extra::create($split['persist']);
+            $extra->syncTranslationForLanguage($langId, [
+                'info' => (string) ($split['translation']['info'] ?? ''),
+            ]);
         }
     }
 
     /**
      * @param  array<string, mixed>  $extraData
      */
-    public function create(array $extraData, Collaborator $collaborator): Extra
+    public function create(array $extraData, Collaborator $collaborator, ?int $contentLanguageId = null): Extra
     {
-        $extraData['collaborator_id'] = $collaborator->id;
+        $langId = $contentLanguageId ?? Language::idForPreferredFormLocale();
+        $split = TranslatablePayload::split($extraData, TranslatablePayload::EXTRA_KEYS);
+        $split['persist']['collaborator_id'] = $collaborator->id;
+        $extra = Extra::create($split['persist']);
+        $extra->syncTranslationForLanguage($langId, [
+            'info' => (string) ($split['translation']['info'] ?? ''),
+        ]);
 
-        return Extra::create($extraData);
+        return $extra;
     }
 
     /**
@@ -77,25 +106,51 @@ class ExtraService
      *
      * @param  array<string, mixed>  $collaboratorData Collaborator data validated by the request.
      * @param  array<string, mixed>  $extraData        Extra data validated by the request.
-     * @return array{status: 'ok'|'internal_blocked'|'collaborator_blocked'}
+     * @return array{
+     *     status: 'ok'|'collaborator_invalid'|'internal_blocked'|'collaborator_blocked'|'email_unverified',
+     *     extra?: Extra,
+     * }
      */
     public function storeSingleExtra(
         CollaboratorService $collaboratorService,
         array $collaboratorData,
         array $extraData
     ): array {
-        $collaborator = $collaboratorService->resolveOrCreateCollaborator($collaboratorData);
+        return DB::transaction(function () use ($collaboratorService, $collaboratorData, $extraData): array {
+            $collaboratorId = (int) ($extraData['collaborator_id'] ?? 0);
+            unset($extraData['collaborator_id']);
 
-        if ($collaborator->role === CollaboratorRole::INTERNAL) {
-            return ['status' => 'internal_blocked'];
-        }
+            $collaborator = Collaborator::query()->find($collaboratorId);
+            if ($collaborator === null) {
+                return ['status' => 'collaborator_invalid'];
+            }
 
-        if ($collaborator->blocked === true) {
-            return ['status' => 'collaborator_blocked'];
-        }
+            if ($collaborator->role === CollaboratorRole::INTERNAL) {
+                return ['status' => 'internal_blocked'];
+            }
 
-        $this->create($extraData, $collaborator);
+            if ($collaborator->blocked === true) {
+                return ['status' => 'collaborator_blocked'];
+            }
 
-        return ['status' => 'ok'];
+            $gate = $collaboratorService->publicContributionCollaboratorGate($collaborator, $collaboratorData);
+            if ($gate === 'email_unverified') {
+                return ['status' => 'email_unverified'];
+            }
+
+            $collaboratorService->applySubmittedFullNameAfterVerifiedContribution(
+                $collaborator,
+                (string) ($collaboratorData['full_name'] ?? ''),
+            );
+            $collaborator->refresh();
+
+            $localeCode = (string) ($extraData['content_locale'] ?? '');
+            unset($extraData['content_locale']);
+            $langId = Language::idForCode($localeCode);
+
+            $extra = $this->create($extraData, $collaborator, $langId);
+
+            return ['status' => 'ok', 'extra' => $extra];
+        });
     }
 }

@@ -7,16 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 class ComponentRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -30,7 +20,7 @@ class ComponentRequest extends FormRequest
                 'exists:items,id',
                 function ($attribute, $value, $fail) {
                     /** @var array<int, array<string, mixed>> $components */
-                    $components = request()->input('components', []);
+                    $components = $this->input('components', []);
                     $ids = collect($components)->pluck('item_id');
                     $count = $ids->count();
                     $uniqueCount = $ids->unique()->count();

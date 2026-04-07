@@ -2,12 +2,11 @@
 
 namespace App\Providers;
 
-use App\Providers\Concerns\GuessesFactoryName;
-use App\Providers\Concerns\GuessesModelName;
-use App\Providers\Concerns\AdminDatabaseSessionHandler;
+use App\Models\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\{Session, View};
 use Illuminate\Support\ServiceProvider;
+use App\Providers\Concerns\{AdminDatabaseSessionHandler, GuessesFactoryName, GuessesModelName, RegistersRateLimiters};
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RegistersRateLimiters::register();
+
         Factory::guessFactoryNamesUsing([GuessesFactoryName::class, 'forModel']);
         Factory::guessModelNamesUsing([GuessesModelName::class, 'forFactory']);
 
@@ -34,5 +35,12 @@ class AppServiceProvider extends ServiceProvider
 
             return new AdminDatabaseSessionHandler($dbConnection, $table, $lifetime, $app);
         });
+
+        View::composer(
+            ['components.layouts.admin', 'components.layouts.app'],
+            function ($view): void {
+                $view->with('localeSwitcherLanguages', Language::forLocaleSwitcher());
+            }
+        );
     }
 }

@@ -1,4 +1,11 @@
+# Prod-like stack: Dockerfile.prod-local, MySQL, Redis.
 services:
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    restart: unless-stopped
+
   app:
     build:
       context: .
@@ -6,9 +13,11 @@ services:
       target: app
     working_dir: /var/www/
     volumes:
-      - e_museu_storage:/var/www/storage
+      # Host bind mount (same idea as local compose): uploads and cache live in ./storage on the machine.
+      - ./storage:/var/www/storage
     depends_on:
       - db
+      - redis
 
   web:
     build:
@@ -18,7 +27,7 @@ services:
     ports:
       - "${WEB_SERVER_PORT_PROD_LOCAL}:80"
     volumes:
-      - e_museu_storage:/var/www/storage
+      - ./storage:/var/www/storage
     depends_on:
       - app
 
@@ -31,6 +40,6 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
     volumes:
       - ./mysql_data:/var/lib/mysql
+      - ./docker/mysql/init/01-create-testing-database.sh:/docker-entrypoint-initdb.d/01-create-testing-database.sh:ro
 
-volumes:
-  e_museu_storage:
+# app + web share ./storage so PHP and nginx/PHP-FPM see the same files (e.g. public disk uploads).

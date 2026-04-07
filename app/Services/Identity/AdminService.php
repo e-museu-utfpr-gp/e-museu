@@ -2,13 +2,11 @@
 
 namespace App\Services\Identity;
 
-use App\Models\Identity\Admin;
-use App\Models\Identity\Lock;
-use App\Support\AdminIndexQueryBuilder;
-use App\Support\AdminIndexConfig;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Identity\{Admin, Lock};
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 
 class AdminService
 {
@@ -17,14 +15,16 @@ class AdminService
      */
     public function getPaginatedAdminsForAdminIndex(Request $request): array
     {
-        $count = Admin::count();
-        $query = Admin::query();
+        $query = Admin::query()->with('locks');
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::admins());
 
         $admins = $query->paginate(50)->withQueryString();
 
-        return ['admins' => $admins, 'count' => $count];
+        return [
+            'admins' => $admins,
+            'count' => $admins->total(),
+        ];
     }
 
     /**

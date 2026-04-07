@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\Controller;
 use App\Services\Taxonomy\TagService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Support\Http\OptionalContentLocale;
+use Illuminate\Http\{JsonResponse, Request};
 
 class TagController extends Controller
 {
@@ -13,17 +13,20 @@ class TagController extends Controller
     {
         $category = (string) ($request->input('category') ?? '');
 
-        $tags = $tagService->getByCategory($category);
-
-        return response()->json($tags);
+        return response()->json(
+            $tagService->jsonPayloadForPublicCategorySelect($category)
+        );
     }
 
     public function autocomplete(Request $request, TagService $tagService): JsonResponse
     {
         $query = (string) ($request->input('query') ?? '');
         $category = (string) ($request->input('category') ?? '');
+        $languageId = OptionalContentLocale::languageIdOrNull($request);
 
-        $tags = $tagService->getValidatedNamesForAutocomplete($query, $category);
+        $tags = $languageId !== null
+            ? $tagService->getValidatedNamesForAutocompleteForLanguage($query, $category, $languageId)
+            : $tagService->getValidatedNamesForAutocomplete($query, $category);
 
         return response()->json($tags);
     }
@@ -32,8 +35,9 @@ class TagController extends Controller
     {
         $category = (string) ($request->input('category') ?? '');
         $name = (string) ($request->input('name') ?? '');
+        $languageId = OptionalContentLocale::languageIdOrNull($request);
 
-        $count = $tagService->countValidatedByNameAndCategory($name, $category);
+        $count = $tagService->countValidatedByNameAndCategory($name, $category, $languageId);
 
         return response()->json($count);
     }

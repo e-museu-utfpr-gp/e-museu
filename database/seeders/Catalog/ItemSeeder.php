@@ -3,9 +3,7 @@
 namespace Database\Seeders\Catalog;
 
 use App\Enums\Catalog\ItemImageType;
-use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemComponent;
-use App\Models\Catalog\ItemImage;
+use App\Models\Catalog\{Item, ItemComponent, ItemImage};
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 

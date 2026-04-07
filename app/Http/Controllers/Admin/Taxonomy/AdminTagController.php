@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Admin\Taxonomy;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Requests\Admin\Taxonomy\AdminSingleTagRequest;
-use App\Services\Taxonomy\TagService;
-use App\Services\Identity\LockService;
-use App\Services\Taxonomy\TagCategoryService;
+use App\Http\Requests\Admin\Taxonomy\AdminTagRequest;
+use App\Models\Language;
 use App\Models\Taxonomy\Tag;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+use App\Services\Identity\LockService;
 use Illuminate\View\View;
+use App\Services\Taxonomy\{TagCategoryService, TagService};
+use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
+use Illuminate\Http\{RedirectResponse, Request};
 
 class AdminTagController extends AdminBaseController
 {
@@ -18,45 +18,55 @@ class AdminTagController extends AdminBaseController
     {
         $result = $tagService->getPaginatedTagsForAdminIndex($request);
 
-        return view('admin.taxonomy.tags.index', [
+        return view('pages.admin.taxonomy.tags.index', array_merge([
             'tags' => $result['tags'],
             'count' => $result['count'],
-        ]);
+        ], AdminIndexTableView::taxonomyTags()));
     }
 
     public function show(Tag $tag): View
     {
-        return view('admin.taxonomy.tags.show', compact('tag'));
+        return view('pages.admin.taxonomy.tags.show', compact('tag'));
     }
 
     public function create(TagCategoryService $tagCategoryService): View
     {
         $categories = $tagCategoryService->getForForm();
 
-        return view('admin.taxonomy.tags.create', compact('categories'));
+        return view('pages.admin.taxonomy.tags.create', [
+            'categories' => $categories,
+            'contentLanguages' => Language::forCatalogContentForms(),
+            'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
+        ]);
     }
 
-    public function store(AdminSingleTagRequest $request, TagService $tagService): RedirectResponse
+    public function store(AdminTagRequest $request, TagService $tagService): RedirectResponse
     {
         $data = $request->validated();
         $tag = $tagService->createFromAdminRequestData($data);
 
-        return redirect()->route('admin.tags.show', $tag)->with('success', __('app.taxonomy.tag.created'));
+        return redirect()->route('admin.taxonomy.tags.show', $tag)->with('success', __('app.taxonomy.tag.created'));
     }
 
-    public function edit(Tag $tag, TagCategoryService $tagCategoryService, LockService $lockService): View
-    {
-        $lockService->requireUnlocked($tag);
+    public function edit(
+        Tag $tag,
+        TagCategoryService $tagCategoryService,
+        LockService $lockService,
+        AdminEditHeadingLocale $headingLocale
+    ): View {
+        $lockService->requireUnlockedThenLock($tag);
 
         $categories = $tagCategoryService->getForForm();
 
-        $lockService->lock($tag);
-
-        return view('admin.taxonomy.tags.edit', compact('tag', 'categories'));
+        return view('pages.admin.taxonomy.tags.edit', array_merge([
+            'tag' => $tag,
+            'categories' => $categories,
+            'contentLanguages' => Language::forCatalogContentForms(),
+        ], $headingLocale->resolveFor($tag)));
     }
 
     public function update(
-        AdminSingleTagRequest $request,
+        AdminTagRequest $request,
         Tag $tag,
         TagService $tagService,
         LockService $lockService
@@ -67,7 +77,7 @@ class AdminTagController extends AdminBaseController
 
         $lockService->unlock($tag);
 
-        return redirect()->route('admin.tags.show', $tag)->with('success', __('app.taxonomy.tag.updated'));
+        return redirect()->route('admin.taxonomy.tags.show', $tag)->with('success', __('app.taxonomy.tag.updated'));
     }
 
     public function destroy(Tag $tag, TagService $tagService, LockService $lockService): RedirectResponse
@@ -78,6 +88,6 @@ class AdminTagController extends AdminBaseController
 
         $tagService->deleteTag($tag);
 
-        return redirect()->route('admin.tags.index')->with('success', __('app.taxonomy.tag.deleted'));
+        return redirect()->route('admin.taxonomy.tags.index')->with('success', __('app.taxonomy.tag.deleted'));
     }
 }

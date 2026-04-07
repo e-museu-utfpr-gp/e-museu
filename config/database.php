@@ -63,7 +63,7 @@ return [
                 if (! $sslCa) {
                     return [];
                 }
-                // PHP 8.5+ usa \Pdo\Mysql::ATTR_SSL_CA em vez de PDO::MYSQL_ATTR_SSL_CA
+                // PHP 8.5+ uses \Pdo\Mysql::ATTR_SSL_CA instead of PDO::MYSQL_ATTR_SSL_CA
                 $attr = (PHP_VERSION_ID >= 80500 && class_exists(\Pdo\Mysql::class))
                     ? \Pdo\Mysql::ATTR_SSL_CA
                     : PDO::MYSQL_ATTR_SSL_CA;
@@ -122,9 +122,10 @@ return [
     | Redis Databases
     |--------------------------------------------------------------------------
     |
-    | Redis is an open source, fast, and advanced key-value store that also
-    | provides a richer body of commands than a typical key-value system
-    | such as APC or Memcached. Laravel makes it easy to dig right in.
+    | Same idea as MySQL above: optional REDIS_URL, or discrete REDIS_HOST /
+    | REDIS_PORT / REDIS_PASSWORD (and logical DB index via REDIS_DB /
+    | REDIS_CACHE_DB). When REDIS_URL is set, Laravel parses it and merges
+    | with the options below.
     |
     */
 
@@ -140,18 +141,18 @@ return [
         'default' => [
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
+            'port' => env('REDIS_PORT', '6379'),
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
-            'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
         ],
 
         'cache' => [
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
+            'port' => env('REDIS_PORT', '6379'),
             'username' => env('REDIS_USERNAME'),
             'password' => env('REDIS_PASSWORD'),
-            'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
         ],
 

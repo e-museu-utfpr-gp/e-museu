@@ -3,14 +3,22 @@
 namespace App\Models\Catalog;
 
 use App\Models\Taxonomy\Tag;
+use App\Support\Content\TranslationDisplaySql;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, Pivot};
 
-class ItemTag extends Model
+/**
+ * Pivot for {@see Item::tags()}; also queried directly for admin listings ({@see scopeForAdminList()}).
+ */
+class ItemTag extends Pivot
 {
     use HasFactory;
+
+    public $incrementing = true;
+
+    protected $table = 'item_tag';
 
     protected $fillable = [
         'item_id',
@@ -18,16 +26,19 @@ class ItemTag extends Model
         'validation',
     ];
 
-    protected $table = 'item_tag';
+    protected $casts = [
+        'validation' => 'boolean',
+    ];
 
     /**
-     * Scope for admin index list: joins items and tags, selects columns with aliases for the index view.
-     *
      * @param  Builder<ItemTag>  $query
      * @return Builder<ItemTag>
      */
     public function scopeForAdminList(Builder $query): Builder
     {
+        $itemNameSql = TranslationDisplaySql::itemNameSubquerySql('items');
+        $tagNameSql = TranslationDisplaySql::tagNameSubquerySql('tags');
+
         $query->leftJoin('items', 'item_tag.item_id', '=', 'items.id')
             ->leftJoin('tags', 'item_tag.tag_id', '=', 'tags.id')
             ->select([
@@ -37,8 +48,8 @@ class ItemTag extends Model
                 'item_tag.validation AS item_tag_validation',
                 'item_tag.created_at AS item_tag_created',
                 'item_tag.updated_at AS item_tag_updated',
-                'items.name AS item_name',
-                'tags.name AS tag_name',
+                DB::raw("({$itemNameSql}) AS item_name"),
+                DB::raw("({$tagNameSql}) AS tag_name"),
             ]);
 
         return $query;

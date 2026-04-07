@@ -2,38 +2,27 @@
 
 namespace App\Http\Requests\Admin\Collaborator;
 
-use App\Enums\Collaborator\CollaboratorRole;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class AdminUpdateCollaboratorRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * @return array<string, string|array<int, string>>
      */
     public function rules(): array
     {
-        $collaboratorId = null;
-        if ($this->route()) {
-            $collaboratorId = $this->route()->parameter('collaborator');
-        }
+        return AdminCollaboratorRules::rules(
+            $this->route()?->parameter('collaborator')
+        );
+    }
 
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
         return [
-            'full_name' => 'required|string|min:1|max:200',
-            'contact' => [
-                'required',
-                'email:rfc,dns',
-                'min:1',
-                'max:200',
-                Rule::unique('collaborators')->ignore($collaboratorId),
-            ],
-            'role' => ['required', Rule::enum(CollaboratorRole::class)],
-            'blocked' => 'sometimes|boolean',
+            'email.unique' => __('app.collaborator.email_unique'),
         ];
     }
 }

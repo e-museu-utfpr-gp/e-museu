@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
-use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
-use App\Http\Requests\Admin\Catalog\AdminUpdateItemRequest;
-use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemImage;
-use App\Services\Catalog\ItemCategoryService;
-use App\Services\Catalog\ItemImagesService;
-use App\Services\Catalog\ItemService;
+use App\Models\Language;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Identity\LockService;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\View\View;
+use App\Http\Requests\Admin\Catalog\{AdminStoreItemRequest, AdminUpdateItemRequest};
+use App\Models\Catalog\{Item, ItemImage};
+use App\Services\Catalog\{ItemCategoryService, ItemImagesService, ItemQrCodeService, ItemService};
+use App\Services\LocationService;
+use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
+use Illuminate\Http\{JsonResponse, RedirectResponse, Request};
+use Throwable;
 
 /**
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
@@ -23,57 +22,110 @@ use Illuminate\View\View;
  */
 class AdminItemController extends AdminBaseController
 {
-    public function index(Request $request, ItemService $itemService): View
+    public function index(Request $request, ItemService $itemService, LocationService $locationService): View
     {
         $result = $itemService->getPaginatedItemsForAdminIndex($request);
 
-        return view('admin.catalog.items.index', [
+        $searchSelectOptions = $locationService->orderedForForms()->map(static fn ($loc): array => [
+            'value' => (string) $loc->id,
+            'label' => $loc->localized_label,
+        ])->all();
+
+        return view('pages.admin.catalog.items.index', array_merge([
             'items' => $result['items'],
             'count' => $result['count'],
-        ]);
+            'searchSelectColumns' => ['location_id'],
+            'searchSelectOptions' => $searchSelectOptions,
+            'searchSelectAnyLabel' => __('view.admin.catalog.items.index.search_location_any'),
+        ], AdminIndexTableView::catalogItems()));
     }
 
-    public function show(Item $item): View
+    public function byItemCategory(Request $request, ItemService $itemService): JsonResponse
     {
-        $item->load('images');
+        $itemCategoryId = (string) ($request->input('item_category') ?? '');
+        $items = $itemService->getItemsByItemCategoryForAdminSelect($itemCategoryId);
 
-        return view('admin.catalog.items.show', compact('item'));
+        return response()->json($itemService->mapItemsToCategorySelectJson($items));
     }
 
-    public function create(ItemCategoryService $itemCategoryService, CollaboratorService $collaboratorService): View
+    public function show(Item $item, ItemQrCodeService $itemQrCodeService): View
     {
-        return view('admin.catalog.items.create', [
+        $item->load(Item::eagerLoadRelationsForAdminShow());
+        $qrCodeImage = $itemQrCodeService->qrCodeImageForItem($item);
+        $qrCodeTargetUrl = $itemQrCodeService->targetUrlFromQrImage($qrCodeImage)
+            ?? $itemQrCodeService->destinationUrlForItem($item);
+        $qrDomainInvalid = ! $itemQrCodeService->isQrDomainCompatible($qrCodeTargetUrl);
+
+        return view('pages.admin.catalog.items.show', compact(
+            'item',
+            'qrCodeImage',
+            'qrDomainInvalid',
+            'qrCodeTargetUrl'
+        ));
+    }
+
+    public function create(
+        ItemCategoryService $itemCategoryService,
+        CollaboratorService $collaboratorService,
+        LocationService $locationService,
+    ): View {
+        $locationForm = $locationService->forItemCreateForms();
+
+        return view('pages.admin.catalog.items.create', [
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
+            'contentLanguages' => Language::forCatalogContentForms(),
+            'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
+            'locations' => $locationForm['locations'],
+            'defaultCatalogLocationId' => $locationForm['defaultCatalogLocationId'],
         ]);
     }
 
     public function store(
         AdminStoreItemRequest $request,
         ItemService $itemService,
-        ItemImagesService $itemImagesService
+        ItemImagesService $itemImagesService,
+        ItemQrCodeService $itemQrCodeService
     ): RedirectResponse {
         $item = $itemService->createItemWithIdentificationCode($request);
         $itemImagesService->storeImagesFromStoreRequest($item, $request);
+        try {
+            $itemQrCodeService->regenerateForItem($item);
+        } catch (Throwable $e) {
+            report($e);
+        }
 
-        return redirect()->route('admin.items.show', $item->id)->with('success', __('app.catalog.item.created'));
+        return redirect()
+            ->route('admin.catalog.items.show', $item->id)
+            ->with('success', __('app.catalog.item.created'));
     }
 
     public function edit(
         Item $item,
         ItemCategoryService $itemCategoryService,
         CollaboratorService $collaboratorService,
-        LockService $lockService
+        LocationService $locationService,
+        LockService $lockService,
+        AdminEditHeadingLocale $headingLocale,
+        ItemQrCodeService $itemQrCodeService
     ): View {
-        $item->load(['images', 'coverImage']);
-        $lockService->requireUnlocked($item);
-        $lockService->lock($item);
+        $item->load(['images', 'translations.language']);
+        $lockService->requireUnlockedThenLock($item);
+        $qrCodeImage = $itemQrCodeService->qrCodeImageForItem($item);
+        $qrCodeTargetUrl = $itemQrCodeService->targetUrlFromQrImage($qrCodeImage)
+            ?? $itemQrCodeService->destinationUrlForItem($item);
+        $qrDomainInvalid = ! $itemQrCodeService->isQrDomainCompatible($qrCodeTargetUrl);
 
-        return view('admin.catalog.items.edit', [
+        return view('pages.admin.catalog.items.edit', array_merge([
             'item' => $item,
+            'contentLanguages' => Language::forCatalogContentForms(),
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
-        ]);
+            'locations' => $locationService->orderedForForms(),
+            'qrCodeImage' => $qrCodeImage,
+            'qrDomainInvalid' => $qrDomainInvalid,
+            'qrCodeTargetUrl' => $qrCodeTargetUrl,
+        ], $headingLocale->resolveFor($item)));
     }
 
     public function update(
@@ -81,9 +133,11 @@ class AdminItemController extends AdminBaseController
         Item $item,
         ItemImagesService $itemImagesService,
         ItemService $itemService,
+        ItemQrCodeService $itemQrCodeService,
         LockService $lockService
     ): RedirectResponse {
         $lockService->requireUnlocked($item);
+        $originalIdentificationCode = (string) $item->identification_code;
 
         $data = Arr::except($request->validated(), [
             'image',
@@ -91,16 +145,56 @@ class AdminItemController extends AdminBaseController
             'delete_image_ids',
             'set_cover_image_id',
         ]);
+        // Same as contribution: validated() skips absent keys; cleared `<input type="date">`
+        // is often omitted from POST, so we must persist null explicitly.
+        if (! array_key_exists('date', $data)) {
+            $data['date'] = $request->input('date');
+        }
 
         $itemImagesService->processDeleteImageIds($item, $request);
         $itemImagesService->processCoverImage($item, $request);
         $itemImagesService->processGalleryImages($item, $request);
 
         $itemService->updateItem($item, $data);
+        $item->refresh();
+
+        if ((string) $item->identification_code !== $originalIdentificationCode) {
+            try {
+                $itemQrCodeService->regenerateForItem($item);
+            } catch (Throwable $e) {
+                report($e);
+            }
+        }
 
         $lockService->unlock($item);
 
-        return redirect()->route('admin.items.show', $item)->with('success', __('app.catalog.item.updated'));
+        return redirect()->route('admin.catalog.items.show', $item)->with('success', __('app.catalog.item.updated'));
+    }
+
+    public function regenerateQrCode(
+        Item $item,
+        ItemQrCodeService $itemQrCodeService,
+        LockService $lockService
+    ): RedirectResponse {
+        $lockService->requireUnlocked($item);
+        $itemQrCodeService->regenerateForItem($item);
+
+        return redirect()
+            ->route('admin.catalog.items.edit', $item)
+            ->with('success', __('app.catalog.item.qrcode_regenerated'));
+    }
+
+    public function deleteQrCode(
+        Item $item,
+        ItemQrCodeService $itemQrCodeService,
+        LockService $lockService
+    ): RedirectResponse {
+        $lockService->requireUnlocked($item);
+        $itemQrCodeService->deleteForItem($item);
+
+        return redirect()
+            ->route('admin.catalog.items.edit', $item)
+            ->with('success', __('app.catalog.item.qrcode_deleted'));
     }
 
     public function destroy(
@@ -116,7 +210,7 @@ class AdminItemController extends AdminBaseController
         $itemImagesService->deleteAllImagesForItem($item);
         $itemService->deleteItem($item);
 
-        return redirect()->route('admin.items.index')->with('success', __('app.catalog.item.deleted'));
+        return redirect()->route('admin.catalog.items.index')->with('success', __('app.catalog.item.deleted'));
     }
 
     public function destroyImage(
@@ -128,6 +222,8 @@ class AdminItemController extends AdminBaseController
         $lockService->requireUnlocked($item);
         $itemImagesService->deleteImage($item, $image);
 
-        return redirect()->route('admin.items.edit', $item)->with('success', __('app.catalog.item_image.deleted'));
+        return redirect()
+            ->route('admin.catalog.items.edit', $item)
+            ->with('success', __('app.catalog.item_image.deleted'));
     }
 }

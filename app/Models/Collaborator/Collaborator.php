@@ -3,13 +3,11 @@
 namespace App\Models\Collaborator;
 
 use App\Enums\Collaborator\CollaboratorRole;
-use App\Models\Catalog\Extra;
-use App\Models\Catalog\Item;
 use App\Models\Identity\Lock;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Catalog\{Extra, Item};
+use Illuminate\Database\Eloquent\Relations\{HasMany, MorphMany};
 
 class Collaborator extends Model
 {
@@ -19,9 +17,10 @@ class Collaborator extends Model
 
     protected $fillable = [
         'full_name',
-        'contact',
+        'email',
         'role',
         'blocked',
+        'last_email_verification_at',
     ];
 
     /**
@@ -29,7 +28,17 @@ class Collaborator extends Model
      */
     protected $casts = [
         'role' => CollaboratorRole::class,
+        'blocked' => 'boolean',
+        'last_email_verification_at' => 'datetime',
     ];
+
+    /**
+     * Whether the collaborator has verified the e-mail with a code at least once (public catalog flow).
+     */
+    public function hasVerifiedEmail(): bool
+    {
+        return $this->last_email_verification_at !== null;
+    }
 
     public function items(): HasMany
     {
