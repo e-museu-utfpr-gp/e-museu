@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Actions\Catalog\{CompleteCatalogItemContributionAction, StoreItemContributionAction};
+use App\Actions\Catalog\StoreItemContributionAction;
+use App\Services\Catalog\CatalogContributionCompletionService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\ItemContributionValidator;
 use App\Services\Taxonomy\TagCategoryService;
@@ -15,15 +16,20 @@ use App\Services\Catalog\{
     ItemImagesService,
     ItemService,
 };
+use App\Services\LocationService;
 use Illuminate\Http\{JsonResponse, RedirectResponse, Request};
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class ItemController extends Controller
 {
     public function index(
         Request $request,
         ItemCategoryService $itemCategoryService,
         TagCategoryService $tagCategoryService,
-        ItemService $itemService
+        ItemService $itemService,
+        LocationService $locationService,
     ): View|RedirectResponse {
         if ($request->getQueryString() === null || $request->getQueryString() === '') {
             $defaultQuery = http_build_query([
@@ -44,23 +50,28 @@ class ItemController extends Controller
             'categoryName' => $data['categoryName'],
             'itemCategories' => $itemCategories,
             'categories' => $categories,
+            'locations' => $locationService->orderedForForms(),
         ]);
     }
 
     public function create(
         ItemCategoryService $itemCategoryService,
         TagCategoryService $tagCategoryService,
-        ContributionContentLocaleService $contributionContentLocaleService
+        ContributionContentLocaleService $contributionContentLocaleService,
+        LocationService $locationService,
     ): View {
         $categories = $tagCategoryService->getForIndex();
         $itemCategories = $itemCategoryService->getForIndex();
         $localeForm = $contributionContentLocaleService->formOptions();
+        $locationForm = $locationService->forItemCreateForms();
 
         return view('pages.catalog.items.create', [
             'categories' => $categories,
             'itemCategories' => $itemCategories,
             'contributionLanguages' => $localeForm['contributionLanguages'],
             'defaultContributionContentLocale' => $localeForm['defaultContentLocale'],
+            'locations' => $locationForm['locations'],
+            'defaultCatalogLocationId' => $locationForm['defaultCatalogLocationId'],
         ]);
     }
 
@@ -70,7 +81,7 @@ class ItemController extends Controller
         StoreItemContributionAction $storeItemContributionAction,
         ItemImagesService $itemImagesService,
         ContributionContentLocaleService $contributionContentLocaleService,
-        CompleteCatalogItemContributionAction $completeCatalogItemContribution,
+        CatalogContributionCompletionService $catalogContributionCompletion,
     ): RedirectResponse {
         $validatedData = $itemContributionValidator->validateStore($request);
 
@@ -94,7 +105,7 @@ class ItemController extends Controller
 
         PublicCatalogContributionOutcome::throwUnlessOk($result);
 
-        $completeCatalogItemContribution->handle($result['item'] ?? null, $contentLanguageId);
+        $catalogContributionCompletion->afterItem($result['item'] ?? null, $contentLanguageId);
 
         return redirect()->route('catalog.items.create')->with('success', __('app.catalog.item.contribution_success'));
     }
@@ -134,7 +145,7 @@ class ItemController extends Controller
             ? $itemService->getPublicItemsByCategoryForLanguage($itemCategoryId, $languageId)
             : $itemService->getPublicItemsByCategory($itemCategoryId);
 
-        return response()->json($items);
+        return response()->json($itemService->mapItemsToCategorySelectJson($items));
     }
 
     public function componentAutocomplete(Request $request, ItemService $itemService): JsonResponse
@@ -144,7 +155,7 @@ class ItemController extends Controller
 
         $items = $itemService->getValidatedNamesForComponentAutocomplete($query, $category);
 
-        return response()->json($items);
+        return response()->json($itemService->mapItemsForComponentAutocompleteJson($items));
     }
 
     public function checkComponentName(Request $request, ItemService $itemService): JsonResponse

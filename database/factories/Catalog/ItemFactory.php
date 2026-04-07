@@ -4,6 +4,7 @@ namespace Database\Factories\Catalog;
 
 use App\Models\Catalog\{Item, ItemCategory, ItemImage};
 use App\Models\Collaborator\Collaborator;
+use App\Models\Location;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +19,11 @@ class ItemFactory extends Factory
             'identification_code' => 'FACTORY_' . $this->faker->unique()->uuid(),
             'validation' => $this->faker->boolean,
             'category_id' => ItemCategory::pluck('id')->random(),
+            'location_id' => static function (): int {
+                $id = Location::query()->value('id');
+
+                return $id !== null ? (int) $id : Location::factory()->create()->id;
+            },
             'collaborator_id' => Collaborator::pluck('id')->random(),
         ];
     }

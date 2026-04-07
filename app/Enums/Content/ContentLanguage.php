@@ -13,7 +13,7 @@ enum ContentLanguage: string
 {
     case PT_BR = 'pt_BR';
     case EN = 'en';
-    case NEUTRAL = 'neutral';
+    case UNIVERSAL = 'universal';
 
     /** Default locale used when saving from admin / contribution forms. */
     public static function defaultForForms(): self
@@ -29,19 +29,19 @@ enum ContentLanguage: string
     public static function orderedCodesForAdminForms(): array
     {
         return [
-            self::NEUTRAL->value,
+            self::UNIVERSAL->value,
             self::PT_BR->value,
             self::EN->value,
         ];
     }
 
     /**
-     * Translatable locales to try after active locale, neutral, and `config('app.fallback_locale')`.
+     * Translatable locales to try after active locale, universal, and `config('app.fallback_locale')`.
      * Stable order for SQL FIELD() / PHP resolution (see ContentLocaleFallback::orderedCodes()).
      *
      * @return list<string>
      */
-    public static function orderedNonNeutralLocales(): array
+    public static function orderedNonUniversalLocales(): array
     {
         $priority = [self::EN, self::PT_BR];
         $seen = [];
@@ -51,7 +51,7 @@ enum ContentLanguage: string
             $out[] = $case->value;
         }
         foreach (self::cases() as $case) {
-            if ($case === self::NEUTRAL || isset($seen[$case->value])) {
+            if ($case === self::UNIVERSAL || isset($seen[$case->value])) {
                 continue;
             }
             $out[] = $case->value;

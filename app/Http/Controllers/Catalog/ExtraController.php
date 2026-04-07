@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Actions\Catalog\CompleteCatalogExtraContributionAction;
+use App\Services\Catalog\CatalogContributionCompletionService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\{ItemContributionValidator, SingleExtraRequest};
 use App\Models\Language;
@@ -21,7 +21,7 @@ class ExtraController extends Controller
         ItemContributionValidator $itemContributionValidator,
         ExtraService $extraService,
         CollaboratorService $collaboratorService,
-        CompleteCatalogExtraContributionAction $completeCatalogExtraContribution,
+        CatalogContributionCompletionService $catalogContributionCompletion,
     ): RedirectResponse {
         $validatedData = $itemContributionValidator->validateSingleExtra($request);
 
@@ -36,7 +36,7 @@ class ExtraController extends Controller
 
         PublicCatalogContributionOutcome::throwUnlessOk($result);
 
-        $completeCatalogExtraContribution->handle($result['extra'] ?? null, $contentLanguageId);
+        $catalogContributionCompletion->afterExtra($result['extra'] ?? null, $contentLanguageId);
 
         return back()->with('success', __('app.catalog.extra.contribution_success'));
     }

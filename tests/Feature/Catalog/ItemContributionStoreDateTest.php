@@ -8,7 +8,9 @@ use App\Mail\ItemContributionReceivedMail;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemCategory;
 use App\Models\Collaborator\Collaborator;
+use App\Models\Location;
 use App\Services\Collaborator\CollaboratorService;
+use App\Support\Catalog\CatalogLocationDefaultResolver;
 use Database\Factories\Catalog\ItemCategoryFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -76,6 +78,7 @@ class ItemContributionStoreDateTest extends TestCase
             'detail' => '',
             'history' => '',
             'category_id' => (string) $category->id,
+            'location_id' => $this->contributionLocationId(),
             'tags' => [],
             'extras' => [],
             'components' => [],
@@ -150,6 +153,7 @@ class ItemContributionStoreDateTest extends TestCase
             'detail' => '',
             'history' => '',
             'category_id' => (string) $category->id,
+            'location_id' => $this->contributionLocationId(),
             'tags' => [],
             'extras' => [],
             'components' => [],
@@ -211,6 +215,7 @@ class ItemContributionStoreDateTest extends TestCase
             'detail' => '',
             'history' => '',
             'category_id' => (string) $category->id,
+            'location_id' => $this->contributionLocationId(),
             'tags' => [],
             'extras' => [],
             'components' => [],
@@ -262,6 +267,7 @@ class ItemContributionStoreDateTest extends TestCase
             'detail' => '',
             'history' => '',
             'category_id' => (string) $category->id,
+            'location_id' => $this->contributionLocationId(),
             'tags' => [],
             'extras' => [],
             'components' => [],
@@ -271,5 +277,18 @@ class ItemContributionStoreDateTest extends TestCase
         $response->assertSessionHasErrors('email');
         $this->assertNull(Collaborator::query()->where('email', $email)->first());
         $this->assertSame(0, Item::query()->where('category_id', $category->id)->count());
+    }
+
+    private function contributionLocationId(): string
+    {
+        $id = CatalogLocationDefaultResolver::defaultLocationId();
+        if ($id !== null) {
+            return (string) $id;
+        }
+
+        $fallback = Location::query()->orderBy('id')->value('id');
+        $this->assertNotNull($fallback, 'At least one location row is required for contribution tests.');
+
+        return (string) $fallback;
     }
 }

@@ -16,7 +16,8 @@ use Illuminate\Http\Request;
  *   sortSubquery?: array<string, string>,
  *   sortSpecial?: array<string, string>,
  *   booleanColumns?: array<int, string>,
- *   exactColumns?: array<int, string>
+ *   exactColumns?: array<int, string>,
+ *   exactColumnsNumeric?: array<int, string>
  * }
  */
 class AdminIndexQueryBuilder
@@ -35,8 +36,8 @@ class AdminIndexQueryBuilder
 
     /**
      * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
-     * @param  IndexConfig  $config
      * @param  string|int|bool|null  $search
+     * @param  IndexConfig  $config
      */
     private static function applySearchFilter(Builder $query, ?string $searchColumn, $search, array $config): void
     {
@@ -45,39 +46,132 @@ class AdminIndexQueryBuilder
         }
 
         $baseTable = $config['searchBaseTable'] ?? $config['baseTable'];
-        $searchSpecialColumns = $config['searchSpecial'] ?? [];
-        $booleanColumns = $config['booleanColumns'] ?? [];
-        $exactColumns = $config['exactColumns'] ?? [];
 
-        if (isset($searchSpecialColumns[$searchColumn])) {
-            $referencedTable = $searchSpecialColumns[$searchColumn]['table'];
-            $referencedColumn = $searchSpecialColumns[$searchColumn]['column'];
-            $query->where("{$referencedTable}.{$referencedColumn}", 'LIKE', '%' . (string) $search . '%');
-
-            return;
-        }
-
-        $searchLikeSubquery = $config['searchLikeSubquery'] ?? [];
-        if (isset($searchLikeSubquery[$searchColumn])) {
-            $sql = $searchLikeSubquery[$searchColumn];
-            $query->whereRaw("{$sql} LIKE ?", ['%' . (string) $search . '%']);
-
-            return;
-        }
-
-        if (in_array($searchColumn, $booleanColumns, true)) {
-            $query->where("{$baseTable}.{$searchColumn}", self::normalizeSearchToBoolean($search));
-
-            return;
-        }
-
-        if (in_array($searchColumn, $exactColumns, true)) {
-            $query->where("{$baseTable}.{$searchColumn}", '=', strtolower((string) $search));
-
+        if (
+            self::applySearchSpecialJoinColumn($query, $searchColumn, $search, $config)
+            || self::applySearchLikeSubquery($query, $searchColumn, $search, $config)
+            || self::applySearchBoolean($query, $searchColumn, $search, $config, $baseTable)
+            || self::applySearchExactNumeric($query, $searchColumn, $search, $config, $baseTable)
+            || self::applySearchExactLowercase($query, $searchColumn, $search, $config, $baseTable)
+        ) {
             return;
         }
 
         $query->where("{$baseTable}.{$searchColumn}", 'LIKE', '%' . (string) $search . '%');
+    }
+
+    /**
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  string|int|bool  $search
+     * @param  IndexConfig  $config
+     */
+    private static function applySearchSpecialJoinColumn(
+        Builder $query,
+        string $searchColumn,
+        $search,
+        array $config,
+    ): bool {
+        $searchSpecialColumns = $config['searchSpecial'] ?? [];
+        if (! isset($searchSpecialColumns[$searchColumn])) {
+            return false;
+        }
+
+        $referencedTable = $searchSpecialColumns[$searchColumn]['table'];
+        $referencedColumn = $searchSpecialColumns[$searchColumn]['column'];
+        $query->where("{$referencedTable}.{$referencedColumn}", 'LIKE', '%' . (string) $search . '%');
+
+        return true;
+    }
+
+    /**
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  string|int|bool  $search
+     * @param  IndexConfig  $config
+     */
+    private static function applySearchLikeSubquery(Builder $query, string $searchColumn, $search, array $config): bool
+    {
+        $searchLikeSubquery = $config['searchLikeSubquery'] ?? [];
+        if (! isset($searchLikeSubquery[$searchColumn])) {
+            return false;
+        }
+
+        $sql = $searchLikeSubquery[$searchColumn];
+        $query->whereRaw("{$sql} LIKE ?", ['%' . (string) $search . '%']);
+
+        return true;
+    }
+
+    /**
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  string|int|bool  $search
+     * @param  IndexConfig  $config
+     */
+    private static function applySearchBoolean(
+        Builder $query,
+        string $searchColumn,
+        $search,
+        array $config,
+        string $baseTable,
+    ): bool {
+        $booleanColumns = $config['booleanColumns'] ?? [];
+        if (! in_array($searchColumn, $booleanColumns, true)) {
+            return false;
+        }
+
+        $query->where("{$baseTable}.{$searchColumn}", self::normalizeSearchToBoolean($search));
+
+        return true;
+    }
+
+    /**
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  string|int|bool  $search
+     * @param  IndexConfig  $config
+     */
+    private static function applySearchExactNumeric(
+        Builder $query,
+        string $searchColumn,
+        $search,
+        array $config,
+        string $baseTable,
+    ): bool {
+        $exactColumnsNumeric = $config['exactColumnsNumeric'] ?? [];
+        if (! in_array($searchColumn, $exactColumnsNumeric, true)) {
+            return false;
+        }
+
+        $raw = is_string($search) ? trim($search) : (string) $search;
+        if ($raw === '' || ! ctype_digit($raw)) {
+            $query->whereRaw('0 = 1');
+
+            return true;
+        }
+
+        $query->where("{$baseTable}.{$searchColumn}", '=', (int) $raw);
+
+        return true;
+    }
+
+    /**
+     * @param  Builder<\Illuminate\Database\Eloquent\Model>  $query
+     * @param  string|int|bool  $search
+     * @param  IndexConfig  $config
+     */
+    private static function applySearchExactLowercase(
+        Builder $query,
+        string $searchColumn,
+        $search,
+        array $config,
+        string $baseTable,
+    ): bool {
+        $exactColumns = $config['exactColumns'] ?? [];
+        if (! in_array($searchColumn, $exactColumns, true)) {
+            return false;
+        }
+
+        $query->where("{$baseTable}.{$searchColumn}", '=', strtolower((string) $search));
+
+        return true;
     }
 
     /**

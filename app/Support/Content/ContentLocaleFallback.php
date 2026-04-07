@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 /**
  * Ordered content locale codes for SQL FIELD() and PHP resolution (matches across the app).
  *
- * Resolution order: active locale → neutral (locale-agnostic copy) → config fallback → other seeded locales.
+ * Resolution order: active locale → universal (locale-agnostic copy) → config fallback → other seeded locales.
  */
 final class ContentLocaleFallback
 {
@@ -28,7 +28,7 @@ final class ContentLocaleFallback
         $known = [
             ContentLanguage::PT_BR->value,
             ContentLanguage::EN->value,
-            ContentLanguage::NEUTRAL->value,
+            ContentLanguage::UNIVERSAL->value,
         ];
         if (in_array($locale, $known, true)) {
             return $locale;
@@ -46,9 +46,9 @@ final class ContentLocaleFallback
         $codes = array_values(
             collect([
                 self::normalizedAppLocaleCode(),
-                ContentLanguage::NEUTRAL->value,
+                ContentLanguage::UNIVERSAL->value,
                 config('app.fallback_locale'),
-                ...ContentLanguage::orderedNonNeutralLocales(),
+                ...ContentLanguage::orderedNonUniversalLocales(),
             ])
                 ->filter(fn ($c) => is_string($c) && $c !== '')
                 ->unique()

@@ -18,20 +18,20 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const form = marker.closest('form');
-    if (!form) {
-        return;
-    }
+    // Skip release-lock beacon on any form submit: parallel POSTs (e.g. locale) can race session writes.
+    let documentSubmitNavigation = false;
+    document.addEventListener(
+        'submit',
+        () => {
+            documentSubmitNavigation = true;
+        },
+        true
+    );
 
-    let formSubmitted = false;
     let lockReleased = false;
 
-    form.addEventListener('submit', () => {
-        formSubmitted = true;
-    });
-
     function releaseLock() {
-        if (formSubmitted || lockReleased) {
+        if (documentSubmitNavigation || lockReleased) {
             return;
         }
         lockReleased = true;
