@@ -540,7 +540,7 @@ footer {
     color: #ed6e38;
 }
 
-// Neutral language: keep label + info icon on one row inside the tab (no nested <button>)
+// Universal language: keep label + info icon on one row inside the tab (no nested <button>)
 .nav-tabs .nav-item .nav-link:has(.language-tab-label) {
     display: inline-flex;
     align-items: center;
@@ -596,7 +596,8 @@ body.admin-layout {
     justify-content: flex-end;
 
     .admin-search-column,
-    .admin-search-boolean {
+    .admin-search-boolean,
+    .admin-search-select {
         width: auto;
         min-width: 9rem;
         max-width: 16rem;
@@ -612,6 +613,55 @@ body.admin-layout {
 
     .btn {
         flex-shrink: 0;
+    }
+}
+
+// Admin catalog items index: narrow columns by semantic class (not nth-child)
+.admin-catalog-items-index-table {
+    .admin-items-index-col--identification-code {
+        max-width: 6.5rem;
+        width: 6.5rem;
+        font-size: 0.8125rem;
+        word-break: break-word;
+        vertical-align: middle;
+    }
+
+    .admin-items-index-col--category {
+        max-width: 7.5rem;
+        width: 7.5rem;
+        font-size: 0.8125rem;
+        word-break: break-word;
+        vertical-align: middle;
+    }
+
+    .admin-items-index-col--location {
+        max-width: 7rem;
+        width: 7rem;
+        font-size: 0.8125rem;
+        word-break: break-word;
+        vertical-align: middle;
+    }
+
+    .admin-items-index-col--collaborator {
+        max-width: 8.5rem;
+        width: 8.5rem;
+        font-size: 0.8125rem;
+        vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .admin-items-index-col--identification-code .btn,
+    .admin-items-index-col--category .btn,
+    .admin-items-index-col--location .btn,
+    .admin-items-index-col--collaborator .btn {
+        font-size: 0.75rem;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        white-space: normal;
+        line-height: 1.2;
+        text-align: left;
     }
 }
 

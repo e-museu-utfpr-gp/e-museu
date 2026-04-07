@@ -5,6 +5,9 @@
     'searchOptions',
     'searchPlaceholder',
     'booleanColumns' => [],
+    'searchSelectColumns' => [],
+    'searchSelectOptions' => [],
+    'searchSelectAnyLabel' => null,
 ])
 
 <nav {{ $attributes->class(['navbar', 'navbar-light', 'bg-light', 'admin-index-toolbar']) }}>
@@ -18,6 +21,9 @@
             :placeholder="$searchPlaceholder"
             :buttonLabel="__('view.shared.buttons.search')"
             :booleanColumns="$booleanColumns"
+            :searchSelectColumns="$searchSelectColumns"
+            :searchSelectOptions="$searchSelectOptions"
+            :searchSelectAnyLabel="$searchSelectAnyLabel"
         />
     </div>
 </nav>

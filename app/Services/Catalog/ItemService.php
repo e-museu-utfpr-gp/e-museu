@@ -5,7 +5,7 @@ namespace App\Services\Catalog;
 use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
 use App\Models\Language;
 use App\Models\Catalog\{Item, ItemCategory};
-use App\Support\StringHelper;
+use App\Support\Catalog\ItemIdentificationCode;
 use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 use App\Support\Catalog\ItemIndexQueryBuilder;
 use App\Support\Content\{TranslatablePayload, TranslationDisplaySql};
@@ -13,6 +13,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -46,10 +47,14 @@ class ItemService
         $query = ItemIndexQueryBuilder::build($request);
         $itemCategoryId = $request->item_category ?? $request->input('item_category');
         $order = $request->input('order', 1);
-        $items = $query->paginate(24)->withQueryString()->appends([
+        $appends = [
             'item_category' => $itemCategoryId,
             'order' => $order,
-        ]);
+        ];
+        if ($request->filled('location_id')) {
+            $appends['location_id'] = $request->input('location_id');
+        }
+        $items = $query->paginate(24)->withQueryString()->appends($appends);
         $categoryName = $this->getItemCategoryName($itemCategoryId);
 
         return ['items' => $items, 'categoryName' => $categoryName];
@@ -96,6 +101,7 @@ class ItemService
         return Item::query()
             ->where('category_id', '=', $categoryId)
             ->where('validation', true)
+            ->with('location')
             ->select('items.*')
             ->orderByRaw("({$nameSql}) asc")
             ->get();
@@ -124,8 +130,9 @@ class ItemService
                 $join->on('items.id', '=', 'it_contribution.item_id')
                     ->where('it_contribution.language_id', '=', $languageId);
             })
-            ->select('items.id')
+            ->select('items.id', 'items.location_id')
             ->selectRaw("{$resolvedNameSql} AS name")
+            ->with('location')
             ->orderByRaw("{$resolvedNameSql} asc")
             ->get();
     }
@@ -146,10 +153,35 @@ class ItemService
 
         return Item::query()
             ->where('category_id', '=', $categoryId)
-            ->select('items.id')
+            ->with('location')
+            ->select('items.id', 'items.location_id')
             ->selectRaw("({$nameSql}) AS name")
             ->orderByRaw("({$nameSql}) asc")
             ->get();
+    }
+
+    /**
+     * JSON payload for {@see \App\Http\Controllers\Catalog\ItemController::byCategory} and
+     * {@see \App\Http\Controllers\Admin\Catalog\AdminItemController::byItemCategory}: each item as `toArray()`
+     * with nested `location` removed and `location_label` set from the loaded relation.
+     *
+     * @param  Collection<int, Item>  $items
+     * @return SupportCollection<int, array<string, mixed>>
+     */
+    public function mapItemsToCategorySelectJson(Collection $items): SupportCollection
+    {
+        $out = new SupportCollection();
+        foreach ($items as $item) {
+            if (! $item instanceof Item) {
+                continue;
+            }
+            $row = $item->toArray();
+            unset($row['location']);
+            $row['location_label'] = $item->location?->localized_label;
+            $out->push($row);
+        }
+
+        return $out;
     }
 
     /**
@@ -181,6 +213,8 @@ class ItemService
         $qb = Item::query()
             ->where('category_id', '=', $itemCategoryId)
             ->where('validation', true)
+            ->with('location')
+            ->select('items.id', 'items.location_id')
             ->selectRaw("({$nameSql}) AS name");
 
         if ($query !== '') {
@@ -188,6 +222,30 @@ class ItemService
         }
 
         return $qb->limit(10)->get();
+    }
+
+    /**
+     * @param  Collection<int, Item>  $items
+     * @return SupportCollection<int, array{id: int, name: string, location_id: int, location_label: string|null}>
+     */
+    public function mapItemsForComponentAutocompleteJson(Collection $items): SupportCollection
+    {
+        $rows = [];
+        foreach ($items as $item) {
+            if (! $item instanceof Item) {
+                continue;
+            }
+            $rows[] = [
+                'id' => (int) $item->id,
+                'name' => (string) $item->name,
+                'location_id' => (int) $item->location_id,
+                'location_label' => $item->location !== null
+                    ? (string) $item->location->localized_label
+                    : null,
+            ];
+        }
+
+        return new SupportCollection($rows);
     }
 
     public function countValidatedByNameAndCategory(string $name, string $categoryId, ?int $languageId = null): int
@@ -214,6 +272,7 @@ class ItemService
         $itemAttributes = [
             'date' => $request->input('date'),
             'category_id' => $request->input('category_id'),
+            'location_id' => $request->input('location_id'),
             'collaborator_id' => $request->input('collaborator_id'),
             'validation' => $request->boolean('validation'),
             'identification_code' => '000',
@@ -238,23 +297,22 @@ class ItemService
         return $item;
     }
 
-    public function createIdentificationCode(Item $item): string
+    /**
+     * @param  int|null  $nameLanguageId  Translation row used for the title (e.g. contribution locale).
+     *                                    Null uses {@see Language::idForPreferredFormLocale()}.
+     */
+    public function createIdentificationCode(Item $item, ?int $nameLanguageId = null): string
     {
-        $itemCategory = ItemCategory::query()
-            ->with('translations.language')
-            ->findOrFail($item->category_id);
-        $normalized = StringHelper::removeAccent($itemCategory->defaultLocaleName());
-        $nameParts = explode(' ', $normalized);
-        if (count($nameParts) === 1) {
-            $nameParts = explode('-', $nameParts[0]);
+        $item->loadMissing('location', 'translations');
+        $langId = $nameLanguageId ?? Language::idForPreferredFormLocale();
+        $translation = $item->translations->firstWhere('language_id', $langId);
+        if ($translation === null || trim((string) $translation->name) === '') {
+            $translation = $item->translations->sortBy('language_id')->first();
         }
-        if (count($nameParts) > 1) {
-            $code = strtoupper(substr($nameParts[0], 0, 2)) . strtoupper(substr(end($nameParts), 0, 2));
-        } else {
-            $code = strtoupper(substr($nameParts[0], 0, 4));
-        }
+        $title = $translation !== null ? (string) $translation->name : '';
+        $locCode = $item->location?->code ?? 'INDEF';
 
-        return 'EXT_' . $code . '_' . $item->id;
+        return ItemIdentificationCode::buildForItem($item, $title, $locCode, $item->created_at);
     }
 
     /**

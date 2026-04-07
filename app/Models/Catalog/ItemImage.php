@@ -56,6 +56,27 @@ class ItemImage extends Model
         return sprintf('items/%d/%s_%d.%s', $itemId, $uuid, $itemId, $ext);
     }
 
+    public static function buildQrCodePath(
+        Item $item,
+        string $targetUrl,
+        string $extension = 'png'
+    ): string {
+        $itemId = (int) $item->getKey();
+        if ($itemId < 1) {
+            throw new InvalidArgumentException(
+                'Item must be saved with a valid id before building a QRCode storage path.',
+            );
+        }
+
+        $ext = preg_match('/^[a-z0-9]+$/i', $extension) ? strtolower($extension) : 'png';
+        $encoded = rtrim(strtr(base64_encode($targetUrl), '+/', '-_'), '=');
+        if ($encoded === '') {
+            $encoded = 'unknown-target';
+        }
+
+        return sprintf('items/%d/qrcode/%s.%s', $itemId, $encoded, $ext);
+    }
+
     /**
      * @return Attribute<string, never>
      */

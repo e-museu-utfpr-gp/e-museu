@@ -8,7 +8,7 @@ use App\Models\Catalog\ItemCategory;
 use Illuminate\Database\Seeder;
 
 /**
- * Demo categories: pt_BR (primary) + en + neutral (same label as pt for manual multi-locale checks).
+ * Demo categories: pt_BR (primary) + en + universal (same label as pt for manual multi-locale checks).
  */
 class ItemCategorySeeder extends Seeder
 {
@@ -19,7 +19,7 @@ class ItemCategorySeeder extends Seeder
         }
 
         $enId = Language::query()->where('code', 'en')->value('id');
-        $neutralId = Language::query()->where('code', ContentLanguage::NEUTRAL->value)->value('id');
+        $universalId = Language::query()->where('code', ContentLanguage::UNIVERSAL->value)->value('id');
 
         foreach ($this->labels() as [$pt, $en]) {
             $category = new ItemCategory();
@@ -31,9 +31,9 @@ class ItemCategorySeeder extends Seeder
                     ['name' => $en],
                 );
             }
-            if ($neutralId !== null) {
+            if ($universalId !== null) {
                 $category->translations()->updateOrCreate(
-                    ['language_id' => $neutralId],
+                    ['language_id' => $universalId],
                     ['name' => $pt],
                 );
             }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Catalog\AdminItemTagController;
 use App\Http\Controllers\Admin\Catalog\AdminItemCategoryController;
 use App\Http\Controllers\Catalog\CollaboratorController;
 use App\Http\Controllers\Catalog\ExtraController;
+use App\Http\Controllers\Catalog\IdentificationCodeRedirectController;
 use App\Http\Controllers\Catalog\ItemController;
 use App\Http\Controllers\Catalog\TagController;
 use App\Http\Controllers\HomeController;
@@ -67,6 +68,10 @@ Route::middleware('throttle:web-public')->group(function () {
         return view('pages.about.index');
     })->name('about');
 
+    Route::get('codes/{code}', IdentificationCodeRedirectController::class)
+        ->where('code', '[^/]+')
+        ->name('codes.show');
+
     Route::prefix('catalog')->name('catalog.')->group(function () {
         Route::redirect('/', '/catalog/items')->name('root');
         Route::get('items', [ItemController::class, 'index'])->name('items.index');
@@ -104,6 +109,10 @@ Route::middleware(['authenticate', 'throttle:web-admin'])->prefix('admin')->name
         Route::redirect('/', '/admin/catalog/items');
         Route::delete('items/{item}/images/{image}', [AdminItemController::class, 'destroyImage'])
             ->name('items.images.destroy');
+        Route::post('items/{item}/qrcode/regenerate', [AdminItemController::class, 'regenerateQrCode'])
+            ->name('items.qrcode.regenerate');
+        Route::delete('items/{item}/qrcode', [AdminItemController::class, 'deleteQrCode'])
+            ->name('items.qrcode.delete');
         Route::get('items/by-item-category', [AdminItemController::class, 'byItemCategory'])
             ->name('items.by-item-category');
         Route::resource('items', AdminItemController::class);

@@ -71,6 +71,7 @@ class AdminIndexConfig
                 'category_id' => 'item_category_name',
             ],
             'booleanColumns' => ['validation'],
+            'exactColumnsNumeric' => ['location_id'],
         ];
     }
 

@@ -41,6 +41,19 @@
                                         </option>
                                     @endforeach
                                 </x-ui.inputs.admin.select>
+                                <x-ui.inputs.admin.select
+                                    name="location_id"
+                                    id="location_id"
+                                    :label="__('view.admin.catalog.items.create.location')"
+                                    required
+                                    :enhanced="false"
+                                >
+                                    @foreach ($locations as $location)
+                                        <option value="{{ $location->id }}" @selected((string) old('location_id', $defaultCatalogLocationId) === (string) $location->id)>
+                                            {{ $location->localized_label }}
+                                        </option>
+                                    @endforeach
+                                </x-ui.inputs.admin.select>
                                 <x-ui.inputs.admin.text
                                     name="date"
                                     id="date"

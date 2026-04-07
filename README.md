@@ -32,12 +32,16 @@ Automated tests under the **`mysql` group** (for example `tests/Feature/Catalog/
 
 A new language is not only a row in `languages`. To keep SQL `FIELD()`, PHP fallback, admin forms, and UI packs aligned:
 
-1. Add the case to `App\Enums\Content\ContentLanguage` (and `orderedNonNeutralLocales()` / form ordering if it should participate in fallback priority).
+1. Add the case to `App\Enums\Content\ContentLanguage` (and `orderedNonUniversalLocales()` / form ordering if it should participate in fallback priority).
 2. Seed the `languages` table (migration or seeder) with a stable `code` matching the enum value.
 3. Add Laravel translation files under `lang/{code}/` (at minimum what you expose in the locale switcher).
 4. For strings used by i18next on the client, add `lang/js/{code}.json` and register the dynamic import in `resources/js/i18n.js` (`bundleLoaders`).
 
 Skipping any of the above leaves the language missing from `ContentLocaleFallback::orderedCodes()` or without UI strings until those pieces are updated.
+
+### Catalog locations (`locations` table)
+
+Items reference a **location** (campus / site). Rows are **seeded reference data** with a stable uppercase `code` (for example `INDEF`, `UTFPR`, `UNCEN`). The label shown in forms and listings comes from translation keys under `app.catalog.location.codes.*` in `lang/{locale}/app/catalog.php` (with fallback to the row `name` when a key is missing). After changing codes or adding a location, update seeds and those translation entries together.
 
 ## Outgoing mail (Resend)
 

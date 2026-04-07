@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
-    use App\Enums\Content\ContentLanguage;
-    use App\Support\Content\ContentLocaleFallback;
-    use Illuminate\Database\Eloquent\{Collection as EloquentCollection, Model};
-    use Illuminate\Database\Eloquent\Relations\HasMany;
-    use Illuminate\Support\Collection;
+use App\Enums\Content\ContentLanguage;
+use App\Support\Content\ContentLocaleFallback;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Lang;
 use RuntimeException;
 
 /**
@@ -97,21 +99,21 @@ class Language extends Model
     }
 
     /**
-     * Languages listed in public/admin locale switchers (excludes neutral; ordered by display name).
+     * Languages listed in public/admin locale switchers (excludes universal; ordered by display name).
      *
      * @return Collection<int, Language>
      */
     public static function forLocaleSwitcher(): Collection
     {
         return static::query()
-            ->where('code', '!=', ContentLanguage::NEUTRAL->value)
+            ->where('code', '!=', ContentLanguage::UNIVERSAL->value)
             ->orderBy('name')
             ->get();
     }
 
     /**
      * Languages for translatable catalog content: admin create/edit forms and public contribution
-     * (includes neutral). Order: neutral → pt_BR → en, then any other rows by name.
+     * (includes universal). Order: universal → pt_BR → en, then any other rows by name.
      *
      * @return EloquentCollection<int, Language>
      */
@@ -133,6 +135,16 @@ class Language extends Model
             ->all();
 
         return new EloquentCollection($rows);
+    }
+
+    /**
+     * Label for admin catalog content tabs (translation by language code, else stored name).
+     */
+    public function catalogContentTabLabel(): string
+    {
+        $key = 'view.catalog.content_language_names.' . $this->code;
+
+        return Lang::has($key) ? (string) __($key) : (string) $this->name;
     }
 
     /**

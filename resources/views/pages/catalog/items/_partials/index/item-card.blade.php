@@ -19,6 +19,9 @@
                     <p class="card-subtitle">{{ __('view.catalog.items.index.date_unknown') }}</p>
                 @endif
             </div>
+            @if ($item->location)
+                <p class="card-subtitle text-muted small mb-0">{{ $item->location->localized_label }}</p>
+            @endif
 
             <div class="division-line my-1"></div>
             <p class="card-text">{{ Str::limit($item->description, 100) }}</p>

@@ -6,6 +6,57 @@
         </div>
     </div>
     <div class="card mb-3">
+        <h5 class="card-header">{{ __('view.admin.catalog.items.show.qrcode') }}</h5>
+        <div class="card-body">
+            @if ($qrCodeImage)
+                <img
+                    src="{{ $qrCodeImage->image_url }}"
+                    class="img-thumbnail mb-2 js-admin-qrcode-image"
+                    alt="{{ __('view.admin.catalog.items.show.qrcode') }}"
+                    style="max-height: 180px;"
+                >
+            @else
+                <p class="text-muted small mb-2">{{ __('view.admin.catalog.items.show.qrcode_missing') }}</p>
+            @endif
+            <div class="small text-break mb-2">
+                <strong>{{ __('view.admin.catalog.items.show.qrcode_target_url') }}:</strong>
+                <a href="{{ $qrCodeTargetUrl }}" target="_blank" rel="noopener noreferrer" class="js-admin-qrcode-target-url">{{ $qrCodeTargetUrl }}</a>
+            </div>
+            @if ($qrDomainInvalid ?? false)
+                <div class="alert alert-warning py-2 px-3 small mb-2">
+                    <i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i>
+                    {{ __('view.admin.catalog.items.show.qrcode_domain_invalid') }}
+                </div>
+            @endif
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm js-admin-qrcode-copy-link">
+                    <i class="bi bi-link-45deg me-1" aria-hidden="true"></i>{{ __('view.admin.catalog.items.show.qrcode_copy_link') }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm js-admin-qrcode-copy-image" @disabled($qrCodeImage === null)>
+                    <i class="bi bi-image me-1" aria-hidden="true"></i>{{ __('view.admin.catalog.items.show.qrcode_copy_image') }}
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm js-admin-qrcode-print" @disabled($qrCodeImage === null)>
+                    <i class="bi bi-printer me-1" aria-hidden="true"></i>{{ __('view.admin.catalog.items.show.qrcode_print') }}
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-3">
+        <h5 class="card-header">{{ __('view.admin.catalog.items.show.location') }}</h5>
+        <div class="card-body">
+            @if ($item->location)
+                <strong>{{ __('view.admin.catalog.items.show.id') }}: </strong>
+                <p class="ms-3">{{ $item->location->id }}</p>
+                <strong>{{ __('view.admin.catalog.items.show.location_code') }}: </strong>
+                <p class="ms-3">{{ $item->location->code }}</p>
+                <strong>{{ __('view.admin.catalog.items.show.name') }}: </strong>
+                <p class="card-text">{{ $item->location->localized_label }}</p>
+            @else
+                <p class="text-muted mb-0">—</p>
+            @endif
+        </div>
+    </div>
+    <div class="card mb-3">
         <h5 class="card-header">{{ __('view.admin.catalog.items.show.validated') }}</h5>
         <div class="card-body">
             <p class="card-text">

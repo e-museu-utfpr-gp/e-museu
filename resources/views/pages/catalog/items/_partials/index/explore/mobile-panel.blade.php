@@ -12,6 +12,7 @@
             <input type="hidden" name="tag[]" value="{{ $tid }}">
         @endforeach
         <input type="hidden" name="order" value="{{ request()->query('order', 1) }}">
+        <input type="hidden" name="location_id" value="{{ request()->query('location_id', '') }}">
         <div class="input-div m-0 mt-2 col-10">
             <input class="form-control" type="text" name="search" id="search-mobile"
                 value="{{ request('search', '') }}" placeholder="">

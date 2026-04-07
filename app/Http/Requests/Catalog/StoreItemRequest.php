@@ -33,6 +33,7 @@ class StoreItemRequest extends FormRequest
             'detail' => 'nullable|string|max:10000',
             'history' => 'nullable|string|max:100000',
             'category_id' => 'required|integer|numeric|exists:item_categories,id',
+            'location_id' => 'required|integer|numeric|exists:locations,id',
         ], CatalogImageRules::requiredCoverAndOptionalGallery());
     }
 }

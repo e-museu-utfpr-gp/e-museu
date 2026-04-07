@@ -26,6 +26,7 @@ class AdminStoreItemRequest extends FormRequest
         return array_merge(AdminItemTranslationsRules::rules(null), [
             'date' => 'nullable|date',
             'category_id' => 'required|integer|numeric|exists:item_categories,id',
+            'location_id' => 'required|integer|numeric|exists:locations,id',
             'collaborator_id' => 'required|integer|numeric|exists:collaborators,id',
             'validation' => 'required|boolean',
         ], CatalogImageRules::requiredCoverAndOptionalGallery());

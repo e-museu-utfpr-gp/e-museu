@@ -3,6 +3,7 @@
 namespace Tests\Feature\Catalog;
 
 use App\Models\Language;
+use App\Models\Location;
 use App\Models\Collaborator\Collaborator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,14 @@ class TranslationResolutionTest extends TestCase
         }
     }
 
+    private function anySeededLocationId(): int
+    {
+        $id = Location::query()->orderBy('id')->value('id');
+        $this->assertNotNull($id, 'Migration seed must create at least one location row.');
+
+        return (int) $id;
+    }
+
     public function test_item_resolve_translation_prefers_current_locale_when_present(): void
     {
         config(['app.locale' => 'pt_BR', 'app.fallback_locale' => 'en']);
@@ -53,6 +62,7 @@ class TranslationResolutionTest extends TestCase
             'validation' => true,
             'category_id' => $itemCategory->id,
             'collaborator_id' => $collaborator->id,
+            'location_id' => $this->anySeededLocationId(),
         ]);
         $ptId = (int) Language::query()->where('code', 'pt_BR')->value('id');
         $enId = (int) Language::query()->where('code', 'en')->value('id');
@@ -103,6 +113,7 @@ class TranslationResolutionTest extends TestCase
             'validation' => true,
             'category_id' => $itemCategory->id,
             'collaborator_id' => $collaborator->id,
+            'location_id' => $this->anySeededLocationId(),
         ]);
         ItemTranslation::query()->where('item_id', $item->id)->delete();
 
@@ -129,6 +140,7 @@ class TranslationResolutionTest extends TestCase
             'validation' => true,
             'category_id' => $itemCategory->id,
             'collaborator_id' => $collaborator->id,
+            'location_id' => $this->anySeededLocationId(),
         ]);
         ItemTranslation::query()->where('item_id', $item->id)->delete();
 
@@ -148,7 +160,7 @@ class TranslationResolutionTest extends TestCase
         $this->assertTrue($resolved->usedFallback());
     }
 
-    public function test_resolve_translation_uses_neutral_when_pt_and_en_missing(): void
+    public function test_resolve_translation_uses_universal_when_pt_and_en_missing(): void
     {
         config(['app.locale' => 'pt_BR', 'app.fallback_locale' => 'en']);
         app()->setLocale('pt_BR');
@@ -165,25 +177,26 @@ class TranslationResolutionTest extends TestCase
             'validation' => true,
             'category_id' => $itemCategory->id,
             'collaborator_id' => $collaborator->id,
+            'location_id' => $this->anySeededLocationId(),
         ]);
         ItemTranslation::query()->where('item_id', $item->id)->delete();
 
-        $neutralId = (int) Language::query()->where('code', 'neutral')->value('id');
-        $this->assertGreaterThan(0, $neutralId);
+        $universalId = (int) Language::query()->where('code', 'universal')->value('id');
+        $this->assertGreaterThan(0, $universalId);
 
         ItemTranslation::query()->create([
             'item_id' => $item->id,
-            'language_id' => $neutralId,
-            'name' => 'Neutral name',
-            'description' => 'Neutral desc',
+            'language_id' => $universalId,
+            'name' => 'Universal name',
+            'description' => 'Universal desc',
             'history' => null,
             'detail' => null,
         ]);
 
         $fresh = Item::query()->with('translations.language')->findOrFail($item->id);
         $resolved = $fresh->resolveTranslation();
-        $this->assertSame('Neutral name', $resolved->translation?->name);
-        $this->assertSame('neutral', $resolved->sourceLanguageCode);
+        $this->assertSame('Universal name', $resolved->translation?->name);
+        $this->assertSame('universal', $resolved->sourceLanguageCode);
         $this->assertTrue($resolved->usedFallback());
     }
 }

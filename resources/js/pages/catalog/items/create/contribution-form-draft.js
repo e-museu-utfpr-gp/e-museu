@@ -4,7 +4,17 @@ const DRAFT_KEY_SUFFIX = 'catalog.itemContribution.formDraft';
 const DRAFT_VERSION = 1;
 
 /** @type {readonly string[]} — `full_name` omitted: not persisted (avoids draft/verification conflicts). */
-const FIELD_NAMES = ['content_locale', 'name', 'category_id', 'date', 'description', 'detail', 'history', 'email'];
+const FIELD_NAMES = [
+    'content_locale',
+    'name',
+    'category_id',
+    'location_id',
+    'date',
+    'description',
+    'detail',
+    'history',
+    'email',
+];
 
 /** After this age the saved draft is ignored and removed (keeps localStorage from growing stale forever). */
 const DRAFT_TTL_MS = 3 * 24 * 60 * 60 * 1000;

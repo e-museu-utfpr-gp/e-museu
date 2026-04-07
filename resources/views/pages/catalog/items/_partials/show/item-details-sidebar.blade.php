@@ -47,6 +47,12 @@
                         ])
                     @endif
                 </div>
+                <div class="col-md-5">
+                    <p class="fw-bold">{{ __('view.catalog.items.show.location') }}</p>
+                </div>
+                <div class="col-md-7">
+                    <p>{{ $item->location?->localized_label ?? '—' }}</p>
+                </div>
             </div>
 
             <div class="row">

@@ -23,7 +23,7 @@ class ItemIndexQueryBuilder
     public static function build(Request $request): Builder
     {
         $query = Item::query()
-            ->with(['coverImage', 'itemCategory.translations.language'])
+            ->with(['coverImage', 'itemCategory.translations.language', 'location'])
             ->where('validation', true)
             ->select('items.*')
             ->addSelect(TranslationDisplaySql::itemCatalogListSelectAliases());
@@ -32,6 +32,7 @@ class ItemIndexQueryBuilder
         $itemCategoryId = $request->item_category ?? $request->input('item_category');
 
         self::applyItemCategoryFilter($query, $itemCategoryId);
+        self::applyLocationFilter($query, $request->input('location_id'));
         self::applySearchFilter($query, $request->search);
         self::applyTagCategoryFilter($query, $request->category);
         self::applyTagFilter($query, $request->tag);
@@ -48,6 +49,25 @@ class ItemIndexQueryBuilder
         if ($itemCategoryId) {
             $query->where('category_id', $itemCategoryId);
         }
+    }
+
+    /**
+     * @param  Builder<Item>  $query
+     */
+    private static function applyLocationFilter(Builder $query, mixed $locationId): void
+    {
+        if ($locationId === null || $locationId === '') {
+            return;
+        }
+
+        $id = filter_var($locationId, FILTER_VALIDATE_INT);
+        if ($id === false || $id < 1) {
+            $query->whereRaw('0 = 1');
+
+            return;
+        }
+
+        $query->where('items.location_id', $id);
     }
 
     /**

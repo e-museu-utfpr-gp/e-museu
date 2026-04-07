@@ -21,8 +21,8 @@ return [
         'info_popover_label' => 'More information',
         'modal_dismiss' => 'Close dialog',
         'languages' => [
-            'neutral_tooltip_short' => 'About the Neutral content language',
-            'neutral_tooltip' => 'Neutral is a special catalog language for text that should read the same for every visitor, no matter the site language (for example institution names, brands, or titles you do not want translated). When the site shows an item, it prefers the visitor’s language, then may use Neutral if that locale has no text, before trying other languages. Leave Neutral empty if you do not need a single shared version.',
+            'universal_tooltip_short' => 'About the Universal content language',
+            'universal_tooltip' => 'Universal is a special catalog language for text that should read the same for every visitor, no matter the site language (for example institution names, brands, or titles you do not want translated). When the site shows an item, it prefers the visitor’s language, then may use Universal if that locale has no text, before trying other languages. Leave Universal empty if you do not need a single shared version.',
         ],
         'images_upload' => [
             'cover_label' => 'Cover image',

@@ -5,7 +5,10 @@
             <p class="text-muted small mb-0" data-role="gallery-empty-hint">{{ __('view.admin.catalog.items.show.no_images') }}</p>
         @else
             @php
-                $sortedImages = $item->images->sortBy('sort_order')->values();
+                $sortedImages = $item->images
+                    ->filter(fn ($img) => $img->type !== \App\Enums\Catalog\ItemImageType::QRCODE)
+                    ->sortBy('sort_order')
+                    ->values();
                 $coverShown = false;
             @endphp
             @foreach ($sortedImages as $img)

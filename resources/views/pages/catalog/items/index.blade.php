@@ -8,7 +8,7 @@
         @endif
         <div class="row">
             <div class="col-md-2 d-none d-md-block">
-                @include('pages.catalog.items._partials.index.filter-menu')
+                @include('pages.catalog.items._partials.index.filter-menu', ['filterPanelSuffix' => 'desktop'])
             </div>
             <div class="col-2 d-block d-md-none">
                 <x-ui.buttons.default type="button" variant="primary" class="d-md-none toggle-filter-button-mobile py-2"
@@ -25,7 +25,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
                     <div class="offcanvas-body">
-                        @include('pages.catalog.items._partials.index.filter-menu')
+                        @include('pages.catalog.items._partials.index.filter-menu', ['filterPanelSuffix' => 'mobile'])
                     </div>
                 </div>
             </div>

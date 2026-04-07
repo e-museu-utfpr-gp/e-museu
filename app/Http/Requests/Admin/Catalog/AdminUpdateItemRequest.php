@@ -30,6 +30,7 @@ class AdminUpdateItemRequest extends FormRequest
         return array_merge(AdminItemTranslationsRules::rules($item instanceof Item ? $item : null), [
             'date' => 'nullable|date',
             'category_id' => 'required|integer|numeric|exists:item_categories,id',
+            'location_id' => 'required|integer|numeric|exists:locations,id',
             'collaborator_id' => 'required|integer|numeric|exists:collaborators,id',
             'identification_code' => 'required|string|min:1|max:50',
             'validation' => 'required|boolean',

@@ -7,8 +7,15 @@
                 :search-options="$searchOptions"
                 :search-placeholder="__('view.admin.catalog.items.index.search_placeholder')"
                 :boolean-columns="$searchBooleanColumns"
+                :search-select-columns="$searchSelectColumns"
+                :search-select-options="$searchSelectOptions"
+                :search-select-any-label="$searchSelectAnyLabel"
             />
-            <x-admin.sortable-table :action="route('admin.catalog.items.index')" :columns="$sortColumns">
+            <x-admin.sortable-table
+                :action="route('admin.catalog.items.index')"
+                :columns="$sortColumns"
+                table-class="admin-catalog-items-index-table"
+            >
                             @foreach ($items as $item)
                                 <tr class="@if (!$item->locks->isEmpty() && (string) $item->locks->first()->admin_id !== (string) auth()->id()) table-warning @endif">
                                     <th scope="row">{{ $item->id }}</th>
@@ -17,7 +24,8 @@
                                     <td>{{ $item->history }}</td>
                                     <td>{{ $item->detail }}</td>
                                     <td>{{ $item->date ? date('d-m-Y', strtotime($item->date)) : '—' }}</td>
-                                    <td>{{ $item->identification_code }}</td>
+                                    <td class="admin-items-index-col admin-items-index-col--identification-code">
+                                        {{ $item->identification_code }}</td>
                                     <td>
                                         @if ($item->validation == 1)
                                             {{ __('view.admin.catalog.items.index.yes') }}
@@ -25,8 +33,12 @@
                                             {{ __('view.admin.catalog.items.index.no') }}
                                         @endif
                                     </td>
-                                    <td>{{ $item->item_category_name }}</td>
-                                    <td>{{ $item->collaborator_email }}</td>
+                                    <td class="admin-items-index-col admin-items-index-col--category">
+                                        {{ $item->item_category_name }}</td>
+                                    <td class="admin-items-index-col admin-items-index-col--location">
+                                        {{ $item->location?->localized_label ?? '—' }}</td>
+                                    <td class="admin-items-index-col admin-items-index-col--collaborator">
+                                        {{ $item->collaborator_email }}</td>
                                     <td>{{ date('d-m-Y H:i:s', strtotime($item->item_created)) }}</td>
                                     <td>{{ date('d-m-Y H:i:s', strtotime($item->item_updated)) }}</td>
                                     <td>
