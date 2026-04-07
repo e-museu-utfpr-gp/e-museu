@@ -60,8 +60,7 @@ class ItemImage extends Model
         Item $item,
         string $targetUrl,
         string $extension = 'png'
-    ): string
-    {
+    ): string {
         $itemId = (int) $item->getKey();
         if ($itemId < 1) {
             throw new InvalidArgumentException(

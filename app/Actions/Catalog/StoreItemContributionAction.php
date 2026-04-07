@@ -21,6 +21,8 @@ use Throwable;
 
 /**
  * Store a public catalog contribution (item, images, tags, extras, components).
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 final class StoreItemContributionAction
 {

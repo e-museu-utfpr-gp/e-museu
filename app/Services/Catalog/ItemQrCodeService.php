@@ -35,33 +35,17 @@ class ItemQrCodeService
         if (! $image instanceof ItemImage) {
             return null;
         }
-        $base = basename((string) $image->getRawOriginal('path'));
-        if ($base === '') {
-            return null;
-        }
-        $dotPos = strrpos($base, '.');
-        $encoded = $dotPos === false ? $base : substr($base, 0, $dotPos);
-        if ($encoded === '') {
+        $encoded = $this->encodedUrlFromImagePath((string) $image->getRawOriginal('path'));
+        if ($encoded === null) {
             return null;
         }
 
-        $padding = (4 - (strlen($encoded) % 4)) % 4;
-        $padded = strtr($encoded, '-_', '+/') . str_repeat('=', $padding);
-        $decoded = base64_decode($padded, true);
+        $decoded = $this->decodeBase64Url($encoded);
         if (! is_string($decoded) || trim($decoded) === '') {
             return null;
         }
 
-        if (! filter_var($decoded, FILTER_VALIDATE_URL)) {
-            return null;
-        }
-
-        $scheme = strtolower((string) parse_url($decoded, PHP_URL_SCHEME));
-        if ($scheme !== 'http' && $scheme !== 'https') {
-            return null;
-        }
-
-        return $decoded;
+        return $this->isHttpUrl($decoded) ? $decoded : null;
     }
 
     public function isQrDomainCompatible(?string $targetUrl): bool
@@ -132,5 +116,38 @@ class ItemQrCodeService
             }
             $img->delete();
         }
+    }
+
+    private function encodedUrlFromImagePath(string $path): ?string
+    {
+        $base = basename($path);
+        if ($base === '') {
+            return null;
+        }
+
+        $dotPos = strrpos($base, '.');
+        $encoded = $dotPos === false ? $base : substr($base, 0, $dotPos);
+
+        return $encoded !== '' ? $encoded : null;
+    }
+
+    private function decodeBase64Url(string $encoded): ?string
+    {
+        $padding = (4 - (strlen($encoded) % 4)) % 4;
+        $padded = strtr($encoded, '-_', '+/') . str_repeat('=', $padding);
+        $decoded = base64_decode($padded, true);
+
+        return is_string($decoded) ? $decoded : null;
+    }
+
+    private function isHttpUrl(string $url): bool
+    {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            return false;
+        }
+
+        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+
+        return $scheme === 'http' || $scheme === 'https';
     }
 }

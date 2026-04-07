@@ -36,7 +36,7 @@ final class ItemIdentificationCodeTest extends TestCase
 
     public function test_build_for_item_includes_segments_and_uppercases_location(): void
     {
-        $item = new Item;
+        $item = new Item();
         $item->forceFill(['id' => 1]);
 
         $code = ItemIdentificationCode::buildForItem(
