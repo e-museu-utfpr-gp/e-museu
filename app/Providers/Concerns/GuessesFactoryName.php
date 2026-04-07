@@ -2,8 +2,8 @@
 
 namespace App\Providers\Concerns;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 class GuessesFactoryName

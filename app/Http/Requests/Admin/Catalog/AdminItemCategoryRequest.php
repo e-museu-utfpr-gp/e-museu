@@ -2,14 +2,20 @@
 
 namespace App\Http\Requests\Admin\Catalog;
 
+use App\Http\Requests\Concerns\AppliesAdminTranslationsPayload;
+use App\Models\Catalog\ItemCategory;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class AdminItemCategoryRequest extends FormRequest
 {
-    public function authorize(): bool
+    use AppliesAdminTranslationsPayload;
+
+    /**
+     * @return class-string<\App\Http\Requests\Contracts\AdminTranslationsPayloadContract>
+     */
+    protected function adminTranslationsPayloadRules(): string
     {
-        return true;
+        return AdminItemCategoryTranslationsRules::class;
     }
 
     /**
@@ -17,14 +23,8 @@ class AdminItemCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'name' => [
-                'required',
-                'string',
-                'min:1',
-                'max:200',
-                Rule::unique('item_categories')->ignore($this->route('item_category')),
-            ],
-        ];
+        $category = $this->route('item_category');
+
+        return AdminItemCategoryTranslationsRules::rules($category instanceof ItemCategory ? $category : null);
     }
 }

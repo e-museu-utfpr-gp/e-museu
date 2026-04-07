@@ -9,6 +9,8 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      E_MUSEU_COMPOSE_FILE: docker-compose.local.yml
     steps:
       - uses: actions/checkout@v3
       
@@ -17,11 +19,16 @@ jobs:
       
       - name: Make run script executable
         run: chmod +x ./run
+
+      - name: Tear down any previous compose stacks
+        run: |
+          docker compose -f docker-compose.local.yml down --remove-orphans 2>/dev/null || true
+          docker compose -f docker-compose.prod-local.yml down --remove-orphans 2>/dev/null || true
       
       - name: Setup environment and run tests
         run: |
-          # Setup environment using run script (creates .env, starts containers, installs deps, runs migrations)
-          ./run setup -env -y
+          # setup → env (.env from .env.example if missing), compose up, composer, key if no APP_KEY, migrate, seed; -y is non-interactive.
+          ./run setup -y
           
           # Run unit and feature tests using run script
           echo "Running tests..."
@@ -37,6 +44,8 @@ jobs:
 
   code-quality:
     runs-on: ubuntu-latest
+    env:
+      E_MUSEU_COMPOSE_FILE: docker-compose.local.yml
     steps:
       - uses: actions/checkout@v3
       
@@ -45,11 +54,16 @@ jobs:
       
       - name: Make run script executable
         run: chmod +x ./run
+
+      - name: Tear down any previous compose stacks
+        run: |
+          docker compose -f docker-compose.local.yml down --remove-orphans 2>/dev/null || true
+          docker compose -f docker-compose.prod-local.yml down --remove-orphans 2>/dev/null || true
       
       - name: Setup environment
         run: |
-          # Setup environment using run script (creates .env, starts containers, installs deps)
-          ./run setup -env -y
+          # setup → env (.env from .env.example if missing), compose up, composer, key if no APP_KEY, migrate, seed; -y non-interactive.
+          ./run setup -y
       
       - name: See containers
         run: ./run ps
@@ -137,14 +151,7 @@ jobs:
           max_attempts=30
           attempt=1
           while [ $attempt -le $max_attempts ]; do
-            if docker compose -f docker-compose.production.test.yml exec -T app-production php -r "
-              \$host = getenv('DB_HOST') ?: 'db-production';
-              \$port = 3306;
-              \$user = getenv('DB_USERNAME') ?: 'user';
-              \$pass = getenv('DB_PASSWORD') ?: '';
-              \$dsn = 'mysql:host=' . \$host . ';port=' . \$port;
-              try { \$pdo = new PDO(\$dsn, \$user, \$pass); \$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); exit(0); } catch (Exception \$e) { exit(1); }
-            " 2>/dev/null; then
+            if docker compose -f docker-compose.production.test.yml exec -T app-production php -r '$url = getenv("DATABASE_URL"); if ($url === false || $url === "") exit(1); $p = parse_url($url); if ($p === false || ($p["scheme"] ?? "") !== "mysql") exit(1); $host = $p["host"] ?? "127.0.0.1"; $port = (int) ($p["port"] ?? 3306); $user = rawurldecode($p["user"] ?? ""); $pass = rawurldecode($p["pass"] ?? ""); $dsn = "mysql:host=" . $host . ";port=" . $port; try { $pdo = new PDO($dsn, $user, $pass); $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); exit(0); } catch (Throwable $e) { exit(1); }' 2>/dev/null; then
               echo "✓ Database is ready!"
               break
             fi

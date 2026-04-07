@@ -3,35 +3,47 @@
 namespace App\Actions\Catalog;
 
 use App\Models\Catalog\Item;
-use App\Models\Catalog\ItemComponent;
 use App\Models\Collaborator\Collaborator;
-use App\Services\Catalog\ExtraService;
-use App\Services\Catalog\ItemImagesService;
-use App\Services\Catalog\ItemService;
-use App\Services\Catalog\ItemTagService;
+use App\Services\Catalog\{
+    ExtraService,
+    ItemComponentService,
+    ItemImagesService,
+    ItemQrCodeService,
+    ItemService,
+    ItemTagService,
+};
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Taxonomy\TagService;
+use App\Support\Content\TranslatablePayload;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
-class StoreItemContributionAction
+/**
+ * Store a public catalog contribution (item, images, tags, extras, components).
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
+final class StoreItemContributionAction
 {
     public function __construct(
         private readonly CollaboratorService $collaboratorService,
         private readonly ExtraService $extraService,
+        private readonly ItemComponentService $itemComponentService,
         private readonly ItemTagService $itemTagService,
         private readonly TagService $tagService,
         private readonly ItemService $itemService,
         private readonly ItemImagesService $itemImagesService,
+        private readonly ItemQrCodeService $itemQrCodeService,
     ) {
     }
 
     /**
      * Store a contributed item (public contribution flow).
-     * Resolves collaborator and creates item, images, tags, extras and components.
+     * Resolves collaborator and creates item, images, tags, extras and components in one database transaction.
      *
      * @param  array<string, mixed>  $collaboratorData  Collaborator data validated by the
-     *                                                  request (e.g. name, contact).
+     *                                                  request (e.g. name, email).
      * @param  array<string, mixed>  $itemData          Item data (name, category_id,
      *                                                  description, history, detail, date,
      *                                                  validation, etc.).
@@ -41,13 +53,14 @@ class StoreItemContributionAction
      *                                                        category and name.
      * @param  array<int, UploadedFile>|null  $galleryImages
      * @return array{
-     *     status: 'ok'|'internal_blocked'|'collaborator_blocked',
-     *     item?: Item
+     *     status: 'ok'|'internal_blocked'|'collaborator_blocked'|'email_unverified',
+     *     item?: Item,
      * }
      */
     public function handle(
         array $collaboratorData,
         array $itemData,
+        int $contentLanguageId,
         array $tags,
         array $extras,
         array $components,
@@ -67,21 +80,53 @@ class StoreItemContributionAction
             unset($itemData['image'], $itemData['cover_image']);
         }
 
-        $item = $this->createItemWithImages(
-            $itemData,
-            $collaborator,
-            $coverImage,
-            $galleryImages ?? [],
-        );
+        /** @var array{itemId: int|null} */
+        $cleanup = ['itemId' => null];
 
-        $this->itemTagService->attachTagsToItem($item, $tags, $this->tagService);
-        $this->extraService->createForItem($item, $collaborator, $extras);
-        $this->attachComponentsToItem($item, $components);
+        try {
+            return DB::transaction(function () use (
+                $itemData,
+                $collaborator,
+                $collaboratorData,
+                $contentLanguageId,
+                $tags,
+                $extras,
+                $components,
+                $coverImage,
+                $galleryImages,
+                &$cleanup,
+            ): array {
+                $this->collaboratorService->applySubmittedFullNameAfterVerifiedContribution(
+                    $collaborator,
+                    (string) ($collaboratorData['full_name'] ?? ''),
+                );
+                $collaborator->refresh();
 
-        return [
-            'status' => 'ok',
-            'item' => $item,
-        ];
+                $item = $this->createItemWithImages(
+                    $itemData,
+                    $collaborator,
+                    $contentLanguageId,
+                    $coverImage,
+                    $galleryImages ?? [],
+                    $cleanup,
+                );
+
+                $this->itemTagService->attachTagsToItem($item, $tags, $this->tagService, $contentLanguageId);
+                $this->extraService->createForItem($item, $collaborator, $extras, $contentLanguageId);
+                $this->itemComponentService->attachContributedComponents($item, $components);
+
+                return [
+                    'status' => 'ok',
+                    'item' => $item,
+                ];
+            });
+        } catch (Throwable $e) {
+            if ($cleanup['itemId'] !== null) {
+                $this->itemImagesService->deletePublicStorageFolderForItemId($cleanup['itemId']);
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -89,13 +134,22 @@ class StoreItemContributionAction
      *
      * @param  array<string, mixed>  $collaboratorData
      * @return array{
-     *     status: 'ok'|'internal_blocked'|'collaborator_blocked',
-     *     collaborator: Collaborator|null
+     *     status: 'ok'|'internal_blocked'|'collaborator_blocked'|'email_unverified',
+     *     collaborator: Collaborator|null,
      * }
      */
     private function resolveCollaboratorForContribution(array $collaboratorData): array
     {
-        $collaborator = $this->collaboratorService->resolveOrCreateCollaborator($collaboratorData);
+        $collaborator = $this->collaboratorService->findCollaboratorByEmailForPublicLookup(
+            (string) ($collaboratorData['email'] ?? ''),
+        );
+        if ($collaborator === null) {
+            return [
+                'status' => 'email_unverified',
+                'collaborator' => null,
+            ];
+        }
+
         if ($collaborator->role === \App\Enums\Collaborator\CollaboratorRole::INTERNAL) {
             return [
                 'status' => 'internal_blocked',
@@ -106,6 +160,14 @@ class StoreItemContributionAction
         if ($collaborator->blocked === true) {
             return [
                 'status' => 'collaborator_blocked',
+                'collaborator' => null,
+            ];
+        }
+
+        $gate = $this->collaboratorService->publicContributionCollaboratorGate($collaborator, $collaboratorData);
+        if ($gate === 'email_unverified') {
+            return [
+                'status' => 'email_unverified',
                 'collaborator' => null,
             ];
         }
@@ -121,14 +183,19 @@ class StoreItemContributionAction
      *
      * @param  array<string, mixed>  $itemData
      * @param  array<int, UploadedFile>  $galleryImages
+     * @param  array{itemId: int|null}  $cleanup  Item id once the row exists; used to remove
+     *                                            public storage if the transaction rolls back.
      */
     private function createItemWithImages(
         array $itemData,
         Collaborator $collaborator,
+        int $contentLanguageId,
         ?UploadedFile $coverImage,
-        array $galleryImages
+        array $galleryImages,
+        array &$cleanup,
     ): Item {
-        $item = $this->createItemForContribution($itemData, $collaborator);
+        $item = $this->createItemForContribution($itemData, $collaborator, $contentLanguageId);
+        $cleanup['itemId'] = (int) $item->id;
         if ($coverImage !== null) {
             $this->itemImagesService->storeCoverImage($item, $coverImage);
         }
@@ -138,47 +205,37 @@ class StoreItemContributionAction
     }
 
     /**
-     * Create an item for contribution flow (transaction with identification code).
+     * Create an item for contribution flow (identification code).
+     * Caller must wrap in {@see DB::transaction} together with images, tags, extras, and components.
      *
      * @param  array<string, mixed>  $itemData
      */
-    private function createItemForContribution(array $itemData, Collaborator $collaborator): Item
-    {
+    private function createItemForContribution(
+        array $itemData,
+        Collaborator $collaborator,
+        int $contentLanguageId
+    ): Item {
         $itemData['collaborator_id'] = $collaborator->id;
         $itemData['identification_code'] = '000';
 
-        return DB::transaction(function () use ($itemData): Item {
-            $item = Item::create($itemData);
-            $item->update([
-                'identification_code' => $this->itemService->createIdentificationCode($item),
-            ]);
+        $split = TranslatablePayload::split($itemData, TranslatablePayload::ITEM_KEYS);
+        $translationData = $split['translation'];
+        $persist = $split['persist'];
 
-            return $item;
-        });
-    }
-
-    /**
-     * Attach components to an item (create ItemComponent records for each component found by category+name).
-     *
-     * @param  array<int, array<string, mixed>>  $componentsData
-     */
-    private function attachComponentsToItem(Item $item, array $componentsData): void
-    {
-        foreach ($componentsData as $componentItemData) {
-            $component = Item::where('category_id', '=', $componentItemData['category_id'])
-                ->where('name', '=', $componentItemData['name'])
-                ->first();
-            if (! $component) {
-                logger()->info('Component item not found for contribution', [
-                    'item_id' => $item->id,
-                    'component_category_id' => $componentItemData['category_id'] ?? null,
-                    'component_name' => $componentItemData['name'] ?? null,
-                ]);
-                continue;
-            }
-            $componentItemData['component_id'] = $component->id;
-            $componentItemData['item_id'] = $item->id;
-            ItemComponent::create($componentItemData);
+        $item = Item::create($persist);
+        if ($translationData !== []) {
+            $item->syncTranslationForLanguage($contentLanguageId, $translationData);
         }
+        $item->update([
+            'identification_code' => $this->itemService->createIdentificationCode($item, $contentLanguageId),
+        ]);
+        $item->refresh();
+        try {
+            $this->itemQrCodeService->regenerateForItem($item);
+        } catch (Throwable $e) {
+            report($e);
+        }
+
+        return $item;
     }
 }

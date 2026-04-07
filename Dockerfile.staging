@@ -20,6 +20,8 @@ RUN apk update && apk upgrade && apk add --no-cache \
     linux-headers \
     icu-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd sockets intl \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer \
     && apk del build-base autoconf make gcc g++ libc-dev file re2c \
     && rm -rf /var/cache/apk/*
@@ -30,6 +32,8 @@ WORKDIR /var/www
 FROM php-base AS vendor
 
 COPY composer.json composer.lock ./
+# Staging must match production posture: no require-dev (Ignition, Debugbar, PHPUnit in vendor, etc.).
+# Use local / Dockerfile.local for debugging with full Composer deps.
 RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
 
 # Copy only necessary files for dependencies caching

@@ -2,29 +2,29 @@
 
 namespace App\Http\Requests\Admin\Taxonomy;
 
+use App\Http\Requests\Concerns\AppliesAdminTranslationsPayload;
+use App\Models\Taxonomy\TagCategory;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class AdminTagCategoryRequest extends FormRequest
 {
-    public function authorize(): bool
+    use AppliesAdminTranslationsPayload;
+
+    /**
+     * @return class-string<\App\Http\Requests\Contracts\AdminTranslationsPayloadContract>
+     */
+    protected function adminTranslationsPayloadRules(): string
     {
-        return true;
+        return AdminTagCategoryTranslationsRules::class;
     }
 
     /**
-     * @return array<string, string|array<int, string|\Illuminate\Validation\Rule>>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        return [
-            'name' => [
-                'required',
-                'string',
-                'min:1',
-                'max:200',
-                Rule::unique('tag_categories')->ignore($this->route('tag_category')),
-            ],
-        ];
+        $category = $this->route('tag_category');
+
+        return AdminTagCategoryTranslationsRules::rules($category instanceof TagCategory ? $category : null);
     }
 }

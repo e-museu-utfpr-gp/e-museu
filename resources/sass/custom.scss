@@ -112,6 +112,16 @@ a {
     color: #0d233d;
     background-color: #f4da7a;
     border-radius: 0 0 0 0;
+
+    &:disabled {
+        background-color: #c4c4c4;
+    }
+}
+
+// Public catalog: verification hints align with .input-div gutters
+.catalog-verification-msg {
+    margin-left: 2rem;
+    margin-right: 2rem;
 }
 
 .button {
@@ -137,11 +147,53 @@ a {
     }
 }
 
+// Public navbar: match nav-link spacing; avoid .input-div / .input-form (form margins + underline)
+.navbar .locale-nav-select {
+    margin: 0;
+    padding: 0;
+
+    @media (max-width: 991.98px) {
+        width: 100%;
+    }
+}
+
+.navbar .locale-nav-select-input {
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    color: #0d233d;
+    cursor: pointer;
+    line-height: 1.5;
+    padding: 0.75rem 1.75rem 0.75rem 1rem;
+    min-width: min(100%, 11rem);
+    width: 100%;
+
+    @media (min-width: 992px) {
+        min-width: 11rem;
+        width: auto;
+    }
+
+    &:focus {
+        border-color: transparent;
+        box-shadow: none;
+        background-color: transparent;
+    }
+
+    &:hover {
+        background-color: rgba(91, 225, 185, 0.2);
+    }
+}
+
 .image-form {
     border-radius: 0;
     border: 0;
     background-color: #e6f6f1;
     padding-bottom: 0;
+}
+
+// Catalog item create: tinted preview area (no side accent — title uses global h5 bar)
+.catalog-images-preview-panel {
+    background-color: #e8f5e9;
 }
 
 .main-container {
@@ -321,10 +373,20 @@ textarea {
     width: fit-content;
 }
 
+// Público: sem scroll horizontal na página; faixa explorar continua dentro do .container
+body.app-public-layout {
+    overflow-x: clip;
+}
+
+.app-public-layout .min-w-0 {
+    min-width: 0;
+}
+
 .explore-menu-div {
     background-color: #5be1b9;
     box-shadow: 0 4px 5px #c4c4c4;
     z-index: 10;
+    max-width: 100%;
 }
 
 .explore-menu-div-mobile {
@@ -334,11 +396,19 @@ textarea {
 }
 
 .explore-menu-options {
-    overflow-x: scroll;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
     -ms-overflow-style: none;
     scrollbar-width: none;
     scroll-behavior: smooth;
     background-color: #e6f6f1;
+    min-width: 0;
+
+    .explore-menu-option {
+        flex-shrink: 0;
+    }
 
     &::-webkit-scrollbar {
         display: none;
@@ -378,7 +448,6 @@ textarea {
 
 .menu-option {
     white-space: nowrap;
-    overflow: auto;
 }
 
 .toggle-filter-button {
@@ -469,4 +538,219 @@ footer {
 
 .orange-text {
     color: #ed6e38;
+}
+
+// Universal language: keep label + info icon on one row inside the tab (no nested <button>)
+.nav-tabs .nav-item .nav-link:has(.language-tab-label) {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    white-space: nowrap;
+}
+
+.tab-info-popover-icon {
+    font-size: 1rem;
+    line-height: 1;
+    display: block;
+}
+
+// Admin: sem scroll horizontal na página; só a área da tabela rola
+body.admin-layout {
+    overflow-x: clip;
+
+    // Global `h5` (catálogo público: barra lateral mint) não deve vazar para cards / alertas do admin
+    .card-header {
+        border-left: 0;
+        padding-left: var(--bs-card-cap-padding-x, 1rem);
+    }
+
+    .alert h5 {
+        border-left: 0;
+        padding-left: 0;
+        font-size: inherit;
+        font-weight: inherit;
+        margin-bottom: 0;
+    }
+}
+
+.admin-layout .admin-main {
+    min-width: 0;
+}
+
+.admin-layout .min-w-0 {
+    min-width: 0;
+}
+
+// Admin listagem: coluna de busca em uma linha (BS .form-select / .form-control são width 100%)
+.admin-index-toolbar .container-fluid {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-search-form {
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-end;
+
+    .admin-search-column,
+    .admin-search-boolean,
+    .admin-search-select {
+        width: auto;
+        min-width: 9rem;
+        max-width: 16rem;
+        flex-shrink: 0;
+    }
+
+    .admin-search-text {
+        flex: 1 1 10rem;
+        min-width: 7rem;
+        max-width: 22rem;
+        width: auto;
+    }
+
+    .btn {
+        flex-shrink: 0;
+    }
+}
+
+// Admin catalog items index: narrow columns by semantic class (not nth-child)
+.admin-catalog-items-index-table {
+    .admin-items-index-col--identification-code {
+        max-width: 6.5rem;
+        width: 6.5rem;
+        font-size: 0.8125rem;
+        word-break: break-word;
+        vertical-align: middle;
+    }
+
+    .admin-items-index-col--category {
+        max-width: 7.5rem;
+        width: 7.5rem;
+        font-size: 0.8125rem;
+        word-break: break-word;
+        vertical-align: middle;
+    }
+
+    .admin-items-index-col--location {
+        max-width: 7rem;
+        width: 7rem;
+        font-size: 0.8125rem;
+        word-break: break-word;
+        vertical-align: middle;
+    }
+
+    .admin-items-index-col--collaborator {
+        max-width: 8.5rem;
+        width: 8.5rem;
+        font-size: 0.8125rem;
+        vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .admin-items-index-col--identification-code .btn,
+    .admin-items-index-col--category .btn,
+    .admin-items-index-col--location .btn,
+    .admin-items-index-col--collaborator .btn {
+        font-size: 0.75rem;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        white-space: normal;
+        line-height: 1.2;
+        text-align: left;
+    }
+}
+
+.enhanced-select-root {
+    position: relative;
+    width: 100%;
+}
+
+// Toggle copies .form-select for Bootstrap shape/colors (admin). Strip only the SVG caret —
+// the script adds .bi-chevron-down; without this, two carets appear.
+// Caret is absolutely positioned like Bootstrap’s background (right padding-x, vertically centered).
+.enhanced-select-toggle.form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: none !important;
+    cursor: pointer;
+    position: relative;
+
+    &::after {
+        display: none;
+    }
+
+    .enhanced-select-toggle-label {
+        flex: 1 1 0%;
+        min-width: 0;
+    }
+
+    .enhanced-select-toggle-caret {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        line-height: 1;
+        pointer-events: none;
+    }
+}
+
+// Public contribution fields: .input-form must win over .form-select border/radius/background.
+.enhanced-select-toggle.form-select.input-form {
+    border: 0;
+    border-bottom: 1px solid #0d233d;
+    border-radius: 0;
+    background-color: #e6f6f1;
+
+    &:focus {
+        box-shadow: 0 0 0 0 #5be1b9;
+        background-color: #e6f6f1;
+    }
+}
+
+.enhanced-select-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1080;
+    margin-top: -1px;
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-top: 0;
+    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+    box-shadow: var(--bs-dropdown-box-shadow, 0 0.5rem 1rem rgba(0, 0, 0, 0.15));
+}
+
+.enhanced-select-panel-options {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.enhanced-select-option {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    border: 0;
+    background: transparent;
+    color: var(--bs-body-color);
+    text-align: left;
+
+    &:hover:not(:disabled) {
+        background-color: var(--bs-secondary-bg);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &.active {
+        background-color: var(--bs-primary-bg-subtle);
+        font-weight: 600;
+    }
 }

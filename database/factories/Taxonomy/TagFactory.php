@@ -2,6 +2,7 @@
 
 namespace Database\Factories\Taxonomy;
 
+use App\Models\Taxonomy\{Tag, TagCategory};
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -15,9 +16,17 @@ class TagFactory extends Factory
     public function definition(): array
     {
         return [
-            'tag_category_id' => $this->faker->numberBetween(1, 4),
-            'name' => $this->faker->unique()->word,
+            'tag_category_id' => fn () => TagCategory::query()->inRandomOrder()->value('id'),
             'validation' => $this->faker->boolean,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Tag $tag): void {
+            $tag->syncPrimaryLocaleTranslation([
+                'name' => $this->faker->unique()->word,
+            ]);
+        });
     }
 }

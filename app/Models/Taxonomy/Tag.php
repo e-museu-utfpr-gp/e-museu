@@ -2,29 +2,48 @@
 
 namespace App\Models\Taxonomy;
 
-use App\Models\Catalog\Item;
+use App\Models\Concerns\SyncsAdminFormNameTranslations;
 use App\Models\Identity\Lock;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Catalog\{Item, ItemTag};
+use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, MorphMany};
 
 class Tag extends Model
 {
     use HasFactory;
+    use SyncsAdminFormNameTranslations;
 
     protected $fillable = [
-        'name',
         'validation',
         'tag_category_id',
     ];
 
     protected $table = 'tags';
 
+    protected $casts = [
+        'validation' => 'boolean',
+    ];
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(TagTranslation::class, 'tag_id')
+            ->orderBy('language_id')
+            ->orderBy('id');
+    }
+
+    public function resolvedTranslation(): ?TagTranslation
+    {
+        $t = $this->resolveTranslation()->translation;
+
+        return $t instanceof TagTranslation ? $t : null;
+    }
+
     public function items(): BelongsToMany
     {
-        return $this->belongsToMany(Item::class, 'item_tag', 'tag_id', 'item_id');
+        return $this->belongsToMany(Item::class, 'item_tag', 'tag_id', 'item_id')
+            ->using(ItemTag::class)
+            ->withPivot('validation');
     }
 
     public function tagCategory(): BelongsTo
@@ -32,9 +51,6 @@ class Tag extends Model
         return $this->belongsTo(TagCategory::class, 'tag_category_id');
     }
 
-    /**
-     * Alias for {@see tagCategory()} — catalog views use `tag->category`.
-     */
     public function category(): BelongsTo
     {
         return $this->tagCategory();

@@ -3,11 +3,12 @@
 namespace App\Services\Catalog;
 
 use App\Models\Catalog\ItemCategory;
-use App\Support\AdminIndexQueryBuilder;
-use App\Support\AdminIndexConfig;
+use App\Support\Content\TranslationDisplaySql;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 
 class ItemCategoryService
 {
@@ -16,14 +17,20 @@ class ItemCategoryService
      */
     public function getPaginatedItemCategoriesForAdminIndex(Request $request): array
     {
-        $count = ItemCategory::count();
-        $query = ItemCategory::query();
+        $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
+        $query = ItemCategory::query()
+            ->select('item_categories.*')
+            ->selectRaw("({$nameSql}) AS name")
+            ->with('locks');
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::itemCategories());
 
         $itemCategories = $query->paginate(50)->withQueryString();
 
-        return ['itemCategories' => $itemCategories, 'count' => $count];
+        return [
+            'itemCategories' => $itemCategories,
+            'count' => $itemCategories->total(),
+        ];
     }
 
     /**
@@ -31,7 +38,13 @@ class ItemCategoryService
      */
     public function getForIndex(): Collection
     {
-        return ItemCategory::select('name', 'id')->orderBy('name', 'asc')->get();
+        $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
+
+        return ItemCategory::query()
+            ->select('item_categories.id')
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -39,7 +52,13 @@ class ItemCategoryService
      */
     public function getForForm(): Collection
     {
-        return ItemCategory::orderBy('name')->get();
+        $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
+
+        return ItemCategory::query()
+            ->select('item_categories.*')
+            ->selectRaw("({$nameSql}) AS name")
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -47,7 +66,11 @@ class ItemCategoryService
      */
     public function createItemCategory(array $data): ItemCategory
     {
-        return ItemCategory::create($data);
+        $translations = $data['translations'] ?? [];
+        $category = ItemCategory::create(Arr::except($data, ['translations']));
+        $category->syncTranslationsFromAdminForm($translations);
+
+        return $category;
     }
 
     /**
@@ -55,7 +78,14 @@ class ItemCategoryService
      */
     public function updateItemCategory(ItemCategory $itemCategory, array $data): void
     {
-        $itemCategory->update($data);
+        $translations = $data['translations'] ?? [];
+        $persist = Arr::except($data, ['translations']);
+        if ($persist !== []) {
+            $itemCategory->update($persist);
+        }
+        if ($translations !== []) {
+            $itemCategory->syncTranslationsFromAdminForm($translations);
+        }
     }
 
     public function deleteItemCategory(ItemCategory $itemCategory): void

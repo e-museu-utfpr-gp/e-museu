@@ -194,10 +194,43 @@ return [
         ],
     ],
 
+    'items' => [
+        'translations' => [
+            'incomplete_for_locale' => 'For :locale, fill in both name and description if any field in that language has text.',
+            'at_least_one_locale' => 'Fill in name and description in at least one language.',
+        ],
+    ],
+
+    'item_categories' => [
+        'translations' => [
+            'at_least_one_locale' => 'Enter a name in at least one language.',
+        ],
+    ],
+
+    'tag_categories' => [
+        'translations' => [
+            'at_least_one_locale' => 'Enter a name in at least one language.',
+        ],
+    ],
+
+    'tags' => [
+        'translations' => [
+            'at_least_one_locale' => 'Enter a name in at least one language.',
+        ],
+    ],
+
+    'extras' => [
+        'translations' => [
+            'at_least_one_locale' => 'Enter the extra information in at least one language.',
+        ],
+    ],
+
     'catalog' => [
         'item_component_different' => 'The item and the component must be different.',
         'item_tag_different' => 'The item and the tag must be different.',
         'components_items_different' => 'The items must be different.',
+        'tags_duplicate_in_request' => 'Do not repeat the same tag (category and name) more than once.',
+        'component_item_not_found' => 'One of the selected component items no longer exists. Refresh the page and try again.',
     ],
 
     /*
@@ -264,7 +297,7 @@ return [
         'component_id' => 'component id',
         'tag_id' => 'tag id',
         'full_name' => 'full name',
-        'contact' => 'email',
+        'email' => 'email',
         'info' => 'extra information',
         'image' => 'image',
         'identification_code' => 'identification code',

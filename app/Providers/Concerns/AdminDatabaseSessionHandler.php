@@ -6,14 +6,14 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Session\DatabaseSessionHandler;
 
 /**
- * Session handler que grava o id do autenticado na coluna admin_id (em vez de user_id).
- * Use com SESSION_DRIVER=database e tabela sessions contendo coluna admin_id.
+ * Session handler that persists the authenticated principal's id in the admin_id column (instead of user_id).
+ * Use with SESSION_DRIVER=database and a sessions table that includes admin_id.
  */
 class AdminDatabaseSessionHandler extends DatabaseSessionHandler
 {
     /**
      * Add the user information to the session payload.
-     * Grava admin_id para refletir que o autenticado é um Admin.
+     * Writes admin_id to reflect that the authenticated user is an Admin.
      *
      * @param  array<string, mixed>  $payload
      * @return $this

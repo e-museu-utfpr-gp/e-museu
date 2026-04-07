@@ -10,11 +10,11 @@ class AdminLoginController extends AdminBaseController
 {
     use AuthenticatesUsers;
 
-    protected string $redirectTo = '/admin/items';
+    protected string $redirectTo = '/admin/catalog/items';
 
     public function showLoginForm(): View
     {
-        return view('admin.auth.admin-login');
+        return view('pages.admin.auth.login');
     }
 
     /**

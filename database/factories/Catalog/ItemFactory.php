@@ -2,9 +2,9 @@
 
 namespace Database\Factories\Catalog;
 
-use App\Models\Catalog\ItemCategory;
-use App\Models\Catalog\ItemImage;
+use App\Models\Catalog\{Item, ItemCategory, ItemImage};
 use App\Models\Collaborator\Collaborator;
+use App\Models\Location;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -15,16 +15,29 @@ class ItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->unique()->sentence,
-            'description' => $this->faker->paragraph,
-            'history' => $this->faker->paragraph(500),
-            'detail' => $this->faker->text,
             'date' => $this->faker->date,
-            'identification_code' => $this->faker->unique()->numberBetween(1, 1000),
+            'identification_code' => 'FACTORY_' . $this->faker->unique()->uuid(),
             'validation' => $this->faker->boolean,
             'category_id' => ItemCategory::pluck('id')->random(),
+            'location_id' => static function (): int {
+                $id = Location::query()->value('id');
+
+                return $id !== null ? (int) $id : Location::factory()->create()->id;
+            },
             'collaborator_id' => Collaborator::pluck('id')->random(),
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Item $item): void {
+            $item->syncPrimaryLocaleTranslation([
+                'name' => 'Item ' . $this->faker->unique()->numerify('########'),
+                'description' => $this->faker->paragraph,
+                'history' => $this->faker->paragraph(500),
+                'detail' => $this->faker->text,
+            ]);
+        });
     }
 
     /**
