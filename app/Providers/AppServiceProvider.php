@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Language;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\{Session, View};
 use Illuminate\Support\ServiceProvider;
 use App\Providers\Concerns\{AdminDatabaseSessionHandler, GuessesFactoryName, GuessesModelName, RegistersRateLimiters};
@@ -22,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (filter_var(env('APP_FORCE_HTTPS', false), FILTER_VALIDATE_BOOL)) {
+            URL::forceScheme('https');
+            URL::forceRootUrl((string) config('app.url'));
+        }
+
         RegistersRateLimiters::register();
 
         Factory::guessFactoryNamesUsing([GuessesFactoryName::class, 'forModel']);
