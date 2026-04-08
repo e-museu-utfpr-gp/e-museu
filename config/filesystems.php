@@ -59,13 +59,17 @@ return [
                 'throw' => false,
             ],
 
+        /*
+        | Direct S3 disk (e.g. artisan, jobs). Public files are not linked with AWS_URL;
+        | they use the `public` disk (APP_URL/storage) and StorageProxyController.
+        */
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
             'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
+            // 'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
             'throw' => false,
