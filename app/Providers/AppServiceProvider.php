@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (filter_var(env('APP_FORCE_HTTPS', false), FILTER_VALIDATE_BOOL)) {
+        if (filter_var(config('app.force_https', false), FILTER_VALIDATE_BOOL)) {
             URL::forceScheme('https');
             URL::forceRootUrl((string) config('app.url'));
         }
