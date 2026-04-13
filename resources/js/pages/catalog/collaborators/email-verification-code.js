@@ -37,10 +37,21 @@ function setStatus($el, text, variant) {
     $el.text(text);
 }
 
+function resetTurnstileWidgetInContainer($container) {
+    if (!$container || !$container.length) {
+        return;
+    }
+    const turnstileEl = $container.find('.cf-turnstile').get(0);
+    if (turnstileEl && typeof window.turnstile !== 'undefined' && typeof window.turnstile.reset === 'function') {
+        window.turnstile.reset(turnstileEl);
+    }
+}
+
 export function resetVerificationUi($form) {
     if (!$form || !$form.length) {
         return;
     }
+    resetTurnstileWidgetInContainer($form.find('.js-antibot-verification-request'));
     const $codeRow = $form.find('.js-verification-code-row');
     const $codeInput = $form.find('.js-verification-code-input');
     const $sendStatus = $form.find('.js-verification-send-status');
@@ -103,6 +114,12 @@ function initCatalogEmailVerificationForm(form) {
     const msgFullNameRequiredBeforeCode =
         form.getAttribute('data-msg-full-name-required-before-code') ||
         'Enter your email and full name before requesting the code.';
+    const msgAntibotBeforeEmailCode =
+        form.getAttribute('data-msg-antibot-before-email-code') ||
+        'Complete the security check before requesting the verification code.';
+
+    const $antiBotVerificationWrap = $form.find('.js-antibot-verification-request');
+    const antiBotResponseField = String($antiBotVerificationWrap.attr('data-response-field') || '').trim();
 
     let internalReservedFromCheck = false;
     /** Until the request finishes, ignore extra clicks on “send code”. */
@@ -168,10 +185,31 @@ function initCatalogEmailVerificationForm(form) {
         if (verificationSendInFlight || Date.now() < verificationSendCooldownUntil) {
             return;
         }
+        if (antiBotResponseField !== '') {
+            const token = String(
+                $antiBotVerificationWrap.find(`[name="${antiBotResponseField}"]`).first().val() || ''
+            ).trim();
+            if (token === '') {
+                setStatus($sendStatus, msgAntibotBeforeEmailCode, 'error');
+                setStatus($codeStatus, '', 'muted');
+                return;
+            }
+        }
         setStatus($sendStatus, '', 'muted');
         setStatus($codeStatus, '', 'muted');
         verificationSendInFlight = true;
         $sendBtn.prop('disabled', true);
+
+        const requestPayload = {
+            _token: csrfToken,
+            email,
+            full_name: fullName,
+        };
+        if (antiBotResponseField !== '') {
+            requestPayload[antiBotResponseField] = String(
+                $antiBotVerificationWrap.find(`[name="${antiBotResponseField}"]`).first().val() || ''
+            ).trim();
+        }
 
         $.ajax({
             type: 'POST',
@@ -180,11 +218,7 @@ function initCatalogEmailVerificationForm(form) {
                 'X-CSRF-TOKEN': csrfToken,
                 Accept: 'application/json',
             },
-            data: {
-                _token: csrfToken,
-                email,
-                full_name: fullName,
-            },
+            data: requestPayload,
             success: function (data) {
                 const msg = data && data.message ? String(data.message).trim() : '';
                 setStatus($sendStatus, '', 'muted');
@@ -207,6 +241,9 @@ function initCatalogEmailVerificationForm(form) {
             },
             complete: function () {
                 verificationSendInFlight = false;
+                if (antiBotResponseField !== '' && $antiBotVerificationWrap.length) {
+                    resetTurnstileWidgetInContainer($antiBotVerificationWrap);
+                }
                 updateSendVerificationButtonEnabled();
             },
         });

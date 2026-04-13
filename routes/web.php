@@ -85,7 +85,7 @@ Route::middleware('throttle:web-public')->group(function () {
             'collaborators/request-verification-code',
             [CollaboratorController::class, 'requestVerificationCode'],
         )
-            ->middleware('throttle:collaborator-verification-email')
+            ->middleware(['throttle:collaborator-verification-email', 'antibot:verification-request'])
             ->name('collaborators.request-verification-code');
         Route::post(
             'collaborators/confirm-verification-code',
@@ -150,7 +150,8 @@ Route::middleware('redirectIfAuthenticated')->prefix('admin/auth')->group(functi
     Route::get('login', [AdminLoginController::class, 'showLoginForm'])
         ->middleware('throttle:web-public')
         ->name('login');
-    Route::post('login', [AdminLoginController::class, 'login'])->middleware('throttle:admin-login');
+    Route::post('login', [AdminLoginController::class, 'login'])
+        ->middleware(['throttle:admin-login', 'antibot']);
 });
 
 Route::post('admin/auth/logout', [AdminLoginController::class, 'logout'])
