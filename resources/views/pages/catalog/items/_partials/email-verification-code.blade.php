@@ -2,6 +2,17 @@
     'codeInputId' => 'catalog-verification-code',
 ])
 
+@isset($antiBotTurnstileWidgetData)
+    @if ($antiBotTurnstileWidgetData)
+        <div
+            class="js-antibot-verification-request mb-2"
+            data-response-field="{{ $antiBotTurnstileWidgetData['responseFieldName'] }}"
+        >
+            @include('components.antibot.turnstile-widget', $antiBotTurnstileWidgetData)
+        </div>
+    @endif
+@endisset
+
 <div class="d-flex justify-content-end mb-2">
     <button type="button" class="edit-button nav-link py-2 px-3 fw-bold js-send-verification-code" disabled>
         {{ __('view.catalog.items.create.email_send_verification_code') }}

@@ -67,6 +67,10 @@ class CollaboratorController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    /**
+     * Sends the verification e-mail only after {@see \App\Http\Middleware\VerifyAntiBotChallenge} (scope
+     * `verification-request`) accepts a valid anti-bot token; the mailer is not called when that fails.
+     */
     public function requestVerificationCode(
         Request $request,
         CatalogCollaboratorVerificationService $verification,

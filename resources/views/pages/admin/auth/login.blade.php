@@ -4,8 +4,26 @@
 
         <div class="row">
             <div class="col-6">
-                <form action="{{ route('login') }}" method="POST">
+                <form
+                    action="{{ route('login') }}"
+                    method="POST"
+                    @isset($adminLoginAntiBotTurnstileData)
+                        @if ($adminLoginAntiBotTurnstileData && $errors->any())
+                            data-admin-login-reset-turnstile
+                        @endif
+                    @endisset
+                >
                     @csrf
+                    @error('antibot')
+                        <div class="alert alert-danger py-2" role="alert">{{ $message }}</div>
+                    @enderror
+                    @isset($adminLoginAntiBotTurnstileData)
+                        @if ($adminLoginAntiBotTurnstileData)
+                            <div class="mb-3">
+                                @include('components.antibot.turnstile-widget', $adminLoginAntiBotTurnstileData)
+                            </div>
+                        @endif
+                    @endisset
                     <x-ui.inputs.admin.text
                         name="username"
                         id="username"

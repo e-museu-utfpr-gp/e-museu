@@ -3,6 +3,7 @@
 namespace Tests\Feature\Catalog;
 
 use App\Enums\Collaborator\CollaboratorRole;
+use App\Http\Middleware\VerifyAntiBotChallenge;
 use App\Mail\CollaboratorVerificationCodeMail;
 use Illuminate\Mail\Mailables\Address;
 use App\Models\Collaborator\Collaborator;
@@ -23,6 +24,9 @@ class CollaboratorEmailVerificationTest extends TestCase
         if (! extension_loaded('pdo_mysql')) {
             $this->markTestSkipped('pdo_mysql required');
         }
+
+        // Mail/session behaviour only, not Turnstile; stable if CI sets ANTIBOT_DRIVER=turnstile.
+        $this->withoutMiddleware(VerifyAntiBotChallenge::class);
     }
 
     public function test_request_and_confirm_code_verifies_external_collaborator(): void

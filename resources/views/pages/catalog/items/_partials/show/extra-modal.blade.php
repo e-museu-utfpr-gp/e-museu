@@ -19,7 +19,8 @@
                     data-msg-code-required="{{ __('view.catalog.items.create.email_verification_code_required') }}"
                     data-msg-full-name-required="{{ __('view.catalog.items.create.email_verification_full_name_required') }}"
                     data-msg-full-name-required-before-code="{{ __('view.catalog.items.create.email_verification_full_name_required_before_code') }}"
-                    data-msg-name-differs-warning="{{ __('view.catalog.items.create.email_verification_name_differs_warning') }}">
+                    data-msg-name-differs-warning="{{ __('view.catalog.items.create.email_verification_name_differs_warning') }}"
+                    data-msg-antibot-before-email-code="{{ __('antibot.complete_before_email_code') }}">
                     @csrf
                     <input type="hidden" name="collaborator_id" value="{{ old('collaborator_id', '') }}" class="js-verified-collaborator-id">
                     <input name="item_id" value="{{ $item->id }}" hidden>
