@@ -31,6 +31,7 @@
             data-msg-full-name-required="{{ __('view.catalog.items.create.email_verification_full_name_required') }}"
             data-msg-full-name-required-before-code="{{ __('view.catalog.items.create.email_verification_full_name_required_before_code') }}"
             data-msg-name-differs-warning="{{ __('view.catalog.items.create.email_verification_name_differs_warning') }}"
+            data-msg-antibot-before-email-code="{{ __('antibot.complete_before_email_code') }}"
             data-label-cover="{{ __('app.catalog.item_image.cover') }}"
             data-label-gallery="{{ __('app.catalog.item_image.gallery') }}"
             data-label-remove-image="{{ __('view.catalog.items.create.remove_image') }}"

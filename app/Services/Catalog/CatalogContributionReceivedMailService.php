@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Mail;
 
 /**
  * Sends "contribution received" mail for public item or extra flows when outbound mail is configured.
+ *
+ * Product note: `POST catalog/items` and `POST catalog/extras` do not use the Turnstile middleware (unlike
+ * requesting a verification e-mail). Automated submissions are constrained mainly by route throttling and
+ * contribution rules; see also {@see \App\Http\Controllers\Catalog\ItemController::store} and extras flow.
  */
 final class CatalogContributionReceivedMailService
 {

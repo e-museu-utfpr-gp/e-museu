@@ -10,11 +10,18 @@ import './shared/ui/enhanced-select';
 
 import './pages/catalog/items/index/explore-scroll';
 
-import './pages/catalog/collaborators/email-verification-code';
 import './pages/admin/collaborators/check-contact';
 
 if (document.querySelector('form[data-extra-clear-session-on-hide][data-route-clear-contribution-session]')) {
     import('./pages/catalog/items/show/extra-modal-clear-session-on-hide');
+}
+
+if (document.querySelector('form[data-route-request-verification-code]')) {
+    await import('./pages/catalog/collaborators/email-verification-code');
+}
+
+if (document.querySelector('form[data-admin-login-reset-turnstile]')) {
+    await import('./pages/admin/auth/login-turnstile-reset.js');
 }
 
 /**
