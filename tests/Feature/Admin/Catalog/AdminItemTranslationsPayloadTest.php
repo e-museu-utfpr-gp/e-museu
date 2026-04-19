@@ -1,37 +1,21 @@
 <?php
 
-namespace Tests\Feature\Admin;
+namespace Tests\Feature\Admin\Catalog;
 
 use App\Http\Requests\Admin\Catalog\AdminItemTranslationsRules;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
+use Tests\Support\Concerns\RequiresMysqlDriverConnection;
 
 /**
- * Covers {@see \App\Http\Requests\Concerns\AppliesAdminTranslationsPayload} behaviour for item
+ * Covers {@see \App\Http\Requests\Concerns\AppliesAdminTranslationsPayload} behavior for item
  * translations (empty-string normalization + cross-locale consistency).
  */
 #[Group('mysql')]
-class AdminItemTranslationsPayloadTest extends TestCase
+class AdminItemTranslationsPayloadTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped(
-                'Admin translation tests require pdo_mysql (run in the app Docker container).'
-            );
-        }
-
-        parent::setUp();
-
-        if (DB::connection()->getDriverName() !== 'mysql') {
-            $this->markTestSkipped('Set DB_CONNECTION=mysql in .env.testing.');
-        }
-    }
+    use RequiresMysqlDriverConnection;
 
     public function test_normalize_empty_strings_to_null_for_known_locales(): void
     {
@@ -80,5 +64,25 @@ class AdminItemTranslationsPayloadTest extends TestCase
         AdminItemTranslationsRules::validateTranslationConsistency($validator, $data['translations']);
 
         $this->assertFalse($validator->errors()->has('translations'));
+    }
+
+    public function test_validate_translation_consistency_errors_when_locale_partial_without_name(): void
+    {
+        $data = [
+            'translations' => [
+                'pt_BR' => [
+                    'name' => '',
+                    'description' => 'Description only',
+                    'detail' => '',
+                    'history' => '',
+                ],
+                'en' => ['name' => '', 'description' => '', 'detail' => '', 'history' => ''],
+            ],
+        ];
+
+        $validator = Validator::make($data, AdminItemTranslationsRules::rules());
+        AdminItemTranslationsRules::validateTranslationConsistency($validator, $data['translations']);
+
+        $this->assertTrue($validator->errors()->has('translations.pt_BR.description'));
     }
 }

@@ -2,40 +2,22 @@
 
 namespace Tests\Feature\Catalog;
 
+use App\Models\Catalog\{Item, ItemCategory, ItemTranslation};
+use App\Models\Collaborator\Collaborator;
 use App\Models\Language;
 use App\Models\Location;
-use App\Models\Collaborator\Collaborator;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
-use App\Models\Catalog\{Item, ItemCategory, ItemTranslation};
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
+use Tests\Support\Concerns\RequiresMysqlDriverConnection;
 
 /**
  * Catalog translation resolution uses MySQL-specific SQL; the project targets MySQL.
  * Use DB_CONNECTION=mysql in testing.
  */
 #[Group('mysql')]
-class TranslationResolutionTest extends TestCase
+class TranslationResolutionFeatureTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped(
-                'Catalog tests require pdo_mysql (install the extension or run tests in the app Docker container).'
-            );
-        }
-
-        parent::setUp();
-
-        if (DB::connection()->getDriverName() !== 'mysql') {
-            $this->markTestSkipped(
-                'Set DB_CONNECTION=mysql in .env.testing (translation queries assume MySQL).'
-            );
-        }
-    }
+    use RequiresMysqlDriverConnection;
 
     private function anySeededLocationId(): int
     {
@@ -72,8 +54,8 @@ class TranslationResolutionTest extends TestCase
         ItemTranslation::query()->create([
             'item_id' => $item->id,
             'language_id' => $ptId,
-            'name' => 'Nome PT',
-            'description' => 'Descrição',
+            'name' => 'Name PT',
+            'description' => 'Description PT',
             'history' => null,
             'detail' => null,
         ]);
@@ -87,7 +69,7 @@ class TranslationResolutionTest extends TestCase
         ]);
 
         $freshPt = Item::query()->with('translations.language')->findOrFail($item->id);
-        $this->assertSame('Nome PT', $freshPt->resolveTranslation()->translation?->name);
+        $this->assertSame('Name PT', $freshPt->resolveTranslation()->translation?->name);
         $this->assertTrue($freshPt->resolveTranslation()->isFromAppLocale);
 
         app()->setLocale('en');

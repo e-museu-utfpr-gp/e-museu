@@ -7,23 +7,16 @@ use App\Http\Middleware\VerifyAntiBotChallenge;
 use App\Mail\CollaboratorVerificationCodeMail;
 use Illuminate\Mail\Mailables\Address;
 use App\Models\Collaborator\Collaborator;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
 
 #[Group('mysql')]
-class CollaboratorEmailVerificationTest extends TestCase
+class CollaboratorEmailVerificationTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
     protected function setUp(): void
     {
         parent::setUp();
-
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
 
         // Mail/session behaviour only, not Turnstile; stable if CI sets ANTIBOT_DRIVER=turnstile.
         $this->withoutMiddleware(VerifyAntiBotChallenge::class);

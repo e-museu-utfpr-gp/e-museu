@@ -10,19 +10,19 @@ class CreateAdmin extends Command
 {
     protected $signature = 'create:admin';
 
-    protected $description = 'Criar administrador';
+    protected $description = 'Create an administrator account';
 
     public function handle(): int
     {
-        $username = $this->ask('Insira o nome de usuário do administrador:');
-        $password = $this->secret('Insira a senha do administrador:');
+        $username = $this->ask('Administrator username:');
+        $password = $this->secret('Administrator password:');
 
         $admin = new Admin();
         $admin->username = $username;
         $admin->password = Hash::make($password);
         $admin->save();
 
-        $this->info('Administrador adicionado com sucesso!');
+        $this->info('Administrator created successfully.');
 
         return Command::SUCCESS;
     }

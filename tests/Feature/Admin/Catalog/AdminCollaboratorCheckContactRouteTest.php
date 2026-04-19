@@ -1,27 +1,15 @@
 <?php
 
-namespace Tests\Feature\Admin;
+namespace Tests\Feature\Admin\Catalog;
 
 use App\Models\Identity\Admin;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
 
 #[Group('mysql')]
-class AdminCollaboratorCheckContactRouteTest extends TestCase
+class AdminCollaboratorCheckContactRouteTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-    }
-
     public function test_guest_cannot_post_admin_catalog_collaborators_check_contact(): void
     {
         $this->postJson(route('admin.catalog.collaborators.check-contact'), [

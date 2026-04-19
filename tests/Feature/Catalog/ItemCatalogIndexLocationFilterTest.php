@@ -6,15 +6,12 @@ use App\Models\Catalog\Item;
 use App\Models\Collaborator\Collaborator;
 use App\Models\Location;
 use Database\Factories\Catalog\ItemCategoryFactory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
 
 #[Group('mysql')]
-class ItemCatalogIndexLocationFilterTest extends TestCase
+class ItemCatalogIndexLocationFilterTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
     /**
      * @param  array<string, string|int>  $query
      */
@@ -30,10 +27,6 @@ class ItemCatalogIndexLocationFilterTest extends TestCase
 
     public function test_catalog_index_filters_validated_items_by_location_id(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         $category = ItemCategoryFactory::new()->create();
         $collaborator = Collaborator::factory()->create();
         $utfpr = Location::query()->where('code', 'UTFPR')->firstOrFail();
@@ -65,10 +58,6 @@ class ItemCatalogIndexLocationFilterTest extends TestCase
 
     public function test_catalog_index_non_numeric_location_id_yields_no_items(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         $category = ItemCategoryFactory::new()->create();
         $collaborator = Collaborator::factory()->create();
         $utfpr = Location::query()->where('code', 'UTFPR')->firstOrFail();

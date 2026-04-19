@@ -6,10 +6,29 @@ use App\Services\Collaborator\CatalogCollaboratorVerificationService;
 use Tests\TestCase;
 
 /**
- * JSON shape for mail-unavailable paths; uses mocked {@see CatalogCollaboratorVerificationService} (no outbound mail).
+ * Contract: HTTP JSON for mail-unavailable paths; uses mocked
+ * {@see CatalogCollaboratorVerificationService} (no outbound mail).
+ * Message detail vs generic copy depends on {@see CatalogVerifyMailError} rules exercised through the route.
  */
-class CatalogVerifyMailErrorTest extends TestCase
+class CatalogVerifyMailErrorRouteTest extends TestCase
 {
+    private string $savedAppEnv = '';
+
+    private bool $savedAppDebug = false;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->savedAppEnv = (string) config('app.env');
+        $this->savedAppDebug = (bool) config('app.debug');
+    }
+
+    protected function tearDown(): void
+    {
+        config(['app.env' => $this->savedAppEnv, 'app.debug' => $this->savedAppDebug]);
+        parent::tearDown();
+    }
+
     public function test_mail_not_configured_when_not_masked_shows_detail(): void
     {
         config(['app.env' => 'testing', 'app.debug' => true]);
