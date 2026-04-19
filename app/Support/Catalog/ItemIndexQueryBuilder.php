@@ -4,6 +4,7 @@ namespace App\Support\Catalog;
 
 use App\Models\Catalog\Item;
 use App\Support\Content\TranslationDisplaySql;
+use App\Support\Database\SqlExpr;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -80,8 +81,8 @@ class ItemIndexQueryBuilder
             $nameSql = TranslationDisplaySql::itemNameSubquerySql('items');
             $descSql = TranslationDisplaySql::itemTranslationSubquerySql('description', 'items');
             $query->where(function (Builder $q) use ($needle, $nameSql, $descSql): void {
-                $q->whereRaw("({$nameSql}) LIKE ?", [$needle])
-                    ->orWhereRaw("({$descSql}) LIKE ?", [$needle]);
+                SqlExpr::whereRaw($q, "({$nameSql}) LIKE ?", [$needle]);
+                SqlExpr::orWhereRaw($q, "({$descSql}) LIKE ?", [$needle]);
             });
         }
     }

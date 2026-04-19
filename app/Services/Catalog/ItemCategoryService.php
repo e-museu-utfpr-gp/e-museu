@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
+use App\Support\Database\SqlExpr;
 
 class ItemCategoryService
 {
@@ -20,8 +21,8 @@ class ItemCategoryService
         $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
         $query = ItemCategory::query()
             ->select('item_categories.*')
-            ->selectRaw("({$nameSql}) AS name")
             ->with('locks');
+        SqlExpr::selectRaw($query, "({$nameSql}) AS name");
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::itemCategories());
 
@@ -40,11 +41,12 @@ class ItemCategoryService
     {
         $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
 
-        return ItemCategory::query()
+        $query = ItemCategory::query()
             ->select('item_categories.id')
-            ->selectRaw("({$nameSql}) AS name")
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
+        SqlExpr::selectRaw($query, "({$nameSql}) AS name");
+
+        return $query->get();
     }
 
     /**
@@ -54,11 +56,12 @@ class ItemCategoryService
     {
         $nameSql = TranslationDisplaySql::itemCategoryNameSubquerySql('item_categories');
 
-        return ItemCategory::query()
+        $query = ItemCategory::query()
             ->select('item_categories.*')
-            ->selectRaw("({$nameSql}) AS name")
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
+        SqlExpr::selectRaw($query, "({$nameSql}) AS name");
+
+        return $query->get();
     }
 
     /**

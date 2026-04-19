@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use App\Models\Taxonomy\{Tag, TagCategory};
 use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
+use App\Support\Database\SqlExpr;
 use Illuminate\Database\Eloquent\{Collection, Model};
 
 class TagCategoryService
@@ -20,8 +21,8 @@ class TagCategoryService
         $count = TagCategory::count();
         $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
         $query = TagCategory::query()
-            ->select('tag_categories.*')
-            ->selectRaw("({$nameSql}) AS name");
+            ->select('tag_categories.*');
+        SqlExpr::selectRaw($query, "({$nameSql}) AS name");
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::tagCategories());
 
@@ -37,14 +38,14 @@ class TagCategoryService
     {
         $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
 
-        $categories = TagCategory::query()
+        $categoriesQuery = TagCategory::query()
             ->select(['tag_categories.id'])
-            ->selectRaw("({$nameSql}) AS name")
             ->orderBy('name')
             ->with([
                 'tags.translations.language',
-            ])
-            ->get();
+            ]);
+        SqlExpr::selectRaw($categoriesQuery, "({$nameSql}) AS name");
+        $categories = $categoriesQuery->get();
 
         $categories->each(function (TagCategory $category): void {
             $category->setRelation(
@@ -67,11 +68,12 @@ class TagCategoryService
     {
         $nameSql = TranslationDisplaySql::tagCategoryNameSubquerySql('tag_categories');
 
-        return TagCategory::query()
+        $query = TagCategory::query()
             ->select('tag_categories.*')
-            ->selectRaw("({$nameSql}) AS name")
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
+        SqlExpr::selectRaw($query, "({$nameSql}) AS name");
+
+        return $query->get();
     }
 
     /**

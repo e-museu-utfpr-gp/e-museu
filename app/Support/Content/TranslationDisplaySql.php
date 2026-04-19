@@ -2,8 +2,8 @@
 
 namespace App\Support\Content;
 
-    use Illuminate\Database\Query\Expression;
-    use Illuminate\Support\Facades\DB;
+use App\Support\Database\SqlExpr;
+use Illuminate\Contracts\Database\Query\Expression as ExpressionContract;
 use InvalidArgumentException;
 
 /**
@@ -26,18 +26,20 @@ final class TranslationDisplaySql
 
     private const EXTRA_TABLE_REF = 'extras';
 
-    public static function itemNameExpression(): Expression
+    public static function itemNameExpression(): ExpressionContract
     {
-        return DB::raw(self::itemNameSubquerySql('items'));
+        return SqlExpr::raw(self::itemNameSubquerySql('items'));
     }
 
-    public static function itemDescriptionExpression(): Expression
+    public static function itemDescriptionExpression(): ExpressionContract
     {
-        return DB::raw(self::itemTranslationSubquerySql('description', 'items'));
+        return SqlExpr::raw(self::itemTranslationSubquerySql('description', 'items'));
     }
 
     /**
      * Subquery: resolved `name` for an item row (`{itemsRef}.id` = item_translations.item_id).
+     *
+     * @return non-falsy-string
      */
     public static function itemNameSubquerySql(string $itemsTableRef): string
     {
@@ -46,6 +48,8 @@ final class TranslationDisplaySql
 
     /**
      * @param  'name'|'description'|'history'|'detail'  $column
+     *
+     * @return non-falsy-string
      */
     public static function itemTranslationSubquerySql(string $column, string $itemsTableRef): string
     {
@@ -65,6 +69,9 @@ final class TranslationDisplaySql
             . "ORDER BY FIELD(l.code, {$list}) LIMIT 1)";
     }
 
+    /**
+     * @return non-falsy-string
+     */
     public static function itemCategoryNameSubquerySql(string $categoryTableRef = self::ITEM_CATEGORY_TABLE_REF): string
     {
         if ($categoryTableRef !== self::ITEM_CATEGORY_TABLE_REF) {
@@ -79,6 +86,9 @@ final class TranslationDisplaySql
             . "ORDER BY FIELD(l.code, {$list}) LIMIT 1)";
     }
 
+    /**
+     * @return non-falsy-string
+     */
     public static function tagNameSubquerySql(string $tagsTableRef = self::TAG_TABLE_REF): string
     {
         if ($tagsTableRef !== self::TAG_TABLE_REF) {
@@ -93,6 +103,9 @@ final class TranslationDisplaySql
             . "ORDER BY FIELD(l.code, {$list}) LIMIT 1)";
     }
 
+    /**
+     * @return non-falsy-string
+     */
     public static function tagCategoryNameSubquerySql(
         string $tagCategoriesTableRef = self::TAG_CATEGORY_TABLE_REF
     ): string {
@@ -108,6 +121,9 @@ final class TranslationDisplaySql
             . "ORDER BY FIELD(l.code, {$list}) LIMIT 1)";
     }
 
+    /**
+     * @return non-falsy-string
+     */
     public static function extraInfoSubquerySql(string $extrasTableRef = self::EXTRA_TABLE_REF): string
     {
         if ($extrasTableRef !== self::EXTRA_TABLE_REF) {
@@ -126,13 +142,13 @@ final class TranslationDisplaySql
      * Virtual columns for public catalog list cards (name + description by locale fallback).
      * Uses two correlated subqueries per row; profile before scaling (see class docblock).
      *
-     * @return list<Expression>
+     * @return list<ExpressionContract>
      */
     public static function itemCatalogListSelectAliases(): array
     {
         return [
-            DB::raw(self::itemTranslationSubquerySql('name', 'items') . ' AS name'),
-            DB::raw(self::itemTranslationSubquerySql('description', 'items') . ' AS description'),
+            SqlExpr::raw(self::itemTranslationSubquerySql('name', 'items') . ' AS name'),
+            SqlExpr::raw(self::itemTranslationSubquerySql('description', 'items') . ' AS description'),
         ];
     }
 }
