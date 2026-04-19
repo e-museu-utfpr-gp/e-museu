@@ -8,20 +8,28 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'default' => env('MAIL_MAILER', 'resend'),
+    'default' => env('MAIL_MAILER', 'smtp'),
 
     /*
     |--------------------------------------------------------------------------
     | Mailer Configurations
     |--------------------------------------------------------------------------
     |
-    | Outgoing mail uses Resend only. Tests set MAIL_MAILER=array in phpunit.xml.
+    | Primary outbound path is SMTP (e.g. UTFPR). Tests set MAIL_MAILER=array in phpunit.xml.
     |
     */
 
     'mailers' => [
-        'resend' => [
-            'transport' => 'resend',
+        'smtp' => [
+            'transport' => 'smtp',
+            'scheme' => env('MAIL_SCHEME'),
+            'url' => env('MAIL_URL'),
+            'host' => env('MAIL_HOST', 'smtp.utfpr.edu.br'),
+            'port' => env('MAIL_PORT', 587),
+            'username' => env('MAIL_USERNAME', 'e-museu-gp@utfpr.edu.br'),
+            'password' => env('MAIL_PASSWORD'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
         'log' => [
@@ -36,7 +44,7 @@ return [
         'failover' => [
             'transport' => 'failover',
             'mailers' => [
-                'resend',
+                'smtp',
                 'log',
             ],
             'retry_after' => 60,
@@ -55,7 +63,6 @@ return [
     */
 
     'transport_required_config' => [
-        'resend' => 'services.resend.key',
         'postmark' => 'services.postmark.token',
         'mailgun' => 'services.mailgun.secret',
     ],
@@ -67,8 +74,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'e-museu-gp@utfpr.edu.br'),
+        'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel E-Museu')),
     ],
 
     /*
