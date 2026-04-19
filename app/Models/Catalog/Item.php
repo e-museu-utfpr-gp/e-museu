@@ -9,9 +9,9 @@ use App\Models\Collaborator\Collaborator;
 use App\Models\Identity\Lock;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\DB;
 use App\Models\Taxonomy\{Tag, TagCategory};
 use App\Support\Content\{ContentLocaleFallback, ResolvedTranslation, TranslationDisplaySql, TranslationResolution};
+use App\Support\Database\SqlExpr;
 use Illuminate\Database\Eloquent\{Builder, Model};
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, BelongsToMany, HasMany, HasOne, MorphMany};
 
@@ -102,16 +102,16 @@ class Item extends Model
     {
         $fieldList = ContentLocaleFallback::fieldListSql();
 
-        return $this->hasOne(ItemTranslation::class)
-            ->whereRaw(
-                "item_translations.id = (
+        return SqlExpr::relationWhereRaw(
+            $this->hasOne(ItemTranslation::class),
+            "item_translations.id = (
                     SELECT it_pick.id FROM item_translations it_pick
                     INNER JOIN languages lang_pick ON lang_pick.id = it_pick.language_id
                     WHERE it_pick.item_id = item_translations.item_id
                     ORDER BY FIELD(lang_pick.code, {$fieldList})
                     LIMIT 1
                 )"
-            );
+        );
     }
 
     public function resolveTranslation(): ResolvedTranslation
@@ -378,14 +378,14 @@ class Item extends Model
             ->leftJoin('item_categories', 'items.category_id', '=', 'item_categories.id')
             ->select([
                 'items.*',
-                DB::raw("({$nameSql}) AS name"),
+                SqlExpr::raw("({$nameSql}) AS name"),
                 'items.created_at AS item_created',
                 'items.updated_at AS item_updated',
                 'items.validation AS item_validation',
-                DB::raw("LEFT(({$historySql}), 300) as history"),
-                DB::raw("LEFT(({$descSql}), 150) as description"),
-                DB::raw("LEFT(({$detailSql}), 150) as detail"),
-                DB::raw("({$catNameSql}) AS item_category_name"),
+                SqlExpr::raw("LEFT(({$historySql}), 300) as history"),
+                SqlExpr::raw("LEFT(({$descSql}), 150) as description"),
+                SqlExpr::raw("LEFT(({$detailSql}), 150) as detail"),
+                SqlExpr::raw("({$catNameSql}) AS item_category_name"),
                 'collaborators.email AS collaborator_email',
             ]);
 

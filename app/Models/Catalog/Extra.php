@@ -7,7 +7,7 @@ use App\Models\Collaborator\Collaborator;
 use App\Models\Identity\Lock;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\DB;
+use App\Support\Database\SqlExpr;
 use App\Support\Content\{ResolvedTranslation, TranslationDisplaySql, TranslationResolution};
 use Illuminate\Database\Eloquent\{Builder, Model};
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany, MorphMany};
@@ -109,13 +109,13 @@ class Extra extends Model
             ->leftJoin('items', 'extras.item_id', '=', 'items.id')
             ->select([
                 'extras.id',
-                DB::raw("({$infoSql}) AS info"),
+                SqlExpr::raw("({$infoSql}) AS info"),
                 'extras.validation AS extra_validation',
                 'extras.created_at AS extra_created',
                 'extras.updated_at AS extra_updated',
                 'extras.item_id',
                 'extras.collaborator_id',
-                DB::raw("({$itemNameSql}) AS item_name"),
+                SqlExpr::raw("({$itemNameSql}) AS item_name"),
                 'collaborators.email AS collaborator_email',
             ]);
 
