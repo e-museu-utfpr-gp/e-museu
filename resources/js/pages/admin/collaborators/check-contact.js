@@ -251,8 +251,29 @@ $(document).ready(function () {
                         }
                     }
                 },
-                error: function (_jq, textStatus) {
+                error: function (xhr, textStatus) {
                     if (textStatus === 'abort') {
+                        return;
+                    }
+                    // Laravel returns 422 for validation while the address is still incomplete/invalid
+                    // (e.g. user typing). That is not a connectivity failure — avoid the "no internet" banner.
+                    if (xhr.status === 422) {
+                        hideNetworkError();
+                        hideInternal();
+                        updateNameDiffersBanner(false);
+                        dispatchCheckContactResult(formEl, {
+                            internalReserved: false,
+                            exists: false,
+                        });
+                        $emailWarning.prop('hidden', true);
+                        $emailSuccess.prop('hidden', true);
+                        if ($emailPending.length) {
+                            $emailPending.prop('hidden', true);
+                        }
+                        if ($emailAdminDuplicate.length) {
+                            $emailAdminDuplicate.prop('hidden', true);
+                        }
+
                         return;
                     }
                     hideInternal();

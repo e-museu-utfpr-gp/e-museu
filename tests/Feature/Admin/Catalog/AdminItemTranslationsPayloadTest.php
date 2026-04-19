@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Admin;
+namespace Tests\Feature\Admin\Catalog;
 
 use App\Http\Requests\Admin\Catalog\AdminItemTranslationsRules;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,7 +10,7 @@ use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
 /**
- * Covers {@see \App\Http\Requests\Concerns\AppliesAdminTranslationsPayload} behaviour for item
+ * Covers {@see \App\Http\Requests\Concerns\AppliesAdminTranslationsPayload} behavior for item
  * translations (empty-string normalization + cross-locale consistency).
  */
 #[Group('mysql')]

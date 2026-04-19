@@ -43,12 +43,12 @@ Skipping any of the above leaves the language missing from `ContentLocaleFallbac
 
 Items reference a **location** (campus / site). Rows are **seeded reference data** with a stable uppercase `code` (for example `INDEF`, `UTFPR`, `UNCEN`). The label shown in forms and listings comes from translation keys under `app.catalog.location.codes.*` in `lang/{locale}/app/catalog.php` (with fallback to the row `name` when a key is missing). After changing codes or adding a location, update seeds and those translation entries together.
 
-## Outgoing mail (Resend)
+## Outgoing mail (SMTP)
 
-Production-oriented outbound mail uses the **Resend** driver by default (`config/mail.php`, `MAIL_MAILER=resend`). Set `RESEND_KEY` in `.env` (see `config/services.php`). The helper `App\Support\Mail\OutgoingMailIsConfigured` decides whether the app should attempt verification and notification e-mails; extend `mail.transport_required_config` when adding new transports.
+Outbound mail defaults to **SMTP** in `config/mail.php` (UTFPR-oriented defaults for host, port, and mailbox identity). Set `MAIL_PASSWORD` in the environment; override other `MAIL_*` keys only when needed. Local development often sets `MAIL_MAILER=log` in `.env` so messages go to the log file instead of the network. The helper `App\Support\Mail\OutgoingMailIsConfigured` decides whether the app should attempt verification and notification e-mails; extend `mail.transport_required_config` when adding new API transports.
 
-- **Deploy:** set `MAIL_MAILER`, `RESEND_KEY`, `MAIL_FROM_ADDRESS`, and `MAIL_FROM_NAME` (see `.env.example`).
-- **Tests:** `phpunit.xml` sets `MAIL_MAILER=array` so PHPUnit does not call Resend. Unit coverage for mail readiness lives in `tests/Unit/Support/Mail/OutgoingMailIsConfiguredTest.php`.
+- **Deploy:** minimal list in `deploy-docs/` (e.g. `MAIL_PASSWORD`); see `.env.example` for full overrides.
+- **Tests:** `phpunit.xml` sets `MAIL_MAILER=array` so PHPUnit does not open SMTP connections. Unit coverage for mail readiness lives in `tests/Unit/Support/Mail/OutgoingMailIsConfiguredTest.php`.
 
 ## Initial Docker Configuration (Avoid using sudo)
 
