@@ -233,6 +233,7 @@ class TagService
         $qb = Tag::query()
             ->where('tag_category_id', $categoryId)
             ->where('validation', true)
+            ->select('tags.id')
             ->selectRaw("({$nameSql}) AS name");
 
         if ($query !== '') {

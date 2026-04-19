@@ -4,25 +4,13 @@ namespace Tests\Feature\Admin\Auth;
 
 use App\Http\Middleware\VerifyAntiBotChallenge;
 use App\Models\Identity\Admin;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
 
 #[Group('mysql')]
-class AdminLoginControllerTest extends TestCase
+class AdminLoginControllerTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
-        parent::setUp();
-    }
-
     public function test_show_login_form_returns_login_view(): void
     {
         $this->get(route('login'))

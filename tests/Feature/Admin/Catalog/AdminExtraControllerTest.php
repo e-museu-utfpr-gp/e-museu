@@ -8,25 +8,13 @@ use App\Models\Collaborator\Collaborator;
 use App\Models\Identity\Admin;
 use App\Models\Location;
 use Database\Factories\Catalog\ItemCategoryFactory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
 
 #[Group('mysql')]
-class AdminExtraControllerTest extends TestCase
+class AdminExtraControllerTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
-        parent::setUp();
-    }
-
     public function test_guest_is_redirected_from_extras_index_to_login(): void
     {
         $this->get(route('admin.catalog.extras.index'))

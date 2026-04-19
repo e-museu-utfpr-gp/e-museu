@@ -10,9 +10,9 @@ class PublicCatalogContributionOutcomeTest extends TestCase
 {
     public function test_ok_does_not_throw(): void
     {
-        PublicCatalogContributionOutcome::throwUnlessOk(['status' => 'ok']);
+        $this->expectNotToPerformAssertions();
 
-        $this->assertTrue(true);
+        PublicCatalogContributionOutcome::throwUnlessOk(['status' => 'ok']);
     }
 
     public function test_internal_blocked_throws_validation_exception(): void

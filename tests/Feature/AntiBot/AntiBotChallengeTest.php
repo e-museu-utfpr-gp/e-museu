@@ -21,6 +21,18 @@ class AntiBotChallengeTest extends TestCase
         $this->app->forgetInstance(AntiBotVerifier::class);
     }
 
+    protected function tearDown(): void
+    {
+        config([
+            'antibot.driver' => 'null',
+            'antibot.turnstile.site_key' => '',
+            'antibot.turnstile.secret_key' => '',
+        ]);
+        $this->app->forgetInstance(AntiBotVerifier::class);
+
+        parent::tearDown();
+    }
+
     public function test_request_verification_code_without_turnstile_token_when_antibot_disabled(): void
     {
         $this->mock(CatalogCollaboratorVerificationService::class, function ($mock): void {

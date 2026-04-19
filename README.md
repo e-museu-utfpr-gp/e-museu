@@ -19,7 +19,7 @@ This guide describes how to configure the development environment and initialize
 
 The application targets **MySQL** in development, staging, and production. Catalog translations and admin listings rely on MySQL-specific SQL (for example `FIELD()` for locale fallback order). **SQLite is not supported** for those code paths.
 
-Automated tests under the **`mysql` group** (for example `tests/Feature/Catalog/TranslationResolutionTest.php`) **require** `DB_CONNECTION=mysql` and a migrated database. If you run PHPUnit without MySQL, those tests are skipped.
+Automated tests under the **`mysql` group** (for example `tests/Feature/Catalog/TranslationResolutionFeatureTest.php`) **require** `DB_CONNECTION=mysql` and a migrated database. If you run PHPUnit without MySQL, those tests are skipped.
 
 ### PHPUnit database `emuseu_testing`
 

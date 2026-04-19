@@ -8,42 +8,17 @@ use App\Models\Collaborator\Collaborator;
 use App\Models\Identity\Admin;
 use App\Models\Location;
 use Database\Factories\Catalog\ItemCategoryFactory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
+use Tests\Support\MinimalContributionCoverJpeg;
 
 #[Group('mysql')]
-class AdminItemControllerTest extends TestCase
+class AdminItemControllerTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    /** Minimal valid JPEG (no GD) — same fixture as {@see ItemContributionStoreDateTest}. */
-    private const TINY_JPEG_B64 = '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRof'
-        . 'Hh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwh'
-        . 'MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAAR'
-        . 'CAABAAEDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAA'
-        . 'AgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkK'
-        . 'FhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWG'
-        . 'h4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl'
-        . '5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREA'
-        . 'AgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYk'
-        . 'NOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOE'
-        . 'hYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk'
-        . '5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q==';
-
-    protected function setUp(): void
-    {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
-        parent::setUp();
-    }
-
     public function test_guest_is_redirected_from_items_index_to_login(): void
     {
         $this->get(route('admin.catalog.items.index'))
@@ -181,7 +156,7 @@ class AdminItemControllerTest extends TestCase
 
         $cover = UploadedFile::fake()->createWithContent(
             'cover.jpg',
-            (string) base64_decode(self::TINY_JPEG_B64, true)
+            MinimalContributionCoverJpeg::binary()
         );
 
         $response = $this->post(route('admin.catalog.items.store'), [

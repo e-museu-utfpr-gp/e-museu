@@ -6,21 +6,14 @@ use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Collaborator\Collaborator;
 use App\Services\Collaborator\CollaboratorService;
 use Database\Factories\Collaborator\CollaboratorFactory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
 
 #[Group('mysql')]
-class CollaboratorServiceManualEmailVerificationTest extends TestCase
+class CollaboratorServiceManualEmailVerificationTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
     public function test_create_external_persists_manual_last_email_verification_at(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         $service = app(CollaboratorService::class);
         $collaborator = $service->createCollaborator([
             'full_name' => 'Test User',
@@ -39,10 +32,6 @@ class CollaboratorServiceManualEmailVerificationTest extends TestCase
 
     public function test_create_internal_respects_manual_last_email_verification_at(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         $service = app(CollaboratorService::class);
         $collaborator = $service->createCollaborator([
             'full_name' => 'Internal Staff',
@@ -61,10 +50,6 @@ class CollaboratorServiceManualEmailVerificationTest extends TestCase
 
     public function test_update_external_email_change_keeps_verification_when_admin_sets_timestamp(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         /** @var Collaborator $collaborator */
         $collaborator = CollaboratorFactory::new()->create([
             'email' => 'old@example.com',
@@ -91,10 +76,6 @@ class CollaboratorServiceManualEmailVerificationTest extends TestCase
 
     public function test_update_external_email_change_clears_verification_without_admin_timestamp(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         /** @var Collaborator $collaborator */
         $collaborator = CollaboratorFactory::new()->create([
             'email' => 'old2@example.com',

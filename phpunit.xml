@@ -24,8 +24,8 @@
         <!-- RefreshDatabase runs migrate:fresh: override DB name so the dev schema (e.g. laravel) is never dropped. Create this database once (see docker/mysql/init). -->
         <env name="DB_DATABASE" value="emuseu_testing"/>
         <!--
-            Feature tests that hit MySQL-specific migration DDL skip when pdo_mysql is missing (see e.g.
-            CatalogLocationDefaultResolverTest::setUp). CI should run ./run test with Docker MySQL.
+            MySQL-only tests use #[Group('mysql')] and skip when the driver is not mysql (see
+            RequiresMysqlDriverConnection). CI should run ./run test with Docker MySQL.
         -->
         <!-- MAIL_MAILER=array: no real SMTP/network in tests; OutgoingMailIsConfigured still passes for the array driver. -->
         <env name="MAIL_MAILER" value="array"/>
