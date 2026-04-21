@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'challenge_failed' => 'Não foi possível concluir a verificação de segurança. Tente novamente.',

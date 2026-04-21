@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Taxonomy;
 
 use App\Models\Language;
@@ -9,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 use App\Support\Content\{TranslatablePayload, TranslationDisplaySql};
+use App\Support\Database\SqlExpr;
 use Illuminate\Database\Eloquent\{Builder, Collection};
 
 class TagService
@@ -28,8 +31,8 @@ class TagService
             'tags.created_at AS tag_created',
             'tags.updated_at AS tag_updated',
         ]);
-        $query->selectRaw("({$tagNameSql}) AS tag_name");
-        $query->selectRaw("({$catNameSql}) AS category_name");
+        SqlExpr::selectRaw($query, "({$tagNameSql}) AS tag_name");
+        SqlExpr::selectRaw($query, "({$catNameSql}) AS category_name");
         $query->with('locks');
 
         AdminIndexQueryBuilder::build($query, $request, AdminIndexConfig::tags());
@@ -131,14 +134,15 @@ class TagService
         if ($restrictQuery !== null) {
             $restrictQuery($tagsQuery);
         }
-        $tags = $tagsQuery
+        $tagsQuery
             ->leftJoin('tag_translations as tt_pref', function ($join) use ($languageId): void {
                 $join->on('tags.id', '=', 'tt_pref.tag_id')
                     ->where('tt_pref.language_id', '=', $languageId);
             })
-            ->select('tags.id')
-            ->selectRaw("{$resolvedNameSql} AS name")
-            ->orderByRaw("{$resolvedNameSql} asc")
+            ->select('tags.id');
+        SqlExpr::selectRaw($tagsQuery, "{$resolvedNameSql} AS name");
+        SqlExpr::orderByRaw($tagsQuery, "{$resolvedNameSql} asc");
+        $tags = $tagsQuery
             ->limit(500)
             ->get();
 
@@ -210,13 +214,14 @@ class TagService
     {
         $nameSql = TranslationDisplaySql::tagNameSubquerySql('tags');
 
-        return Tag::query()
+        $query = Tag::query()
             ->where('validation', true)
             ->where('tag_category_id', $categoryId)
-            ->select('tags.id')
-            ->selectRaw("({$nameSql}) AS name")
-            ->orderByRaw("({$nameSql}) asc")
-            ->get();
+            ->select('tags.id');
+        SqlExpr::selectRaw($query, "({$nameSql}) AS name");
+        SqlExpr::orderByRaw($query, "({$nameSql}) asc");
+
+        return $query->get();
     }
 
     /**
@@ -233,11 +238,11 @@ class TagService
         $qb = Tag::query()
             ->where('tag_category_id', $categoryId)
             ->where('validation', true)
-            ->select('tags.id')
-            ->selectRaw("({$nameSql}) AS name");
+            ->select('tags.id');
+        SqlExpr::selectRaw($qb, "({$nameSql}) AS name");
 
         if ($query !== '') {
-            $qb->whereRaw("({$nameSql}) LIKE ?", ['%' . $query . '%']);
+            SqlExpr::whereRaw($qb, "({$nameSql}) LIKE ?", ['%' . $query . '%']);
         }
 
         return $qb->limit(50)->get();

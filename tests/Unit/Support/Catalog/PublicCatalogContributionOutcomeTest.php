@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Support\Catalog;
 
 use App\Support\Catalog\PublicCatalogContributionOutcome;
@@ -49,10 +51,13 @@ class PublicCatalogContributionOutcomeTest extends TestCase
         }
     }
 
-    public function test_unknown_status_throws_invalid_argument(): void
+    public function test_unknown_status_throws_validation_exception_on_email_field(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-
-        PublicCatalogContributionOutcome::throwUnlessOk(['status' => 'weird']);
+        try {
+            PublicCatalogContributionOutcome::throwUnlessOk(['status' => 'weird']);
+            $this->fail('Expected ValidationException');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('email', $e->errors());
+        }
     }
 }

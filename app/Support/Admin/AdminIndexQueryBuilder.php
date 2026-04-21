@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support\Admin;
 
+use App\Support\Database\SqlExpr;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -96,7 +99,7 @@ class AdminIndexQueryBuilder
         }
 
         $sql = $searchLikeSubquery[$searchColumn];
-        $query->whereRaw("{$sql} LIKE ?", ['%' . (string) $search . '%']);
+        SqlExpr::whereRaw($query, "{$sql} LIKE ?", ['%' . (string) $search . '%']);
 
         return true;
     }
@@ -200,7 +203,7 @@ class AdminIndexQueryBuilder
         $sortSubquery = $config['sortSubquery'] ?? [];
         if (isset($sortSubquery[$sort])) {
             $dir = strtolower((string) $order) === 'desc' ? 'desc' : 'asc';
-            $query->orderByRaw("{$sortSubquery[$sort]} {$dir}");
+            SqlExpr::orderByRaw($query, "{$sortSubquery[$sort]} {$dir}");
 
             return;
         }

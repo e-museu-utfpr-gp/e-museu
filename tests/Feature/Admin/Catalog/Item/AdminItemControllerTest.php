@@ -1,6 +1,8 @@
 <?php
 
-namespace Tests\Feature\Admin\Catalog;
+declare(strict_types=1);
+
+namespace Tests\Feature\Admin\Catalog\Item;
 
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemImage;
@@ -246,6 +248,41 @@ class AdminItemControllerTest extends AbstractMysqlRefreshDatabaseTestCase
         $this->assertSame('Updated title', $pt->name);
     }
 
+    public function test_admin_update_regenerates_qr_when_identification_code_changes(): void
+    {
+        Storage::fake('public');
+        Http::fake([
+            'api.qrserver.com/*' => Http::response("\x89PNG\r\n\x1a\n", 200, ['Content-Type' => 'image/png']),
+        ]);
+
+        $admin = $this->createAdmin();
+        $item = $this->createItemWithFixtures([
+            'identification_code' => 'QR_KEEP_' . uniqid('', false),
+        ]);
+        $previousCode = (string) $item->identification_code;
+        $newCode = 'QR_NEW_' . uniqid('', false);
+        $this->assertNotSame($previousCode, $newCode);
+
+        $this->actingAs($admin);
+        $this->get(route('admin.catalog.items.edit', $item));
+
+        $response = $this->put(route('admin.catalog.items.update', $item), [
+            '_token' => session()->token(),
+            'date' => $item->date?->format('Y-m-d'),
+            'category_id' => $item->category_id,
+            'location_id' => $item->location_id,
+            'collaborator_id' => $item->collaborator_id,
+            'identification_code' => $newCode,
+            'validation' => 1,
+            'translations' => $this->minimalTranslationsPayload(),
+        ]);
+
+        $response->assertRedirect(route('admin.catalog.items.show', $item));
+        $item->refresh();
+        $this->assertSame($newCode, $item->identification_code);
+        Http::assertSentCount(1);
+    }
+
     public function test_admin_can_destroy_item(): void
     {
         Storage::fake('public');
@@ -313,6 +350,29 @@ class AdminItemControllerTest extends AbstractMysqlRefreshDatabaseTestCase
         $response->assertRedirect(route('admin.catalog.items.edit', $item));
         $response->assertSessionHas('success');
         Http::assertSentCount(1);
+    }
+
+    public function test_admin_qr_regenerate_redirects_with_error_when_external_http_fails(): void
+    {
+        Storage::fake('public');
+        Http::fake([
+            'api.qrserver.com/*' => Http::response('', 503),
+        ]);
+
+        $admin = $this->createAdmin();
+        $item = $this->createItemWithFixtures();
+
+        $this->actingAs($admin);
+        $this->get(route('admin.catalog.items.edit', $item));
+
+        $response = $this->post(
+            route('admin.catalog.items.qrcode.regenerate', $item),
+            ['_token' => session()->token()]
+        );
+
+        $response->assertRedirect(route('admin.catalog.items.edit', $item));
+        $response->assertSessionHasErrors('qrcode');
+        $response->assertSessionMissing('success');
     }
 
     public function test_admin_can_delete_qr_code(): void
