@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
@@ -7,7 +9,8 @@ use App\Http\Requests\Admin\Catalog\AdminItemTagRequest;
 use App\Models\Catalog\ItemTag;
 use App\Support\Admin\AdminIndexTableView;
 use Illuminate\View\View;
-use App\Services\Catalog\{ItemCategoryService, ItemTagService};
+use App\Services\Catalog\ItemTagService;
+use App\Services\Catalog\ItemCategoryService;
 use App\Services\Taxonomy\{TagCategoryService, TagService};
 use Illuminate\Http\{JsonResponse, RedirectResponse, Request};
 

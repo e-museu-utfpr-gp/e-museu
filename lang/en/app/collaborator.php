@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'access_denied' => 'Access denied.',
     'blocked_from_registering' => 'This user does not have permission to register items.',

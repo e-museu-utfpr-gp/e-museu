@@ -47,7 +47,7 @@ Items reference a **location** (campus / site). Rows are **seeded reference data
 
 Outbound mail defaults to **SMTP** in `config/mail.php` (UTFPR-oriented defaults for host, port, and mailbox identity). Set `MAIL_PASSWORD` in the environment; override other `MAIL_*` keys only when needed. Local development often sets `MAIL_MAILER=log` in `.env` so messages go to the log file instead of the network. The helper `App\Support\Mail\OutgoingMailIsConfigured` decides whether the app should attempt verification and notification e-mails; extend `mail.transport_required_config` when adding new API transports.
 
-- **Deploy:** minimal list in `deploy-docs/` (e.g. `MAIL_PASSWORD`); see `.env.example` for full overrides.
+- **Deploy:** Coolify/env templates live under `docs/deploy/` (e.g. `docs/deploy/coolify-production.env.example`, `docs/deploy/coolify-minio-s3/`); see `.env.example` for pointers.
 - **Tests:** `phpunit.xml` sets `MAIL_MAILER=array` so PHPUnit does not open SMTP connections. Unit coverage for mail readiness lives in `tests/Unit/Support/Mail/OutgoingMailIsConfiguredTest.php`.
 
 ## Initial Docker Configuration (Avoid using sudo)

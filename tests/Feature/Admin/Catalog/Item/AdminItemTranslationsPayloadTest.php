@@ -1,6 +1,8 @@
 <?php
 
-namespace Tests\Feature\Admin\Catalog;
+declare(strict_types=1);
+
+namespace Tests\Feature\Admin\Catalog\Item;
 
 use App\Http\Requests\Admin\Catalog\AdminItemTranslationsRules;
 use Illuminate\Support\Facades\Validator;

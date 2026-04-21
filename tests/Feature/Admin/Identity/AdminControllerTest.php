@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Admin\Identity;
 
 use App\Models\Collaborator\Collaborator;

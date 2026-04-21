@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'collaborator_verification_code' => [
         'subject' => 'Seu código de verificação — :app',

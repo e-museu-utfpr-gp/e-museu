@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
@@ -7,7 +9,8 @@ use App\Http\Requests\Admin\Catalog\AdminSingleComponentRequest;
 use App\Models\Catalog\ItemComponent;
 use App\Support\Admin\AdminIndexTableView;
 use Illuminate\View\View;
-use App\Services\Catalog\{ItemCategoryService, ItemComponentService};
+use App\Services\Catalog\ItemComponentService;
+use App\Services\Catalog\ItemCategoryService;
 use Illuminate\Http\{RedirectResponse, Request};
 
 class AdminItemComponentController extends AdminBaseController

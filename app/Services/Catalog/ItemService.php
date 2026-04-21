@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Catalog;
 
 use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
@@ -166,7 +168,7 @@ class ItemService
 
     /**
      * JSON payload for {@see \App\Http\Controllers\Catalog\ItemController::byCategory} and
-     * {@see \App\Http\Controllers\Admin\Catalog\AdminItemController::byItemCategory}: each item as `toArray()`
+     * {@see \App\Http\Controllers\Admin\Catalog\Item\AdminItemController::byItemCategory}: each item as `toArray()`
      * with nested `location` removed and `location_label` set from the loaded relation.
      *
      * @param  Collection<int, Item>  $items

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Catalog;
 
 use App\Services\Taxonomy\TagService;
@@ -10,6 +12,11 @@ use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 
 class ItemTagService
 {
+    public function __construct(
+        private readonly TagService $tagService,
+    ) {
+    }
+
     /**
      * @return array{itemTags: LengthAwarePaginator<int, ItemTag>, count: int}
      */
@@ -52,12 +59,11 @@ class ItemTagService
     public function attachTagsToItem(
         Item $item,
         array $tagsData,
-        TagService $tagService,
         ?int $contentLanguageId = null
     ): void {
         $ids = [];
         foreach ($tagsData as $tagData) {
-            $ids[] = $tagService->findOrCreate($tagData, $contentLanguageId)->id;
+            $ids[] = $this->tagService->findOrCreate($tagData, $contentLanguageId)->id;
         }
         $item->tags()->syncWithoutDetaching(array_values(array_unique($ids)));
     }

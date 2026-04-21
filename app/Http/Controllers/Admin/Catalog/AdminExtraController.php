@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
@@ -9,7 +11,8 @@ use App\Models\Catalog\Extra;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\Identity\LockService;
 use Illuminate\View\View;
-use App\Services\Catalog\{ExtraService, ItemCategoryService};
+use App\Services\Catalog\ExtraService;
+use App\Services\Catalog\ItemCategoryService;
 use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
 use Illuminate\Http\{RedirectResponse, Request};
 
