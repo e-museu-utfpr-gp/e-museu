@@ -1,5 +1,9 @@
 # Coolify → Docker Compose (empty project). MinIO for production.
 #
+# Only these are parameterized (Coolify env overrides defaults):
+#   MINIO_ROOT_USER     — default SERVICE_s3_ROOT_USER
+#   MINIO_ROOT_PASSWORD — default SERVICE_s3_ROOT_PASSWORD
+#
 # Inside the container MinIO always uses:
 #   9000 = S3 API
 #   9001 = web console
@@ -10,23 +14,22 @@
 #
 services:
   minio-production:
-    # Pinned release (Docker Hub). Bump intentionally for security/features.
     image: 'minio/minio:RELEASE.2025-09-07T16-13-09Z'
     command: 'server /data --console-address ":9001"'
     environment:
-      MINIO_ROOT_USER: SERVICE_s3_ROOT_USER
-      MINIO_ROOT_PASSWORD: SERVICE_s3_ROOT_PASSWORD
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-SERVICE_s3_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-SERVICE_s3_ROOT_PASSWORD}
     volumes:
       - 'minio_production_data:/data'
     ports:
       - '10000:9000'
       - '10001:9001'
-    # Official MinIO images ship `mc`; they do not include curl (ubi-micro). See minio docker-compose upstream.
     healthcheck:
       test: ['CMD', 'mc', 'ready', 'local']
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
+
 volumes:
   minio_production_data: null

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'title' => 'About',
     'heading' => 'About the Virtual Museum',

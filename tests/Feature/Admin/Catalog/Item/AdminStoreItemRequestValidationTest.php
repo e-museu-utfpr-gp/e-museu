@@ -1,6 +1,8 @@
 <?php
 
-namespace Tests\Feature\Admin\Catalog;
+declare(strict_types=1);
+
+namespace Tests\Feature\Admin\Catalog\Item;
 
 use App\Models\Catalog\ItemCategory;
 use App\Models\Collaborator\Collaborator;
@@ -15,7 +17,7 @@ use Tests\Support\MinimalContributionCoverJpeg;
 
 /**
  * HTTP-level validation for {@see \App\Http\Requests\Admin\Catalog\AdminStoreItemRequest}
- * (beyond happy-path {@see AdminItemControllerTest}).
+ * (beyond happy-path {@see \Tests\Feature\Admin\Catalog\Item\AdminItemControllerTest}).
  */
 #[Group('mysql')]
 final class AdminStoreItemRequestValidationTest extends AbstractMysqlRefreshDatabaseTestCase

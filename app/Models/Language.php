@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\Content\ContentLanguage;
 use App\Support\Content\ContentLocaleFallback;
+use App\Support\Database\SqlExpr;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -129,8 +132,7 @@ class Language extends Model
         $caseSql = 'CASE code ' . implode(' ', $caseParts) . ' ELSE 99 END';
 
         /** @var list<Language> $rows */
-        $rows = static::query()
-            ->orderByRaw($caseSql . ', name', $bindings)
+        $rows = SqlExpr::orderByRaw(static::query(), $caseSql . ', name', $bindings)
             ->get()
             ->all();
 

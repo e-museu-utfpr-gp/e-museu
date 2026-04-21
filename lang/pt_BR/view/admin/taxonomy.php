@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'tag_categories' => [
         'delete_confirm' => 'Tem certeza que deseja excluir a categoria e todas as vezes que é referenciada em outros registros?',

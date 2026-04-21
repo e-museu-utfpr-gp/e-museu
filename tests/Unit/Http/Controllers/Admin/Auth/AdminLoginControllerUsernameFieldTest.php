@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Admin\Auth\AdminLoginController;

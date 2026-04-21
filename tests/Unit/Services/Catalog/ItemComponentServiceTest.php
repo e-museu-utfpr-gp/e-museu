@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Services\Catalog;
 
 use App\Models\Catalog\Item;
@@ -43,7 +45,7 @@ class ItemComponentServiceTest extends ServiceMysqlTestCase
     public function test_attach_contributed_components_creates_rows(): void
     {
         $parent = $this->makeItem();
-        $child = $this->makeItem();
+        $child = $this->makeItem(['validation' => true]);
 
         $svc = app(ItemComponentService::class);
         $svc->attachContributedComponents($parent, [
@@ -57,16 +59,33 @@ class ItemComponentServiceTest extends ServiceMysqlTestCase
         ]);
     }
 
-    private function makeItem(): Item
+    public function test_attach_contributed_components_throws_when_component_not_validated(): void
+    {
+        $parent = $this->makeItem();
+        $child = $this->makeItem(['validation' => false]);
+
+        $svc = app(ItemComponentService::class);
+
+        $this->expectException(ValidationException::class);
+
+        $svc->attachContributedComponents($parent, [
+            ['item_id' => $child->id],
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $overrides
+     */
+    private function makeItem(array $overrides = []): Item
     {
         $categoryId = ItemCategoryFactory::new()->create()->id;
         $locationId = Location::factory()->create()->id;
         $collaboratorId = Collaborator::factory()->create()->id;
 
-        return Item::factory()->create([
+        return Item::factory()->create(array_merge([
             'category_id' => $categoryId,
             'location_id' => $locationId,
             'collaborator_id' => $collaboratorId,
-        ]);
+        ], $overrides));
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Admin\Auth;
 
 use App\Http\Middleware\VerifyAntiBotChallenge;

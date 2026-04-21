@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
 | Laravel framework language file. Keys and structure are defined by the framework.
 | Do not rename keys. Keep this file in sync with the same file in other locales (e.g. en).

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'location' => [
         'codes' => [
@@ -11,10 +13,12 @@ return [
         'upload_read_failed' => 'Could not read uploaded file.',
         'upload_store_failed' => 'Could not save uploaded file to storage.',
         'contribution_success' => 'Thank you for your time! We will review your contribution before adding it to our museum.',
+        'contribution_unexpected' => 'We could not complete your submission. Please try again or contact the museum if the problem persists.',
         'created' => 'Item added successfully.',
         'updated' => 'Item updated successfully.',
         'deleted' => 'Item deleted successfully.',
         'qrcode_regenerated' => 'QRCode generated successfully.',
+        'qrcode_regenerate_failed' => 'The QRCode could not be generated. Please try again later.',
         'qrcode_deleted' => 'QRCode deleted successfully.',
     ],
     'item_image' => [

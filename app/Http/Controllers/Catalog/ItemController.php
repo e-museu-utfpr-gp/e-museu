@@ -1,36 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Catalog;
 
-use App\Actions\Catalog\StoreItemContributionAction;
-use App\Services\Catalog\CatalogContributionCompletionService;
+use App\Actions\Catalog\StoreItemContribution\StoreItemContributionAction;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Catalog\ItemContributionValidator;
-use App\Services\Taxonomy\TagCategoryService;
-use App\Support\Catalog\PublicCatalogContributionOutcome;
+use App\Services\Catalog\{CatalogItemViewDataService, ItemService};
 use App\Support\Http\OptionalContentLocale;
-use Illuminate\View\View;
-use App\Services\Catalog\{
-    ContributionContentLocaleService,
-    ItemCategoryService,
-    ItemImagesService,
-    ItemService,
-};
-use App\Services\LocationService;
 use Illuminate\Http\{JsonResponse, RedirectResponse, Request};
+use Illuminate\View\View;
 
-/**
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- */
 class ItemController extends Controller
 {
-    public function index(
-        Request $request,
-        ItemCategoryService $itemCategoryService,
-        TagCategoryService $tagCategoryService,
-        ItemService $itemService,
-        LocationService $locationService,
-    ): View|RedirectResponse {
+    public function index(Request $request, CatalogItemViewDataService $viewData): View|RedirectResponse
+    {
         if ($request->getQueryString() === null || $request->getQueryString() === '') {
             $defaultQuery = http_build_query([
                 'item_category' => '',
@@ -41,99 +25,24 @@ class ItemController extends Controller
             return redirect()->to(route('catalog.items.index', [], false) . '?' . $defaultQuery);
         }
 
-        $data = $itemService->getPaginatedItemsForCatalogIndex($request);
-        $itemCategories = $itemCategoryService->getForIndex();
-        $categories = $tagCategoryService->getForIndex();
-
-        return view('pages.catalog.items.index', [
-            'items' => $data['items'],
-            'categoryName' => $data['categoryName'],
-            'itemCategories' => $itemCategories,
-            'categories' => $categories,
-            'locations' => $locationService->orderedForForms(),
-        ]);
+        return view('pages.catalog.items.index', $viewData->forIndex($request));
     }
 
-    public function create(
-        ItemCategoryService $itemCategoryService,
-        TagCategoryService $tagCategoryService,
-        ContributionContentLocaleService $contributionContentLocaleService,
-        LocationService $locationService,
-    ): View {
-        $categories = $tagCategoryService->getForIndex();
-        $itemCategories = $itemCategoryService->getForIndex();
-        $localeForm = $contributionContentLocaleService->formOptions();
-        $locationForm = $locationService->forItemCreateForms();
-
-        return view('pages.catalog.items.create', [
-            'categories' => $categories,
-            'itemCategories' => $itemCategories,
-            'contributionLanguages' => $localeForm['contributionLanguages'],
-            'defaultContributionContentLocale' => $localeForm['defaultContentLocale'],
-            'locations' => $locationForm['locations'],
-            'defaultCatalogLocationId' => $locationForm['defaultCatalogLocationId'],
-        ]);
+    public function create(CatalogItemViewDataService $viewData): View
+    {
+        return view('pages.catalog.items.create', $viewData->forCreate());
     }
 
-    public function store(
-        Request $request,
-        ItemContributionValidator $itemContributionValidator,
-        StoreItemContributionAction $storeItemContributionAction,
-        ItemImagesService $itemImagesService,
-        ContributionContentLocaleService $contributionContentLocaleService,
-        CatalogContributionCompletionService $catalogContributionCompletion,
-    ): RedirectResponse {
-        $validatedData = $itemContributionValidator->validateStore($request);
-
-        $galleryFiles = $itemImagesService->filterValidGalleryFiles($request->file('gallery_images'));
-
-        $itemPayload = $validatedData['item'];
-        $contentLocaleCode = (string) ($itemPayload['content_locale'] ?? '');
-        unset($itemPayload['content_locale']);
-        $contentLanguageId = $contributionContentLocaleService->languageIdForValidatedCode($contentLocaleCode);
-
-        $result = $storeItemContributionAction->handle(
-            $validatedData['collaborator'],
-            $itemPayload,
-            $contentLanguageId,
-            $validatedData['tags'],
-            $validatedData['extras'],
-            $validatedData['components'],
-            $request->file('cover_image'),
-            $galleryFiles ?: null
-        );
-
-        PublicCatalogContributionOutcome::throwUnlessOk($result);
-
-        $catalogContributionCompletion->afterItem($result['item'] ?? null, $contentLanguageId);
+    public function store(Request $request, StoreItemContributionAction $storeItemContribution): RedirectResponse
+    {
+        $storeItemContribution->handle($request);
 
         return redirect()->route('catalog.items.create')->with('success', __('app.catalog.item.contribution_success'));
     }
 
-    public function show(
-        string $id,
-        ItemCategoryService $itemCategoryService,
-        TagCategoryService $tagCategoryService,
-        ItemService $itemService,
-        ContributionContentLocaleService $contributionContentLocaleService
-    ): View {
-        $item = $itemService->getPublicItemForShow($id);
-
-        $itemCategories = $itemCategoryService->getForIndex();
-        $categories = $tagCategoryService->getForIndex();
-
-        $seriesCategoryId = $item->loadCatalogSeriesTimelineForShow();
-
-        $localeForm = $contributionContentLocaleService->formOptions();
-
-        return view('pages.catalog.items.show', [
-            'item' => $item,
-            'itemCategories' => $itemCategories,
-            'categories' => $categories,
-            'seriesCategoryId' => $seriesCategoryId,
-            'contributionLanguages' => $localeForm['contributionLanguages'],
-            'defaultExtraContentLocale' => $localeForm['defaultContentLocale'],
-        ]);
+    public function show(string $id, CatalogItemViewDataService $viewData): View
+    {
+        return view('pages.catalog.items.show', $viewData->forShow($id));
     }
 
     public function byCategory(Request $request, ItemService $itemService): JsonResponse

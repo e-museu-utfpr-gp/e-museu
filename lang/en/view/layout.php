@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'logo_nav_alt' => 'E-Museu logo',
     'footer_partner_e_lixo_alt' => 'E-lixo partner logo',

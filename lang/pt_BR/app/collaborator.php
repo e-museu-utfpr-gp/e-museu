@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'access_denied' => 'Acesso negado.',
     'blocked_from_registering' => 'Este usuário não possui permissão para registrar itens.',

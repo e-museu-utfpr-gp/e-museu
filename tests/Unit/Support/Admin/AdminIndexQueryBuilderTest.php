@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Support\Admin;
 
 use App\Models\Catalog\ItemCategory;

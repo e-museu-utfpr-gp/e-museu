@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Catalog;
 
 use App\Http\Requests\Admin\Catalog\AdminStoreItemRequest;
@@ -9,6 +11,7 @@ use App\Support\Catalog\ItemIdentificationCode;
 use App\Support\Admin\{AdminIndexConfig, AdminIndexQueryBuilder};
 use App\Support\Catalog\ItemIndexQueryBuilder;
 use App\Support\Content\{TranslatablePayload, TranslationDisplaySql};
+use App\Support\Database\SqlExpr;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -98,13 +101,14 @@ class ItemService
 
         $nameSql = TranslationDisplaySql::itemNameSubquerySql('items');
 
-        return Item::query()
+        $query = Item::query()
             ->where('category_id', '=', $categoryId)
             ->where('validation', true)
             ->with('location')
-            ->select('items.*')
-            ->orderByRaw("({$nameSql}) asc")
-            ->get();
+            ->select('items.*');
+        SqlExpr::orderByRaw($query, "({$nameSql}) asc");
+
+        return $query->get();
     }
 
     /**
@@ -123,7 +127,7 @@ class ItemService
         $fallbackNameSql = TranslationDisplaySql::itemNameSubquerySql('items');
         $resolvedNameSql = 'COALESCE(it_contribution.name, (' . $fallbackNameSql . '))';
 
-        return Item::query()
+        $query = Item::query()
             ->where('category_id', '=', $categoryId)
             ->where('validation', true)
             ->leftJoin('item_translations as it_contribution', function ($join) use ($languageId): void {
@@ -131,10 +135,11 @@ class ItemService
                     ->where('it_contribution.language_id', '=', $languageId);
             })
             ->select('items.id', 'items.location_id')
-            ->selectRaw("{$resolvedNameSql} AS name")
-            ->with('location')
-            ->orderByRaw("{$resolvedNameSql} asc")
-            ->get();
+            ->with('location');
+        SqlExpr::selectRaw($query, "{$resolvedNameSql} AS name");
+        SqlExpr::orderByRaw($query, "{$resolvedNameSql} asc");
+
+        return $query->get();
     }
 
     /**
@@ -151,18 +156,19 @@ class ItemService
 
         $nameSql = TranslationDisplaySql::itemNameSubquerySql('items');
 
-        return Item::query()
+        $query = Item::query()
             ->where('category_id', '=', $categoryId)
             ->with('location')
-            ->select('items.id', 'items.location_id')
-            ->selectRaw("({$nameSql}) AS name")
-            ->orderByRaw("({$nameSql}) asc")
-            ->get();
+            ->select('items.id', 'items.location_id');
+        SqlExpr::selectRaw($query, "({$nameSql}) AS name");
+        SqlExpr::orderByRaw($query, "({$nameSql}) asc");
+
+        return $query->get();
     }
 
     /**
      * JSON payload for {@see \App\Http\Controllers\Catalog\ItemController::byCategory} and
-     * {@see \App\Http\Controllers\Admin\Catalog\AdminItemController::byItemCategory}: each item as `toArray()`
+     * {@see \App\Http\Controllers\Admin\Catalog\Item\AdminItemController::byItemCategory}: each item as `toArray()`
      * with nested `location` removed and `location_label` set from the loaded relation.
      *
      * @param  Collection<int, Item>  $items
@@ -214,11 +220,11 @@ class ItemService
             ->where('category_id', '=', $itemCategoryId)
             ->where('validation', true)
             ->with('location')
-            ->select('items.id', 'items.location_id')
-            ->selectRaw("({$nameSql}) AS name");
+            ->select('items.id', 'items.location_id');
+        SqlExpr::selectRaw($qb, "({$nameSql}) AS name");
 
         if ($query !== '') {
-            $qb->whereRaw("({$nameSql}) LIKE ?", ['%' . $query . '%']);
+            SqlExpr::whereRaw($qb, "({$nameSql}) LIKE ?", ['%' . $query . '%']);
         }
 
         return $qb->limit(10)->get();

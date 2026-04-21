@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Admin\Taxonomy;
 
 use App\Models\Identity\Admin;

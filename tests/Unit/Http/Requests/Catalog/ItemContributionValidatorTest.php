@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Http\Requests\Catalog;
 
 use App\Http\Requests\Catalog\ItemContributionValidator;
