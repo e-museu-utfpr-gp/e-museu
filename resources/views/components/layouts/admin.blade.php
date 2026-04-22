@@ -4,8 +4,14 @@
 ])
 
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
-    data-admin-dependent-select-error="{{ __('view.admin.layout.dependent_select_load_failed') }}">
+<html
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    data-admin-dependent-select-error="{{ __('view.admin.layout.dependent_select_load_failed') }}"
+    data-admin-ai-enabled="{{ ($adminAiEnabled ?? false) ? '1' : '0' }}"
+    data-admin-ai-translate-url="{{ ($adminAiEnabled ?? false) ? ($adminAiTranslateUrl ?? '') : '' }}"
+    data-admin-ai-msg-network="{{ e(__('view.admin.ai.provider_error')) }}"
+    data-admin-ai-msg-busy="{{ e(__('view.admin.ai.busy')) }}"
+>
 
 <head>
     <meta charset="utf-8">

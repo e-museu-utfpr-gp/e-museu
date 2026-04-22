@@ -50,5 +50,6 @@ return [
         'auth' => require __DIR__ . '/view/admin/auth.php',
         'layout' => require __DIR__ . '/view/admin/layout.php',
         'collaborator' => require __DIR__ . '/view/admin/collaborator.php',
+        'ai' => require __DIR__ . '/view/admin/ai.php',
     ],
 ];

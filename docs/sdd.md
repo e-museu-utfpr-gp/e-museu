@@ -57,6 +57,7 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 - Taxonomy: `Tag`, `TagCategory`, and translations.
 - Collaborators: email verification codes and eligibility for public contribution.
 - Admin / identity: admin auth, administrative CRUD, and edit locks.
+- Admin AI translation: `POST /admin/ai/translate-content` (auth + `throttle:admin-ai-translate`), `config/ai.php`, `App\Support\Admin\Ai\{AdminAi, AdminContentTranslationRegistry, AdminAiViewData, AdminContentTranslationPrompts}`, `App\Services\Ai\*` (OpenRouter client + translation orchestration), admin layout + translation tab partials + `resources/js/pages/admin/ai/admin-content-translation.js`.
 - Storage proxy: public files served through an app route (`/storage/{path}`).
 
 ## 4) Critical flows (AI-oriented)
@@ -71,6 +72,7 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
   - request email code → confirm code → temporary contribution session.
 - Admin:
   - CRUD under `/admin/*`, content validation, images/QR management.
+  - Optional translation assist: generic JSON endpoint keyed by `resource` (`item`, `extra`, `item_category`, `tag`, `tag_category`) with `translations[locale][field]` echo of the form; modes `fill` vs `regenerate`.
 
 ## 5) Rules and invariants
 
@@ -105,3 +107,4 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 
 - **2026-04-21**: Document renamed from `spp.md` (typo) to **`sdd.md`** (software design document). Added **PHP `use` imports** convention. English-only code rule. Section “Public item contribution (`StoreItemContributionAction`) — structure” (traits table). README deploy paths → `docs/deploy/`. Stricter rate limit on `catalog.items.store`; unknown contribution status → validation error (not HTTP 500).
 - **2026-04-21 (later):** `declare(strict_types=1)` applied across `app/`, `routes/`, `config/`, `bootstrap/`, `tests/`, `database/`, `lang/`. Public contribution components must reference **validated** items only (`ComponentRequest` + `ItemComponentService`). Admin partial edit actions: lock semantics in `docs/internal/edit-locks.md`.
+- **2026-04-21 (later still):** `config/ai.php`, `RegistersRateLimiters::admin-ai-translate`, `AdminContentTranslationController` + `AdminContentTranslationRequest`, OpenRouter-backed `AdminContentTranslationService`, feature tests `AdminContentTranslationControllerTest`; admin AI support classes live under `App\Support\Admin\Ai` (registry, prompts, layout flags, etc.).

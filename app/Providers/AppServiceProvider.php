@@ -10,6 +10,7 @@ use App\Providers\Concerns\{
     GuessesFactoryName,
     GuessesModelName,
     RegistersAdminDatabaseSessionHandler,
+    RegistersAdminAiViewComposer,
     RegistersAdminLoginAntiBotViewComposer,
     RegistersAntiBotEmailCodeComposer,
     RegistersForcedHttpsUrls,
@@ -34,5 +35,6 @@ class AppServiceProvider extends ServiceProvider
 
         RegistersAdminDatabaseSessionHandler::register();
         RegistersLocaleSwitcherViewComposer::register();
+        RegistersAdminAiViewComposer::register();
     }
 }

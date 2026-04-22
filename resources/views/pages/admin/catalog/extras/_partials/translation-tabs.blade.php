@@ -1,6 +1,13 @@
-{{-- Expects: $contentLanguages, $preferredContentTabLanguageId, $extra (nullable) --}}
+{{-- Expects: $contentLanguages, $preferredContentTabLanguageId, $extra (nullable), $aiTranslationUiEnabled (bool), $aiTranslationResource (optional), $aiTranslationFieldKeys (optional CSV) --}}
 
-<div class="mb-3">
+<div
+    class="mb-3"
+    @if (($aiTranslationUiEnabled ?? false) && isset($aiTranslationResource) && $aiTranslationResource !== '' && isset($aiTranslationFieldKeys) && $aiTranslationFieldKeys !== '')
+        data-admin-ai-translation-root="1"
+        data-ai-resource="{{ $aiTranslationResource }}"
+        data-ai-field-keys="{{ $aiTranslationFieldKeys }}"
+    @endif
+>
     <label class="form-label fw-bold">{{ __('view.admin.catalog.items.form.content_by_language') }}</label>
     @error('translations')
         <div class="text-danger small mb-2">{{ $message }}</div>
@@ -36,6 +43,11 @@
                 role="tabpanel"
                 aria-labelledby="extra-tab-trigger-{{ $lang->code }}"
             >
+                @include('pages.admin._partials.ai-translation-tab-actions', [
+                    'lang' => $lang,
+                    'aiTranslationResource' => $aiTranslationResource ?? null,
+                    'aiTranslationUiEnabled' => $aiTranslationUiEnabled ?? false,
+                ])
                 <x-ui.inputs.admin.textarea
                     name="translations[{{ $c }}][info]"
                     id="extra-info-{{ $c }}"

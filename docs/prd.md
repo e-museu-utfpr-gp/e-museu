@@ -34,7 +34,8 @@
 - **Curation / admin:**
   - CRUD for items, categories, tags, extras, components, and relations;
   - content validation/moderation;
-  - image and QR management.
+  - image and QR management;
+  - optional AI-assisted translation (OpenRouter) on admin multilingual forms: fill missing fields or regenerate from other locales (not on the universal tab; gated by `AI_ENABLED` and API key).
 - **Multi-locale content:**
   - translations and locale fallback.
 
@@ -78,3 +79,4 @@
 
 - **2026-04-21**: Initial PRD; English-only code rule. Deploy docs pointer `docs/deploy/`; note on stricter rate limit for public item contribution POST (abuse mitigation). Companion doc renamed to `docs/sdd.md` (software design document; replaces typo `spp.md`).
 - **2026-04-21 (later):** Public contribution may only link **validated** catalog items as components (aligned with “public sees validated content”). Internal note on admin edit locks: `docs/internal/edit-locks.md`.
+- **2026-04-21 (later still):** Admin-only OpenRouter translation assist on all multilingual catalog/taxonomy forms; feature-flagged (`AI_ENABLED` + key); per-user rate limit on `POST /admin/ai/translate-content`.
