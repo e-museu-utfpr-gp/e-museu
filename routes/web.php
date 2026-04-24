@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\Collaborator\AdminCollaboratorController;
 use App\Http\Controllers\StorageProxyController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagCategoryController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagController;
+use App\Http\Controllers\Admin\Ai\AdminContentTranslationController;
 use App\Models\Language;
 use Illuminate\Support\Facades\Route;
 
@@ -110,6 +111,10 @@ Route::middleware('throttle:web-public')->group(function () {
 
 Route::middleware(['authenticate', 'throttle:web-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/catalog/items');
+
+    Route::post('ai/translate-content', [AdminContentTranslationController::class, 'translate'])
+        ->middleware('throttle:admin-ai-translate')
+        ->name('ai.translate-content');
 
     Route::prefix('catalog')->name('catalog.')->group(function () {
         Route::redirect('/', '/admin/catalog/items');

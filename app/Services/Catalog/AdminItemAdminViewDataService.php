@@ -8,6 +8,7 @@ use App\Models\Catalog\Item;
 use App\Models\Language;
 use App\Services\Collaborator\CollaboratorService;
 use App\Services\LocationService;
+use App\Support\Admin\Ai\{AdminAiViewData, AdminContentTranslationRegistry};
 use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
 use Illuminate\Http\Request;
 
@@ -56,14 +57,18 @@ final class AdminItemAdminViewDataService
     {
         $locationForm = $this->locationService->forItemCreateForms();
 
-        return [
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_ITEM
+        );
+
+        return array_merge([
             'itemCategories' => $this->itemCategoryService->getForForm(),
             'collaborators' => $this->collaboratorService->getForForm(),
             'contentLanguages' => Language::forCatalogContentForms(),
             'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
             'locations' => $locationForm['locations'],
             'defaultCatalogLocationId' => $locationForm['defaultCatalogLocationId'],
-        ];
+        ], $aiTranslationViewData);
     }
 
     /**
@@ -73,13 +78,22 @@ final class AdminItemAdminViewDataService
     {
         $item->load(['images', 'translations.language']);
 
-        return array_merge([
-            'item' => $item,
-            'contentLanguages' => Language::forCatalogContentForms(),
-            'itemCategories' => $this->itemCategoryService->getForForm(),
-            'collaborators' => $this->collaboratorService->getForForm(),
-            'locations' => $this->locationService->orderedForForms(),
-        ], $this->itemQrCodeService->adminViewQrPresentation($item), $this->headingLocale->resolveFor($item));
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_ITEM
+        );
+
+        return array_merge(
+            [
+                'item' => $item,
+                'contentLanguages' => Language::forCatalogContentForms(),
+                'itemCategories' => $this->itemCategoryService->getForForm(),
+                'collaborators' => $this->collaboratorService->getForForm(),
+                'locations' => $this->locationService->orderedForForms(),
+            ],
+            $this->itemQrCodeService->adminViewQrPresentation($item),
+            $this->headingLocale->resolveFor($item),
+            $aiTranslationViewData
+        );
     }
 
     /**

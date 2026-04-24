@@ -37,6 +37,13 @@ final class RegistersRateLimiters
             return Limit::perMinute(480)->by($request->user()?->id ?: $request->ip());
         });
 
+        /** Admin AI translation assist (multi-provider) — strict per-user cap (see `config/ai.php` `rate_limit`). */
+        RateLimiter::for('admin-ai-translate', function (Request $request) {
+            $perMinute = max(1, (int) config('ai.rate_limit.per_minute', 3));
+
+            return Limit::perMinute($perMinute)->by($request->user()?->id ?: $request->ip());
+        });
+
         RateLimiter::for('web-storage', function (Request $request) {
             return Limit::perMinute(1200)->by($request->ip());
         });

@@ -13,6 +13,7 @@ use App\Services\Identity\LockService;
 use Illuminate\View\View;
 use App\Services\Catalog\ExtraService;
 use App\Services\Catalog\ItemCategoryService;
+use App\Support\Admin\Ai\{AdminAiViewData, AdminContentTranslationRegistry};
 use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
 use Illuminate\Http\{RedirectResponse, Request};
 
@@ -46,12 +47,16 @@ class AdminExtraController extends AdminBaseController
         ItemCategoryService $itemCategoryService,
         CollaboratorService $collaboratorService
     ): View {
-        return view('pages.admin.catalog.extras.create', [
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_EXTRA
+        );
+
+        return view('pages.admin.catalog.extras.create', array_merge([
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
             'contentLanguages' => Language::forCatalogContentForms(),
             'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
-        ]);
+        ], $aiTranslationViewData));
     }
 
     public function store(AdminStoreExtraRequest $request, ExtraService $extraService): RedirectResponse
@@ -72,12 +77,16 @@ class AdminExtraController extends AdminBaseController
 
         $extra->load(['translations.language', 'item.itemCategory', 'collaborator']);
 
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_EXTRA
+        );
+
         return view('pages.admin.catalog.extras.edit', array_merge([
             'extra' => $extra,
             'itemCategories' => $itemCategoryService->getForForm(),
             'collaborators' => $collaboratorService->getForForm(),
             'contentLanguages' => Language::forCatalogContentForms(),
-        ], $headingLocale->resolveFor($extra)));
+        ], $headingLocale->resolveFor($extra), $aiTranslationViewData));
     }
 
     public function update(

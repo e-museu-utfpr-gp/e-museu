@@ -150,6 +150,14 @@ class Language extends Model
     }
 
     /**
+     * Whether this row is the catalog "universal" pseudo-locale (shared fallback content).
+     */
+    public function isCatalogUniversalContentLocale(): bool
+    {
+        return $this->code === ContentLanguage::UNIVERSAL->value;
+    }
+
+    /**
      * @return HasMany<\App\Models\Catalog\ItemTranslation, $this>
      */
     public function itemTranslations(): HasMany
