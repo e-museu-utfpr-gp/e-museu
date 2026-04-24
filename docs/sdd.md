@@ -5,7 +5,7 @@
 
 > **Code language:** all source code must be in **English** — identifiers (classes, methods, variables), comments inside code, PHPDoc/DocBlocks, and technical strings in code (e.g. translation keys). User-facing copy may be localized via `lang/` and frontend i18n; the codebase itself stays English-only.
 
-- **Last updated:** 2026-04-21  
+- **Last updated:** 2026-04-24  
 - **Purpose:** technical baseline so AI agents can understand the project quickly
 
 ## PHP `use` imports (project convention)
@@ -45,7 +45,7 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 
 ## 2) Architecture and layers
 
-- `app/Http/Controllers`: HTTP layer (request/response).
+- `app/Http/Controllers`: HTTP layer (request/response). **Convention:** keep controllers thin and scannable — **almost never add `private` methods** here. Push response shaping, structured logging, and non-trivial branching to `Support`, `Actions`, `Services`, or other dedicated classes so the controller stays a short orchestration surface.
 - `app/Actions`: orchestration for complex use cases.
 - `app/Services`: application rules, queries, and view data assembly.
 - `app/Models`: Eloquent entities and relationships.
@@ -57,6 +57,7 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 - Taxonomy: `Tag`, `TagCategory`, and translations.
 - Collaborators: email verification codes and eligibility for public contribution.
 - Admin / identity: admin auth, administrative CRUD, and edit locks.
+- Admin AI translation: `POST /admin/ai/translate-content` (auth + `throttle:admin-ai-translate`), `config/ai.php` (provider blocks: `provider_url`, `human_label` from .env, `*_MODELS`, optional `extra_request_headers`; chain order `AI_CHAT_COMPLETION_CHAIN`), `App\Support\Admin\Ai\{AdminAi, AdminContentTranslationRegistry, AdminAiViewData, AdminContentTranslationPrompts, AdminContentTranslationHttp, AdminChatCompletionHttpRequestFactory}`, `App\Client\Ai\AiChatCompletionHttpClient`, `App\Actions\Admin\Ai\AdminChatCompletion\AdminChatCompletionAction`, admin layout + translation tab partials + `resources/js/pages/admin/ai/admin-content-translation.js`. Provider labels in the UI come from each block’s `human_label` (e.g. `OPENROUTER_LOG_LABEL`), not from per-slug translation keys.
 - Storage proxy: public files served through an app route (`/storage/{path}`).
 
 ## 4) Critical flows (AI-oriented)
@@ -71,6 +72,7 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
   - request email code → confirm code → temporary contribution session.
 - Admin:
   - CRUD under `/admin/*`, content validation, images/QR management.
+  - Optional translation assist: generic JSON endpoint keyed by `resource` (`item`, `extra`, `item_category`, `tag`, `tag_category`) with `translations[locale][field]` echo of the form; modes `fill` vs `regenerate`.
 
 ## 5) Rules and invariants
 
@@ -105,3 +107,5 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 
 - **2026-04-21**: Document renamed from `spp.md` (typo) to **`sdd.md`** (software design document). Added **PHP `use` imports** convention. English-only code rule. Section “Public item contribution (`StoreItemContributionAction`) — structure” (traits table). README deploy paths → `docs/deploy/`. Stricter rate limit on `catalog.items.store`; unknown contribution status → validation error (not HTTP 500).
 - **2026-04-21 (later):** `declare(strict_types=1)` applied across `app/`, `routes/`, `config/`, `bootstrap/`, `tests/`, `database/`, `lang/`. Public contribution components must reference **validated** items only (`ComponentRequest` + `ItemComponentService`). Admin partial edit actions: lock semantics in `docs/internal/edit-locks.md`.
+- **2026-04-21 (later still):** `config/ai.php`, `RegistersRateLimiters::admin-ai-translate`, `AdminContentTranslationController` + `AdminContentTranslationRequest`, feature tests `AdminContentTranslationControllerTest`; admin AI support classes live under `App\Support\Admin\Ai` (registry, prompts, layout flags, etc.). (Superseded for HTTP stack by **2026-04-24** below.)
+- **2026-04-24:** Admin AI chat HTTP is `AiChatCompletionHttpClient` + `AdminChatCompletionHttpRequestFactory` (no per-vendor client classes). Provider order `AI_CHAT_COMPLETION_CHAIN`; each block uses `provider_url` and optional `*_LOG_LABEL` → `human_label` for UI/log copy. Lang `view.admin.ai` no longer defines fixed strings per provider slug; `AdminAi::providerLabel()` reads `config('ai.{slug}.human_label')` with a generic `provider_default` fallback.

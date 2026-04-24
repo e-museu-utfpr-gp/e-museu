@@ -11,6 +11,7 @@ use App\Models\Taxonomy\Tag;
 use App\Services\Identity\LockService;
 use Illuminate\View\View;
 use App\Services\Taxonomy\{TagCategoryService, TagService};
+use App\Support\Admin\Ai\{AdminAiViewData, AdminContentTranslationRegistry};
 use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
 use Illuminate\Http\{RedirectResponse, Request};
 
@@ -35,11 +36,15 @@ class AdminTagController extends AdminBaseController
     {
         $categories = $tagCategoryService->getForForm();
 
-        return view('pages.admin.taxonomy.tags.create', [
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_TAG
+        );
+
+        return view('pages.admin.taxonomy.tags.create', array_merge([
             'categories' => $categories,
             'contentLanguages' => Language::forCatalogContentForms(),
             'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
-        ]);
+        ], $aiTranslationViewData));
     }
 
     public function store(AdminTagRequest $request, TagService $tagService): RedirectResponse
@@ -60,11 +65,15 @@ class AdminTagController extends AdminBaseController
 
         $categories = $tagCategoryService->getForForm();
 
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_TAG
+        );
+
         return view('pages.admin.taxonomy.tags.edit', array_merge([
             'tag' => $tag,
             'categories' => $categories,
             'contentLanguages' => Language::forCatalogContentForms(),
-        ], $headingLocale->resolveFor($tag)));
+        ], $headingLocale->resolveFor($tag), $aiTranslationViewData));
     }
 
     public function update(
