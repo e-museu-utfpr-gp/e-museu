@@ -13,7 +13,7 @@ use Throwable;
 final class AiTranslationUserException extends RuntimeException
 {
     /**
-     * @param  array<string, string>  $translationReplace
+     * @param  array<string, scalar>  $translationReplace  Passed to {@see __()} as replacements.
      */
     public function __construct(
         public readonly string $translationKey,

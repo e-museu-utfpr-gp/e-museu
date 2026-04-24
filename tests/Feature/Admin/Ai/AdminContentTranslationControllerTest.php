@@ -19,13 +19,11 @@ final class AdminContentTranslationControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** URL pattern aligned with the default OpenRouter completions URL in {@see \App\Client\Ai\OpenRouterChatCompletionClient}. */
+    /** Default chat URL patterns from {@see config('ai.php')} for the bundled provider blocks. */
     private const OPENROUTER_COMPLETIONS_URL_PATTERN = 'https://openrouter.ai/*';
 
-    /** Groq OpenAI-compatible completions base in {@see \App\Client\Ai\GroqChatCompletionClient}. */
     private const GROQ_COMPLETIONS_URL_PATTERN = 'https://api.groq.com/*';
 
-    /** GitHub Models inference in {@see \App\Client\Ai\GitHubModelsChatCompletionClient}. */
     private const GITHUB_MODELS_COMPLETIONS_URL_PATTERN = 'https://models.github.ai/*';
 
     protected function setUp(): void
@@ -34,8 +32,18 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         AdminAi::resetMissingProvidersWarningForTesting();
 
+        // Explicit URLs so partial Config::set() in individual tests never drops provider_url
+        // (required for ready + HTTP fakes).
+        Config::set('ai.openrouter.provider_url', 'https://openrouter.ai/api/v1/chat/completions');
+        Config::set('ai.groq.provider_url', 'https://api.groq.com/openai/v1/chat/completions');
+        Config::set('ai.github_models.provider_url', 'https://models.github.ai/inference/chat/completions');
+
+        Config::set('ai.openrouter.enabled', true);
         Config::set('ai.github_models.api_key', '');
         Config::set('ai.groq.api_key', '');
+
+        // Match .env.example and test fakes: OpenRouter first, then Groq, then GitHub Models.
+        Config::set('ai.chat_completion.chain', ['openrouter', 'groq', 'github_models']);
     }
 
     public function test_guest_cannot_translate(): void
@@ -237,26 +245,25 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         Http::fake([
             self::OPENROUTER_COMPLETIONS_URL_PATTERN => Http::sequence()
-                ->push(['error' => 'rate limited'], 429)
-                ->push(['error' => 'overload'], 502),
+                ->push(['error' => 'overload'], 502)
+                ->push(['error' => 'bad gateway'], 503),
         ]);
 
         $admin = $this->makeAdmin();
         $response = $this->actingAs($admin)->postJson(route('admin.ai.translate-content'), $this->minimalPayload());
 
         $response->assertStatus(422);
-        $response->assertJsonFragment(['message' => __('view.admin.ai.error_all_models_failed')]);
+        $response->assertJsonFragment(['message' => __('view.admin.ai.provider_error')]);
         Http::assertSentCount(2);
     }
 
-    public function test_openrouter_all_models_return_422_with_rate_limit_message_when_only_429(): void
+    public function test_openrouter_api_returns_429_and_app_responds_422_with_rate_limit_message(): void
     {
         Config::set('ai.openrouter.api_key', 'sk-test');
         Config::set('ai.openrouter.models', ['model/a', 'model/b']);
 
         Http::fake([
             self::OPENROUTER_COMPLETIONS_URL_PATTERN => Http::sequence()
-                ->push(['error' => 'rate limited'], 429)
                 ->push(['error' => 'rate limited'], 429),
         ]);
 
@@ -265,7 +272,7 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonFragment(['message' => __('view.admin.ai.error_rate_limited')]);
-        Http::assertSentCount(2);
+        Http::assertSentCount(1);
     }
 
     public function test_openrouter_rate_limited_then_groq_fails_user_gets_groq_message_not_rate_limit_copy(): void
@@ -278,7 +285,6 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         Http::fake([
             self::OPENROUTER_COMPLETIONS_URL_PATTERN => Http::sequence()
-                ->push(['error' => 'rate limited'], 429)
                 ->push(['error' => 'rate limited'], 429),
             self::GROQ_COMPLETIONS_URL_PATTERN => Http::sequence()
                 ->push(['error' => 'bad gateway'], 502)
@@ -291,7 +297,7 @@ final class AdminContentTranslationControllerTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonFragment(['message' => __('view.admin.ai.provider_error')]);
         $response->assertJsonMissing(['message' => __('view.admin.ai.error_rate_limited')]);
-        Http::assertSentCount(4);
+        Http::assertSentCount(3);
     }
 
     public function test_openrouter_and_groq_all_rate_limited_returns_rate_limit_message(): void
@@ -304,10 +310,8 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         Http::fake([
             self::OPENROUTER_COMPLETIONS_URL_PATTERN => Http::sequence()
-                ->push(['error' => 'rate limited'], 429)
                 ->push(['error' => 'rate limited'], 429),
             self::GROQ_COMPLETIONS_URL_PATTERN => Http::sequence()
-                ->push(['error' => 'rate limited'], 429)
                 ->push(['error' => 'rate limited'], 429),
         ]);
 
@@ -316,7 +320,7 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonFragment(['message' => __('view.admin.ai.error_rate_limited')]);
-        Http::assertSentCount(4);
+        Http::assertSentCount(2);
     }
 
     public function test_openrouter_all_models_no_endpoints_returns_models_unavailable_message(): void
@@ -370,7 +374,6 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         Http::fake([
             self::OPENROUTER_COMPLETIONS_URL_PATTERN => Http::sequence()
-                ->push(['error' => 'rate limited'], 429)
                 ->push(['error' => 'rate limited'], 429),
             self::GITHUB_MODELS_COMPLETIONS_URL_PATTERN => Http::response([
                 'choices' => [
@@ -388,7 +391,7 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonPath('translations.name', 'From GitHub after OpenRouter');
-        Http::assertSentCount(3);
+        Http::assertSentCount(2);
     }
 
     public function test_falls_back_openrouter_then_groq_then_github(): void
@@ -404,10 +407,8 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         Http::fake([
             self::OPENROUTER_COMPLETIONS_URL_PATTERN => Http::sequence()
-                ->push(['error' => 'rate limited'], 429)
                 ->push(['error' => 'rate limited'], 429),
             self::GROQ_COMPLETIONS_URL_PATTERN => Http::sequence()
-                ->push(['error' => 'rate limited'], 429)
                 ->push(['error' => 'rate limited'], 429),
             self::GITHUB_MODELS_COMPLETIONS_URL_PATTERN => Http::response([
                 'choices' => [
@@ -425,7 +426,7 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonPath('translations.name', 'From GitHub third hop');
-        Http::assertSentCount(5);
+        Http::assertSentCount(3);
     }
 
     public function test_falls_back_to_groq_when_openrouter_exhausts_models(): void
@@ -438,7 +439,6 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         Http::fake([
             self::OPENROUTER_COMPLETIONS_URL_PATTERN => Http::sequence()
-                ->push(['error' => 'rate limited'], 429)
                 ->push(['error' => 'rate limited'], 429),
             self::GROQ_COMPLETIONS_URL_PATTERN => Http::response([
                 'choices' => [
@@ -456,7 +456,7 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonPath('translations.name', 'From Groq');
-        Http::assertSentCount(3);
+        Http::assertSentCount(2);
     }
 
     public function test_openrouter_401_returns_credentials_error(): void
@@ -527,6 +527,101 @@ final class AdminContentTranslationControllerTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonFragment(['message' => __('view.admin.ai.error_no_source')]);
+        Http::assertNothingSent();
+    }
+
+    public function test_forced_openrouter_uses_only_openrouter_and_returns_requested_provider(): void
+    {
+        Config::set('ai.openrouter.api_key', 'sk-test');
+        Config::set('ai.openrouter.models', ['model/only']);
+        Config::set('ai.groq.api_key', 'gsk-test');
+        Config::set('ai.groq.models', ['llama-3.1-8b-instant']);
+        Config::set('ai.groq.enabled', true);
+
+        Http::fake([
+            self::OPENROUTER_COMPLETIONS_URL_PATTERN => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => '{"name":"OpenRouter forced"}',
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $admin = $this->makeAdmin();
+        $response = $this->actingAs($admin)->postJson(route('admin.ai.translate-content'), [
+            ...$this->minimalPayload(),
+            'provider' => 'openrouter',
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('translations.name', 'OpenRouter forced');
+        $response->assertJsonPath('requested_provider', 'openrouter');
+        $response->assertJsonPath('provider', 'openrouter');
+        Http::assertSentCount(1);
+    }
+
+    public function test_forced_provider_failure_does_not_fallback_to_other_provider(): void
+    {
+        Config::set('ai.openrouter.api_key', 'sk-test');
+        Config::set('ai.openrouter.models', ['model/only']);
+        Config::set('ai.groq.api_key', 'gsk-test');
+        Config::set('ai.groq.models', ['llama-3.1-8b-instant']);
+        Config::set('ai.groq.enabled', true);
+
+        Http::fake([
+            self::OPENROUTER_COMPLETIONS_URL_PATTERN => Http::response(['error' => 'bad gateway'], 503),
+            self::GROQ_COMPLETIONS_URL_PATTERN => Http::response([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => '{"name":"Should not be used"}',
+                        ],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $admin = $this->makeAdmin();
+        $response = $this->actingAs($admin)->postJson(route('admin.ai.translate-content'), [
+            ...$this->minimalPayload(),
+            'provider' => 'openrouter',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment([
+            'message' => __('view.admin.ai.error_selected_provider_failed', [
+                'provider' => AdminAi::providerLabel('openrouter'),
+            ]),
+        ]);
+        Http::assertSentCount(1);
+    }
+
+    public function test_forced_provider_unavailable_returns_specific_message(): void
+    {
+        Config::set('ai.openrouter.enabled', false);
+        Config::set('ai.openrouter.api_key', 'sk-test');
+        Config::set('ai.openrouter.models', ['model/only']);
+        Config::set('ai.groq.enabled', true);
+        Config::set('ai.groq.api_key', 'gsk-test');
+        Config::set('ai.groq.models', ['llama-3.1-8b-instant']);
+
+        Http::fake();
+
+        $admin = $this->makeAdmin();
+        $response = $this->actingAs($admin)->postJson(route('admin.ai.translate-content'), [
+            ...$this->minimalPayload(),
+            'provider' => 'openrouter',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment([
+            'message' => __('view.admin.ai.error_selected_provider_unavailable', [
+                'provider' => AdminAi::providerLabel('openrouter'),
+            ]),
+        ]);
         Http::assertNothingSent();
     }
 

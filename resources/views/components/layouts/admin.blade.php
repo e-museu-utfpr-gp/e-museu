@@ -10,7 +10,12 @@
     data-admin-ai-enabled="{{ ($adminAiEnabled ?? false) ? '1' : '0' }}"
     data-admin-ai-translate-url="{{ ($adminAiEnabled ?? false) ? ($adminAiTranslateUrl ?? '') : '' }}"
     data-admin-ai-msg-network="{{ e(__('view.admin.ai.provider_error')) }}"
+    data-admin-ai-msg-invalid-response="{{ e(__('view.admin.ai.ajax_invalid_response')) }}"
+    data-admin-ai-msg-session="{{ e(__('view.admin.ai.ajax_session_expired')) }}"
+    data-admin-ai-msg-forbidden="{{ e(__('view.admin.ai.ajax_forbidden')) }}"
+    data-admin-ai-msg-validation="{{ e(__('view.admin.ai.ajax_validation')) }}"
     data-admin-ai-msg-busy="{{ e(__('view.admin.ai.busy')) }}"
+    data-admin-ai-msg-close-aria="{{ e(__('view.admin.ai.toast_close_aria')) }}"
 >
 
 <head>

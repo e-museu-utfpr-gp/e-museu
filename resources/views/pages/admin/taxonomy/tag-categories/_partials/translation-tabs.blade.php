@@ -1,4 +1,4 @@
-{{-- Expects: $contentLanguages, $preferredContentTabLanguageId, $tagCategory (nullable), $aiTranslationUiEnabled (bool), $aiTranslationResource (optional), $aiTranslationFieldKeys (optional CSV) --}}
+{{-- Expects: $contentLanguages, $preferredContentTabLanguageId, $tagCategory (nullable), $aiTranslationUiEnabled (bool), $aiTranslationResource (optional), $aiTranslationFieldKeys (optional CSV), $aiTranslationFieldLimits (optional array) --}}
 
 <div
     class="mb-3"
@@ -6,6 +6,7 @@
         data-admin-ai-translation-root="1"
         data-ai-resource="{{ $aiTranslationResource }}"
         data-ai-field-keys="{{ $aiTranslationFieldKeys }}"
+        data-ai-field-limits="{{ e(json_encode($aiTranslationFieldLimits ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}"
     @endif
 >
     <label class="form-label fw-bold">{{ __('view.admin.catalog.items.form.content_by_language') }}</label>

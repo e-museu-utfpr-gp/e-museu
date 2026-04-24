@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Admin\Ai\AdminChatCompletionAction\Concerns\Translation;
+namespace App\Actions\Admin\Ai\AdminChatCompletion\Concerns;
 
 use App\Enums\Content\ContentLanguage;
 use App\Exceptions\AiTranslationUserException;
 use App\Models\Language;
+use App\Support\Admin\Ai\AdminAi;
 use App\Support\Admin\Ai\AdminContentTranslationPrompts;
 use App\Support\Admin\Ai\AdminContentTranslationRegistry;
 
@@ -17,13 +18,14 @@ trait TranslatesAdminContent
 {
     /**
      * @param  array<string, mixed>  $translationsByLocale
-     * @return array<string, string>
+     * @return array{translations: array<string, string>, provider: string, model: string}
      */
     public function translateContent(
         string $resourceKey,
         string $targetLocale,
         string $mode,
         array $translationsByLocale,
+        ?string $forcedProvider = null,
     ): array {
         if ($targetLocale === ContentLanguage::UNIVERSAL->value) {
             throw new AiTranslationUserException('view.admin.ai.error_universal_target');
@@ -55,6 +57,8 @@ trait TranslatesAdminContent
         );
 
         $maxSource = (int) config('ai.translation.max_source_chars');
+        // `AI_TRANSLATION_MAX_SOURCE_CHARS` is enforced with strlen() = UTF-8 byte length of the
+        // serialized source block (not grapheme count). See `config/ai.php` `translation.max_source_chars`.
         if (strlen($sourceDocument) > $maxSource) {
             throw new AiTranslationUserException('view.admin.ai.error_payload_too_large');
         }
@@ -62,9 +66,9 @@ trait TranslatesAdminContent
         $system = AdminContentTranslationPrompts::system($resourceKey, $targetLocale, $applicableFields, $mode);
         $user = AdminContentTranslationPrompts::user($targetLocale, $applicableFields, $sourceDocument);
 
-        /** @var list<string> $models */
-        $models = config('ai.openrouter.models', []);
-        $result = $this->handle($system, $user, $models);
+        $firstSlug = AdminAi::firstChatCompletionChainSlug();
+        $models = $firstSlug !== null ? AdminAi::configuredModelsFor($firstSlug) : [];
+        $result = $this->handle($system, $user, $models, $forcedProvider);
 
         $parsed = $this->modelJsonDecoder->decodeAssoc($result['content']);
         $out = $this->validateAndClampOutput($parsed, $applicableFields, $fields);
@@ -73,7 +77,11 @@ trait TranslatesAdminContent
             throw new AiTranslationUserException('view.admin.ai.error_model_empty');
         }
 
-        return $out;
+        return [
+            'translations' => $out,
+            'provider' => $result['provider'],
+            'model' => $result['model'],
+        ];
     }
 
     /**

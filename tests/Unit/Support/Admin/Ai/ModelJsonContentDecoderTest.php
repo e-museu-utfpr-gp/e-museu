@@ -44,6 +44,13 @@ final class ModelJsonContentDecoderTest extends TestCase
         $this->assertSame(['ok' => true], $this->decoder()->decodeAssoc($raw));
     }
 
+    public function test_json_slice_ignores_braces_inside_string_values(): void
+    {
+        $raw = 'Preamble {"name": "Label with } char", "slug": "y"} trailing';
+
+        $this->assertSame(['name' => 'Label with } char', 'slug' => 'y'], $this->decoder()->decodeAssoc($raw));
+    }
+
     public function test_invalid_json_returns_empty_array(): void
     {
         $this->assertSame([], $this->decoder()->decodeAssoc('not json at all'));

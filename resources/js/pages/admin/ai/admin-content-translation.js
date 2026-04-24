@@ -7,9 +7,24 @@ function readMeta() {
     const enabled = root.getAttribute('data-admin-ai-enabled') === '1';
     const url = root.getAttribute('data-admin-ai-translate-url') || '';
     const networkMsg = root.getAttribute('data-admin-ai-msg-network') || '';
+    const invalidResponseMsg = root.getAttribute('data-admin-ai-msg-invalid-response') || '';
+    const sessionMsg = root.getAttribute('data-admin-ai-msg-session') || '';
+    const forbiddenMsg = root.getAttribute('data-admin-ai-msg-forbidden') || '';
+    const validationMsg = root.getAttribute('data-admin-ai-msg-validation') || '';
     const busyMsg = root.getAttribute('data-admin-ai-msg-busy') || '';
+    const closeAria = root.getAttribute('data-admin-ai-msg-close-aria') || '';
 
-    return { enabled, url, networkMsg, busyMsg };
+    return {
+        enabled,
+        url,
+        networkMsg,
+        invalidResponseMsg,
+        sessionMsg,
+        forbiddenMsg,
+        validationMsg,
+        busyMsg,
+        closeAria,
+    };
 }
 
 /**
@@ -113,6 +128,46 @@ function fieldKeysFromRoot(root) {
 }
 
 /**
+ * @param {HTMLElement} root
+ * @returns {Record<string, number>}
+ */
+function fieldLimitsFromRoot(root) {
+    const raw = root.getAttribute('data-ai-field-limits') || '{}';
+    try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            /** @type {Record<string, number>} */
+            const out = {};
+            Object.keys(parsed).forEach(k => {
+                const n = Number(parsed[k]);
+                if (Number.isFinite(n) && n > 0) {
+                    out[k] = n;
+                }
+            });
+
+            return out;
+        }
+    } catch {
+        /* ignore */
+    }
+
+    return {};
+}
+
+/**
+ * @param {string} str
+ * @param {number} maxChars
+ */
+function truncateUnicode(str, maxChars) {
+    if (maxChars <= 0) {
+        return '';
+    }
+    const chars = Array.from(str);
+
+    return chars.length <= maxChars ? str : chars.slice(0, maxChars).join('');
+}
+
+/**
  * @param {HTMLFormElement} form
  */
 function refreshAllAiButtons(form) {
@@ -134,8 +189,9 @@ function refreshAllAiButtons(form) {
     locales.forEach(loc => refreshButtonStates(form, loc, fieldKeys));
 }
 
-function showAdminAiToast(message, variant) {
+function showAdminAiToast(message, variant, closeAria) {
     const v = variant === 'success' ? 'success' : 'danger';
+    const aria = closeAria && String(closeAria).trim() !== '' ? String(closeAria) : 'Close';
     const $alert = $('<div>', {
         class: 'alert alert-' + v + ' alert-dismissible fade show position-fixed shadow',
         role: 'alert',
@@ -147,7 +203,7 @@ function showAdminAiToast(message, variant) {
             type: 'button',
             class: 'btn-close',
             'data-bs-dismiss': 'alert',
-            'aria-label': 'Close',
+            'aria-label': aria,
         })
     );
     $('body').append($alert);
@@ -221,17 +277,70 @@ function escapeForHtml(text) {
     return d.innerHTML;
 }
 
-function applyTranslationsToForm(form, targetLocale, payload) {
+/**
+ * @param {HTMLFormElement} form
+ * @param {string} targetLocale
+ * @param {Record<string, unknown>} payload
+ * @param {Record<string, number>} limits
+ */
+function applyTranslationsToForm(form, targetLocale, payload, limits) {
     Object.keys(payload).forEach(field => {
         const name = 'translations[' + targetLocale + '][' + field + ']';
         const raw = form.elements.namedItem(name);
         const el = raw && typeof raw === 'object' && 'length' in raw && raw.length > 0 ? raw[0] : raw;
         if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
-            el.value = payload[field];
+            let v = payload[field];
+            if (typeof v !== 'string') {
+                v = v == null ? '' : String(v);
+            }
+            const max = limits[field] ?? 65535;
+            el.value = truncateUnicode(v, max);
             el.dispatchEvent(new Event('input', { bubbles: true }));
             el.dispatchEvent(new Event('change', { bubbles: true }));
         }
     });
+}
+
+function renderMetaText(template, providerLabel, model) {
+    if (!template) {
+        return '';
+    }
+
+    return template
+        .replace(':provider', String(providerLabel || 'AI'))
+        .replace(':model', String(model || '').trim() || '-');
+}
+
+function clearMetaInPane(pane) {
+    if (!(pane instanceof HTMLElement)) {
+        return;
+    }
+    const disclaimer = pane.querySelector('.admin-ai-translate-disclaimer');
+    if (!(disclaimer instanceof HTMLElement)) {
+        return;
+    }
+    const metaEl = disclaimer.querySelector('.admin-ai-translate-disclaimer__meta');
+    if (metaEl instanceof HTMLElement) {
+        metaEl.textContent = '';
+        metaEl.classList.add('d-none');
+    }
+}
+
+function updateMetaInPane(pane, providerLabel, model) {
+    if (!(pane instanceof HTMLElement)) {
+        return;
+    }
+    const disclaimer = pane.querySelector('.admin-ai-translate-disclaimer');
+    if (!(disclaimer instanceof HTMLElement)) {
+        return;
+    }
+    const metaEl = disclaimer.querySelector('.admin-ai-translate-disclaimer__meta');
+    const template = disclaimer.getAttribute('data-ai-meta-label') || '';
+    const metaText = renderMetaText(template, providerLabel, model);
+    if (metaEl instanceof HTMLElement && metaText !== '') {
+        metaEl.textContent = metaText;
+        metaEl.classList.remove('d-none');
+    }
 }
 
 $(document).ready(function () {
@@ -273,10 +382,19 @@ $(document).ready(function () {
             return;
         }
         const pane = document.querySelector(paneSelector);
+        clearMetaInPane(pane);
         const form = pane && pane.closest('form');
         if (form instanceof HTMLFormElement) {
             refreshAllAiButtons(form);
         }
+    });
+
+    $(document).on('change', '.js-admin-ai-provider', function (e) {
+        const select = e.currentTarget;
+        if (!(select instanceof HTMLSelectElement)) {
+            return;
+        }
+        clearMetaInPane(select.closest('.tab-pane'));
     });
 
     $(document).on('click', '.js-admin-ai-translate', function (e) {
@@ -295,6 +413,7 @@ $(document).ready(function () {
         const translations = collectTranslationsFromForm(form);
         const root = form.querySelector('[data-admin-ai-translation-root="1"]');
         const fieldKeys = root ? fieldKeysFromRoot(root) : [];
+        const fieldLimits = root instanceof HTMLElement ? fieldLimitsFromRoot(root) : {};
         const withSource = fieldHasSourceElsewhere(translations, targetLocale, fieldKeys);
         if (withSource.length === 0) {
             return;
@@ -304,12 +423,18 @@ $(document).ready(function () {
             b => b instanceof HTMLButtonElement
         );
         const pane = btn.closest('.tab-pane');
+        const providerSelect =
+            pane instanceof HTMLElement
+                ? pane.querySelector('.js-admin-ai-provider[data-ai-target-locale="' + targetLocale + '"]')
+                : null;
+        const selectedProvider = providerSelect instanceof HTMLSelectElement ? providerSelect.value || 'auto' : 'auto';
         /** @type {HTMLElement|null} */
         let progressBlock = null;
         if (pane instanceof HTMLElement) {
             const found = pane.querySelector('.admin-ai-translate-progress');
             progressBlock = found instanceof HTMLElement ? found : null;
         }
+        clearMetaInPane(pane);
 
         setTranslatingUi(form, buttons, btn, progressBlock, true, meta.busyMsg);
 
@@ -326,27 +451,45 @@ $(document).ready(function () {
                 resource,
                 target_locale: targetLocale,
                 mode,
+                provider: selectedProvider,
                 translations,
             },
         })
             .done(function (resp) {
                 if (resp && typeof resp === 'object' && resp.translations && typeof resp.translations === 'object') {
-                    applyTranslationsToForm(form, targetLocale, resp.translations);
+                    applyTranslationsToForm(form, targetLocale, resp.translations, fieldLimits);
+                    updateMetaInPane(pane, resp.provider_label || resp.provider, resp.model);
                     refreshAllAiButtons(form);
                 } else {
-                    showAdminAiToast(meta.networkMsg, 'danger');
+                    const inv = meta.invalidResponseMsg || meta.networkMsg;
+                    showAdminAiToast(inv, 'danger', meta.closeAria);
                 }
             })
             .fail(function (xhr) {
                 let msg = meta.networkMsg;
-                if (
+                const st = xhr.status;
+                if (st === 419) {
+                    msg = meta.sessionMsg || msg;
+                } else if (st === 403) {
+                    msg = meta.forbiddenMsg || msg;
+                } else if (st === 422) {
+                    if (
+                        xhr.responseJSON &&
+                        typeof xhr.responseJSON.message === 'string' &&
+                        xhr.responseJSON.message !== ''
+                    ) {
+                        msg = xhr.responseJSON.message;
+                    } else {
+                        msg = meta.validationMsg || msg;
+                    }
+                } else if (
                     xhr.responseJSON &&
                     typeof xhr.responseJSON.message === 'string' &&
                     xhr.responseJSON.message !== ''
                 ) {
                     msg = xhr.responseJSON.message;
                 }
-                showAdminAiToast(msg, 'danger');
+                showAdminAiToast(msg, 'danger', meta.closeAria);
             })
             .always(function () {
                 setTranslatingUi(form, buttons, btn, progressBlock, false, meta.busyMsg);

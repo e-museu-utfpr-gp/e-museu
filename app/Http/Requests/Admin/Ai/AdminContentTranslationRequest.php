@@ -6,6 +6,7 @@ namespace App\Http\Requests\Admin\Ai;
 
 use App\Enums\Content\ContentLanguage;
 use App\Models\Language;
+use App\Support\Admin\Ai\AdminAi;
 use App\Support\Admin\Ai\AdminContentTranslationRegistry;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -33,6 +34,7 @@ final class AdminContentTranslationRequest extends FormRequest
                 Rule::notIn([ContentLanguage::UNIVERSAL->value]),
             ],
             'mode' => ['required', 'string', Rule::in(['fill', 'regenerate'])],
+            'provider' => ['nullable', 'string', Rule::in(array_merge(['auto'], AdminAi::allProviderSlugs()))],
             'translations' => ['required', 'array'],
         ];
 

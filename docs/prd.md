@@ -5,7 +5,7 @@
 
 > **Code language:** all source code must be in **English** (identifiers, in-code comments, DocBlocks). End-user text is localized via translation files; product docs for humans may be localized separately — this PRD/SDD pair is maintained in **English** for tooling and AI.
 
-- **Last updated:** 2026-04-21  
+- **Last updated:** 2026-04-24  
 - **Purpose:** fast product understanding for AI agents
 
 **Note (ops):** Coolify/env templates are under `docs/deploy/` (see root `README.md` and `.env.example`).
@@ -35,7 +35,7 @@
   - CRUD for items, categories, tags, extras, components, and relations;
   - content validation/moderation;
   - image and QR management;
-  - optional AI-assisted translation (OpenRouter) on admin multilingual forms: fill missing fields or regenerate from other locales (not on the universal tab; gated by `AI_ENABLED` and API key).
+  - optional AI-assisted translation on admin multilingual forms: fill missing fields or regenerate from other locales (not on the universal tab; gated by provider `*_ENABLED` flags in `.env` / `config/ai.php` and valid `provider_url` + API key + models per block). Multiple providers can be chained (`AI_CHAT_COMPLETION_CHAIN`); recoverable failures try the next ready block in order.
 - **Multi-locale content:**
   - translations and locale fallback.
 
@@ -79,4 +79,5 @@
 
 - **2026-04-21**: Initial PRD; English-only code rule. Deploy docs pointer `docs/deploy/`; note on stricter rate limit for public item contribution POST (abuse mitigation). Companion doc renamed to `docs/sdd.md` (software design document; replaces typo `spp.md`).
 - **2026-04-21 (later):** Public contribution may only link **validated** catalog items as components (aligned with “public sees validated content”). Internal note on admin edit locks: `docs/internal/edit-locks.md`.
-- **2026-04-21 (later still):** Admin-only OpenRouter translation assist on all multilingual catalog/taxonomy forms; feature-flagged (`AI_ENABLED` + key); per-user rate limit on `POST /admin/ai/translate-content`.
+- **2026-04-21 (later still):** Admin-only translation assist on multilingual catalog/taxonomy forms; per-user rate limit on `POST /admin/ai/translate-content`.
+- **2026-04-24:** Translation assist is driven by dynamic provider blocks in `config/ai.php` / `.env` (chain, `provider_url`, keys, models); UI provider names follow each block’s `human_label` env (e.g. `OPENROUTER_LOG_LABEL`), not fixed translation keys per vendor.

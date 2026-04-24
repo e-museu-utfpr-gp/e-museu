@@ -12,10 +12,6 @@ final class RegistersAdminAiViewComposer
     public static function register(): void
     {
         View::composer('components.layouts.admin', function ($view): void {
-            if (AdminAi::anyAdminAiProviderSwitchEnabled() && ! AdminAi::hasAnyChatProviderConfigured()) {
-                AdminAi::warnOnceIfProvidersRequestedButNoneReady();
-            }
-
             $enabled = AdminAi::translationUiEnabled();
 
             $view->with('adminAiEnabled', $enabled);

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin\Ai;
 
 use App\Http\Controllers\Controller;
-use App\Actions\Admin\Ai\AdminChatCompletionAction\AdminChatCompletionAction;
+use App\Actions\Admin\Ai\AdminChatCompletion\AdminChatCompletionAction;
 use App\Http\Requests\Admin\Ai\AdminContentTranslationRequest;
 use App\Exceptions\AiTranslationUserException;
 use App\Support\Admin\Ai\AdminAi;
+use App\Support\Admin\Ai\AdminContentTranslationHttp;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class AdminContentTranslationController extends Controller
@@ -19,64 +19,90 @@ final class AdminContentTranslationController extends Controller
         AdminContentTranslationRequest $request,
         AdminChatCompletionAction $adminChatCompletion,
     ): JsonResponse {
-        $block = AdminAi::translationEndpointBlockReason();
-        if ($block === 'disabled') {
-            return response()->json([
-                'message' => (string) __('view.admin.ai.disabled'),
-            ], 503);
-        }
-
-        if ($block === 'not_configured') {
-            return response()->json([
-                'message' => (string) __('view.admin.ai.not_configured'),
-            ], 503);
+        $blocked = AdminContentTranslationHttp::blockedTranslationResponse();
+        if ($blocked !== null) {
+            return $blocked;
         }
 
         $resource = (string) $request->validated('resource');
         $targetLocale = (string) $request->validated('target_locale');
         $mode = (string) $request->validated('mode');
+        $requestedProvider = (string) ($request->validated('provider') ?? 'auto');
+        $forcedProvider = $requestedProvider !== 'auto' ? $requestedProvider : null;
         $translations = $request->validatedTranslationsPayload();
+        $provider = null;
+        $model = null;
+        $providerLabel = null;
+
+        $providerUnavailable = AdminContentTranslationHttp::forcedProviderUnavailableResponse($forcedProvider);
+        if ($providerUnavailable !== null) {
+            return $providerUnavailable;
+        }
 
         try {
-            $payload = $adminChatCompletion->translateContent($resource, $targetLocale, $mode, $translations);
+            $translation = $adminChatCompletion->translateContent(
+                $resource,
+                $targetLocale,
+                $mode,
+                $translations,
+                $forcedProvider,
+            );
+            $provider = $translation['provider'];
+            $model = $translation['model'];
+            $providerLabel = AdminAi::providerLabel($provider);
 
-            Log::info('admin.ai.translation', [
-                'outcome' => 'success',
-                'admin_id' => $request->user()?->getAuthIdentifier(),
-                'resource' => $resource,
-                'target_locale' => $targetLocale,
-                'mode' => $mode,
+            AdminContentTranslationHttp::logSuccess(
+                $request,
+                $resource,
+                $targetLocale,
+                $mode,
+                $requestedProvider,
+                $provider,
+                $providerLabel,
+                $model,
+            );
+
+            return response()->json([
+                'translations' => $translation['translations'],
+                'provider' => $translation['provider'],
+                'provider_label' => $providerLabel,
+                'model' => $translation['model'],
+                'requested_provider' => $requestedProvider,
             ]);
-
-            return response()->json(['translations' => $payload]);
         } catch (AiTranslationUserException $e) {
-            Log::info('admin.ai.translation', [
-                'outcome' => 'user_error',
-                'admin_id' => $request->user()?->getAuthIdentifier(),
-                'resource' => $resource,
-                'target_locale' => $targetLocale,
-                'mode' => $mode,
-                'reason_key' => $e->translationKey,
-            ]);
+            $previousReasonKey = $e->getPrevious() instanceof AiTranslationUserException
+                ? $e->getPrevious()->translationKey
+                : null;
+            AdminContentTranslationHttp::logUserError(
+                $request,
+                $resource,
+                $targetLocale,
+                $mode,
+                $requestedProvider,
+                $provider,
+                $model,
+                $e->translationKey,
+                $previousReasonKey,
+            );
 
             return response()->json([
                 'message' => (string) __($e->translationKey, $e->translationReplace),
             ], 422);
-        } catch (Throwable $e) {
-            Log::error('admin.ai.translation', [
-                'outcome' => 'provider_error',
-                'admin_id' => $request->user()?->getAuthIdentifier(),
-                'resource' => $resource,
-                'target_locale' => $targetLocale,
-                'mode' => $mode,
-                'exception_class' => $e::class,
-                'exception_message' => $e->getMessage(),
-                'exception' => $e,
-            ]);
+        } catch (Throwable $throwable) {
+            AdminContentTranslationHttp::logProviderError(
+                $request,
+                $resource,
+                $targetLocale,
+                $mode,
+                $requestedProvider,
+                $provider,
+                $model,
+                $throwable,
+            );
 
             return response()->json([
-                'message' => (string) __('view.admin.ai.provider_error'),
-            ], 502);
+                'message' => (string) __('view.admin.ai.internal_error'),
+            ], 500);
         }
     }
 }

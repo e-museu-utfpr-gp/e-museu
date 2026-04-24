@@ -20,6 +20,14 @@ trait DispatchesOpenAiChatHttpResponse
         string $httpErrorPrefix,
         ?Throwable &$lastThrowable,
     ): ?array {
+        // Do not rotate through sibling models on rate limit; escalate to the next provider in the chain.
+        if ($response->status() === 429) {
+            $rateLimited = new RuntimeException($httpErrorPrefix . ' HTTP 429');
+            $lastThrowable = $rateLimited;
+
+            throw new AiTranslationUserException('view.admin.ai.error_rate_limited', [], $rateLimited);
+        }
+
         $retryable = self::throwableForRetryableHttpStatus($response, $httpErrorPrefix);
         if ($retryable !== null) {
             $lastThrowable = $retryable;
@@ -48,9 +56,6 @@ trait DispatchesOpenAiChatHttpResponse
         Response $response,
         string $httpErrorPrefix,
     ): ?Throwable {
-        if ($response->status() === 429) {
-            return new RuntimeException($httpErrorPrefix . ' HTTP 429');
-        }
         if ($response->serverError()) {
             return new RuntimeException($httpErrorPrefix . ' HTTP ' . $response->status());
         }

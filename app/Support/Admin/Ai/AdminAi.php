@@ -13,6 +13,19 @@ final class AdminAi
 {
     private static bool $warnedMissingChatProviders = false;
 
+    /** @return list<string> */
+    public static function chatCompletionChainSlugs(): array
+    {
+        return AdminAiChatCompletionChain::orderedSlugs();
+    }
+
+    public static function firstChatCompletionChainSlug(): ?string
+    {
+        $chain = self::chatCompletionChainSlugs();
+
+        return $chain[0] ?? null;
+    }
+
     /**
      * Whether admin AI translation UI should show (at least one provider enabled, with key and models).
      */
@@ -26,9 +39,13 @@ final class AdminAi
      */
     public static function anyAdminAiProviderSwitchEnabled(): bool
     {
-        return filter_var(config('ai.github_models.enabled', true), FILTER_VALIDATE_BOOL)
-            || filter_var(config('ai.openrouter.enabled', true), FILTER_VALIDATE_BOOL)
-            || filter_var(config('ai.groq.enabled', true), FILTER_VALIDATE_BOOL);
+        foreach (AdminAiProviderCatalog::allProviderSlugs() as $slug) {
+            if (filter_var(config("ai.{$slug}.enabled", true), FILTER_VALIDATE_BOOL)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -49,56 +66,124 @@ final class AdminAi
         return 'not_configured';
     }
 
-    public static function hasAnyChatProviderConfigured(): bool
+    /** @return list<string> */
+    public static function allProviderSlugs(): array
     {
-        return self::githubModelsReady()
-            || self::openRouterReady()
-            || self::groqReady();
+        return AdminAiProviderCatalog::allProviderSlugs();
     }
 
-    public static function githubModelsReady(): bool
+    private static function hasAnyChatProviderConfigured(): bool
     {
-        if (! filter_var(config('ai.github_models.enabled', true), FILTER_VALIDATE_BOOL)) {
-            return false;
+        foreach (AdminAiProviderCatalog::allProviderSlugs() as $slug) {
+            if (self::providerReady($slug)) {
+                return true;
+            }
         }
 
-        if (trim((string) config('ai.github_models.api_key')) === '') {
-            return false;
-        }
-
-        $models = config('ai.github_models.models', []);
-
-        return is_array($models) && $models !== [];
+        return false;
     }
 
-    public static function openRouterReady(): bool
+    /** @return list<string> */
+    public static function configuredProviderSlugs(): array
     {
-        if (! filter_var(config('ai.openrouter.enabled', true), FILTER_VALIDATE_BOOL)) {
-            return false;
+        $out = [];
+        foreach (AdminAiProviderCatalog::allProviderSlugs() as $slug) {
+            if (self::providerReady($slug)) {
+                $out[] = $slug;
+            }
         }
 
-        if (trim((string) config('ai.openrouter.api_key')) === '') {
-            return false;
-        }
-
-        $models = config('ai.openrouter.models', []);
-
-        return is_array($models) && $models !== [];
+        return $out;
     }
 
-    public static function groqReady(): bool
+    /**
+     * True when this slug is a configured AI provider block and enabled with key + models.
+     */
+    public static function providerReady(string $slug): bool
     {
-        if (! filter_var(config('ai.groq.enabled', true), FILTER_VALIDATE_BOOL)) {
+        if (! in_array($slug, AdminAiProviderCatalog::allProviderSlugs(), true)) {
             return false;
         }
 
-        if (trim((string) config('ai.groq.api_key')) === '') {
+        return self::providerSectionReady($slug);
+    }
+
+    /**
+     * Human-facing provider name from {@see config("ai.{slug}.human_label")} (set via .env per provider block).
+     * Falls back to a short formatted slug when the block has no label.
+     */
+    public static function providerLabel(string $slug): string
+    {
+        $fromConfig = trim((string) config('ai.' . $slug . '.human_label', ''));
+        if ($fromConfig !== '') {
+            return $fromConfig;
+        }
+
+        return (string) __('view.admin.ai.provider_default', [
+            'name' => self::formatProviderSlugForDisplay($slug),
+        ]);
+    }
+
+    private static function formatProviderSlugForDisplay(string $slug): string
+    {
+        $slug = trim(str_replace(['-', '_'], ' ', $slug));
+        if ($slug === '') {
+            return '?';
+        }
+        if (preg_match('/^[\p{P}\p{S}\s]+$/u', $slug)) {
+            return '?';
+        }
+
+        return mb_convert_case($slug, MB_CASE_TITLE, 'UTF-8');
+    }
+
+    /** @return list<string> */
+    public static function configuredModelsFor(string $providerSlug): array
+    {
+        if (! in_array($providerSlug, AdminAiProviderCatalog::allProviderSlugs(), true)) {
+            return [];
+        }
+
+        $raw = config("ai.{$providerSlug}.models", []);
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $models = [];
+        foreach ($raw as $model) {
+            if (! is_string($model)) {
+                continue;
+            }
+            $model = trim($model);
+            if ($model !== '') {
+                $models[] = $model;
+            }
+        }
+
+        return $models;
+    }
+
+    private static function providerSectionReady(string $slug): bool
+    {
+        if (! filter_var(config("ai.{$slug}.enabled", true), FILTER_VALIDATE_BOOL)) {
             return false;
         }
 
-        $models = config('ai.groq.models', []);
+        if (trim((string) config("ai.{$slug}.api_key")) === '') {
+            return false;
+        }
 
-        return is_array($models) && $models !== [];
+        if (trim((string) config("ai.{$slug}.provider_url")) === '') {
+            return false;
+        }
+
+        $models = config("ai.{$slug}.models", []);
+
+        if (! is_array($models) || $models === []) {
+            return false;
+        }
+
+        return self::configuredModelsFor($slug) !== [];
     }
 
     public static function warnOnceIfProvidersRequestedButNoneReady(): void

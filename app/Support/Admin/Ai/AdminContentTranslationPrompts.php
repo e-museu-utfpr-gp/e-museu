@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Admin\Ai;
 
 /**
- * System and user messages for admin catalog AI translation (OpenRouter).
+ * System and user messages for admin catalog AI translation (shared across all OpenAI-compatible providers).
  */
 final class AdminContentTranslationPrompts
 {
@@ -48,41 +48,52 @@ final class AdminContentTranslationPrompts
         $fields = AdminContentTranslationRegistry::fieldsFor($resourceKey);
         $fieldLines = [];
         foreach ($applicableFields as $key) {
+            if (! isset($fields[$key])) {
+                continue;
+            }
             $spec = $fields[$key];
             $desc = (string) $spec['description'];
             $fieldLines[] = "- `{$key}`: {$desc}";
         }
         $fieldList = implode("\n", $fieldLines);
         $keys = '`' . implode('`, `', $applicableFields) . '`';
+        $jsonFormatHint = 'Values: JSON strings only (not null). Prefer raw JSON; a leading ```json fence is accepted.';
 
         $modeHint = $mode === 'regenerate'
-            ? 'Overwrite prior text in the target locale with fresh translations.'
-            : 'Only provide translations for missing target values; keep tone consistent with sources.';
+            ? 'Mode: overwrite existing target-locale text using the sources.'
+            : 'Mode: fill only empty target values; match tone of the sources.';
 
         $fidelity = implode("\n", [
-            'Source fidelity (mandatory):',
-            '- The labeled snippets are the exact source strings to translate.',
-            '- Preserve facts, scope, numbers, names, and intent from those snippets only.',
-            '- Do not invent, summarize, expand, or omit substantive content except for normal grammar '
-            . 'in the target locale.',
-            '- Each JSON value must derive only from sources shown for that field (no outside content).',
+            'Source fidelity:',
+            '- Translate only the labeled source text; keep facts, numbers, names, and scope; '
+                . 'no invention or omission beyond normal grammar in the target locale.',
+            '- Each JSON value must come only from snippets shown for that field.',
+        ]);
+
+        $outputLanguage = implode("\n", [
+            'Output language:',
+            '- Every JSON string must be entirely in `'
+                . $targetLocale
+                . '` (visitor-native). If a source is another locale, translate fully; '
+                . 'keep codes/identifiers as in sources unless a standard localized form exists.',
         ]);
 
         return <<<PROMPT
-You are a professional translator and editor for a museum catalog application.
-{$resourceIntro}
+You translate museum catalog content. {$resourceIntro}
 
-Target locale code: `{$targetLocale}` (produce natural text for visitors in that language).
+Target locale: `{$targetLocale}` — all output strings must read as native for visitors in that language.
 
 {$modeHint}
 
+{$outputLanguage}
+
 {$fidelity}
 
-Return ONLY a single JSON object with these keys exactly once each: {$keys}.
-Values must be JSON strings (not null). Do not wrap the JSON in markdown fences.
-Do not add keys outside the list.
+Reply with one JSON object only, exactly these keys once each: {$keys}.
+{$jsonFormatHint}
+Do not add other keys.
 
-Field meanings:
+Fields:
 {$fieldList}
 PROMPT;
     }
@@ -93,17 +104,13 @@ PROMPT;
     public static function user(string $targetLocale, array $applicableFields, string $sourceDocument): string
     {
         $fieldsCsv = implode(', ', $applicableFields);
-        $exactCopy = implode("\n", [
-            'The text between the horizontal rules is the exact catalog copy you must translate.',
-            'Do not substitute other wording, hypotheticals, or commentary.',
-        ]);
 
         return <<<PROMPT
-Translate the following labeled source snippets into locale `{$targetLocale}` for fields: {$fieldsCsv}.
+Translate into `{$targetLocale}` for fields: {$fieldsCsv}.
+Every value must be in that locale, not left in a source language.
 
-{$exactCopy}
+The text between the rules below is the authoritative source; do not add commentary.
 
-Source snippets (each section states the field name and source locale):
 ---
 {$sourceDocument}
 ---

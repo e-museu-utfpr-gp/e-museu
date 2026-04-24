@@ -37,9 +37,9 @@ final class RegistersRateLimiters
             return Limit::perMinute(480)->by($request->user()?->id ?: $request->ip());
         });
 
-        /** Admin OpenRouter translation assist — strict per-user cap (see config/ai.php). */
+        /** Admin AI translation assist (multi-provider) — strict per-user cap (see `config/ai.php` `rate_limit`). */
         RateLimiter::for('admin-ai-translate', function (Request $request) {
-            $perMinute = max(1, (int) config('ai.rate_limit.per_minute', 8));
+            $perMinute = max(1, (int) config('ai.rate_limit.per_minute', 3));
 
             return Limit::perMinute($perMinute)->by($request->user()?->id ?: $request->ip());
         });
