@@ -10,7 +10,7 @@
 
     <title>E-museu: {{ $title }}</title>
 
-    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
