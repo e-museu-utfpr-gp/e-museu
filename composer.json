@@ -10,29 +10,28 @@
   "require": {
     "php": "^8.5",
     "guzzlehttp/guzzle": "^7.2",
-    "laravel/framework": "^12.0",
-    "laravel/sanctum": "^4.0",
-    "laravel/tinker": "^2.9",
+    "laravel/framework": "^13.0",
+    "laravel/sanctum": "^4.3",
+    "laravel/tinker": "^3.0",
     "laravel/ui": "^4.6.1",
-    "league/flysystem-aws-s3-v3": "^3.0",
-    "resend/resend-php": "^1.2"
+    "league/flysystem-aws-s3-v3": "^3.0"
   },
   "require-dev": {
     "barryvdh/laravel-debugbar": "^4.0",
     "bmitch/churn-php": "^1.7",
     "fakerphp/faker": "^1.23",
-    "larastan/larastan": "^3.0",
+    "larastan/larastan": "^3.9",
     "laravel/pint": "^1.13",
-    "laravel/sail": "^1.26",
+    "laravel/sail": "^1.57",
     "lucascudo/laravel-pt-br-localization": "^3.0.4",
     "mockery/mockery": "^1.6",
-    "nunomaduro/collision": "^8.0",
-    "nunomaduro/phpinsights": "^2.13",
+    "nunomaduro/collision": "^8.9.3",
+    "nunomaduro/phpinsights": "^2.14",
     "phpmd/phpmd": "^2.15",
     "phpstan/extension-installer": "^1.3",
     "phpstan/phpstan": "^2.0",
     "phpunit/phpunit": "^12.0",
-    "spatie/laravel-ignition": "^2.4",
+    "spatie/laravel-ignition": "^2.12",
     "systemsdk/phpcpd": "^8.2"
   },
   "autoload": {

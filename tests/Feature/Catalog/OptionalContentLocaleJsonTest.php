@@ -1,25 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Catalog;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
 
-class OptionalContentLocaleJsonTest extends TestCase
+#[Group('mysql')]
+class OptionalContentLocaleJsonTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped(
-                'Migrations require pdo_mysql (install the extension or run tests in the app Docker container).'
-            );
-        }
-
-        parent::setUp();
-    }
-
     public function test_items_by_category_returns_422_for_unknown_content_locale(): void
     {
         $this->getJson(route('catalog.items.byCategory', [

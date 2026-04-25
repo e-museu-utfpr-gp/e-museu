@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'catalog' => require __DIR__ . '/app/catalog.php',
     'taxonomy' => require __DIR__ . '/app/taxonomy.php',

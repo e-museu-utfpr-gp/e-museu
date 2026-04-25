@@ -23,4 +23,6 @@ import './pages/admin/catalog/items/qrcode-actions';
 import './pages/admin/collaborators/check-contact';
 import './pages/admin/collaborators/mark-email-verified-at-now';
 
+import './pages/admin/ai/admin-content-translation';
+
 import './shared/ui/enhanced-select';

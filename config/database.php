@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Support\Str;
 
 return [
@@ -142,7 +144,7 @@ return [
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'port' => env('REDIS_PORT', '6379'),
-            'username' => env('REDIS_USERNAME'),
+            'username' => env('REDIS_USERNAME', 'default'),
             'password' => env('REDIS_PASSWORD'),
             'database' => env('REDIS_DB', '0'),
         ],
@@ -151,7 +153,7 @@ return [
             'url' => env('REDIS_URL'),
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'port' => env('REDIS_PORT', '6379'),
-            'username' => env('REDIS_USERNAME'),
+            'username' => env('REDIS_USERNAME', 'default'),
             'password' => env('REDIS_PASSWORD'),
             'database' => env('REDIS_CACHE_DB', '1'),
         ],

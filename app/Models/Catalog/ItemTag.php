@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Catalog;
 
 use App\Models\Taxonomy\Tag;
 use App\Support\Content\TranslationDisplaySql;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\DB;
+use App\Support\Database\SqlExpr;
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, Pivot};
 
 /**
@@ -48,8 +50,8 @@ class ItemTag extends Pivot
                 'item_tag.validation AS item_tag_validation',
                 'item_tag.created_at AS item_tag_created',
                 'item_tag.updated_at AS item_tag_updated',
-                DB::raw("({$itemNameSql}) AS item_name"),
-                DB::raw("({$tagNameSql}) AS tag_name"),
+                SqlExpr::raw("({$itemNameSql}) AS item_name"),
+                SqlExpr::raw("({$tagNameSql}) AS tag_name"),
             ]);
 
         return $query;

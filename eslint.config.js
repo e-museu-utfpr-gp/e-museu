@@ -42,6 +42,7 @@ export default [
                 HTMLInputElement: 'readonly',
                 HTMLTextAreaElement: 'readonly',
                 HTMLSelectElement: 'readonly',
+                HTMLButtonElement: 'readonly',
                 // jQuery (if used globally)
                 $: 'readonly',
                 jQuery: 'readonly',

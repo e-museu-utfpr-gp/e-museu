@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Admin\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\Catalog\AdminItemComponentController;
 use App\Http\Controllers\Admin\Catalog\AdminExtraController;
-use App\Http\Controllers\Admin\Catalog\AdminItemController;
+use App\Http\Controllers\Admin\Catalog\Item\AdminItemController;
+use App\Http\Controllers\Admin\Catalog\Item\AdminItemImageController;
+use App\Http\Controllers\Admin\Catalog\Item\AdminItemQrCodeController;
 use App\Http\Controllers\Admin\Catalog\AdminItemTagController;
 use App\Http\Controllers\Admin\Catalog\AdminItemCategoryController;
 use App\Http\Controllers\Catalog\CollaboratorController;
@@ -18,6 +22,7 @@ use App\Http\Controllers\Admin\Collaborator\AdminCollaboratorController;
 use App\Http\Controllers\StorageProxyController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagCategoryController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagController;
+use App\Http\Controllers\Admin\Ai\AdminContentTranslationController;
 use App\Models\Language;
 use Illuminate\Support\Facades\Route;
 
@@ -78,14 +83,16 @@ Route::middleware('throttle:web-public')->group(function () {
         Route::get('items/create', [ItemController::class, 'create'])->name('items.create');
         Route::get('items/by-category', [ItemController::class, 'byCategory'])->name('items.byCategory');
         Route::get('items/{id}', [ItemController::class, 'show'])->name('items.show')->whereNumber('id');
-        Route::post('items', [ItemController::class, 'store'])->name('items.store');
+        Route::post('items', [ItemController::class, 'store'])
+            ->middleware('throttle:catalog-item-contribution-store')
+            ->name('items.store');
         Route::post('extras', [ExtraController::class, 'store'])->name('extras.store');
         Route::get('tags', [TagController::class, 'index'])->name('tags.index');
         Route::post(
             'collaborators/request-verification-code',
             [CollaboratorController::class, 'requestVerificationCode'],
         )
-            ->middleware('throttle:collaborator-verification-email')
+            ->middleware(['throttle:collaborator-verification-email', 'antibot:verification-request'])
             ->name('collaborators.request-verification-code');
         Route::post(
             'collaborators/confirm-verification-code',
@@ -105,13 +112,17 @@ Route::middleware('throttle:web-public')->group(function () {
 Route::middleware(['authenticate', 'throttle:web-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/catalog/items');
 
+    Route::post('ai/translate-content', [AdminContentTranslationController::class, 'translate'])
+        ->middleware('throttle:admin-ai-translate')
+        ->name('ai.translate-content');
+
     Route::prefix('catalog')->name('catalog.')->group(function () {
         Route::redirect('/', '/admin/catalog/items');
-        Route::delete('items/{item}/images/{image}', [AdminItemController::class, 'destroyImage'])
+        Route::delete('items/{item}/images/{image}', [AdminItemImageController::class, 'destroy'])
             ->name('items.images.destroy');
-        Route::post('items/{item}/qrcode/regenerate', [AdminItemController::class, 'regenerateQrCode'])
+        Route::post('items/{item}/qrcode/regenerate', [AdminItemQrCodeController::class, 'regenerate'])
             ->name('items.qrcode.regenerate');
-        Route::delete('items/{item}/qrcode', [AdminItemController::class, 'deleteQrCode'])
+        Route::delete('items/{item}/qrcode', [AdminItemQrCodeController::class, 'deleteQrCode'])
             ->name('items.qrcode.delete');
         Route::get('items/by-item-category', [AdminItemController::class, 'byItemCategory'])
             ->name('items.by-item-category');
@@ -150,7 +161,8 @@ Route::middleware('redirectIfAuthenticated')->prefix('admin/auth')->group(functi
     Route::get('login', [AdminLoginController::class, 'showLoginForm'])
         ->middleware('throttle:web-public')
         ->name('login');
-    Route::post('login', [AdminLoginController::class, 'login'])->middleware('throttle:admin-login');
+    Route::post('login', [AdminLoginController::class, 'login'])
+        ->middleware(['throttle:admin-login', 'antibot']);
 });
 
 Route::post('admin/auth/logout', [AdminLoginController::class, 'logout'])

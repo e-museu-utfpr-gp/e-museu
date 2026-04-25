@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'content_language_names' => [
         'pt_BR' => 'português (Brasil)',

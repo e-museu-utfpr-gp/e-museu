@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers\Concerns;
 
 use Illuminate\Contracts\Auth\Guard;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories\Taxonomy;
 
 use App\Models\Taxonomy\{Tag, TagCategory};

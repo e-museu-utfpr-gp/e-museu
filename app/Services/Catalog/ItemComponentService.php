@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Catalog;
 
 use App\Models\Catalog\{Item, ItemComponent};
@@ -50,7 +52,9 @@ class ItemComponentService
      * Links catalog items as components of the parent item (each row's `item_id` is the component catalog id).
      * Pivot `validation` stays false until an admin approves.
      *
-     * Used only from {@see \App\Actions\Catalog\StoreItemContributionAction} (public contribution flow).
+     * Used only from
+     * {@see \App\Actions\Catalog\StoreItemContribution\StoreItemContributionAction}
+     * (public contribution flow).
      *
      * @param  array<int, array<string, mixed>>  $componentsData
      */
@@ -62,9 +66,15 @@ class ItemComponentService
                 continue;
             }
 
-            if (! Item::query()->whereKey($componentId)->exists()) {
+            $componentItem = Item::query()->whereKey($componentId)->first();
+            if ($componentItem === null) {
                 throw ValidationException::withMessages([
                     'components' => [__('validation.catalog.component_item_not_found')],
+                ]);
+            }
+            if ($componentItem->validation !== true) {
+                throw ValidationException::withMessages([
+                    'components' => [__('validation.catalog.component_item_must_be_validated')],
                 ]);
             }
 

@@ -1,12 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support\Catalog;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
-use InvalidArgumentException;
 
 /**
  * Maps public catalog contribution result statuses to validation errors for form re-display.
+ *
+ * When adding a new early-exit status in
+ * {@see \App\Actions\Catalog\StoreItemContribution\Concerns\PersistsContribution::persistContribution()},
+ * add a matching arm here so users see a field error instead of an HTTP 500.
  */
 final class PublicCatalogContributionOutcome
 {
@@ -32,9 +38,21 @@ final class PublicCatalogContributionOutcome
             'collaborator_invalid' => throw ValidationException::withMessages([
                 'collaborator_id' => __('validation.exists', ['attribute' => 'collaborator id']),
             ]),
-            default => throw new InvalidArgumentException(
-                'Unknown public catalog contribution status: ' . (string) ($result['status'] ?? '')
-            ),
+            default => self::throwUnknownStatus($result),
         };
+    }
+
+    /**
+     * @param  array{status?: string}  $result
+     */
+    private static function throwUnknownStatus(array $result): never
+    {
+        Log::warning('Unknown public catalog contribution status.', [
+            'status' => $result['status'] ?? null,
+        ]);
+
+        throw ValidationException::withMessages([
+            'email' => __('app.catalog.item.contribution_unexpected'),
+        ]);
     }
 }

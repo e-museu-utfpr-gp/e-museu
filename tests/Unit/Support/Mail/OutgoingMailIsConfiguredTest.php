@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Support\Mail;
 
 use App\Support\Mail\OutgoingMailIsConfigured;
@@ -7,21 +9,29 @@ use Tests\TestCase;
 
 class OutgoingMailIsConfiguredTest extends TestCase
 {
-    public function test_resend_without_key_is_not_configured(): void
+    public function test_smtp_without_host_is_not_configured(): void
     {
         config([
-            'mail.default' => 'resend',
-            'services.resend.key' => '',
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp' => [
+                'transport' => 'smtp',
+                'host' => '',
+                'port' => 587,
+            ],
         ]);
 
         $this->assertFalse(OutgoingMailIsConfigured::forDefaultMailer());
     }
 
-    public function test_resend_with_key_is_configured(): void
+    public function test_smtp_with_host_is_configured(): void
     {
         config([
-            'mail.default' => 'resend',
-            'services.resend.key' => 're_test_key',
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp' => [
+                'transport' => 'smtp',
+                'host' => 'smtp.utfpr.edu.br',
+                'port' => 587,
+            ],
         ]);
 
         $this->assertTrue(OutgoingMailIsConfigured::forDefaultMailer());
@@ -38,7 +48,7 @@ class OutgoingMailIsConfiguredTest extends TestCase
     {
         config([
             'mail.default' => 'failover',
-            'services.resend.key' => '',
+            'mail.mailers.smtp.host' => '',
         ]);
 
         $this->assertTrue(OutgoingMailIsConfigured::forDefaultMailer());
@@ -49,7 +59,7 @@ class OutgoingMailIsConfiguredTest extends TestCase
         config([
             'app.env' => 'production',
             'mail.default' => 'failover',
-            'services.resend.key' => '',
+            'mail.mailers.smtp.host' => '',
         ]);
 
         $this->assertFalse(OutgoingMailIsConfigured::forDefaultMailer());
@@ -60,7 +70,7 @@ class OutgoingMailIsConfiguredTest extends TestCase
         config([
             'app.env' => 'production',
             'mail.default' => 'failover',
-            'services.resend.key' => 're_live_key',
+            'mail.mailers.smtp.host' => 'smtp.example.test',
         ]);
 
         $this->assertTrue(OutgoingMailIsConfigured::forDefaultMailer());
