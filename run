@@ -415,11 +415,20 @@ function ensure-mysql-testing-database {
   fi
 
   echo ">> Ensuring MySQL database emuseu_testing exists and is granted to application user (MYSQL_USER in db container, from .env DB_USERNAME)..."
-  # Password and app user are expanded only inside the db container (see docker-compose MYSQL_* env), not passed as -p on the host shell.
+  # Credentials expand only inside the db container. Use --defaults-extra-file (not -p) so the client does not warn about passwords on the CLI.
   if ! docker compose -f "$compose_file" exec -T db sh -c "
-    mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" mysql -e 'CREATE DATABASE IF NOT EXISTS emuseu_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;' &&
-    mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" mysql -e \"GRANT ALL PRIVILEGES ON emuseu_testing.* TO '\$MYSQL_USER'@'%';\" &&
-    mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" mysql -e 'FLUSH PRIVILEGES;'
+    umask 077
+    cnf=\$(mktemp)
+    {
+      echo '[client]'
+      echo 'user=root'
+      echo \"password=\$MYSQL_ROOT_PASSWORD\"
+    } > \"\$cnf\"
+    (
+      mysql --defaults-extra-file=\"\$cnf\" mysql -e 'CREATE DATABASE IF NOT EXISTS emuseu_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;' &&
+      mysql --defaults-extra-file=\"\$cnf\" mysql -e \"GRANT ALL PRIVILEGES ON emuseu_testing.* TO '\$MYSQL_USER'@'%';\" &&
+      mysql --defaults-extra-file=\"\$cnf\" mysql -e 'FLUSH PRIVILEGES;'
+    ); rm -f \"\$cnf\"
   "; then
     echo "ERROR: Could not create or grant emuseu_testing. Is the db container up? Check MYSQL_ROOT_PASSWORD and MYSQL_USER in the container (from .env DB_ROOT_PASSWORD / DB_USERNAME)." >&2
     return 1

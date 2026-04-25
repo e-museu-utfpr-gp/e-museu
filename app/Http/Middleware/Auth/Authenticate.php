@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware\Auth;
 
 use Illuminate\Auth\Middleware\Authenticate as Middleware;

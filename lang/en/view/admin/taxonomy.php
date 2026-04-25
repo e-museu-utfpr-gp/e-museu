@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'tag_categories' => [
         'delete_confirm' => 'Are you sure you want to delete this category and all references to it in other records?',

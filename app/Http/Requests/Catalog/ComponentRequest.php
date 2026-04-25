@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Catalog;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ComponentRequest extends FormRequest
 {
@@ -17,7 +20,7 @@ class ComponentRequest extends FormRequest
                 'required',
                 'integer',
                 'numeric',
-                'exists:items,id',
+                Rule::exists('items', 'id')->where('validation', true),
                 function ($attribute, $value, $fail) {
                     /** @var array<int, array<string, mixed>> $components */
                     $components = $this->input('components', []);

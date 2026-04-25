@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Catalog;
 
 use App\Enums\Catalog\ItemImageType;
@@ -56,6 +58,25 @@ class ItemQrCodeService
 
         return $this->normalizeOriginForCompare($targetUrl)
             === $this->normalizeOriginForCompare((string) config('app.url'));
+    }
+
+    /**
+     * QR image and target URL context for admin item show/edit views.
+     *
+     * @return array{qrCodeImage: ?ItemImage, qrCodeTargetUrl: string, qrDomainInvalid: bool}
+     */
+    public function adminViewQrPresentation(Item $item): array
+    {
+        $qrCodeImage = $this->qrCodeImageForItem($item);
+        $qrCodeTargetUrl = $this->targetUrlFromQrImage($qrCodeImage)
+            ?? $this->destinationUrlForItem($item);
+        $qrDomainInvalid = ! $this->isQrDomainCompatible($qrCodeTargetUrl);
+
+        return [
+            'qrCodeImage' => $qrCodeImage,
+            'qrCodeTargetUrl' => $qrCodeTargetUrl,
+            'qrDomainInvalid' => $qrDomainInvalid,
+        ];
     }
 
     public function regenerateForItem(Item $item): ItemImage

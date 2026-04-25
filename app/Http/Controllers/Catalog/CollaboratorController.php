@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Catalog;
 
 use App\Http\Controllers\Controller;
@@ -29,6 +31,7 @@ class CollaboratorController extends Controller
     public function checkContact(Request $request, CollaboratorService $collaboratorService): JsonResponse
     {
         $this->validateCheckContact($request);
+        $verificationEnabled = (bool) config('mail.public_contribution_email_verification_enabled');
 
         $email = trim((string) $request->input('email', ''));
         if ($email === '') {
@@ -52,9 +55,9 @@ class CollaboratorController extends Controller
             'exists' => $collaborator !== null,
             'internal_reserved' => false,
             'full_name' => $collaborator !== null ? (string) $collaborator->full_name : '',
-            'email_verified' => $collaborator === null || $collaborator->hasVerifiedEmail(),
-            'contribution_session_verified' => $collaboratorService
-                ->publicContributionSessionIsAuthenticatedForEmail($email),
+            'email_verified' => ! $verificationEnabled || $collaborator === null || $collaborator->hasVerifiedEmail(),
+            'contribution_session_verified' => ! $verificationEnabled
+                || $collaboratorService->publicContributionSessionIsAuthenticatedForEmail($email),
             'name_differs_from_record' => $nameDiffersFromRecord,
             'collaborator_id' => $collaborator?->id,
         ]);
@@ -67,10 +70,16 @@ class CollaboratorController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    /**
+     * Sends the verification e-mail only after {@see \App\Http\Middleware\VerifyAntiBotChallenge} (scope
+     * `verification-request`) accepts a valid anti-bot token; the mailer is not called when that fails.
+     */
     public function requestVerificationCode(
         Request $request,
         CatalogCollaboratorVerificationService $verification,
     ): JsonResponse {
+        abort_unless((bool) config('mail.public_contribution_email_verification_enabled'), 404);
+
         $validated = $request->validate([
             'email' => ['required', 'email:rfc', 'max:200'],
             'full_name' => ['required', 'string', 'min:1', 'max:200'],
@@ -98,6 +107,8 @@ class CollaboratorController extends Controller
         Request $request,
         CatalogCollaboratorVerificationService $verification,
     ): JsonResponse {
+        abort_unless((bool) config('mail.public_contribution_email_verification_enabled'), 404);
+
         $validated = $request->validate([
             'email' => ['required', 'email:rfc', 'max:200'],
             'code' => ['required', 'string', 'regex:/^[0-9]{6}$/'],

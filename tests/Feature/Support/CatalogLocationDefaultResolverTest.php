@@ -1,29 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Support;
 
 use App\Models\Location;
 use App\Support\Catalog\CatalogLocationDefaultResolver;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Group;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
+use Tests\Support\Concerns\RequiresMysqlDriverConnection;
 
-class CatalogLocationDefaultResolverTest extends TestCase
+#[Group('mysql')]
+class CatalogLocationDefaultResolverTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql is required (runs migrations against MySQL).');
-        }
-
-        parent::setUp();
-
-        if (DB::connection()->getDriverName() !== 'mysql') {
-            $this->markTestSkipped('Locations migration uses MySQL-specific DDL (AUTO_INCREMENT).');
-        }
-    }
+    use RequiresMysqlDriverConnection;
 
     public function test_default_location_id_matches_utfpr_code(): void
     {

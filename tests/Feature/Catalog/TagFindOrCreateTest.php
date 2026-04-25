@@ -1,35 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Catalog;
 
-use App\Services\Taxonomy\TagService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
-use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
 use App\Models\Taxonomy\{Tag, TagCategory};
+use App\Services\Taxonomy\TagService;
+use PHPUnit\Framework\Attributes\Group;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
+use Tests\Support\Concerns\RequiresMysqlDriverConnection;
 
 #[Group('mysql')]
-class TagFindOrCreateTest extends TestCase
+class TagFindOrCreateTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped(
-                'Catalog tests require pdo_mysql (install the extension or run tests in the app Docker container).'
-            );
-        }
-
-        parent::setUp();
-
-        if (DB::connection()->getDriverName() !== 'mysql') {
-            $this->markTestSkipped(
-                'Set DB_CONNECTION=mysql in .env.testing (catalog seeds and SQL assume MySQL).'
-            );
-        }
-    }
+    use RequiresMysqlDriverConnection;
 
     public function test_find_or_create_reuses_same_tag_for_same_category_and_name(): void
     {

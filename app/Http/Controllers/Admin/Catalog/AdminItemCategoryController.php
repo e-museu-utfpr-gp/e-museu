@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin\Catalog;
 
 use App\Http\Controllers\Admin\AdminBaseController;
@@ -9,6 +11,7 @@ use App\Models\Catalog\ItemCategory;
 use App\Services\Catalog\ItemCategoryService;
 use App\Services\Identity\LockService;
 use Illuminate\View\View;
+use App\Support\Admin\Ai\{AdminAiViewData, AdminContentTranslationRegistry};
 use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
 use Illuminate\Http\{RedirectResponse, Request};
 
@@ -31,10 +34,14 @@ class AdminItemCategoryController extends AdminBaseController
 
     public function create(): View
     {
-        return view('pages.admin.catalog.item-categories.create', [
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_ITEM_CATEGORY
+        );
+
+        return view('pages.admin.catalog.item-categories.create', array_merge([
             'contentLanguages' => Language::forCatalogContentForms(),
             'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
-        ]);
+        ], $aiTranslationViewData));
     }
 
     public function store(AdminItemCategoryRequest $request, ItemCategoryService $itemCategoryService): RedirectResponse
@@ -53,10 +60,14 @@ class AdminItemCategoryController extends AdminBaseController
     ): View {
         $lockService->requireUnlockedThenLock($itemCategory);
 
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_ITEM_CATEGORY
+        );
+
         return view('pages.admin.catalog.item-categories.edit', array_merge([
             'itemCategory' => $itemCategory,
             'contentLanguages' => Language::forCatalogContentForms(),
-        ], $headingLocale->resolveFor($itemCategory)));
+        ], $headingLocale->resolveFor($itemCategory), $aiTranslationViewData));
     }
 
     public function update(

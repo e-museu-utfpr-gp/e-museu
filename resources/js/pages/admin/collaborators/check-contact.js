@@ -33,6 +33,9 @@ $(document).ready(function () {
         const $fullNameInput = $form.find('input[name="full_name"], #full_name').first();
 
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const emailVerificationEnabled =
+            $form.attr('data-email-verification-enabled') === '1' ||
+            $form.attr('data-email-verification-enabled') === 'true';
 
         const KEYUP_DEBOUNCE_MS = 300;
         let keyupTimer = null;
@@ -225,12 +228,20 @@ $(document).ready(function () {
                     }
 
                     if (!exists) {
+                        if (!emailVerificationEnabled) {
+                            $emailWarning.prop('hidden', true);
+                            $emailSuccess.prop('hidden', true);
+                            if ($emailPending.length) {
+                                $emailPending.prop('hidden', true);
+                            }
+                            return;
+                        }
                         $emailWarning.prop('hidden', false);
                         $emailSuccess.prop('hidden', true);
                         if ($emailPending.length) {
                             $emailPending.prop('hidden', true);
                         }
-                    } else if ($emailPending.length && !sessionOk) {
+                    } else if (emailVerificationEnabled && $emailPending.length && !sessionOk) {
                         const dbVerified = data && data.skip_contact_check !== true && data.email_verified === true;
                         $emailPending.find('.js-email-pending-first-time').prop('hidden', dbVerified);
                         $emailPending.find('.js-email-pending-session').prop('hidden', !dbVerified);
@@ -251,8 +262,29 @@ $(document).ready(function () {
                         }
                     }
                 },
-                error: function (_jq, textStatus) {
+                error: function (xhr, textStatus) {
                     if (textStatus === 'abort') {
+                        return;
+                    }
+                    // Laravel returns 422 for validation while the address is still incomplete/invalid
+                    // (e.g. user typing). That is not a connectivity failure — avoid the "no internet" banner.
+                    if (xhr.status === 422) {
+                        hideNetworkError();
+                        hideInternal();
+                        updateNameDiffersBanner(false);
+                        dispatchCheckContactResult(formEl, {
+                            internalReserved: false,
+                            exists: false,
+                        });
+                        $emailWarning.prop('hidden', true);
+                        $emailSuccess.prop('hidden', true);
+                        if ($emailPending.length) {
+                            $emailPending.prop('hidden', true);
+                        }
+                        if ($emailAdminDuplicate.length) {
+                            $emailAdminDuplicate.prop('hidden', true);
+                        }
+
                         return;
                     }
                     hideInternal();

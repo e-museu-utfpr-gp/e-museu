@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin\Taxonomy;
 
 use App\Http\Controllers\Admin\AdminBaseController;
@@ -9,6 +11,7 @@ use App\Models\Taxonomy\TagCategory;
 use App\Services\Identity\LockService;
 use App\Services\Taxonomy\TagCategoryService;
 use Illuminate\View\View;
+use App\Support\Admin\Ai\{AdminAiViewData, AdminContentTranslationRegistry};
 use App\Support\Admin\{AdminEditHeadingLocale, AdminIndexTableView};
 use Illuminate\Http\{RedirectResponse, Request};
 
@@ -26,10 +29,14 @@ class AdminTagCategoryController extends AdminBaseController
 
     public function create(): View
     {
-        return view('pages.admin.taxonomy.tag-categories.create', [
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_TAG_CATEGORY
+        );
+
+        return view('pages.admin.taxonomy.tag-categories.create', array_merge([
             'contentLanguages' => Language::forCatalogContentForms(),
             'preferredContentTabLanguageId' => AdminEditHeadingLocale::preferredContentTabLanguageId(),
-        ]);
+        ], $aiTranslationViewData));
     }
 
     public function store(AdminTagCategoryRequest $request, TagCategoryService $tagCategoryService): RedirectResponse
@@ -53,10 +60,14 @@ class AdminTagCategoryController extends AdminBaseController
     ): View {
         $lockService->requireUnlockedThenLock($tagCategory);
 
+        $aiTranslationViewData = AdminAiViewData::forTranslationResource(
+            AdminContentTranslationRegistry::RESOURCE_TAG_CATEGORY
+        );
+
         return view('pages.admin.taxonomy.tag-categories.edit', array_merge([
             'tagCategory' => $tagCategory,
             'contentLanguages' => Language::forCatalogContentForms(),
-        ], $headingLocale->resolveFor($tagCategory)));
+        ], $headingLocale->resolveFor($tagCategory), $aiTranslationViewData));
     }
 
     public function update(

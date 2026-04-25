@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Catalog;
 
 use App\Enums\Catalog\ItemImageType;
@@ -12,51 +14,45 @@ use App\Models\Location;
 use App\Services\Collaborator\CollaboratorService;
 use App\Support\Catalog\CatalogLocationDefaultResolver;
 use Database\Factories\Catalog\ItemCategoryFactory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\{Mail, Storage};
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
+use Tests\Support\MinimalContributionCoverJpeg;
 
 #[Group('mysql')]
-class ItemContributionStoreDateTest extends TestCase
+class ItemContributionStoreDateTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['mail.public_contribution_email_verification_enabled' => true]);
+    }
+
+    /**
+     * Avoid UploadedFile::fake()->image(): it requires GD (imagejpeg), which CI/host PHP may omit.
+     */
+    private function contributionCoverUploadedFile(string $filename = 'cover.jpg'): UploadedFile
+    {
+        return UploadedFile::fake()->createWithContent(
+            $filename,
+            MinimalContributionCoverJpeg::binary()
+        );
+    }
 
     public function test_contribution_store_persists_release_date(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         /** @var ItemCategory $category */
         $category = ItemCategoryFactory::new()->create();
 
-        // Avoid UploadedFile::fake()->image(): it requires GD (imagejpeg). Host/CI PHP may omit ext-gd.
-        $coverJpegB64 = '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRof'
-            . 'Hh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwh'
-            . 'MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAAR'
-            . 'CAABAAEDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAA'
-            . 'AgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkK'
-            . 'FhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWG'
-            . 'h4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl'
-            . '5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREA'
-            . 'AgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYk'
-            . 'NOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOE'
-            . 'hYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk'
-            . '5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q==';
-        $cover = UploadedFile::fake()->createWithContent(
-            'cover.jpg',
-            (string) base64_decode($coverJpegB64, true)
-        );
+        $cover = $this->contributionCoverUploadedFile();
 
-        // Public collaborator rules use email:rfc (no live DNS check).
         Mail::fake();
         Storage::fake('public');
 
         $email = 'emuseu.contrib.' . uniqid('', false) . '@google.com';
         Collaborator::create([
-            'full_name' => 'Contribuinte Teste',
+            'full_name' => 'Test Contributor',
             'email' => $email,
             'role' => CollaboratorRole::EXTERNAL,
             'blocked' => false,
@@ -69,12 +65,12 @@ class ItemContributionStoreDateTest extends TestCase
                 'expires_at' => now()->addMinutes(20)->getTimestamp(),
             ],
         ])->post(route('catalog.items.store'), [
-            'full_name' => 'Contribuinte Teste',
+            'full_name' => 'Test Contributor',
             'email' => $email,
             'content_locale' => 'pt_BR',
-            'name' => 'Peça com data',
+            'name' => 'Item with date',
             'date' => '2015-06-20',
-            'description' => 'Descrição mínima para validar.',
+            'description' => 'Minimal description for validation.',
             'detail' => '',
             'history' => '',
             'category_id' => (string) $category->id,
@@ -103,33 +99,14 @@ class ItemContributionStoreDateTest extends TestCase
 
     public function test_contribution_updates_collaborator_full_name_when_submitted_name_differs_from_record(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         /** @var ItemCategory $category */
         $category = ItemCategoryFactory::new()->create();
 
-        $coverJpegB64 = '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRof'
-            . 'Hh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwh'
-            . 'MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAAR'
-            . 'CAABAAEDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAA'
-            . 'AgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkK'
-            . 'FhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWG'
-            . 'h4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl'
-            . '5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREA'
-            . 'AgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYk'
-            . 'NOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOE'
-            . 'hYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk'
-            . '5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q==';
-        $cover = UploadedFile::fake()->createWithContent(
-            'cover.jpg',
-            (string) base64_decode($coverJpegB64, true)
-        );
+        $cover = $this->contributionCoverUploadedFile();
 
         $email = 'emuseu.name-mismatch.' . uniqid('', false) . '@google.com';
         $collaborator = Collaborator::create([
-            'full_name' => 'Nome Cadastrado',
+            'full_name' => 'Registered Name',
             'email' => $email,
             'role' => CollaboratorRole::EXTERNAL,
             'blocked' => false,
@@ -144,12 +121,12 @@ class ItemContributionStoreDateTest extends TestCase
                 'expires_at' => now()->addMinutes(20)->getTimestamp(),
             ],
         ])->from(route('catalog.items.create'))->post(route('catalog.items.store'), [
-            'full_name' => 'Outra Pessoa',
+            'full_name' => 'Other Person',
             'email' => $email,
             'content_locale' => 'pt_BR',
-            'name' => 'Item teste',
+            'name' => 'Test item',
             'date' => '',
-            'description' => 'Descrição mínima.',
+            'description' => 'Minimal description.',
             'detail' => '',
             'history' => '',
             'category_id' => (string) $category->id,
@@ -164,7 +141,7 @@ class ItemContributionStoreDateTest extends TestCase
         $response->assertSessionHas('success');
 
         $collaborator->refresh();
-        $this->assertSame('Outra Pessoa', $collaborator->full_name);
+        $this->assertSame('Other Person', $collaborator->full_name);
 
         $this->assertSame(1, Item::query()->where('category_id', $category->id)->count());
         Mail::assertSent(ItemContributionReceivedMail::class);
@@ -172,33 +149,14 @@ class ItemContributionStoreDateTest extends TestCase
 
     public function test_contribution_rejected_when_db_verified_but_no_session_auth(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         /** @var ItemCategory $category */
         $category = ItemCategoryFactory::new()->create();
 
-        $coverJpegB64 = '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRof'
-            . 'Hh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwh'
-            . 'MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAAR'
-            . 'CAABAAEDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAA'
-            . 'AgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkK'
-            . 'FhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWG'
-            . 'h4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl'
-            . '5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREA'
-            . 'AgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYk'
-            . 'NOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOE'
-            . 'hYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk'
-            . '5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q==';
-        $cover = UploadedFile::fake()->createWithContent(
-            'cover.jpg',
-            (string) base64_decode($coverJpegB64, true)
-        );
+        $cover = $this->contributionCoverUploadedFile();
 
         $email = 'emuseu.no-session.' . uniqid('', false) . '@google.com';
         Collaborator::create([
-            'full_name' => 'Contribuinte Teste',
+            'full_name' => 'Test Contributor',
             'email' => $email,
             'role' => CollaboratorRole::EXTERNAL,
             'blocked' => false,
@@ -206,12 +164,12 @@ class ItemContributionStoreDateTest extends TestCase
         ]);
 
         $response = $this->post(route('catalog.items.store'), [
-            'full_name' => 'Contribuinte Teste',
+            'full_name' => 'Test Contributor',
             'email' => $email,
             'content_locale' => 'pt_BR',
-            'name' => 'Sem sessão',
+            'name' => 'No session',
             'date' => '',
-            'description' => 'Descrição mínima.',
+            'description' => 'Minimal description.',
             'detail' => '',
             'history' => '',
             'category_id' => (string) $category->id,
@@ -228,29 +186,10 @@ class ItemContributionStoreDateTest extends TestCase
 
     public function test_contribution_without_verification_does_not_create_collaborator_for_new_email(): void
     {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('pdo_mysql required');
-        }
-
         /** @var ItemCategory $category */
         $category = ItemCategoryFactory::new()->create();
 
-        $coverJpegB64 = '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRof'
-            . 'Hh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwh'
-            . 'MjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAAR'
-            . 'CAABAAEDAREAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAA'
-            . 'AgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkK'
-            . 'FhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWG'
-            . 'h4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl'
-            . '5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREA'
-            . 'AgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYk'
-            . 'NOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOE'
-            . 'hYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk'
-            . '5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q==';
-        $cover = UploadedFile::fake()->createWithContent(
-            'cover.jpg',
-            (string) base64_decode($coverJpegB64, true)
-        );
+        $cover = $this->contributionCoverUploadedFile();
 
         Mail::fake();
 
@@ -258,12 +197,12 @@ class ItemContributionStoreDateTest extends TestCase
         $this->assertNull(Collaborator::query()->where('email', $email)->first());
 
         $response = $this->post(route('catalog.items.store'), [
-            'full_name' => 'Novo Contribuinte',
+            'full_name' => 'New Contributor',
             'email' => $email,
             'content_locale' => 'pt_BR',
-            'name' => 'Peça sem verificação',
+            'name' => 'Item without verification',
             'date' => '',
-            'description' => 'Descrição mínima.',
+            'description' => 'Minimal description.',
             'detail' => '',
             'history' => '',
             'category_id' => (string) $category->id,

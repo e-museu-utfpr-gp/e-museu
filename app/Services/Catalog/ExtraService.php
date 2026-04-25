@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Catalog;
 
+use App\Actions\Catalog\ResolveSingleExtraCollaboratorAction;
 use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Language;
 use App\Models\Collaborator\Collaborator;
@@ -113,14 +116,25 @@ class ExtraService
      */
     public function storeSingleExtra(
         CollaboratorService $collaboratorService,
+        ResolveSingleExtraCollaboratorAction $resolveSingleExtraCollaborator,
         array $collaboratorData,
         array $extraData
     ): array {
-        return DB::transaction(function () use ($collaboratorService, $collaboratorData, $extraData): array {
+        $verificationEnabled = (bool) config('mail.public_contribution_email_verification_enabled');
+
+        return DB::transaction(function () use (
+            $collaboratorService,
+            $resolveSingleExtraCollaborator,
+            $collaboratorData,
+            $extraData,
+            $verificationEnabled,
+        ): array {
             $collaboratorId = (int) ($extraData['collaborator_id'] ?? 0);
             unset($extraData['collaborator_id']);
 
-            $collaborator = Collaborator::query()->find($collaboratorId);
+            $collaborator = $verificationEnabled
+                ? Collaborator::query()->find($collaboratorId)
+                : $resolveSingleExtraCollaborator->handle($collaboratorData, $collaboratorId);
             if ($collaborator === null) {
                 return ['status' => 'collaborator_invalid'];
             }
@@ -133,9 +147,11 @@ class ExtraService
                 return ['status' => 'collaborator_blocked'];
             }
 
-            $gate = $collaboratorService->publicContributionCollaboratorGate($collaborator, $collaboratorData);
-            if ($gate === 'email_unverified') {
-                return ['status' => 'email_unverified'];
+            if ($verificationEnabled) {
+                $gate = $collaboratorService->publicContributionCollaboratorGate($collaborator, $collaboratorData);
+                if ($gate === 'email_unverified') {
+                    return ['status' => 'email_unverified'];
+                }
             }
 
             $collaboratorService->applySubmittedFullNameAfterVerifiedContribution(

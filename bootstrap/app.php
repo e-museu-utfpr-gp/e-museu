@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -33,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Foundation\Http\Middleware\PreventRequestForgery::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\SetLocaleFromSession::class,
         ]);
@@ -46,14 +48,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'authenticate' => \App\Http\Middleware\Auth\Authenticate::class,
             'redirectIfAuthenticated' => \App\Http\Middleware\Auth\RedirectIfAuthenticated::class,
+            'antibot' => \App\Http\Middleware\VerifyAntiBotChallenge::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->dontFlash([
+        $antibotResponseInputs = array_values(array_unique(array_filter([
+            (string) config('antibot.response_input'),
+            (string) config('antibot.verification_request_response_input'),
+        ])));
+
+        $exceptions->dontFlash(array_merge([
             'current_password',
             'password',
             'password_confirmation',
-        ]);
+        ], $antibotResponseInputs));
 
         $exceptions->render(function (AuthorizationException $e, Request $request) {
             if ($request->expectsJson()) {

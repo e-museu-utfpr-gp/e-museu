@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Catalog;
 
 use App\Support\Content\TranslationDisplaySql;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
+use App\Support\Database\SqlExpr;
 use Illuminate\Database\Eloquent\{Builder, Model};
 
 class ItemComponent extends Model
@@ -42,8 +44,8 @@ class ItemComponent extends Model
                 'item_component.validation AS item_component_validation',
                 'item_component.created_at AS item_component_created',
                 'item_component.updated_at AS item_component_updated',
-                DB::raw("({$itemNameSql}) AS item_name"),
-                DB::raw("({$componentNameSql}) AS component_name"),
+                SqlExpr::raw("({$itemNameSql}) AS item_name"),
+                SqlExpr::raw("({$componentNameSql}) AS component_name"),
             ]);
 
         return $query;

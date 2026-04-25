@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Catalog;
 
 use App\Models\Catalog\{Item, ItemCategory};
@@ -7,32 +9,14 @@ use App\Models\Collaborator\Collaborator;
 use App\Models\Language;
 use App\Models\Location;
 use App\Support\Catalog\ItemIdentificationCode;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Group;
-use Tests\TestCase;
+use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
+use Tests\Support\Concerns\RequiresMysqlDriverConnection;
 
 #[Group('mysql')]
-final class IdentificationCodeRedirectTest extends TestCase
+final class IdentificationCodeRedirectTest extends AbstractMysqlRefreshDatabaseTestCase
 {
-    use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        if (! extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped(
-                'Catalog tests require pdo_mysql (install the extension or run tests in the app Docker container).'
-            );
-        }
-
-        parent::setUp();
-
-        if (DB::connection()->getDriverName() !== 'mysql') {
-            $this->markTestSkipped(
-                'Set DB_CONNECTION=mysql in .env.testing (translation queries assume MySQL).'
-            );
-        }
-    }
+    use RequiresMysqlDriverConnection;
 
     public function test_codes_redirects_to_public_item_show_when_validation_true(): void
     {
@@ -145,5 +129,31 @@ final class IdentificationCodeRedirectTest extends TestCase
         ]);
 
         $this->get('/codes/' . $item->id . '_UTFPR_FAKE_26')->assertNotFound();
+    }
+
+    public function test_codes_returns_404_when_code_exceeds_max_length(): void
+    {
+        $tooLong = str_repeat('x', 256);
+
+        $this->get(route('codes.show', ['code' => $tooLong]))
+            ->assertNotFound();
+    }
+
+    public function test_codes_returns_404_when_code_has_no_leading_numeric_id(): void
+    {
+        $this->get(route('codes.show', ['code' => 'ABC_UTFPR_ITEM_26']))
+            ->assertNotFound();
+    }
+
+    public function test_codes_returns_404_when_leading_id_segment_is_zero(): void
+    {
+        $this->get(route('codes.show', ['code' => '0_UTFPR_ITEM_26']))
+            ->assertNotFound();
+    }
+
+    public function test_codes_returns_404_when_item_id_does_not_exist(): void
+    {
+        $this->get(route('codes.show', ['code' => '99999999_UTFPR_ITEM_26']))
+            ->assertNotFound();
     }
 }

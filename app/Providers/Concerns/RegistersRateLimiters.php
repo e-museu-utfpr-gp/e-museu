@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers\Concerns;
 
 use Illuminate\Cache\RateLimiting\Limit;
@@ -23,8 +25,23 @@ final class RegistersRateLimiters
             return Limit::perMinute(300)->by($request->ip());
         });
 
+        /**
+         * Stricter cap for public item contribution POST (`catalog.items.store`), in addition to `web-public`.
+         * Mitigates automated submissions without affecting lighter catalog JSON endpoints.
+         */
+        RateLimiter::for('catalog-item-contribution-store', function (Request $request) {
+            return Limit::perMinute(15)->by($request->ip());
+        });
+
         RateLimiter::for('web-admin', function (Request $request) {
             return Limit::perMinute(480)->by($request->user()?->id ?: $request->ip());
+        });
+
+        /** Admin AI translation assist (multi-provider) — strict per-user cap (see `config/ai.php` `rate_limit`). */
+        RateLimiter::for('admin-ai-translate', function (Request $request) {
+            $perMinute = max(1, (int) config('ai.rate_limit.per_minute', 3));
+
+            return Limit::perMinute($perMinute)->by($request->user()?->id ?: $request->ip());
         });
 
         RateLimiter::for('web-storage', function (Request $request) {

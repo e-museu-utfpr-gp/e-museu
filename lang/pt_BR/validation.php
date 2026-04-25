@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
 | Laravel framework language file. Keys and structure are defined by the framework.
 | Do not rename keys. Keep this file in sync with the same file in other locales (e.g. en).
@@ -232,6 +234,7 @@ return [
         'components_items_different' => 'Os itens precisam ser diferentes.',
         'tags_duplicate_in_request' => 'Não repita a mesma etiqueta (categoria e nome) mais do que uma vez.',
         'component_item_not_found' => 'Um dos itens selecionados como componente não existe mais. Atualize a página e tente novamente.',
+        'component_item_must_be_validated' => 'Os componentes devem ser apenas itens já validados no catálogo. Atualize a página e tente novamente.',
     ],
 
     /*
