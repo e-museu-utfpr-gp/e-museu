@@ -16,6 +16,7 @@ class AntiBotChallengeTest extends TestCase
         parent::setUp();
 
         config([
+            'mail.public_contribution_email_verification_enabled' => true,
             'antibot.driver' => 'null',
             'antibot.turnstile.site_key' => '',
             'antibot.turnstile.secret_key' => '',

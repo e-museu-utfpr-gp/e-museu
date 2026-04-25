@@ -13,6 +13,12 @@ use Tests\TestCase;
 #[Group('services')]
 class CollaboratorServiceTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['mail.public_contribution_email_verification_enabled' => true]);
+    }
+
     protected function tearDown(): void
     {
         session()->forget(CollaboratorService::PUBLIC_CONTRIBUTION_AUTH_SESSION_KEY);

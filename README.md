@@ -1,353 +1,278 @@
-# E-Museu TEST CI
+# E-Museu
 
-#### Forked from https://github.com/tankesho/e-museu
+E-Museu is a digital museum platform inspired by electronic waste projects led by The Federal University of
+Technology - Parana (UTFPR) and the State University of Central-West (Unicentro). These projects collect
+unused computer parts and motivated the creation of a museum to preserve their history, with contributions
+from both project members and the broader community.
 
-#### v5.0.1-beta
-
-# 🚧 Work In Progress 
-
-# Installation and Setup Guide
-
-This guide describes how to configure the development environment and initialize the E-Museu project.
-
-## Prerequisites
-
-- Docker and Docker Compose installed
-- Git (for cloning the repository)
-
-## Database (MySQL)
-
-The application targets **MySQL** in development, staging, and production. Catalog translations and admin listings rely on MySQL-specific SQL (for example `FIELD()` for locale fallback order). **SQLite is not supported** for those code paths.
-
-Automated tests under the **`mysql` group** (for example `tests/Feature/Catalog/TranslationResolutionFeatureTest.php`) **require** `DB_CONNECTION=mysql` and a migrated database. If you run PHPUnit without MySQL, those tests are skipped.
-
-### PHPUnit database `emuseu_testing`
-
-`phpunit.xml` sets `DB_DATABASE=emuseu_testing` so tests do not wipe your development database.
-
-- **`./run test`** runs `ensure-mysql-testing-database` first: it creates `emuseu_testing` and grants it to the application user using credentials **inside** the `db` container (`MYSQL_ROOT_PASSWORD` / `MYSQL_USER`, derived from `.env`).
-- On the **first** MySQL volume initialization, `docker/mysql/init/01-create-testing-database.sh` may also create that database; if your `mysql_data` volume was created earlier, rely on `./run test` (or run the same SQL manually) so the database and `GRANT` exist.
-
-### Adding a catalog / content language
-
-A new language is not only a row in `languages`. To keep SQL `FIELD()`, PHP fallback, admin forms, and UI packs aligned:
-
-1. Add the case to `App\Enums\Content\ContentLanguage` (and `orderedNonUniversalLocales()` / form ordering if it should participate in fallback priority).
-2. Seed the `languages` table (migration or seeder) with a stable `code` matching the enum value.
-3. Add Laravel translation files under `lang/{code}/` (at minimum what you expose in the locale switcher).
-4. For strings used by i18next on the client, add `lang/js/{code}.json` and register the dynamic import in `resources/js/i18n.js` (`bundleLoaders`).
-
-Skipping any of the above leaves the language missing from `ContentLocaleFallback::orderedCodes()` or without UI strings until those pieces are updated.
-
-### Catalog locations (`locations` table)
-
-Items reference a **location** (campus / site). Rows are **seeded reference data** with a stable uppercase `code` (for example `INDEF`, `UTFPR`, `UNCEN`). The label shown in forms and listings comes from translation keys under `app.catalog.location.codes.*` in `lang/{locale}/app/catalog.php` (with fallback to the row `name` when a key is missing). After changing codes or adding a location, update seeds and those translation entries together.
-
-## Outgoing mail (SMTP)
-
-Outbound mail defaults to **SMTP** in `config/mail.php` (UTFPR-oriented defaults for host, port, and mailbox identity). Set `MAIL_PASSWORD` in the environment; override other `MAIL_*` keys only when needed. Local development often sets `MAIL_MAILER=log` in `.env` so messages go to the log file instead of the network. The helper `App\Support\Mail\OutgoingMailIsConfigured` decides whether the app should attempt verification and notification e-mails; extend `mail.transport_required_config` when adding new API transports.
-
-- **Deploy:** Coolify/env templates live under `docs/deploy/` (e.g. `docs/deploy/coolify-production.env.example`, `docs/deploy/coolify-minio-s3/`); see `.env.example` for pointers.
-- **Tests:** `phpunit.xml` sets `MAIL_MAILER=array` so PHPUnit does not open SMTP connections. Unit coverage for mail readiness lives in `tests/Unit/Support/Mail/OutgoingMailIsConfiguredTest.php`.
-
-## Initial Docker Configuration (Avoid using sudo)
-
-By default, Docker commands require administrator privileges (sudo). To avoid having to use `sudo` for every command, add your user to the `docker` group:
-
-### 1. Add user to docker group
-
-Execute the following command (you'll need to use sudo one last time):
-
-```bash
-sudo usermod -aG docker $USER
-```
-
-### 2. Apply changes
-
-You need to reload the groups. You have two options:
-
-**Option A: Reload in current session (recommended for testing)**
-```bash
-newgrp docker
-```
-
-This starts a new session with the docker group active. You can exit this session with `exit` when you're done.
-
-**Option B: Logout and login again**
-- Close the terminal and open a new one, or
-- Logout from the system session and login again
-
-### 3. Verify it worked
-
-Execute to verify you're in the docker group:
-
-```bash
-groups
-```
-
-You should see `docker` in the group list. Now Docker commands will work without sudo!
+- **Version:** `1.0.0`
+- **Original forks:** [vinifen/e-museu-2.1.0-beta](https://github.com/vinifen/e-museu-2.1.0-beta), [tankesho/e-museu](https://github.com/tankesho/e-museu)
 
 ---
 
-## Project Initialization
+## 🧰 Tech Stack
 
-The project uses a `./run` script to facilitate command execution. All operations are done through this script.
+- Laravel (PHP), Blade + Vite
+- MySQL 8 (required)
+- Redis
+- Docker / Docker Compose
+- Node.js (frontend tooling)
 
-### First Time Setup
+---
 
-#### Option 1: Complete Setup (Recommended)
+## 🚀 Quick Start
 
-To perform a complete project setup (creates `.env` if missing, starts containers, installs dependencies, runs migrations and seeders):
+### 1) ✅ Prerequisites
+
+- Docker + Docker Compose
+- Git
+
+Optional (to avoid `sudo` on Docker commands):
+
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+### 2) ⚙️ Set up the project
 
 ```bash
 ./run setup
 ```
+This command creates `.env` if missing, starts containers, installs dependencies, runs migrations/seeders, and starts Vite in local mode.
 
-This command:
-- Ensures `.env` exists (copies from `.env.example` only if `.env` is missing; use `./run env -f` to replace `.env` from the example)
-- Starts Docker containers
-- Installs Composer dependencies
-- Generates `APP_KEY` only when it is not already set in `.env`
-- Runs database migrations
-- Runs seeders (initial data)
-- In local environment, starts Vite server
-
-#### Option 2: Setup with automatic confirmation (Production)
-
-For production environments or automation, use the `-y` flag to skip confirmations:
-
-```bash
-./run setup -y
-```
-
-#### Option 3: Complete Reset (Clean everything and start over)
-
-If you want to start from scratch, removing all data, containers and generated files:
-
-```bash
-./run setup-hard
-```
-
-**Warning:** This command removes:
-- Database (mysql_data)
-- Dependencies (vendor, node_modules)
-- Docker containers
-- Docker images
-- Docker volumes
-
-To skip the confirmation:
-
-```bash
-./run setup-hard -y
-```
-
-To keep the local MySQL data directory (`mysql_data`) while still resetting containers, vendor, and Node assets (useful when you do not want to lose the database volume):
+If you need a clean re-setup while keeping your local DB volume:
 
 ```bash
 ./run setup-hard -y -db
-# or
-./run setup-hard -db -y
 ```
 
-`setup` / `setup-hard` never overwrite an existing `.env` from `.env.example`; they only create it when the file is missing. The same `-db` flag works with `./run remove-all` and `./run remove-all-files` (e.g. `./run remove-all -y -db`). The flag `-env` is still accepted for backwards compatibility but does nothing extra (older docs used `./run setup -env`).
+### 3) 🌐 Access app
 
-### Main Commands
+- Local: `http://localhost:9090` (default from `.env.example`)
 
-#### Container Management
+---
+
+## 🧭 Environment Modes
+
+Environment is selected by `APP_ENV`:
+
+- `local` -> `docker-compose.local.yml`
+- `prod-local` -> `docker-compose.prod-local.yml` (production-like local run)
+
+Use `.env.example` as reference for all variables.
+
+---
+
+## 🎛️ Feature Toggles (`.env`)
+
+Enable/disable services explicitly per environment:
+
+### ✉️ Public collaborator email verification
+
+```env
+MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED=false
+```
+
+- `true`: public catalog contribution requires request/confirm email-code session.
+- `false`: email verification UI/routes are disabled for contribution flow.
+
+### 🛡️ Anti-bot (Turnstile)
+
+```env
+ANTIBOT_DRIVER=null
+# ANTIBOT_DRIVER=turnstile
+TURNSTILE_SITE_KEY=
+TURNSTILE_SECRET_KEY=
+```
+
+- `ANTIBOT_DRIVER=null`: disabled
+- `ANTIBOT_DRIVER=turnstile`: enabled (requires both keys)
+
+### 🤖 Admin AI providers
+
+At least one provider must be enabled for admin translation assist:
+
+```env
+OPENROUTER_ENABLED=false
+GROQ_ENABLED=false
+GITHUB_MODELS_ENABLED=false
+```
+
+When enabled, set credentials/models for each provider (`*_API_KEY` / `*_TOKEN`, models and provider URL).
+
+---
+
+## 🧪 Core Commands (`./run`)
+
+### 🐳 Containers
 
 ```bash
-# Start containers
 ./run up
-
-# Stop containers
 ./run down
-
-# View container status
 ./run ps
 ```
 
-#### Database
+### ♻️ Setup / Reset
 
 ```bash
-# Run migrations
-./run migrate
+./run setup
+./run setup -y
+./run setup-hard -y
+./run setup-hard -y -db
+```
 
-# Run seeders
+`setup-hard` removes containers, dependencies, images, and volumes.  
+Use `-db` to keep the local MySQL volume (`mysql_data`).
+
+### 🗄️ Database
+
+```bash
+./run migrate
 ./run seed
 ```
 
-#### Dependencies
+### 🎨 Frontend
 
 ```bash
-# Install Composer dependencies
-./run composer
-
-# Generate application key (use -y in production)
-./run gen_key
-# or
-./run gen_key -y  # to skip confirmation
-```
-
-#### Local Environment (Development)
-
-```bash
-# Install Node dependencies and start Vite
 ./run npm-local-bg
-
-# Stop Vite
 ./run stop-vite-local
-
-# Start Vite again
 ./run start-vite-local
-
-# Build assets for production
 ./run build-vite
 ```
 
-#### Testing and Code Quality
-
-**Important:** Before running code quality tools:
-1. Make sure `APP_ENV=local` is set in your `.env` file
-2. Run `./run setup` to start the containers and ensure the vendor directory is properly mounted and the binaries are available
+### ✅ Testing and Quality
 
 ```bash
-# Setup project first (required for code quality tools)
-./run setup
-
-# Run tests (creates/grants emuseu_testing when using Docker MySQL — see "PHPUnit database emuseu_testing" above)
 ./run test
-
-# Analyze code (PHPStan)
 ./run phpstan
-
-# Check code standards (PHPCS)
 ./run phpcs
-
-# Fix code standards (PHPCBF)
 ./run phpcbf
-
-# PHP Insights (code quality analysis)
 ./run phpinsights
-
-# Detect duplicated code (PHPCPD)
 ./run phpcpd
-
-# Analyze refactoring candidates (Churn)
 ./run churn
-
-# PHP Mess Detector
 ./run phpmd
-
-# ESLint (JavaScript linting)
 ./run eslint
-
-# Prettier (code formatting)
 ./run prettier
-
-# Run all tests and checks
 ./run all-tests
 ```
 
-#### Utilities
+### 🧩 Utility
 
 ```bash
-# Show complete help
 ./run help
-
-# Execute command inside container
 ./run exec php artisan tinker
-
-# Clean environment (no confirmation with -y)
 ./run remove-all -y
-
-# Full cleanup but keep local MySQL volume (mysql_data)
 ./run remove-all -y -db
 ```
 
 ---
 
-## Environments
+## 📌 Database Notes (MySQL Required)
 
-The script automatically detects the environment based on the `APP_ENV` variable in the `.env` file:
+This project relies on MySQL-specific behavior (for example locale ordering with SQL `FIELD()`), so SQLite is not supported in those paths.
 
-- `APP_ENV=local` → Uses `docker-compose.local.yml`
-- `APP_ENV=prod-local` → Uses `docker-compose.prod-local.yml` (local production simulation)
-
-### .env Configuration
-
-Make sure the `.env` file is configured correctly. Important variables include:
-
-**For local and prod-local environments:**
-```env
-APP_ENV=local  # or prod-local
-DB_HOST=db
-DB_PORT=3306
-DB_DATABASE=laravel
-DB_USERNAME=user
-DB_PASSWORD=your_password
-```
+`phpunit.xml` uses `DB_DATABASE=emuseu_testing` to isolate tests from development data.  
+`./run test` ensures this test database exists and grants proper permissions.
 
 ---
 
-## Troubleshooting
+## Mail Configuration
 
-### Docker permission error
+Mail defaults to SMTP (`config/mail.php`).  
+Set at least:
 
-If you still get permission errors after adding to the docker group:
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=...
+MAIL_PORT=587
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+MAIL_FROM_ADDRESS=...
+MAIL_FROM_NAME="${APP_NAME}"
+```
 
-1. Verify you're in the group: `groups | grep docker`
-2. If not, execute `newgrp docker` or logout/login
-3. Check socket permissions: `ls -l /var/run/docker.sock`
+### Public contribution email verification toggle
 
-### Database container won't start
+Public catalog contribution email verification is feature-flagged:
 
-MySQL may take a few seconds to start, especially the first time. The script automatically waits for the database to be ready before running migrations.
+```env
+MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED=false
+```
 
-### Port already in use
+- `true`: requires request/confirm code flow
+- `false`: hides verification flow and allows contribution without email-code session
 
-If you get a port in use error (especially 3306), check:
+---
+
+## 🚢 Deploy References
+
+Deployment env templates and docs:
+
+- `docs/deploy/coolify-production.env.example`
+- `docs/deploy/coolify-staging.env.example`
+- `docs/deploy/coolify-minio-s3/`
+
+### ☁️ Coolify support (MySQL, Redis, MinIO/S3)
+
+This project supports Coolify deployment with MySQL, Redis, and S3-compatible object storage (MinIO).
+
+Main env points:
+
+- `DATABASE_URL` -> MySQL DSN
+- `REDIS_URL` -> Redis connection
+- `FILESYSTEM_DISK=s3` + `AWS_*` -> MinIO/S3 storage (`AWS_ENDPOINT`, credentials, bucket)
+
+Use:
+
+- `docs/deploy/coolify-production.env.example`
+- `docs/deploy/coolify-staging.env.example`
+- `docs/deploy/coolify-minio-s3/`
+
+---
+
+## 🌍 Content/Locale Maintenance
+
+When adding a new content language, update all related layers together:
+
+1. `App\Enums\Content\ContentLanguage`
+2. `languages` seed/migration
+3. `lang/{locale}/...` server translations
+4. `lang/js/{locale}.json` + loader in `resources/js/i18n.js`
+
+For catalog locations, keep `locations.code` and translation keys in sync (`lang/{locale}/app/catalog.php` -> `app.catalog.location.codes.*`).
+
+---
+
+## 🧯 Troubleshooting
+
+### 🐳 Docker permission denied
 
 ```bash
-# See what's using port 3306
+groups | grep docker
+ls -l /var/run/docker.sock
+```
+
+If needed, run `newgrp docker` or sign out/in.
+
+### 🗄️ MySQL not ready
+
+First startup can take 10-30 seconds. `./run` commands already wait for readiness where needed.
+
+### 🔌 Port already in use
+
+```bash
 sudo lsof -i :3306
-# or
 sudo netstat -tlnp | grep :3306
 ```
 
-Stop the local MySQL service if necessary, or adjust the port in `.env`.
+Adjust ports in `.env` when necessary.
 
 ---
 
-## Important Notes
+## 📚 Project Docs
 
-- **First initialization**: MySQL may take 10-30 seconds to start the first time
-- **Production environment**: Always use the `-y` flag in automated scripts to skip confirmations
-- **Docker group**: After adding your user to the docker group, you no longer need to use sudo
-- **Complete reset**: `setup-hard` removes ALL data by default. Use with caution! Pass **`-db`** to keep `mysql_data` (see Option 3 above).
+- Product requirements: `docs/prd.md`
+- Software design: `docs/sdd.md`
+- Database model diagram (Mermaid): `docs/database/database-model.md`
 
----
-
-## Quick Reference Commands
-
-```bash
-# Complete initial setup
-./run setup
-
-# Setup with automatic confirmation
-./run setup -y
-
-# Complete reset (careful!)
-./run setup-hard -y
-
-# Hard reset but keep local DB volume
-./run setup-hard -y -db
-
-# Start containers
-./run up
-
-# Stop containers
-./run down
-
-# Show help
-./run help
-```

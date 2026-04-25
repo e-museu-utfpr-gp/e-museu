@@ -21,6 +21,7 @@ class CatalogVerifyMailErrorRouteTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['mail.public_contribution_email_verification_enabled' => true]);
         $this->savedAppEnv = (string) config('app.env');
         $this->savedAppDebug = (bool) config('app.debug');
     }

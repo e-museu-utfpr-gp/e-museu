@@ -23,6 +23,12 @@ use Tests\Support\MinimalContributionCoverJpeg;
 #[Group('mysql')]
 class ItemContributionStoreDateTest extends AbstractMysqlRefreshDatabaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['mail.public_contribution_email_verification_enabled' => true]);
+    }
+
     /**
      * Avoid UploadedFile::fake()->image(): it requires GD (imagejpeg), which CI/host PHP may omit.
      */
