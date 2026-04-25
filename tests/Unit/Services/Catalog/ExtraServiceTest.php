@@ -19,6 +19,12 @@ use Tests\Unit\Services\ServiceMysqlTestCase;
 #[Group('services')]
 class ExtraServiceTest extends ServiceMysqlTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['mail.public_contribution_email_verification_enabled' => true]);
+    }
+
     public function test_store_single_extra_returns_collaborator_invalid_when_missing(): void
     {
         $collabSvc = $this->createMock(CollaboratorService::class);
