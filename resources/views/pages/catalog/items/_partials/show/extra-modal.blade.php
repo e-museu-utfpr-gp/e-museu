@@ -1,3 +1,7 @@
+@php
+    $publicEmailVerificationEnabled = (bool) config('mail.public_contribution_email_verification_enabled');
+@endphp
+
 <div class="modal fade" id="addExtraModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -12,9 +16,12 @@
                 <form action="{{ route('catalog.extras.store') }}" method="POST" id="addExtraForm"
                     data-extra-clear-session-on-hide="1"
                     data-check-contact-route="{{ route('catalog.collaborators.check-contact') }}"
-                    data-route-clear-contribution-session="{{ route('catalog.collaborators.clear-contribution-session') }}"
-                    data-route-request-verification-code="{{ route('catalog.collaborators.request-verification-code') }}"
-                    data-route-confirm-verification-code="{{ route('catalog.collaborators.confirm-verification-code') }}"
+                    data-email-verification-enabled="{{ $publicEmailVerificationEnabled ? '1' : '0' }}"
+                    @if ($publicEmailVerificationEnabled)
+                        data-route-clear-contribution-session="{{ route('catalog.collaborators.clear-contribution-session') }}"
+                        data-route-request-verification-code="{{ route('catalog.collaborators.request-verification-code') }}"
+                        data-route-confirm-verification-code="{{ route('catalog.collaborators.confirm-verification-code') }}"
+                    @endif
                     data-msg-email-required="{{ __('view.catalog.items.create.email_verification_email_required') }}"
                     data-msg-code-required="{{ __('view.catalog.items.create.email_verification_code_required') }}"
                     data-msg-full-name-required="{{ __('view.catalog.items.create.email_verification_full_name_required') }}"
@@ -104,7 +111,9 @@
                         <i class="bi bi-info-circle-fill mx-1 h5"></i>
                         <span class="js-email-name-differs-warning-text"></span>
                     </div>
-                    @include('pages.catalog.items._partials.email-verification-code', ['codeInputId' => 'extra-catalog-verification-code'])
+                    @if ($publicEmailVerificationEnabled)
+                        @include('pages.catalog.items._partials.email-verification-code', ['codeInputId' => 'extra-catalog-verification-code'])
+                    @endif
                     <div class="col d-flex align-items-center justify-content-end">
                         <x-ui.buttons.submit variant="plain" class="button nav-link py-2 px-3 fw-bold" id="save-extra-button">
                             {{ __('view.catalog.items.show_extra.submit') }}

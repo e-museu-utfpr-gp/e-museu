@@ -91,12 +91,59 @@ class CollaboratorService
     }
 
     /**
-     * Exact e-mail lookup (any role). Public item contributions must not insert a row here — creation happens in
-     * {@see CatalogCollaboratorVerificationService::confirmEmailVerificationCode} after the code flow.
+     * Public catalog item contribution: exact e-mail lookup (any role), then role/blocked/session gate.
+     * Does not insert collaborators — creation for new e-mails happens in
+     * {@see CatalogCollaboratorVerificationService::confirmEmailVerificationCode} after the code flow, or in the
+     * contribution action when e-mail verification is disabled.
+     *
+     * @param  array<string, mixed>  $collaboratorData
+     * @return array{
+     *     status: 'ok',
+     *     collaborator: Collaborator,
+     * }|array{
+     *     status: 'internal_blocked'|'collaborator_blocked'|'email_unverified',
+     *     collaborator: null,
+     * }
      */
-    public function findCollaboratorByEmailForPublicLookup(string $email): ?Collaborator
+    public function resolveForPublicCatalogContribution(array $collaboratorData): array
     {
-        return Collaborator::query()->where('email', '=', $email)->first();
+        $collaborator = Collaborator::query()
+            ->where('email', '=', (string) ($collaboratorData['email'] ?? ''))
+            ->first();
+
+        if ($collaborator === null) {
+            return [
+                'status' => 'email_unverified',
+                'collaborator' => null,
+            ];
+        }
+
+        if ($collaborator->role === CollaboratorRole::INTERNAL) {
+            return [
+                'status' => 'internal_blocked',
+                'collaborator' => null,
+            ];
+        }
+
+        if ($collaborator->blocked === true) {
+            return [
+                'status' => 'collaborator_blocked',
+                'collaborator' => null,
+            ];
+        }
+
+        $gate = $this->publicContributionCollaboratorGate($collaborator, $collaboratorData);
+        if ($gate === 'email_unverified') {
+            return [
+                'status' => 'email_unverified',
+                'collaborator' => null,
+            ];
+        }
+
+        return [
+            'status' => 'ok',
+            'collaborator' => $collaborator,
+        ];
     }
 
     /**
@@ -151,6 +198,10 @@ class CollaboratorService
      */
     public function publicContributionCollaboratorGate(Collaborator $collaborator, array $collaboratorData): string
     {
+        if (! (bool) config('mail.public_contribution_email_verification_enabled')) {
+            return 'ok';
+        }
+
         $submittedEmail = (string) ($collaboratorData['email'] ?? '');
         if (! $this->publicContributionSessionIsAuthenticatedForEmail($submittedEmail)) {
             return 'email_unverified';

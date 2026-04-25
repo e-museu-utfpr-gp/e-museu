@@ -23,6 +23,12 @@ use Tests\Unit\Services\ServiceMysqlTestCase;
 #[Group('mysql')]
 final class StoreItemContributionTest extends ServiceMysqlTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        config(['mail.public_contribution_email_verification_enabled' => true]);
+    }
+
     protected function tearDown(): void
     {
         session()->forget(CollaboratorService::PUBLIC_CONTRIBUTION_AUTH_SESSION_KEY);
@@ -477,5 +483,72 @@ final class StoreItemContributionTest extends ServiceMysqlTestCase
         }
 
         $this->assertSame($before, Item::query()->where('collaborator_id', $collaborator->id)->count());
+    }
+
+    public function test_persist_contribution_creates_external_collaborator_when_verification_disabled(): void
+    {
+        config(['mail.public_contribution_email_verification_enabled' => false]);
+
+        /** @var ItemCategory $category */
+        $category = ItemCategory::factory()->create();
+        $email = 'new-disabled.action.' . uniqid('', true) . '@example.com';
+
+        $this->assertNull(Collaborator::query()->where('email', $email)->first());
+
+        $action = app(StoreItemContributionAction::class);
+        $result = $action->persistContribution(
+            $this->collaboratorPayload($email, 'Created While Disabled'),
+            $this->minimalItemPayload($category),
+            Language::idForCode('pt_BR'),
+            [],
+            [],
+            [],
+            null,
+            null,
+        );
+
+        $this->assertSame('ok', $result['status']);
+        $this->assertDatabaseHas('collaborators', ['email' => $email]);
+        $created = Collaborator::query()->where('email', $email)->firstOrFail();
+        $this->assertSame(CollaboratorRole::EXTERNAL, $created->role);
+        $this->assertFalse((bool) $created->blocked);
+    }
+
+    public function test_persist_contribution_requires_session_again_after_verification_is_re_enabled(): void
+    {
+        config(['mail.public_contribution_email_verification_enabled' => false]);
+
+        /** @var ItemCategory $category */
+        $category = ItemCategory::factory()->create();
+        $email = 're-enable.action.' . uniqid('', true) . '@example.com';
+
+        $action = app(StoreItemContributionAction::class);
+        $first = $action->persistContribution(
+            $this->collaboratorPayload($email, 'Created While Disabled'),
+            $this->minimalItemPayload($category),
+            Language::idForCode('pt_BR'),
+            [],
+            [],
+            [],
+            null,
+            null,
+        );
+        $this->assertSame('ok', $first['status']);
+
+        config(['mail.public_contribution_email_verification_enabled' => true]);
+        session()->forget(CollaboratorService::PUBLIC_CONTRIBUTION_AUTH_SESSION_KEY);
+
+        $second = $action->persistContribution(
+            $this->collaboratorPayload($email, 'Created While Disabled'),
+            $this->minimalItemPayload($category),
+            Language::idForCode('pt_BR'),
+            [],
+            [],
+            [],
+            null,
+            null,
+        );
+
+        $this->assertSame('email_unverified', $second['status']);
     }
 }

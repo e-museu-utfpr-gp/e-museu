@@ -17,15 +17,21 @@
                 ],
             ];
         @endphp
+        @php
+            $publicEmailVerificationEnabled = (bool) config('mail.public_contribution_email_verification_enabled');
+        @endphp
         <form action="{{ route('catalog.items.store') }}" method="POST" enctype="multipart/form-data" id="item-create-form"
             data-modals-i18n='@json($createModalsI18n)'
             data-route-tags-autocomplete="{{ route('catalog.tags.autocomplete') }}"
             data-route-tags-check-name="{{ route('catalog.tags.check-name') }}"
             data-route-items-by-category="{{ route('catalog.items.byCategory') }}"
             data-check-contact-route="{{ route('catalog.collaborators.check-contact') }}"
-            data-route-clear-contribution-session="{{ route('catalog.collaborators.clear-contribution-session') }}"
-            data-route-request-verification-code="{{ route('catalog.collaborators.request-verification-code') }}"
-            data-route-confirm-verification-code="{{ route('catalog.collaborators.confirm-verification-code') }}"
+            data-email-verification-enabled="{{ $publicEmailVerificationEnabled ? '1' : '0' }}"
+            @if ($publicEmailVerificationEnabled)
+                data-route-clear-contribution-session="{{ route('catalog.collaborators.clear-contribution-session') }}"
+                data-route-request-verification-code="{{ route('catalog.collaborators.request-verification-code') }}"
+                data-route-confirm-verification-code="{{ route('catalog.collaborators.confirm-verification-code') }}"
+            @endif
             data-msg-email-required="{{ __('view.catalog.items.create.email_verification_email_required') }}"
             data-msg-code-required="{{ __('view.catalog.items.create.email_verification_code_required') }}"
             data-msg-full-name-required="{{ __('view.catalog.items.create.email_verification_full_name_required') }}"
@@ -183,7 +189,9 @@
                         <i class="bi bi-info-circle-fill mx-1 h5"></i>
                         <span class="js-email-name-differs-warning-text"></span>
                     </div>
-                    @include('pages.catalog.items._partials.email-verification-code', ['codeInputId' => 'item-create-verification-code'])
+                    @if ($publicEmailVerificationEnabled)
+                        @include('pages.catalog.items._partials.email-verification-code', ['codeInputId' => 'item-create-verification-code'])
+                    @endif
                 </div>
                 <div class="col-md-6">
                     @include('pages.catalog.items._partials.create.tags-extras-components')

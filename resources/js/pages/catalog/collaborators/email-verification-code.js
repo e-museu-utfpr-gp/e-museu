@@ -26,15 +26,25 @@ function jsonErrorMessage(body, fallback) {
 }
 
 function setStatus($el, text, variant) {
-    $el.removeClass('text-success text-danger text-muted');
-    if (variant === 'success') {
-        $el.addClass('text-success');
-    } else if (variant === 'error') {
-        $el.addClass('text-danger');
-    } else {
-        $el.addClass('text-muted');
+    $el.removeClass(
+        'text-success text-danger text-muted catalog-verification-status-sent catalog-verification-status-confirmed catalog-verification-status-error catalog-verification-status-muted'
+    );
+    const normalizedText = String(text || '').trim();
+    $el.prop('hidden', normalizedText === '');
+    if (normalizedText === '') {
+        $el.text('');
+        return;
     }
-    $el.text(text);
+    if (variant === 'sent') {
+        $el.addClass('text-success catalog-verification-status-sent');
+    } else if (variant === 'confirmed') {
+        $el.addClass('text-success catalog-verification-status-confirmed');
+    } else if (variant === 'error') {
+        $el.addClass('text-danger catalog-verification-status-error');
+    } else {
+        $el.addClass('text-muted catalog-verification-status-muted');
+    }
+    $el.text(normalizedText);
 }
 
 function resetTurnstileWidgetInContainer($container) {
@@ -223,7 +233,7 @@ function initCatalogEmailVerificationForm(form) {
                 const msg = data && data.message ? String(data.message).trim() : '';
                 setStatus($sendStatus, '', 'muted');
                 $codeRow.prop('hidden', false);
-                setStatus($codeStatus, msg, 'success');
+                setStatus($codeStatus, msg, 'sent');
                 $codeInput.trigger('focus');
                 verificationSendCooldownUntil = Date.now() + verificationSendCooldownMs;
                 window.setTimeout(updateSendVerificationButtonEnabled, verificationSendCooldownMs);
@@ -283,7 +293,7 @@ function initCatalogEmailVerificationForm(form) {
             },
             success: function (data) {
                 const msg = data && data.message ? String(data.message).trim() : '';
-                setStatus($codeStatus, msg, 'success');
+                setStatus($codeStatus, msg, 'confirmed');
                 const $cid = $form.find('.js-verified-collaborator-id');
                 if ($cid.length && data && data.collaborator_id) {
                     $cid.val(String(data.collaborator_id));

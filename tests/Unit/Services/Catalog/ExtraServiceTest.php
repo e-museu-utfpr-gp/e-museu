@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Catalog;
 
+use App\Actions\Catalog\ResolveSingleExtraCollaboratorAction;
+use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Catalog\Extra;
 use App\Models\Catalog\Item;
-use App\Enums\Collaborator\CollaboratorRole;
 use App\Models\Collaborator\Collaborator;
 use App\Models\Location;
 use App\Services\Catalog\ExtraService;
@@ -24,7 +25,8 @@ class ExtraServiceTest extends ServiceMysqlTestCase
         $collabSvc->expects($this->never())->method('publicContributionCollaboratorGate');
 
         $svc = app(ExtraService::class);
-        $out = $svc->storeSingleExtra($collabSvc, ['full_name' => 'x'], [
+        $resolveCollaborator = new ResolveSingleExtraCollaboratorAction();
+        $out = $svc->storeSingleExtra($collabSvc, $resolveCollaborator, ['full_name' => 'x'], [
             'collaborator_id' => 9_999_999,
             'content_locale' => 'pt_BR',
             'item_id' => 1,
@@ -44,7 +46,8 @@ class ExtraServiceTest extends ServiceMysqlTestCase
         $collabSvc->expects($this->never())->method('publicContributionCollaboratorGate');
 
         $svc = app(ExtraService::class);
-        $out = $svc->storeSingleExtra($collabSvc, ['full_name' => 'x'], [
+        $resolveCollaborator = new ResolveSingleExtraCollaboratorAction();
+        $out = $svc->storeSingleExtra($collabSvc, $resolveCollaborator, ['full_name' => 'x'], [
             'collaborator_id' => $internal->id,
             'content_locale' => 'pt_BR',
             'item_id' => 1,
@@ -73,7 +76,8 @@ class ExtraServiceTest extends ServiceMysqlTestCase
         $collabSvc->expects($this->once())->method('applySubmittedFullNameAfterVerifiedContribution');
 
         $svc = app(ExtraService::class);
-        $out = $svc->storeSingleExtra($collabSvc, [
+        $resolveCollaborator = new ResolveSingleExtraCollaboratorAction();
+        $out = $svc->storeSingleExtra($collabSvc, $resolveCollaborator, [
             'full_name' => $collaborator->full_name,
             'email' => $collaborator->email,
         ], [

@@ -20,10 +20,8 @@ use App\Services\Catalog\{
     ItemService,
     ItemTagService,
 };
-use App\Support\Catalog\{
-    PublicCatalogContributionOutcome,
-    PublicContributionCollaboratorSupport,
-};
+use App\Services\Collaborator\CollaboratorService;
+use App\Support\Catalog\PublicCatalogContributionOutcome;
 use Illuminate\Http\Request;
 
 /**
@@ -46,7 +44,7 @@ final class StoreItemContributionAction
 
     public function __construct(
         private readonly StoreItemContributionRequestContext $requestContext,
-        private readonly PublicContributionCollaboratorSupport $contributionCollaborator,
+        private readonly CollaboratorService $collaboratorService,
         private readonly ExtraService $extraService,
         private readonly ItemComponentService $itemComponentService,
         private readonly ItemTagService $itemTagService,
