@@ -28,8 +28,31 @@ return [
         ))),
     ],
 
+    'groq' => [
+        'enabled' => filter_var(env('GROQ_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'api_key' => env('GROQ_API_KEY', ''),
+        'provider_url' => trim((string) env(
+            'GROQ_PROVIDER_URL',
+            'https://api.groq.com/openai/v1/chat/completions'
+        )),
+        'timeout_seconds' => max(5, (int) env('GROQ_TIMEOUT', 90)),
+        'connect_timeout_seconds' => max(2, (int) env('GROQ_CONNECT_TIMEOUT', 15)),
+        'models' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env(
+                'GROQ_MODELS',
+                'llama-3.1-8b-instant,gemma2-9b-it'
+            ))
+        ))),
+        'temperature' => min(2.0, max(0.0, (float) env('GROQ_TEMPERATURE', 0.2))),
+        'max_tokens' => max(256, (int) env('GROQ_MAX_TOKENS', 2048)),
+        'http_error_prefix' => (string) env('GROQ_HTTP_ERROR_PREFIX', 'Groq'),
+        'human_label' => (string) env('GROQ_LOG_LABEL', 'Groq'),
+        'extra_request_headers' => [],
+    ],
+
     'openrouter' => [
-        'enabled' => filter_var(env('OPENROUTER_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'enabled' => filter_var(env('OPENROUTER_ENABLED', false), FILTER_VALIDATE_BOOL),
         'api_key' => env('OPENROUTER_API_KEY', ''),
         'provider_url' => trim((string) env(
             'OPENROUTER_PROVIDER_URL',
@@ -56,31 +79,8 @@ return [
         ],
     ],
 
-    'groq' => [
-        'enabled' => filter_var(env('GROQ_ENABLED', true), FILTER_VALIDATE_BOOL),
-        'api_key' => env('GROQ_API_KEY', ''),
-        'provider_url' => trim((string) env(
-            'GROQ_PROVIDER_URL',
-            'https://api.groq.com/openai/v1/chat/completions'
-        )),
-        'timeout_seconds' => max(5, (int) env('GROQ_TIMEOUT', 90)),
-        'connect_timeout_seconds' => max(2, (int) env('GROQ_CONNECT_TIMEOUT', 15)),
-        'models' => array_values(array_filter(array_map(
-            'trim',
-            explode(',', (string) env(
-                'GROQ_MODELS',
-                'llama-3.1-8b-instant,gemma2-9b-it'
-            ))
-        ))),
-        'temperature' => min(2.0, max(0.0, (float) env('GROQ_TEMPERATURE', 0.2))),
-        'max_tokens' => max(256, (int) env('GROQ_MAX_TOKENS', 2048)),
-        'http_error_prefix' => (string) env('GROQ_HTTP_ERROR_PREFIX', 'Groq'),
-        'human_label' => (string) env('GROQ_LOG_LABEL', 'Groq'),
-        'extra_request_headers' => [],
-    ],
-
     'github_models' => [
-        'enabled' => filter_var(env('GITHUB_MODELS_ENABLED', true), FILTER_VALIDATE_BOOL),
+        'enabled' => filter_var(env('GITHUB_MODELS_ENABLED', false), FILTER_VALIDATE_BOOL),
         'api_key' => env('GITHUB_MODELS_TOKEN', ''),
         'provider_url' => trim((string) env(
             'GITHUB_MODELS_PROVIDER_URL',

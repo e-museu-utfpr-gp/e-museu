@@ -22,6 +22,8 @@ class SingleExtraRequest extends FormRequest
      */
     public function rules(): array
     {
+        $verificationEnabled = (bool) config('mail.public_contribution_email_verification_enabled');
+
         return array_merge(PublicCollaboratorRules::rules(), [
             'content_locale' => [
                 'required',
@@ -30,12 +32,18 @@ class SingleExtraRequest extends FormRequest
             ],
             'info' => 'required|string|min:1|max:10000',
             'item_id' => 'required|integer|numeric|exists:items,id',
-            'collaborator_id' => 'required|integer|numeric|exists:collaborators,id',
+            'collaborator_id' => $verificationEnabled
+                ? 'required|integer|numeric|exists:collaborators,id'
+                : 'nullable|integer|numeric|exists:collaborators,id',
         ]);
     }
 
     public function withValidator(Validator $validator): void
     {
+        if (! (bool) config('mail.public_contribution_email_verification_enabled')) {
+            return;
+        }
+
         $validator->after(function (Validator $v): void {
             $id = $this->input('collaborator_id');
             $email = trim((string) $this->input('email', ''));

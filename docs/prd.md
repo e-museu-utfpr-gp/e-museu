@@ -5,7 +5,7 @@
 
 > **Code language:** all source code must be in **English** (identifiers, in-code comments, DocBlocks). End-user text is localized via translation files; product docs for humans may be localized separately — this PRD/SDD pair is maintained in **English** for tooling and AI.
 
-- **Last updated:** 2026-04-24  
+- **Last updated:** 2026-04-25  
 - **Purpose:** fast product understanding for AI agents
 
 **Note (ops):** Coolify/env templates are under `docs/deploy/` (see root `README.md` and `.env.example`).
@@ -30,7 +30,7 @@
 - **Public contribution:**
   - submit an item with metadata, images, and relations;
   - submit an extra on an existing item;
-  - collaborator verification via email code.
+  - optional collaborator verification via email code (disabled by default; can be enabled via environment config).
 - **Curation / admin:**
   - CRUD for items, categories, tags, extras, components, and relations;
   - content validation/moderation;
@@ -42,7 +42,7 @@
 ## 4) Core functional requirements
 
 - FR-01: the public only sees validated items.
-- FR-02: public contribution requires an active verification session.
+- FR-02: public contribution requires an active verification session only when email verification is enabled.
 - FR-03: internal or blocked collaborators cannot use the public contribution path.
 - FR-04: admins can review and validate catalog entities.
 - FR-05: the system keeps language/content consistent per locale.
@@ -81,3 +81,4 @@
 - **2026-04-21 (later):** Public contribution may only link **validated** catalog items as components (aligned with “public sees validated content”). Internal note on admin edit locks: `docs/internal/edit-locks.md`.
 - **2026-04-21 (later still):** Admin-only translation assist on multilingual catalog/taxonomy forms; per-user rate limit on `POST /admin/ai/translate-content`.
 - **2026-04-24:** Translation assist is driven by dynamic provider blocks in `config/ai.php` / `.env` (chain, `provider_url`, keys, models); UI provider names follow each block’s `human_label` env (e.g. `OPENROUTER_LOG_LABEL`), not fixed translation keys per vendor.
+- **2026-04-25:** Public collaborator email verification for catalog item/extra contribution is now configurable via `MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED` (`config/mail.php`), with default disabled. When disabled, contribution works without the email-code UI/session flow.

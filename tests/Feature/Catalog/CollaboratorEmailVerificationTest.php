@@ -19,6 +19,7 @@ class CollaboratorEmailVerificationTest extends AbstractMysqlRefreshDatabaseTest
     protected function setUp(): void
     {
         parent::setUp();
+        config(['mail.public_contribution_email_verification_enabled' => true]);
 
         // Mail/session behaviour only, not Turnstile; stable if CI sets ANTIBOT_DRIVER=turnstile.
         $this->withoutMiddleware(VerifyAntiBotChallenge::class);

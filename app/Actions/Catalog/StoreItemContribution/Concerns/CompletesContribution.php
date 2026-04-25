@@ -37,9 +37,9 @@ trait CompletesContribution
         array $galleryImages,
         array &$cleanup,
     ): array {
-        $this->contributionCollaborator->applySubmittedFullNameAfterVerifiedContribution(
+        $this->collaboratorService->applySubmittedFullNameAfterVerifiedContribution(
             $collaborator,
-            $collaboratorData,
+            (string) ($collaboratorData['full_name'] ?? ''),
         );
         $collaborator->refresh();
 

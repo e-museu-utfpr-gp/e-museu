@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Services\Catalog\CatalogContributionCompletionService;
+use App\Actions\Catalog\ResolveSingleExtraCollaboratorAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Catalog\{ItemContributionValidator, SingleExtraRequest};
 use App\Models\Language;
-use App\Services\Catalog\ExtraService;
-use App\Support\Catalog\PublicCatalogContributionOutcome;
+use App\Services\Catalog\{CatalogContributionCompletionService, ExtraService};
 use App\Services\Collaborator\CollaboratorService;
+use App\Support\Catalog\PublicCatalogContributionOutcome;
 use Illuminate\Http\RedirectResponse;
 
 class ExtraController extends Controller
@@ -23,6 +23,7 @@ class ExtraController extends Controller
         ItemContributionValidator $itemContributionValidator,
         ExtraService $extraService,
         CollaboratorService $collaboratorService,
+        ResolveSingleExtraCollaboratorAction $resolveSingleExtraCollaborator,
         CatalogContributionCompletionService $catalogContributionCompletion,
     ): RedirectResponse {
         $validatedData = $itemContributionValidator->validateSingleExtra($request);
@@ -32,6 +33,7 @@ class ExtraController extends Controller
 
         $result = $extraService->storeSingleExtra(
             $collaboratorService,
+            $resolveSingleExtraCollaborator,
             $validatedData['collaborator'],
             $validatedData['extra']
         );

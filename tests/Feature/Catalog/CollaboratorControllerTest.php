@@ -18,6 +18,7 @@ class CollaboratorControllerTest extends AbstractMysqlRefreshDatabaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['mail.public_contribution_email_verification_enabled' => true]);
 
         $this->withoutMiddleware(VerifyAntiBotChallenge::class);
     }
@@ -172,5 +173,43 @@ class CollaboratorControllerTest extends AbstractMysqlRefreshDatabaseTestCase
             ->assertJsonFragment(['message' => __('app.collaborator.verify_blocked')]);
 
         Mail::assertNothingSent();
+    }
+
+    public function test_verification_endpoints_return_404_when_feature_disabled(): void
+    {
+        config(['mail.public_contribution_email_verification_enabled' => false]);
+
+        $this->postJson(route('catalog.collaborators.request-verification-code'), [
+            'email' => 'disabled@example.com',
+            'full_name' => 'Disabled',
+        ])->assertNotFound();
+
+        $this->postJson(route('catalog.collaborators.confirm-verification-code'), [
+            'email' => 'disabled@example.com',
+            'code' => '123456',
+            'full_name' => 'Disabled',
+        ])->assertNotFound();
+    }
+
+    public function test_check_contact_when_feature_disabled_treats_email_as_verification_not_required(): void
+    {
+        config(['mail.public_contribution_email_verification_enabled' => false]);
+
+        $email = 'disabled-contact-' . uniqid('', false) . '@google.com';
+        Collaborator::create([
+            'full_name' => 'No Verify Needed',
+            'email' => $email,
+            'role' => CollaboratorRole::EXTERNAL,
+            'blocked' => false,
+            'last_email_verification_at' => null,
+        ]);
+
+        $this->postJson(route('catalog.collaborators.check-contact'), ['email' => $email])
+            ->assertOk()
+            ->assertJson([
+                'exists' => true,
+                'email_verified' => true,
+                'contribution_session_verified' => true,
+            ]);
     }
 }

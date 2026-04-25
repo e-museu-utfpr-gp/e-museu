@@ -6,6 +6,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Public catalog collaborator e-mail verification
+    |--------------------------------------------------------------------------
+    |
+    | When disabled, public item/extra contribution does not require the
+    | request/confirm verification-code flow and related UI can stay hidden.
+    |
+    */
+
+    'public_contribution_email_verification_enabled' => (bool) env(
+        'MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED',
+        false,
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Mailer
     |--------------------------------------------------------------------------
     */

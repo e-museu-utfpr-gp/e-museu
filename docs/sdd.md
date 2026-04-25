@@ -5,7 +5,7 @@
 
 > **Code language:** all source code must be in **English** — identifiers (classes, methods, variables), comments inside code, PHPDoc/DocBlocks, and technical strings in code (e.g. translation keys). User-facing copy may be localized via `lang/` and frontend i18n; the codebase itself stays English-only.
 
-- **Last updated:** 2026-04-24  
+- **Last updated:** 2026-04-25  
 - **Purpose:** technical baseline so AI agents can understand the project quickly
 
 ## PHP `use` imports (project convention)
@@ -69,14 +69,14 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
   - `POST /catalog/items` → `ItemController@store` → `StoreItemContributionAction`.
   - Pipeline: validate request → resolve collaborator → transaction → create item/translations/images → relations (tags/extras/components) → post-processing.
 - Verification:
-  - request email code → confirm code → temporary contribution session.
+  - optional request email code → confirm code → temporary contribution session (enabled by `config('mail.public_contribution_email_verification_enabled')` / `MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED`; default disabled).
 - Admin:
   - CRUD under `/admin/*`, content validation, images/QR management.
   - Optional translation assist: generic JSON endpoint keyed by `resource` (`item`, `extra`, `item_category`, `tag`, `tag_category`) with `translations[locale][field]` echo of the form; modes `fill` vs `regenerate`.
 
 ## 5) Rules and invariants
 
-- Public contribution requires a valid email-verification session.
+- Public contribution requires a valid email-verification session only when `mail.public_contribution_email_verification_enabled` is true.
 - Internal or blocked collaborators cannot use the public contribution flow.
 - Contribution-created content typically starts with `validation=false` (later curation).
 - The public should only see validated items.
@@ -109,3 +109,4 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 - **2026-04-21 (later):** `declare(strict_types=1)` applied across `app/`, `routes/`, `config/`, `bootstrap/`, `tests/`, `database/`, `lang/`. Public contribution components must reference **validated** items only (`ComponentRequest` + `ItemComponentService`). Admin partial edit actions: lock semantics in `docs/internal/edit-locks.md`.
 - **2026-04-21 (later still):** `config/ai.php`, `RegistersRateLimiters::admin-ai-translate`, `AdminContentTranslationController` + `AdminContentTranslationRequest`, feature tests `AdminContentTranslationControllerTest`; admin AI support classes live under `App\Support\Admin\Ai` (registry, prompts, layout flags, etc.). (Superseded for HTTP stack by **2026-04-24** below.)
 - **2026-04-24:** Admin AI chat HTTP is `AiChatCompletionHttpClient` + `AdminChatCompletionHttpRequestFactory` (no per-vendor client classes). Provider order `AI_CHAT_COMPLETION_CHAIN`; each block uses `provider_url` and optional `*_LOG_LABEL` → `human_label` for UI/log copy. Lang `view.admin.ai` no longer defines fixed strings per provider slug; `AdminAi::providerLabel()` reads `config('ai.{slug}.human_label')` with a generic `provider_default` fallback.
+- **2026-04-25:** Public catalog collaborator email verification is feature-flagged by `MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED` (`config/mail.php`, default `false`). When disabled, contribution endpoints/UI skip verification-code flow and backend collaborator gate no longer requires session-authenticated email verification.
