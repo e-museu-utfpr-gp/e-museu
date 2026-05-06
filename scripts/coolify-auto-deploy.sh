@@ -6,12 +6,7 @@ set -eu
 # Environment (set by Coolify or .env injection):
 #   COOLIFY_AUTO_DEPLOY_GITHUB_REPO_URL  e.g. https://github.com/org/repo.git
 #   COOLIFY_AUTO_DEPLOY_GITHUB_BRANCH    e.g. develop or main
-#   Deploy target — either:
-#     COOLIFY_AUTO_DEPLOY_DEPLOY_URL  full URL (in Coolify UI use double-quotes if it contains &)
-#   or (recommended for Coolify YAML: no & in any value):
-#     COOLIFY_AUTO_DEPLOY_COOLIFY_ORIGIN  e.g. http://HOST:8000
-#     COOLIFY_AUTO_DEPLOY_RESOURCE_UUID   resource uuid
-#     COOLIFY_AUTO_DEPLOY_FORCE           optional, default false
+#   COOLIFY_AUTO_DEPLOY_DEPLOY_URL       full deploy API URL (quote in Coolify if it contains &)
 #   COOLIFY_AUTO_DEPLOY_TOKEN            Bearer token (tokens often contain | — quote in Coolify UI)
 #   COOLIFY_AUTO_DEPLOY_TOKEN_FILE       optional; read token from file if TOKEN is empty
 #   APP_ENV                             staging | production (state file under storage/coolify/)
@@ -31,23 +26,14 @@ if [ -n "${COOLIFY_AUTO_DEPLOY_TOKEN_FILE:-}" ] && [ -z "${COOLIFY_AUTO_DEPLOY_T
   fi
 fi
 
-if [ -z "${COOLIFY_AUTO_DEPLOY_DEPLOY_URL:-}" ] \
-  && [ -n "${COOLIFY_AUTO_DEPLOY_COOLIFY_ORIGIN:-}" ] \
-  && [ -n "${COOLIFY_AUTO_DEPLOY_RESOURCE_UUID:-}" ]; then
-  _origin="${COOLIFY_AUTO_DEPLOY_COOLIFY_ORIGIN%/}"
-  _force="${COOLIFY_AUTO_DEPLOY_FORCE:-false}"
-  COOLIFY_AUTO_DEPLOY_DEPLOY_URL="${_origin}/api/v1/deploy?uuid=${COOLIFY_AUTO_DEPLOY_RESOURCE_UUID}&force=${_force}"
-fi
-
 if [ -z "${COOLIFY_AUTO_DEPLOY_GITHUB_REPO_URL:-}" ] \
   || [ -z "${COOLIFY_AUTO_DEPLOY_GITHUB_BRANCH:-}" ] \
   || [ -z "${COOLIFY_AUTO_DEPLOY_DEPLOY_URL:-}" ] \
   || [ -z "${COOLIFY_AUTO_DEPLOY_TOKEN:-}" ]; then
   echo "coolify-auto-deploy: missing required configuration." >&2
   echo "  Need: COOLIFY_AUTO_DEPLOY_GITHUB_REPO_URL, COOLIFY_AUTO_DEPLOY_GITHUB_BRANCH," >&2
-  echo "        COOLIFY_AUTO_DEPLOY_DEPLOY_URL (or COOLIFY_AUTO_DEPLOY_COOLIFY_ORIGIN + COOLIFY_AUTO_DEPLOY_RESOURCE_UUID)," >&2
-  echo "        COOLIFY_AUTO_DEPLOY_TOKEN (or COOLIFY_AUTO_DEPLOY_TOKEN_FILE)." >&2
-  echo "  In Coolify, unquoted values with & or | break YAML — use split ORIGIN/UUID/FORCE vars or wrap values in double quotes." >&2
+  echo "        COOLIFY_AUTO_DEPLOY_DEPLOY_URL, COOLIFY_AUTO_DEPLOY_TOKEN (or COOLIFY_AUTO_DEPLOY_TOKEN_FILE)." >&2
+  echo "  In Coolify YAML, unquoted & or | can break parsing — wrap DEPLOY_URL and TOKEN in double quotes if needed." >&2
   exit 1
 fi
 

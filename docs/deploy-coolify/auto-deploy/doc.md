@@ -18,19 +18,9 @@ Set these on the **same** Coolify resource (staging or production) whose **app**
 
 Coolify stores env in **YAML**. In unquoted values, **`&`** starts a YAML anchor and **`|`** starts a literal block. That often yields **empty or wrong** variables inside the container — the script then reports *missing required env*.
 
-**Recommended:** use **origin + uuid + force** (no `&` in any value):
+Set **`COOLIFY_AUTO_DEPLOY_DEPLOY_URL`** to the full deploy link (including `uuid=…&force=…`). Wrap the value in **double quotes** in Coolify if it contains **`&`**.
 
-| Variable | Example |
-|----------|---------|
-| `COOLIFY_AUTO_DEPLOY_COOLIFY_ORIGIN` | `http://YOUR_COOLIFY_HOST:8000` |
-| `COOLIFY_AUTO_DEPLOY_RESOURCE_UUID` | your resource uuid from the deploy API link |
-| `COOLIFY_AUTO_DEPLOY_FORCE` | `false` |
-
-The script builds `…/api/v1/deploy?uuid=…&force=…` internally.
-
-**Alternative:** set `COOLIFY_AUTO_DEPLOY_DEPLOY_URL` to the full URL but wrap it in **double quotes** in the Coolify env value.
-
-Tokens often contain **`|`**; if the full URL or token is wrong in the container, quote the value or use **`COOLIFY_AUTO_DEPLOY_TOKEN_FILE`** (path to a file readable in the container, content = token only).
+Tokens often contain **`|`**; quote the value or use **`COOLIFY_AUTO_DEPLOY_TOKEN_FILE`** (path to a file readable in the container, content = token only).
 
 ### Full list
 
@@ -38,10 +28,7 @@ Tokens often contain **`|`**; if the full URL or token is wrong in the container
 |----------|-------------|
 | `COOLIFY_AUTO_DEPLOY_GITHUB_REPO_URL` | Git clone URL (e.g. `https://github.com/e-museu-utfpr-gp/e-museu.git`) |
 | `COOLIFY_AUTO_DEPLOY_GITHUB_BRANCH` | Branch to watch (e.g. `develop` / `main`) |
-| `COOLIFY_AUTO_DEPLOY_COOLIFY_ORIGIN` | Coolify base URL, no path (use with `RESOURCE_UUID`) |
-| `COOLIFY_AUTO_DEPLOY_RESOURCE_UUID` | Resource uuid from the deploy link |
-| `COOLIFY_AUTO_DEPLOY_FORCE` | Optional; `true` or `false` (default `false`) |
-| `COOLIFY_AUTO_DEPLOY_DEPLOY_URL` | Optional full deploy URL if you do not use the three vars above |
+| `COOLIFY_AUTO_DEPLOY_DEPLOY_URL` | Full Coolify deploy API URL (`…/api/v1/deploy?uuid=…&force=…`) |
 | `COOLIFY_AUTO_DEPLOY_TOKEN` | API Bearer token |
 | `COOLIFY_AUTO_DEPLOY_TOKEN_FILE` | Optional; token file path if `TOKEN` is empty |
 
