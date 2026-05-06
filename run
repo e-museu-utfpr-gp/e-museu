@@ -670,6 +670,12 @@ function exec {
   sudo docker exec -it e-museu-app-1 "$@"
 }
 
+function create-admin {
+  source .env
+  echo ">> php artisan create:admin (app container)"
+  sudo docker exec -it e-museu-app-1 php artisan create:admin "$@"
+}
+
 function version {
   echo "E-Museu $(cat VERSION)"
 }
@@ -778,6 +784,7 @@ function help {
   echo "  migrate            - Run database migrations"
   echo "  seed               - Seed database with initial data"
   echo "  composer           - Install Composer dependencies"
+  echo "  create-admin       - Run php artisan create:admin (shortcut for ./run exec php artisan create:admin)"
   echo ""
   echo "Testing & Code Quality:"
   echo "  NOTE: Before running code quality tools:"
@@ -843,6 +850,7 @@ function help {
   echo "  ./run simulate-ci            # Simulate complete CI pipeline"
   echo "  ./run simulate-ci -y         # Simulate CI pipeline without confirmation"
   echo "  ./run exec php artisan tinker  # Open Laravel tinker"
+  echo "  ./run create-admin             # Create admin user (interactive)"
   echo "  ./run remove-all -y        # Remove all without confirmation prompt"
   echo "  ./run remove-all -y -db    # Full cleanup but keep mysql_data"
   echo ""

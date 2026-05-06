@@ -10,7 +10,7 @@ set -eu
 #   COOLIFY_AUTO_DEPLOY_DEPLOY_URL       full deploy API URL (quote in Coolify if it contains &)
 #   COOLIFY_AUTO_DEPLOY_TOKEN            Bearer token (tokens often contain | — quote in Coolify UI)
 #   COOLIFY_AUTO_DEPLOY_TOKEN_FILE       optional; read token from file if TOKEN is empty
-#   APP_ENV                             staging | production (state file under storage/coolify/)
+#   APP_ENV                             staging | production (state file under storage/coolify/ )
 
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 APP_ROOT="$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)"
