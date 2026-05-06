@@ -5,7 +5,7 @@ Technology - Parana (UTFPR) and the State University of Central-West (Unicentro)
 unused computer parts and motivated the creation of a museum to preserve their history, with contributions
 from both project members and the broader community.
 
-- **Version:** `1.0.0`
+- **Version:** `1.1.0`
 - **Original forks:** [vinifen/e-museu-2.1.0-beta](https://github.com/vinifen/e-museu-2.1.0-beta), [tankesho/e-museu](https://github.com/tankesho/e-museu)
 
 ---
