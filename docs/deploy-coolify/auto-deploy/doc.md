@@ -66,17 +66,17 @@ Fallback if the executable bit is missing in a custom image: `/bin/sh /var/www/s
 
 Create **Scheduled Tasks** on each resource (staging and production):
 
-| Field | Staging | Production |
-|-------|---------|------------|
+| Field | Staging (develop) | Production |
+|-------|-------------------|------------|
 | **Name** | e.g. `Staging / GitHub poll -> Coolify deploy` | `Production / GitHub poll -> Coolify deploy` |
 | **Command** | `/var/www/scripts/coolify-auto-deploy.sh` | same |
-| **Frequency** | `0,5,10,15,20,25,30,35,40,45,50,55 * * * *` | `0,10,20,30,40,50 * * * *` |
+| **Frequency** | `0,10,20,30,40,50 * * * *` | `0,15,30,45 * * * *` |
 | **Timeout (seconds)** | `300` (must be **≥ 60** in Coolify) | same |
 | **Container** | staging app container (e.g. `app-staging`) | production app container |
 
-Paste **Frequency** as plain text: exactly **five** cron fields, ASCII spaces only (no smart quotes). The lists above mean “at minutes 0, 5, 10, …” (every 5 or 10 minutes). Coolify’s UI may show **Invalid Cron / Human expression** for some shorthand forms (e.g. `*/5 * * * *`); the explicit minute lists are standard and validate reliably.
+Paste **Frequency** as plain text: exactly **five** cron fields, ASCII spaces only (no smart quotes). The lists above run the task **every 10 minutes** on staging (develop) and **every 15 minutes** on production. Coolify’s UI may show **Invalid Cron / Human expression** for some shorthand forms (e.g. `*/10 * * * *`); the explicit minute lists are standard and validate reliably.
 
-Staggering (5 min vs 10 min) reduces the chance of two deploys firing back-to-back when both branches move.
+Staggering (10 min vs 15 min) reduces the chance of two deploys firing back-to-back when both branches move.
 
 ## Templates
 
