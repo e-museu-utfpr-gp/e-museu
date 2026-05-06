@@ -1,7 +1,7 @@
 # Storage
 
 > **Last updated:** 2026-04-21  
-> Related: `config/filesystems.php`, `app/Http/Controllers/StorageProxyController.php`, route `GET /storage/{path}` in `routes/web.php`. Deploy examples: `docs/deploy/`.
+> Related: `config/filesystems.php`, `app/Http/Controllers/StorageProxyController.php`, route `GET /storage/{path}` in `routes/web.php`. Deploy examples: `docs/deploy-coolify/`.
 
 ## What lives under `storage/`
 
@@ -32,7 +32,7 @@ The `public` disk `url` is set to `APP_URL` + `/storage` so generated URLs match
 |-------------|-----------------|--------|
 | **Local** | Local disk | Files under `storage/app/public`. |
 | **Prod-local (Docker)** | Local disk on volume | `storage` (or subpaths) mounted so data persists between container and host per `docker-compose`. |
-| **Staging / production** | S3 or MinIO | Set `FILESYSTEM_DISK=s3` and `AWS_*` / endpoint as needed. See `docs/deploy/` for Coolify-oriented examples. |
+| **Staging / production** | S3 or MinIO | Set `FILESYSTEM_DISK=s3` and `AWS_*` / endpoint as needed. See `docs/deploy-coolify/` for Coolify-oriented examples. |
 
 ## For AI / contributors
 
