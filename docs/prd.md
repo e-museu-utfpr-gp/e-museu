@@ -5,10 +5,10 @@
 
 > **Code language:** all source code must be in **English** (identifiers, in-code comments, DocBlocks). End-user text is localized via translation files; product docs for humans may be localized separately — this PRD/SDD pair is maintained in **English** for tooling and AI.
 
-- **Last updated:** 2026-04-25  
+- **Last updated:** 2026-05-06  
 - **Purpose:** fast product understanding for AI agents
 
-**Note (ops):** Coolify/env templates are under `docs/deploy/` (see root `README.md` and `.env.example`).
+**Note (ops):** Coolify/env templates are under `docs/deploy-coolify/` (see root `README.md` and `.env.example`). Optional **GitHub branch poll → Coolify deploy API** is documented in `docs/deploy-coolify/auto-deploy/doc.md` (operations automation, not an end-user feature).
 
 ## 1) Problem and goal
 
@@ -54,6 +54,7 @@
 - NFR-02: MySQL-oriented compatibility.
 - NFR-03: throttling and anti-automation on sensitive endpoints.
 - NFR-04: transactional robustness on contribution flows.
+- NFR-05 (ops): staging/production may use Coolify scheduled tasks to poll GitHub and trigger deploys via the Coolify API when the watched branch SHA changes (see deploy docs).
 
 ## 6) Boundaries and out of scope (today)
 
@@ -77,8 +78,9 @@
 
 ## Change log (short)
 
-- **2026-04-21**: Initial PRD; English-only code rule. Deploy docs pointer `docs/deploy/`; note on stricter rate limit for public item contribution POST (abuse mitigation). Companion doc renamed to `docs/sdd.md` (software design document; replaces typo `spp.md`).
+- **2026-04-21**: Initial PRD; English-only code rule. Deploy docs pointer `docs/deploy-coolify/`; note on stricter rate limit for public item contribution POST (abuse mitigation). Companion doc renamed to `docs/sdd.md` (software design document; replaces typo `spp.md`).
 - **2026-04-21 (later):** Public contribution may only link **validated** catalog items as components (aligned with “public sees validated content”). Internal note on admin edit locks: `docs/internal/edit-locks.md`.
 - **2026-04-21 (later still):** Admin-only translation assist on multilingual catalog/taxonomy forms; per-user rate limit on `POST /admin/ai/translate-content`.
 - **2026-04-24:** Translation assist is driven by dynamic provider blocks in `config/ai.php` / `.env` (chain, `provider_url`, keys, models); UI provider names follow each block’s `human_label` env (e.g. `OPENROUTER_LOG_LABEL`), not fixed translation keys per vendor.
 - **2026-04-25:** Public collaborator email verification for catalog item/extra contribution is now configurable via `MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED` (`config/mail.php`), with default disabled. When disabled, contribution works without the email-code UI/session flow.
+- **2026-05-06:** Documented optional Coolify auto-deploy (GitHub SHA poll + deploy API); env keys in Coolify templates and `docs/deploy-coolify/auto-deploy/doc.md`.
