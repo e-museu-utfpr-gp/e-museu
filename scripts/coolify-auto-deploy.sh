@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+# IMPORTANT: Dont delete this script or move this script, it is used by Coolify to deploy the application. Edit this script can break the auto deployment process.
 
 # Polls GitHub for the tip SHA of a branch; if it changed, calls Coolify deploy API and persists the new SHA.
 # Intended for Coolify "Scheduled Tasks" inside the app container. Requires git, curl.
