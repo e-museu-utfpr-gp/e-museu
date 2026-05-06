@@ -100,7 +100,7 @@
                     alt="{{ __('view.layout.footer_partner_tecnolixo_alt') }}">
             </a>
 
-            <p class="col-md-4 mb-0 d-flex justify-content-center">{{ __('view.layout.footer.copyright') }}</p>
+            <p class="col-md-4 mb-0 d-flex justify-content-center">{{ __('view.layout.footer.copyright', ['year' => now()->year]) }}</p>
         </footer>
     </div>
     @stack('scripts')
