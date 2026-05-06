@@ -5,7 +5,7 @@ Technology - Parana (UTFPR) and the State University of Central-West (Unicentro)
 unused computer parts and motivated the creation of a museum to preserve their history, with contributions
 from both project members and the broader community.
 
-- **Version:** `1.0.0`
+- **Version:** `1.1.0`
 - **Original forks:** [vinifen/e-museu-2.1.0-beta](https://github.com/vinifen/e-museu-2.1.0-beta), [tankesho/e-museu](https://github.com/tankesho/e-museu)
 
 ---
@@ -15,7 +15,7 @@ from both project members and the broader community.
 - Laravel (PHP), Blade + Vite
 - MySQL 8 (required)
 - Redis
-- Docker / Docker Compose
+- Docker / Docker Compose 
 - Node.js (frontend tooling)
 
 ---
@@ -209,9 +209,12 @@ MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED=false
 
 Deployment env templates and docs:
 
-- `docs/deploy/coolify-production.env.example`
-- `docs/deploy/coolify-staging.env.example`
-- `docs/deploy/coolify-minio-s3/`
+- `docs/deploy-coolify/coolify-production.env.example`
+- `docs/deploy-coolify/coolify-staging.env.example`
+- `docs/deploy-coolify/auto-deploy/doc.md` (optional GitHub poll → Coolify deploy)
+- `docs/deploy-coolify/minio-s3/doc.md` (post-setup: bucket + object data)
+- `docs/deploy-coolify/mysql/doc.md` (post-setup: import SQL dump)
+- `docs/deploy-coolify/minio-s3/` (Compose stacks)
 
 ### ☁️ Coolify support (MySQL, Redis, MinIO/S3)
 
@@ -225,9 +228,12 @@ Main env points:
 
 Use:
 
-- `docs/deploy/coolify-production.env.example`
-- `docs/deploy/coolify-staging.env.example`
-- `docs/deploy/coolify-minio-s3/`
+- `docs/deploy-coolify/coolify-production.env.example`
+- `docs/deploy-coolify/coolify-staging.env.example`
+- `docs/deploy-coolify/auto-deploy/doc.md`
+- `docs/deploy-coolify/minio-s3/doc.md`
+- `docs/deploy-coolify/mysql/doc.md`
+- `docs/deploy-coolify/minio-s3/` (Compose stacks)
 
 ---
 
