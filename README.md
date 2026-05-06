@@ -15,8 +15,8 @@ from both project members and the broader community.
 - Laravel (PHP), Blade + Vite
 - MySQL 8 (required)
 - Redis
-- Docker / Docker Compose 
-- Node.js (frontend tooling)
+- Docker / Docker Compose
+- Node.js (frontend tooling )
 
 ---
 
