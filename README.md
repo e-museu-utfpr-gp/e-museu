@@ -213,7 +213,7 @@ Deployment env templates and docs:
 - `docs/deploy-coolify/coolify-staging.env.example`
 - `docs/deploy-coolify/auto-deploy/doc.md` (optional GitHub poll → Coolify deploy)
 - `docs/deploy-coolify/minio-s3/doc.md` (post-setup: bucket + object data)
-- `docs/deploy-coolify/mysql/doc.md` (post-setup: import SQL dump )
+- `docs/deploy-coolify/mysql/doc.md` (post-setup: import SQL dump)
 - `docs/deploy-coolify/minio-s3/` (Compose stacks)
 
 ### ☁️ Coolify support (MySQL, Redis, MinIO/S3)
