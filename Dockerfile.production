@@ -20,7 +20,7 @@ RUN apk update && apk upgrade && apk add --no-cache \
     linux-headers \
     icu-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd sockets intl \
-    && pecl install redis \
+    && pecl install redis-6.3.0 \
     && docker-php-ext-enable redis \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer \
     && apk del build-base autoconf make gcc g++ libc-dev file re2c \
