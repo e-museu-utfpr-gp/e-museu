@@ -17,6 +17,6 @@ return [
     'locale_no_ui' => 'sem interface',
     'footer' => [
         'contact' => 'Contato:',
-        'copyright' => ':year - UTFPR - Unicentro teste',
+        'copyright' => ':year - UTFPR - Unicentro teste 2',
     ],
 ];
