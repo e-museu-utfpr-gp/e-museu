@@ -17,6 +17,6 @@ return [
     'locale_no_ui' => 'no UI pack',
     'footer' => [
         'contact' => 'Contact:',
-        'copyright' => '2024 - UTFPR - Unicentro',
+        'copyright' => ':year - UTFPR - Unicentro',
     ],
 ];
