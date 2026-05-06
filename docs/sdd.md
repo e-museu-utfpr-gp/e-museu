@@ -89,7 +89,7 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 - Tests: `./run test`
 - Quality: `./run phpcs`, `./run phpstan`, `./run all-tests`
 - Local dev and CI assume MySQL.
-- **Coolify auto-deploy (optional):** `scripts/coolify-auto-deploy.sh` runs inside the staging/production app container (Coolify **Scheduled Tasks**). It reads `COOLIFY_AUTO_DEPLOY_GITHUB_*`, `COOLIFY_AUTO_DEPLOY_DEPLOY_URL`, `COOLIFY_AUTO_DEPLOY_TOKEN`, compares `git ls-remote` to `storage/coolify/last_sha_github_repo_staging` / `last_sha_github_repo_production` (from `APP_ENV`), then calls the Coolify deploy HTTP API with `Authorization: Bearer`. See `docs/deploy-coolify/auto-deploy/doc.md`.
+- **Coolify auto-deploy (optional):** `scripts/coolify-auto-deploy.sh` runs inside the staging/production app container (Coolify **Scheduled Tasks**). It reads `COOLIFY_AUTO_DEPLOY_GITHUB_*`, deploy target (`COOLIFY_AUTO_DEPLOY_DEPLOY_URL` or `COOLIFY_AUTO_DEPLOY_COOLIFY_ORIGIN` + `COOLIFY_AUTO_DEPLOY_RESOURCE_UUID`), and `COOLIFY_AUTO_DEPLOY_TOKEN` (or `COOLIFY_AUTO_DEPLOY_TOKEN_FILE`), compares `git ls-remote` to `storage/coolify/last_sha_github_repo_staging` / `last_sha_github_repo_production` (from `APP_ENV`), then calls the Coolify deploy HTTP API with `Authorization: Bearer`. See `docs/deploy-coolify/auto-deploy/doc.md`.
 
 ## 7) Known technical risks
 
