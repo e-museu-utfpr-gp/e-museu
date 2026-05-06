@@ -16,7 +16,7 @@ from both project members and the broader community.
 - MySQL 8 (required)
 - Redis
 - Docker / Docker Compose
-- Node.js (frontend tooling)
+- Node.js (frontend tooling )
 
 ---
 
