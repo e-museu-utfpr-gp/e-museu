@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 
 /**
  * Stateless OpenAI-style chat HTTP caller: URL, bearer token, headers, and tuning
- * must be supplied via {@see ChatCompletionHttpRequest} (usually from application config / .env).
+ * must be supplied via  {@see ChatCompletionHttpRequest} (usually from application config / .env).
  */
 final class AiChatCompletionHttpClient
 {
