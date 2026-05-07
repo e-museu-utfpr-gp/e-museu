@@ -89,7 +89,7 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 - Tests: `./run test`
 - Quality: `./run phpcs`, `./run phpstan`, `./run all-tests`
 - Local dev and CI assume MySQL.
-- **Coolify deploy hook:** `POST /deploy` → `DeployWebhookController` (Bearer `DEPLOY_HOOK_SECRET`, throttle `deploy-hook` **5/min per IP**, CSRF excluded); outbound authenticated **GET** to `COOLIFY_DEPLOY_URL` with `COOLIFY_DEPLOY_TOKEN`. Nginx `location = /deploy` allows POST only. GitHub Actions: `.github/workflows/deploy-coolify.yml`. See `docs/deploy-coolify/deploy-hook/doc.md`. Optional poll: `scripts/coolify-auto-deploy.sh` + `COOLIFY_AUTO_DEPLOY_*` if scheduled tasks are still used.
+- **Coolify deploy hook:** `POST /deploy` → `DeployWebhookController` (Bearer `DEPLOY_HOOK_SECRET`, throttle `deploy-hook` **5/min per IP**, CSRF excluded); outbound authenticated **GET** to `COOLIFY_DEPLOY_URL` with `COOLIFY_DEPLOY_TOKEN`. Nginx `location = /deploy` allows POST only. **`StagingBasicAuth`** skips **`/deploy`** so CI can send Bearer only. GitHub Actions: `.github/workflows/deploy-coolify.yml` (hook URLs from **`vars`**, not secrets). See `docs/deploy-coolify/deploy-hook/doc.md`. Optional poll: `scripts/coolify-auto-deploy.sh` + `COOLIFY_AUTO_DEPLOY_*` if scheduled tasks are still used.
 
 ## 7) Known technical risks
 
@@ -114,3 +114,4 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 - **2026-05-06:** Coolify deploy primary path: GitHub Actions → `POST /deploy` (`DeployWebhookController`, `config/deploy.php`), Coolify templates env `DEPLOY_HOOK_SECRET`, `COOLIFY_DEPLOY_URL`, `COOLIFY_DEPLOY_TOKEN`; nginx `/deploy` POST-only; docs `docs/deploy-coolify/deploy-hook/doc.md`. Legacy poll script `scripts/coolify-auto-deploy.sh` retained.
 - **2026-05-06:** Deploy-hook throttle **5/min** per IP; deploy-hook doc explains UTFPR/Coolify-port constraint (application-mediated webhook vs exposing Coolify publicly).
 - **2026-05-06:** GitHub Actions workflow uses repository **variables** `DEPLOY_HOOK_URL_PRODUCTION` / `DEPLOY_HOOK_URL_STAGING` for hook URLs; paste-friendly template `docs/deploy-coolify/github-actions-deploy.env.example`; single secret **`DEPLOY_HOOK_BEARER`** shared by prod/staging (matches **`DEPLOY_HOOK_SECRET`** on both apps).
+- **2026-05-06:** `StagingBasicAuth` exempts **`/deploy`**; workflow trims URLs and enforces **`https://`** (avoid empty/malformed `curl` URL when vars missing).

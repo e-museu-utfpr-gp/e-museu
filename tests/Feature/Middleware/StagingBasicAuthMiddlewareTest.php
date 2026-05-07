@@ -83,4 +83,19 @@ class StagingBasicAuthMiddlewareTest extends MysqlMiddlewareTestCase
         $this->get(route('home'))
             ->assertOk();
     }
+
+    public function test_staging_skips_basic_auth_for_deploy_hook_path(): void
+    {
+        $this->app->detectEnvironment(fn (): string => 'staging');
+        config([
+            'auth.staging_basic.user' => 'staging_user',
+            'auth.staging_basic.password' => 'staging_pass',
+            'deploy.secret' => 'hook-secret',
+            'deploy.coolify.deploy_url' => '',
+            'deploy.coolify.token' => '',
+        ]);
+
+        $this->postJson('/deploy', [], ['Authorization' => 'Bearer hook-secret'])
+            ->assertStatus(503);
+    }
 }

@@ -21,10 +21,21 @@ jobs:
           BEARER: ${{ secrets.DEPLOY_HOOK_BEARER }}
         run: |
           set -eu
-          if [ -z "${URL:-}" ]; then
-            echo "Missing repository variable DEPLOY_HOOK_URL_PRODUCTION (Settings → Secrets and variables → Actions → Variables)." >&2
+          URL="$(printf '%s' "$URL" | tr -d '\r')"
+          URL="${URL#"${URL%%[![:space:]]*}"}"
+          URL="${URL%"${URL##*[![:space:]]}"}"
+          if [ -z "$URL" ]; then
+            echo "Missing or blank DEPLOY_HOOK_URL_PRODUCTION." >&2
+            echo "Create it under Settings → Secrets and variables → Actions → Variables (not Secrets)." >&2
             exit 1
           fi
+          case "$URL" in
+            https://*) ;;
+            *)
+              echo "DEPLOY_HOOK_URL_PRODUCTION must start with https:// (got malformed value)." >&2
+              exit 1
+              ;;
+          esac
           if [ -z "${BEARER:-}" ]; then
             echo "Missing repository secret DEPLOY_HOOK_BEARER." >&2
             exit 1
@@ -38,21 +49,27 @@ jobs:
         env:
           URL: ${{ vars.DEPLOY_HOOK_URL_STAGING }}
           BEARER: ${{ secrets.DEPLOY_HOOK_BEARER }}
-          BASIC: ${{ secrets.STAGING_BASIC_AUTH_CURL }}
         run: |
           set -eu
-          if [ -z "${URL:-}" ]; then
-            echo "Missing repository variable DEPLOY_HOOK_URL_STAGING (Settings → Secrets and variables → Actions → Variables)." >&2
+          URL="$(printf '%s' "$URL" | tr -d '\r')"
+          URL="${URL#"${URL%%[![:space:]]*}"}"
+          URL="${URL%"${URL##*[![:space:]]}"}"
+          if [ -z "$URL" ]; then
+            echo "Missing or blank DEPLOY_HOOK_URL_STAGING." >&2
+            echo "Create it under Settings → Secrets and variables → Actions → Variables (not Secrets)." >&2
             exit 1
           fi
+          case "$URL" in
+            https://*) ;;
+            *)
+              echo "DEPLOY_HOOK_URL_STAGING must start with https:// (got malformed value)." >&2
+              exit 1
+              ;;
+          esac
           if [ -z "${BEARER:-}" ]; then
             echo "Missing repository secret DEPLOY_HOOK_BEARER." >&2
             exit 1
           fi
-          CURL_BASIC=( )
-          if [ -n "${BASIC:-}" ]; then
-            CURL_BASIC=( -u "${BASIC}" )
-          fi
-          curl -fsS --max-time 120 -X POST "${CURL_BASIC[@]}" "$URL" \
+          curl -fsS --max-time 120 -X POST "$URL" \
             -H "Authorization: Bearer ${BEARER}" \
             -H "Accept: application/json"

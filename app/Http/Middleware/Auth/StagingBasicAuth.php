@@ -4,19 +4,26 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware\Auth;
 
-    use Illuminate\Http\Request;
-    use Symfony\Component\HttpFoundation\Response;
 use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class StagingBasicAuth
 {
     /**
      * Requires HTTP Basic Auth when APP_ENV=staging.
      * Credentials from STAGING_HTTP_USER and STAGING_HTTP_PASSWORD.
+     *
+     * {@see DeployWebhookController} uses Bearer only; Basic cannot coexist with Bearer on one request,
+     * so the Coolify deploy hook path is excluded from this gate (still protected by DEPLOY_HOOK_SECRET).
      */
     public function handle(Request $request, Closure $next): Response
     {
         if (! app()->environment('staging')) {
+            return $next($request);
+        }
+
+        if ($request->is('deploy')) {
             return $next($request);
         }
 
