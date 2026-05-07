@@ -27,6 +27,9 @@ jobs:
           BEARER="$(printf '%s' "$BEARER" | tr -d '\r')"
           BEARER="${BEARER#"${BEARER%%[![:space:]]*}"}"
           BEARER="${BEARER%"${BEARER##*[![:space:]]}"}"
+          echo "DEBUG URL=${URL}"
+          echo "DEBUG BEARER_LEN=${#BEARER}"
+          echo "DEBUG BEARER_SHA12=$(printf '%s' "$BEARER" | sha256sum | cut -c1-12)"
           if [ -z "$URL" ]; then
             echo "Missing or blank DEPLOY_HOOK_URL_PRODUCTION." >&2
             echo "Create it under Settings → Secrets and variables → Actions → Variables (not Secrets)." >&2
@@ -80,6 +83,9 @@ jobs:
           BEARER="$(printf '%s' "$BEARER" | tr -d '\r')"
           BEARER="${BEARER#"${BEARER%%[![:space:]]*}"}"
           BEARER="${BEARER%"${BEARER##*[![:space:]]}"}"
+          echo "DEBUG URL=${URL}"
+          echo "DEBUG BEARER_LEN=${#BEARER}"
+          echo "DEBUG BEARER_SHA12=$(printf '%s' "$BEARER" | sha256sum | cut -c1-12)"
           if [ -z "$URL" ]; then
             echo "Missing or blank DEPLOY_HOOK_URL_STAGING." >&2
             echo "Create it under Settings → Secrets and variables → Actions → Variables (not Secrets)." >&2
