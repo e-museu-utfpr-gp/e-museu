@@ -54,11 +54,16 @@ Workflow file: `.github/workflows/deploy-coolify.yml`.
 - Disable Coolify **Scheduled Tasks** that ran `coolify-auto-deploy.sh` if you rely solely on Actions, to avoid duplicate deploy triggers.
 - Confirm the app container can reach `COOLIFY_DEPLOY_URL` (internal host/IP and port **8000** if applicable).
 
+### Browser **GET** vs CI **POST**
+
+- **GET** `https://…/deploy` in a browser hits Nginx **`limit_except POST`** → **403** from Nginx (expected; the hook is **POST** only).
+- **POST** with **`Authorization: Bearer`** must reach Laravel; if you still see **401**, read below.
+
 ### GitHub Actions gets **401 Unauthorized**
 
 Typical causes:
 
-1. **Staging HTTP Basic Auth** (`STAGING_HTTP_USER` / `STAGING_HTTP_PASSWORD`) — the app returns **401** with header **`WWW-Authenticate: Basic`**. The running image must include the middleware change that **skips `/deploy`** for Basic Auth (Bearer-only hook). Until that version is deployed, trigger one deploy manually from Coolify, or test with `curl -u user:pass -H "Authorization: Bearer …"` from your machine.
+1. **Staging HTTP Basic Auth** (`STAGING_HTTP_USER` / `STAGING_HTTP_PASSWORD`) — **`StagingBasicAuth`** returns **401** with **`WWW-Authenticate: Basic`** when credentials are missing or wrong. The hook must **skip** that middleware for path **`/deploy`** (implementation uses **`getPathInfo()`** so it always matches). Deploy the latest app image to staging, then re-run Actions. Until then: deploy once from Coolify UI, or test locally with `curl -u user:pass -H "Authorization: Bearer …" -X POST …/deploy`.
 2. **Cloudflare (or another edge)** — **Zero Trust / Access**, **WAF**, or an **Institutional proxy** may return **401** before the request reaches Laravel. Check the response body and headers in the Actions log (`curl -v` temporarily in a branch) or Cloudflare **Security → Events**. Add a bypass or service token for **`POST /deploy`** if needed.
 3. **Wrong URL** — ensure the variable points to **`https://…/deploy`** (no typo, no extra path). **403** from Laravel usually means wrong or missing Bearer; **401** is rarely from `DeployWebhookController` itself.
 
@@ -71,4 +76,4 @@ The Laravel route uses throttle **`deploy-hook`**: **5 requests per minute per I
 - **2026-05-06:** Deploy hook URLs moved to GitHub repository **variables** `DEPLOY_HOOK_URL_PRODUCTION` / `DEPLOY_HOOK_URL_STAGING`.
 - **2026-05-06:** Single GitHub secret **`DEPLOY_HOOK_BEARER`** for both environments; **`DEPLOY_HOOK_SECRET`** must match on prod and staging.
 - **2026-05-06:** Workflow trims hook URLs and requires **`https://`**; **`StagingBasicAuth`** skips **`/deploy`** (Bearer-only hook); removed **`STAGING_BASIC_AUTH_CURL`** from Actions (URLs must live under **Variables**, not **Secrets**, for `vars.*`).
-- **2026-05-06:** **`StagingBasicAuth`** also matches **`deploy.hook`** route and **`deploy/*`** paths; doc section on **401** (Basic vs Cloudflare vs deploy order).
+- **2026-05-06:** **`StagingBasicAuth`** skips hook via **`getPathInfo()`** (`/deploy` prefix); doc clarifies **GET → 403** (Nginx) vs **POST + 401** (Basic Auth if bypass missing).

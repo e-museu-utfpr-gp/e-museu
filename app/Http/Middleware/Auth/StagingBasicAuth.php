@@ -23,7 +23,8 @@ class StagingBasicAuth
             return $next($request);
         }
 
-        if ($request->is('deploy', 'deploy/*') || $request->routeIs('deploy.hook')) {
+        $pathInfo = $request->getPathInfo();
+        if ($pathInfo === '/deploy' || str_starts_with($pathInfo, '/deploy/')) {
             return $next($request);
         }
 
