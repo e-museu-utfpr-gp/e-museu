@@ -14,7 +14,7 @@ Legacy **`scripts/coolify-auto-deploy.sh`** remains available for optional sched
 
 | Variable | Description |
 |----------|-------------|
-| `DEPLOY_HOOK_SECRET` | Shared with GitHub (`DEPLOY_HOOK_BEARER_MAIN` / `DEPLOY_HOOK_BEARER_DEVELOP`); must match `Authorization: Bearer` on incoming hook requests. |
+| `DEPLOY_HOOK_SECRET` | Same value on **production and staging** Coolify apps; must match GitHub secret **`DEPLOY_HOOK_BEARER`** (`Authorization: Bearer` on hook requests). |
 | `COOLIFY_DEPLOY_URL` | Full Coolify deploy API URL (`…/api/v1/deploy?uuid=…&force=false`). Quote in Coolify YAML if it contains `&`. |
 | `COOLIFY_DEPLOY_TOKEN` | Coolify API token with deploy permission (`Authorization: Bearer` on the outbound GET). |
 
@@ -33,14 +33,13 @@ Repository **Settings → Secrets and variables → Actions**.
 
 Create these under the **Variables** tab (`vars.DEPLOY_HOOK_URL_*` in the workflow).
 
-Paste-friendly reference (same `KEY=value` layout as Coolify templates): `docs/deploy-coolify/github-actions-deploy.env.example` — copy **`DEPLOY_HOOK_URL_*`** into **Variables**; copy **`DEPLOY_HOOK_BEARER_*`** and optional **`STAGING_BASIC_AUTH_CURL`** into **Secrets**.
+Paste-friendly reference (same `KEY=value` layout as Coolify templates): `docs/deploy-coolify/github-actions-deploy.env.example` — copy **`DEPLOY_HOOK_URL_*`** into **Variables**; copy **`DEPLOY_HOOK_BEARER`** (single token used for both environments) and optional **`STAGING_BASIC_AUTH_CURL`** into **Secrets**.
 
 ### Repository secrets
 
 | Secret | Used when |
 |--------|-----------|
-| `DEPLOY_HOOK_BEARER_MAIN` | Push to `main`; must equal production `DEPLOY_HOOK_SECRET`. |
-| `DEPLOY_HOOK_BEARER_DEVELOP` | Push to `develop`; must equal staging `DEPLOY_HOOK_SECRET`. |
+| `DEPLOY_HOOK_BEARER` | Every deploy trigger; must equal **`DEPLOY_HOOK_SECRET`** on **both** production and staging Laravel/Coolify env. |
 | `STAGING_BASIC_AUTH_CURL` | Optional; push to `develop` only. If staging uses `STAGING_HTTP_USER` / `STAGING_HTTP_PASSWORD`, set this to **`user:password`** for `curl -u` (same pair as the app). Leave unset if staging basic auth is disabled. |
 
 Workflow file: `.github/workflows/deploy-coolify.yml` (production step has no basic auth; staging passes `-u` when `STAGING_BASIC_AUTH_CURL` is set).
@@ -61,3 +60,4 @@ The Laravel route uses throttle **`deploy-hook`**: **5 requests per minute per I
 - **2026-05-06:** Replaced GitHub SHA polling docs with deploy-hook + Actions workflow; env keys `DEPLOY_HOOK_SECRET`, `COOLIFY_DEPLOY_URL`, `COOLIFY_DEPLOY_TOKEN`.
 - **2026-05-06:** Documented rationale (UTFPR firewall / blocked Coolify port); deploy-hook rate limit **5/min** per IP.
 - **2026-05-06:** Deploy hook URLs moved to GitHub repository **variables** `DEPLOY_HOOK_URL_PRODUCTION` / `DEPLOY_HOOK_URL_STAGING`.
+- **2026-05-06:** Single GitHub secret **`DEPLOY_HOOK_BEARER`** for both environments; **`DEPLOY_HOOK_SECRET`** must match on prod and staging.

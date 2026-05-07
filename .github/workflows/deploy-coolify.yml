@@ -18,7 +18,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         env:
           URL: ${{ vars.DEPLOY_HOOK_URL_PRODUCTION }}
-          BEARER: ${{ secrets.DEPLOY_HOOK_BEARER_MAIN }}
+          BEARER: ${{ secrets.DEPLOY_HOOK_BEARER }}
         run: |
           set -eu
           if [ -z "${URL:-}" ]; then
@@ -26,7 +26,7 @@ jobs:
             exit 1
           fi
           if [ -z "${BEARER:-}" ]; then
-            echo "Missing repository secret DEPLOY_HOOK_BEARER_MAIN." >&2
+            echo "Missing repository secret DEPLOY_HOOK_BEARER." >&2
             exit 1
           fi
           curl -fsS --max-time 120 -X POST "$URL" \
@@ -37,7 +37,7 @@ jobs:
         if: github.ref == 'refs/heads/develop'
         env:
           URL: ${{ vars.DEPLOY_HOOK_URL_STAGING }}
-          BEARER: ${{ secrets.DEPLOY_HOOK_BEARER_DEVELOP }}
+          BEARER: ${{ secrets.DEPLOY_HOOK_BEARER }}
           BASIC: ${{ secrets.STAGING_BASIC_AUTH_CURL }}
         run: |
           set -eu
@@ -46,7 +46,7 @@ jobs:
             exit 1
           fi
           if [ -z "${BEARER:-}" ]; then
-            echo "Missing repository secret DEPLOY_HOOK_BEARER_DEVELOP." >&2
+            echo "Missing repository secret DEPLOY_HOOK_BEARER." >&2
             exit 1
           fi
           CURL_BASIC=( )
