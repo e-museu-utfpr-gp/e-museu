@@ -8,7 +8,7 @@
 - **Last updated:** 2026-05-06  
 - **Purpose:** fast product understanding for AI agents
 
-**Note (ops):** Coolify/env templates are under `docs/deploy-coolify/` (see root `README.md` and `.env.example`). **GitHub Actions** pushes trigger **`POST /deploy`** on each environment, which calls the Coolify deploy HTTP API (operations automation, not an end-user feature); see `docs/deploy-coolify/deploy-hook/doc.md`. Optional polling remains available via `scripts/coolify-auto-deploy.sh`.
+**Note (ops):** Coolify/env templates are under `docs/deploy-coolify/` (see root `README.md` and `.env.example`). **GitHub Actions** pushes trigger **`POST /deploy`** on each environment, which calls the Coolify deploy HTTP API (operations automation, not an end-user feature); see `docs/deploy-coolify/deploy-hook/doc.md`.
 
 ## 1) Problem and goal
 
@@ -54,7 +54,7 @@
 - NFR-02: MySQL-oriented compatibility.
 - NFR-03: throttling and anti-automation on sensitive endpoints.
 - NFR-04: transactional robustness on contribution flows.
-- NFR-05 (ops): staging/production deploy automation uses GitHub Actions → **`POST /deploy`** → Coolify deploy API (`docs/deploy-coolify/deploy-hook/doc.md`); optional Coolify scheduled poll via `scripts/coolify-auto-deploy.sh`.
+- NFR-05 (ops): staging/production deploy automation uses GitHub Actions → **`POST /deploy`** → Coolify deploy API (`docs/deploy-coolify/deploy-hook/doc.md`).
 
 ## 6) Boundaries and out of scope (today)
 
@@ -83,4 +83,5 @@
 - **2026-04-21 (later still):** Admin-only translation assist on multilingual catalog/taxonomy forms; per-user rate limit on `POST /admin/ai/translate-content`.
 - **2026-04-24:** Translation assist is driven by dynamic provider blocks in `config/ai.php` / `.env` (chain, `provider_url`, keys, models); UI provider names follow each block’s `human_label` env (e.g. `OPENROUTER_LOG_LABEL`), not fixed translation keys per vendor.
 - **2026-04-25:** Public collaborator email verification for catalog item/extra contribution is now configurable via `MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED` (`config/mail.php`), with default disabled. When disabled, contribution works without the email-code UI/session flow.
-- **2026-05-06:** Coolify deploy automation: primary **GitHub Actions webhook** (`POST /deploy`, Coolify GET + Bearer token, env per resource); docs `docs/deploy-coolify/deploy-hook/doc.md` (includes rationale where institutional firewall blocks direct Coolify access); optional **`scripts/coolify-auto-deploy.sh`** poll unchanged; hook rate limit **5/min** per IP; GitHub **variables** for production/staging hook URLs (must use **Variables** tab so `vars.*` resolves); single repo secret **`DEPLOY_HOOK_BEARER`** matching **`DEPLOY_HOOK_SECRET`** on both apps; template `docs/deploy-coolify/github-actions-deploy.env.example`; staging **Basic Auth** does not apply to **`/deploy`** (Bearer-only for CI).
+- **2026-05-06:** Coolify deploy automation: **GitHub Actions webhook** (`POST /deploy`, Coolify GET + Bearer token, env per resource); docs `docs/deploy-coolify/deploy-hook/doc.md` (includes rationale where institutional firewall blocks direct Coolify access); hook rate limit **5/min** per IP; GitHub **variables** for production/staging hook URLs; single repo secret **`DEPLOY_HOOK_BEARER`** matching **`DEPLOY_HOOK_SECRET`** on both apps; template `docs/deploy-coolify/github-actions-deploy.env.example`; staging **Basic Auth** does not apply to **`/deploy`** (Bearer-only for CI).
+- **2026-05-06:** Removed **`scripts/coolify-auto-deploy.sh`** and **`COOLIFY_AUTO_DEPLOY_*`** / `storage/coolify` state files; deploy is **Actions + `POST /deploy`** only.

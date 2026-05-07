@@ -8,8 +8,6 @@ From outside the project it can look odd that **Laravel calls Coolify to redeplo
 
 At **UTFPR**, management blocks **Coolify’s HTTP API port (typically 8000)** and other non-standard ports from the public internet for institutional security. GitHub Actions runners therefore **cannot** call Coolify directly. What **is** reachable over HTTPS are the usual web fronts (**production** and **staging**). The safest workable pattern is: **GitHub → public app URL (`POST /deploy`) → server-side call to Coolify on the internal network**. The hook adds **Bearer authentication**, **strict rate limiting** (5 requests/minute per IP), **POST-only** handling at Nginx, and **no CSRF** on this single route—reducing exposure compared with opening Coolify to the world.
 
-Legacy **`scripts/coolify-auto-deploy.sh`** remains available for optional scheduled polling (configure **`COOLIFY_AUTO_DEPLOY_*`** in Coolify if you use it; those keys are not in the paste-friendly `.env.example` templates). Primary automation is this webhook plus `.github/workflows/deploy-coolify.yml`.
-
 ## Application environment (per Coolify resource)
 
 | Variable | Description |
@@ -47,11 +45,11 @@ Workflow file: `.github/workflows/deploy-coolify.yml`.
 
 ## Nginx
 
-`docker/nginx/*/default.conf` defines `location = /deploy` with `limit_except POST { deny all; }` and forwards to Laravel via `try_files` → `index.php`.
+`docker/nginx/*/default.conf` defines `location ~ ^/deploy/?$` with `limit_except POST { deny all; }` and forwards to Laravel via `try_files` → `index.php`.
 
 ## Operations
 
-- Disable Coolify **Scheduled Tasks** that ran `coolify-auto-deploy.sh` if you rely solely on Actions, to avoid duplicate deploy triggers.
+- If you previously used Coolify **Scheduled Tasks** that polled GitHub, remove those tasks so deploy is only triggered by **GitHub Actions** (avoids duplicate deploys).
 - Confirm the app container can reach `COOLIFY_DEPLOY_URL` (internal host/IP and port **8000** if applicable).
 
 ### Browser **GET** vs CI **POST**
@@ -91,3 +89,4 @@ The Laravel route uses throttle **`deploy-hook`**: **5 requests per minute per I
 - **2026-05-06:** Workflow trims hook URLs and requires **`https://`**; **`StagingBasicAuth`** skips **`/deploy`** (Bearer-only hook); removed **`STAGING_BASIC_AUTH_CURL`** from Actions (URLs must live under **Variables**, not **Secrets**, for `vars.*`).
 - **2026-05-06:** **`StagingBasicAuth`** skips hook via **`getPathInfo()`** (`/deploy` prefix); doc clarifies **GET → 403** (Nginx) vs **POST + 401** (Basic Auth if bypass missing).
 - **2026-05-06:** Hook **403** checklist; **`trim`** on Bearer/`DEPLOY_HOOK_SECRET`; Actions trims bearer and prints hints on **403**/**503**.
+- **2026-05-06:** Removed **`scripts/coolify-auto-deploy.sh`**, **`COOLIFY_AUTO_DEPLOY_*`**, and **`storage/coolify`** state tracking; deploy is **GitHub Actions + `POST /deploy`** only.

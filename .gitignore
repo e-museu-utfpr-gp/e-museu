@@ -4,8 +4,6 @@
 /public/hot
 /public/storage
 /storage/*.key
-/storage/coolify/last_sha_github_repo_staging
-/storage/coolify/last_sha_github_repo_production
 /vendor
 .env
 .env.backup
