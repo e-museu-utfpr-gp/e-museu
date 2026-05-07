@@ -47,13 +47,25 @@ final class DeployWebhookController extends Controller
     {
         $secret = config('deploy.secret');
 
-        if (! is_string($secret) || $secret === '') {
+        if (! is_string($secret)) {
+            return false;
+        }
+
+        $secret = trim($secret);
+
+        if ($secret === '') {
             return false;
         }
 
         $bearer = $request->bearerToken();
 
-        if ($bearer === null || $bearer === '') {
+        if ($bearer === null) {
+            return false;
+        }
+
+        $bearer = trim($bearer);
+
+        if ($bearer === '') {
             return false;
         }
 

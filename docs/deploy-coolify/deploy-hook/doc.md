@@ -65,7 +65,17 @@ Typical causes:
 
 1. **Staging HTTP Basic Auth** (`STAGING_HTTP_USER` / `STAGING_HTTP_PASSWORD`) — **`StagingBasicAuth`** returns **401** with **`WWW-Authenticate: Basic`** when credentials are missing or wrong. The hook must **skip** that middleware for path **`/deploy`** (implementation uses **`getPathInfo()`** so it always matches). Deploy the latest app image to staging, then re-run Actions. Until then: deploy once from Coolify UI, or test locally with `curl -u user:pass -H "Authorization: Bearer …" -X POST …/deploy`.
 2. **Cloudflare (or another edge)** — **Zero Trust / Access**, **WAF**, or an **Institutional proxy** may return **401** before the request reaches Laravel. Check the response body and headers in the Actions log (`curl -v` temporarily in a branch) or Cloudflare **Security → Events**. Add a bypass or service token for **`POST /deploy`** if needed.
-3. **Wrong URL** — ensure the variable points to **`https://…/deploy`** (no typo, no extra path). **403** from Laravel usually means wrong or missing Bearer; **401** is rarely from `DeployWebhookController` itself.
+3. **Wrong URL** — ensure the variable points to **`https://…/deploy`** (no typo, no extra path).
+
+### **403 Forbidden** on `POST /deploy`
+
+Laravel returns **403** when **`Authorization: Bearer …`** does not match **`DEPLOY_HOOK_SECRET`** (after trim), or when **`DEPLOY_HOOK_SECRET`** is empty/missing in the running container.
+
+Checklist:
+
+- **GitHub** secret **`DEPLOY_HOOK_BEARER`** and **Coolify** **`DEPLOY_HOOK_SECRET`** for **that** environment (staging vs production) must be the **same string** (no extra quotes in the value; paste can add spaces or newlines — app and workflow now trim).
+- After changing env in Coolify, **redeploy** or run **`php artisan config:clear`** inside the app container so `config('deploy.secret')` picks up the new value (if config was cached).
+- Confirm you are hitting the **correct** URL (staging variable vs production) so the secret you set in Coolify matches the app that receives the request.
 
 The Laravel route uses throttle **`deploy-hook`**: **5 requests per minute per IP**.
 
@@ -77,3 +87,4 @@ The Laravel route uses throttle **`deploy-hook`**: **5 requests per minute per I
 - **2026-05-06:** Single GitHub secret **`DEPLOY_HOOK_BEARER`** for both environments; **`DEPLOY_HOOK_SECRET`** must match on prod and staging.
 - **2026-05-06:** Workflow trims hook URLs and requires **`https://`**; **`StagingBasicAuth`** skips **`/deploy`** (Bearer-only hook); removed **`STAGING_BASIC_AUTH_CURL`** from Actions (URLs must live under **Variables**, not **Secrets**, for `vars.*`).
 - **2026-05-06:** **`StagingBasicAuth`** skips hook via **`getPathInfo()`** (`/deploy` prefix); doc clarifies **GET → 403** (Nginx) vs **POST + 401** (Basic Auth if bypass missing).
+- **2026-05-06:** Hook **403** checklist; **`trim`** on Bearer/`DEPLOY_HOOK_SECRET`; Actions trims bearer and prints hints on **403**/**503**.

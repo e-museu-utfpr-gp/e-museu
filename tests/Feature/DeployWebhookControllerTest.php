@@ -45,6 +45,23 @@ final class DeployWebhookControllerTest extends TestCase
             ->assertStatus(503);
     }
 
+    public function test_deploy_accepts_trimmed_bearer_and_secret_from_env_style_whitespace(): void
+    {
+        config([
+            'deploy.secret' => "  hook-secret\n",
+            'deploy.coolify.deploy_url' => 'http://coolify.internal/api/v1/deploy?uuid=x&force=false',
+            'deploy.coolify.token' => 'coolify-token',
+        ]);
+
+        Http::fake([
+            'http://coolify.internal/*' => Http::response(['deployed' => true], 200),
+        ]);
+
+        $this->postJson('/deploy', [], ['Authorization' => 'Bearer  hook-secret  '])
+            ->assertOk()
+            ->assertJson(['ok' => true]);
+    }
+
     public function test_deploy_calls_coolify_and_returns_ok_when_configured(): void
     {
         config([
