@@ -55,10 +55,14 @@ jobs:
             head -c 1000 "$body" >&2 || true
             echo >&2
             if [ "$code" = "403" ]; then
-              echo "Hint: 403 = Bearer rejected. Set DEPLOY_HOOK_BEARER (GitHub) exactly equal to DEPLOY_HOOK_SECRET (Coolify/Laravel). Redeploy or run: php artisan config:clear after env changes." >&2
+              echo "403 = Laravel rejected the Bearer token (wrong or empty DEPLOY_HOOK_SECRET on the server)." >&2
+              echo "  1) GitHub: repository secret DEPLOY_HOOK_BEARER" >&2
+              echo "  2) Coolify: same resource that serves this URL → env DEPLOY_HOOK_SECRET (exact name; see config/deploy.php)" >&2
+              echo "  3) Value must match byte-for-byte (case-sensitive). One shared Bearer → set the SAME secret on BOTH Coolify apps (staging + production)." >&2
+              echo "  4) After env change: redeploy the app or run in the container: php artisan config:clear" >&2
             fi
             if [ "$code" = "503" ]; then
-              echo "Hint: 503 = missing COOLIFY_DEPLOY_URL or COOLIFY_DEPLOY_TOKEN on this app." >&2
+              echo "503 = missing COOLIFY_DEPLOY_URL or COOLIFY_DEPLOY_TOKEN on this app." >&2
             fi
             exit 1
           fi
@@ -104,10 +108,14 @@ jobs:
             head -c 1000 "$body" >&2 || true
             echo >&2
             if [ "$code" = "403" ]; then
-              echo "Hint: 403 = Bearer rejected. Set DEPLOY_HOOK_BEARER (GitHub) exactly equal to DEPLOY_HOOK_SECRET (Coolify/Laravel). Redeploy or run: php artisan config:clear after env changes." >&2
+              echo "403 = Laravel rejected the Bearer token (wrong or empty DEPLOY_HOOK_SECRET on the server)." >&2
+              echo "  1) GitHub: repository secret DEPLOY_HOOK_BEARER" >&2
+              echo "  2) Coolify: same resource that serves this URL → env DEPLOY_HOOK_SECRET (exact name; see config/deploy.php)" >&2
+              echo "  3) Value must match byte-for-byte (case-sensitive). One shared Bearer → set the SAME secret on BOTH Coolify apps (staging + production)." >&2
+              echo "  4) After env change: redeploy the app or run in the container: php artisan config:clear" >&2
             fi
             if [ "$code" = "503" ]; then
-              echo "Hint: 503 = missing COOLIFY_DEPLOY_URL or COOLIFY_DEPLOY_TOKEN on this app." >&2
+              echo "503 = missing COOLIFY_DEPLOY_URL or COOLIFY_DEPLOY_TOKEN on this app." >&2
             fi
             exit 1
           fi

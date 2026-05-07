@@ -73,9 +73,12 @@ Laravel returns **403** when **`Authorization: Bearer …`** does not match **`D
 
 Checklist:
 
-- **GitHub** secret **`DEPLOY_HOOK_BEARER`** and **Coolify** **`DEPLOY_HOOK_SECRET`** for **that** environment (staging vs production) must be the **same string** (no extra quotes in the value; paste can add spaces or newlines — app and workflow now trim).
-- After changing env in Coolify, **redeploy** or run **`php artisan config:clear`** inside the app container so `config('deploy.secret')` picks up the new value (if config was cached).
-- Confirm you are hitting the **correct** URL (staging variable vs production) so the secret you set in Coolify matches the app that receives the request.
+- The **HTTP 403** in Actions is **not** a GitHub bug: the Laravel app answered **Forbidden** because **`Authorization: Bearer …`** did not match **`DEPLOY_HOOK_SECRET`** loaded in that container (or the variable is **empty** there).
+- **GitHub** repository secret **`DEPLOY_HOOK_BEARER`** must equal **Coolify** env **`DEPLOY_HOOK_SECRET`** on the **same** Coolify **application** that serves **`DEPLOY_HOOK_URL_STAGING`** or **`DEPLOY_HOOK_URL_PRODUCTION`** (if the URL points at staging, fix **staging**’s env, not only production).
+- You use **one** Bearer for both branches → put the **identical** value of **`DEPLOY_HOOK_SECRET`** on **both** Coolify resources (staging and production).
+- Variable name in Coolify must be exactly **`DEPLOY_HOOK_SECRET`** (Laravel reads it in `config/deploy.php` via `env('DEPLOY_HOOK_SECRET')`).
+- No extra **quotes** around the value unless they are part of the secret. App and workflow **trim** spaces/newlines, but typos and case still break the match.
+- After changing env in Coolify, **redeploy** or run **`php artisan config:clear`** in the app container so `config('deploy.secret')` updates (especially if **`php artisan config:cache`** was used).
 
 The Laravel route uses throttle **`deploy-hook`**: **5 requests per minute per IP**.
 
