@@ -211,7 +211,8 @@ Deployment env templates and docs:
 
 - `docs/deploy-coolify/coolify-production.env.example`
 - `docs/deploy-coolify/coolify-staging.env.example`
-- `docs/deploy-coolify/auto-deploy/doc.md` (optional GitHub poll → Coolify deploy)
+- `docs/deploy-coolify/github-actions-deploy.env.example` (GitHub Actions variables + secrets for deploy webhook)
+- `docs/deploy-coolify/deploy-hook/doc.md` (GitHub Actions → `POST /deploy` → Coolify API)
 - `docs/deploy-coolify/minio-s3/doc.md` (post-setup: bucket + object data)
 - `docs/deploy-coolify/mysql/doc.md` (post-setup: import SQL dump)
 - `docs/deploy-coolify/minio-s3/` (Compose stacks)
@@ -230,7 +231,8 @@ Use:
 
 - `docs/deploy-coolify/coolify-production.env.example`
 - `docs/deploy-coolify/coolify-staging.env.example`
-- `docs/deploy-coolify/auto-deploy/doc.md`
+- `docs/deploy-coolify/github-actions-deploy.env.example`
+- `docs/deploy-coolify/deploy-hook/doc.md`
 - `docs/deploy-coolify/minio-s3/doc.md`
 - `docs/deploy-coolify/mysql/doc.md`
 - `docs/deploy-coolify/minio-s3/` (Compose stacks)

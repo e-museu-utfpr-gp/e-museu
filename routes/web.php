@@ -23,8 +23,15 @@ use App\Http\Controllers\StorageProxyController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagCategoryController;
 use App\Http\Controllers\Admin\Taxonomy\AdminTagController;
 use App\Http\Controllers\Admin\Ai\AdminContentTranslationController;
+use App\Http\Controllers\DeployWebhookController;
 use App\Models\Language;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/deploy', DeployWebhookController::class)
+    ->middleware('throttle:deploy-hook')
+    ->withoutMiddleware([PreventRequestForgery::class])
+    ->name('deploy.hook');
 
 Route::get('/storage/{path}', StorageProxyController::class)
     ->where('path', '.*')
