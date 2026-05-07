@@ -28,10 +28,12 @@ use App\Models\Language;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/deploy', DeployWebhookController::class)
-    ->middleware('throttle:deploy-hook')
+Route::middleware(['throttle:deploy-hook'])
     ->withoutMiddleware([PreventRequestForgery::class])
-    ->name('deploy.hook');
+    ->group(function (): void {
+        Route::post('/deploy', DeployWebhookController::class)->name('deploy.hook');
+        Route::post('/deploy/', DeployWebhookController::class);
+    });
 
 Route::get('/storage/{path}', StorageProxyController::class)
     ->where('path', '.*')
