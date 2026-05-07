@@ -1,0 +1,121 @@
+name: Deploy (Coolify webhook)
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: deploy-coolify-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy production
+        if: github.ref == 'refs/heads/main'
+        env:
+          URL: ${{ vars.DEPLOY_HOOK_URL_PRODUCTION }}
+          BEARER: ${{ secrets.DEPLOY_HOOK_BEARER }}
+        run: |
+          set -eu
+          URL="$(printf '%s' "$URL" | tr -d '\r')"
+          URL="${URL#"${URL%%[![:space:]]*}"}"
+          URL="${URL%"${URL##*[![:space:]]}"}"
+          BEARER="$(printf '%s' "$BEARER" | tr -d '\r')"
+          BEARER="${BEARER#"${BEARER%%[![:space:]]*}"}"
+          BEARER="${BEARER%"${BEARER##*[![:space:]]}"}"
+          if [ -z "$URL" ]; then
+            echo "Missing or blank DEPLOY_HOOK_URL_PRODUCTION." >&2
+            echo "Create it under Settings → Secrets and variables → Actions → Variables (not Secrets)." >&2
+            exit 1
+          fi
+          case "$URL" in
+            https://*) ;;
+            *)
+              echo "DEPLOY_HOOK_URL_PRODUCTION must start with https:// (got malformed value)." >&2
+              exit 1
+              ;;
+          esac
+          if [ -z "${BEARER:-}" ]; then
+            echo "Missing repository secret DEPLOY_HOOK_BEARER." >&2
+            exit 1
+          fi
+          body=$(mktemp)
+          hdr=$(mktemp)
+          trap 'rm -f "$body" "$hdr"' EXIT
+          code=$(curl -sS -w '%{http_code}' -o "$body" -D "$hdr" --max-time 120 -X POST "$URL" \
+            -H "Authorization: Bearer ${BEARER}" \
+            -H "Accept: application/json") || code="000"
+          if [ "$code" != "200" ]; then
+            echo "Deploy hook failed: HTTP ${code}" >&2
+            cat "$hdr" >&2 || true
+            head -c 1000 "$body" >&2 || true
+            echo >&2
+            if [ "$code" = "403" ]; then
+              echo "403 = Laravel rejected the Bearer token (wrong or empty DEPLOY_HOOK_SECRET on the server)." >&2
+              echo "  1) GitHub: repository secret DEPLOY_HOOK_BEARER" >&2
+              echo "  2) Coolify: same resource that serves this URL → env DEPLOY_HOOK_SECRET (exact name; see config/deploy.php)" >&2
+              echo "  3) Value must match byte-for-byte (case-sensitive). One shared Bearer → set the SAME secret on BOTH Coolify apps (staging + production)." >&2
+              echo "  4) After env change: redeploy the app or run in the container: php artisan config:clear" >&2
+            fi
+            if [ "$code" = "503" ]; then
+              echo "503 = missing COOLIFY_DEPLOY_URL or COOLIFY_DEPLOY_TOKEN on this app." >&2
+            fi
+            exit 1
+          fi
+
+      - name: Deploy staging
+        if: github.ref == 'refs/heads/develop'
+        env:
+          URL: ${{ vars.DEPLOY_HOOK_URL_STAGING }}
+          BEARER: ${{ secrets.DEPLOY_HOOK_BEARER }}
+        run: |
+          set -eu
+          URL="$(printf '%s' "$URL" | tr -d '\r')"
+          URL="${URL#"${URL%%[![:space:]]*}"}"
+          URL="${URL%"${URL##*[![:space:]]}"}"
+          BEARER="$(printf '%s' "$BEARER" | tr -d '\r')"
+          BEARER="${BEARER#"${BEARER%%[![:space:]]*}"}"
+          BEARER="${BEARER%"${BEARER##*[![:space:]]}"}"
+          if [ -z "$URL" ]; then
+            echo "Missing or blank DEPLOY_HOOK_URL_STAGING." >&2
+            echo "Create it under Settings → Secrets and variables → Actions → Variables (not Secrets)." >&2
+            exit 1
+          fi
+          case "$URL" in
+            https://*) ;;
+            *)
+              echo "DEPLOY_HOOK_URL_STAGING must start with https:// (got malformed value)." >&2
+              exit 1
+              ;;
+          esac
+          if [ -z "${BEARER:-}" ]; then
+            echo "Missing repository secret DEPLOY_HOOK_BEARER." >&2
+            exit 1
+          fi
+          body=$(mktemp)
+          hdr=$(mktemp)
+          trap 'rm -f "$body" "$hdr"' EXIT
+          code=$(curl -sS -w '%{http_code}' -o "$body" -D "$hdr" --max-time 120 -X POST "$URL" \
+            -H "Authorization: Bearer ${BEARER}" \
+            -H "Accept: application/json") || code="000"
+          if [ "$code" != "200" ]; then
+            echo "Deploy hook failed: HTTP ${code}" >&2
+            cat "$hdr" >&2 || true
+            head -c 1000 "$body" >&2 || true
+            echo >&2
+            if [ "$code" = "403" ]; then
+              echo "403 = Laravel rejected the Bearer token (wrong or empty DEPLOY_HOOK_SECRET on the server)." >&2
+              echo "  1) GitHub: repository secret DEPLOY_HOOK_BEARER" >&2
+              echo "  2) Coolify: same resource that serves this URL → env DEPLOY_HOOK_SECRET (exact name; see config/deploy.php)" >&2
+              echo "  3) Value must match byte-for-byte (case-sensitive). One shared Bearer → set the SAME secret on BOTH Coolify apps (staging + production)." >&2
+              echo "  4) After env change: redeploy the app or run in the container: php artisan config:clear" >&2
+            fi
+            if [ "$code" = "503" ]; then
+              echo "503 = missing COOLIFY_DEPLOY_URL or COOLIFY_DEPLOY_TOKEN on this app." >&2
+            fi
+            exit 1
+          fi

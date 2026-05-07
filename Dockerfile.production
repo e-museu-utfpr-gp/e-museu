@@ -48,8 +48,7 @@ COPY storage/ ./storage/
 COPY artisan ./
 # Production: .env not copied (uses environment variables from Coolify)
 
-RUN chmod +x ./scripts/coolify-auto-deploy.sh \
-    && composer dump-autoload --optimize
+RUN composer dump-autoload --optimize
 
 # ---------- Frontend build ----------
 FROM node:25.4.0-alpine3.22 AS node-build
@@ -84,8 +83,7 @@ RUN sed -i 's/^listen = .*/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www \
     && chmod -R 775 /var/www/storage \
-    && chmod -R 775 /var/www/bootstrap/cache \
-    && chmod +x /var/www/scripts/coolify-auto-deploy.sh
+    && chmod -R 775 /var/www/bootstrap/cache
 
 USER www-data
 

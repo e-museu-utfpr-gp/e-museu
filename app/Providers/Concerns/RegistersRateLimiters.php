@@ -83,6 +83,10 @@ final class RegistersRateLimiters
 
             return Limit::perMinute(120)->by($emailKey . '|' . $request->ip());
         });
+
+        RateLimiter::for('deploy-hook', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
     }
 
     /** Lowercase + trim request input, then sha256 for rate-limit keys; empty uses $emptyLabel. */
