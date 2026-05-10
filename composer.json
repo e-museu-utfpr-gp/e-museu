@@ -9,6 +9,7 @@
   "license": "MIT",
   "require": {
     "php": "^8.5",
+    "endroid/qr-code": "^6",
     "guzzlehttp/guzzle": "^7.2",
     "laravel/framework": "^13.0",
     "laravel/sanctum": "^4.3",

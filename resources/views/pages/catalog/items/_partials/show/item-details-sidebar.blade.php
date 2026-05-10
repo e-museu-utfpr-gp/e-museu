@@ -10,15 +10,21 @@
             <h5>{{ $item->name }}</h5>
         </div>
 
-        @if ($item->image_url)
+        @php
+            $orderedPublicImages = $item->images->sortBy('sort_order')->values();
+            $heroImageUrl = $item->image_url !== ''
+                ? $item->image_url
+                : (string) ($orderedPublicImages->first()?->image_url ?? '');
+        @endphp
+        @if ($heroImageUrl !== '')
             <div style="overflow:hidden;">
-                <img src="{{ $item->image_url }}" class="card-img-top p-1 clickable-image myImg"
+                <img src="{{ $heroImageUrl }}" class="card-img-top p-1 clickable-image myImg"
                     style="aspect-ratio: 1 / 1; width: 100%; max-height: 100%; object-fit: cover"
                     alt="{{ __('view.catalog.items.show.image_alt') }}">
             </div>
-            @if ($item->images->count() > 1)
+            @if ($orderedPublicImages->count() > 1)
                 <div class="d-flex flex-wrap gap-1 p-1">
-                    @foreach ($item->images as $img)
+                    @foreach ($orderedPublicImages as $img)
                         <img src="{{ $img->image_url }}" class="clickable-image myImg rounded" alt=""
                             style="width: 48px; height: 48px; object-fit: cover;">
                     @endforeach

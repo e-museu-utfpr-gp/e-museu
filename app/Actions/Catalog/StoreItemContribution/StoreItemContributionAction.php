@@ -12,11 +12,11 @@ use App\Actions\Catalog\StoreItemContribution\Concerns\{
     ResolvesCollaboratorForContribution,
     StoreItemContributionRequestContext,
 };
+use App\Actions\Catalog\RegenerateItemQrCode\RegenerateItemQrCodeAction;
 use App\Services\Catalog\{
     ExtraService,
     ItemComponentService,
     ItemImagesService,
-    ItemQrCodeService,
     ItemService,
     ItemTagService,
 };
@@ -50,7 +50,7 @@ final class StoreItemContributionAction
         private readonly ItemTagService $itemTagService,
         private readonly ItemService $itemService,
         private readonly ItemImagesService $itemImagesService,
-        private readonly ItemQrCodeService $itemQrCodeService,
+        private readonly RegenerateItemQrCodeAction $regenerateItemQrCodeAction,
     ) {
     }
 

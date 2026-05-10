@@ -6,7 +6,8 @@ unused computer parts and motivated the creation of a museum to preserve their h
 from both project members and the broader community.
 
 - **Version:** `1.1.0`
-- **Original forks:** [vinifen/e-museu-2.1.0-beta](https://github.com/vinifen/e-museu-2.1.0-beta), [tankesho/e-museu](https://github.com/tankesho/e-museu)
+
+**Credits (software).** The first version was developed by **Alexandre Takeshi Ogassahara** in **2024** ([tankesho/e-museu](https://github.com/tankesho/e-museu)). **Vinicius Ferreira Novacoski** led further work from **2026**; the current upstream is [**e-museu-utfpr-gp/e-museu**](https://github.com/e-museu-utfpr-gp/e-museu). An earlier fork also existed as [vinifen/e-museu-2.1.0-beta](https://github.com/vinifen/e-museu-2.1.0-beta).
 
 ---
 
@@ -211,8 +212,6 @@ Deployment env templates and docs:
 
 - `docs/deploy-coolify/coolify-production.env.example`
 - `docs/deploy-coolify/coolify-staging.env.example`
-- `docs/deploy-coolify/github-actions-deploy.env.example` (GitHub Actions variables + secrets for deploy webhook)
-- `docs/deploy-coolify/deploy-hook/doc.md` (GitHub Actions → `POST /deploy` → Coolify API)
 - `docs/deploy-coolify/minio-s3/doc.md` (post-setup: bucket + object data)
 - `docs/deploy-coolify/mysql/doc.md` (post-setup: import SQL dump)
 - `docs/deploy-coolify/minio-s3/` (Compose stacks)
@@ -231,8 +230,6 @@ Use:
 
 - `docs/deploy-coolify/coolify-production.env.example`
 - `docs/deploy-coolify/coolify-staging.env.example`
-- `docs/deploy-coolify/github-actions-deploy.env.example`
-- `docs/deploy-coolify/deploy-hook/doc.md`
 - `docs/deploy-coolify/minio-s3/doc.md`
 - `docs/deploy-coolify/mysql/doc.md`
 - `docs/deploy-coolify/minio-s3/` (Compose stacks)
@@ -248,7 +245,14 @@ When adding a new content language, update all related layers together:
 3. `lang/{locale}/...` server translations
 4. `lang/js/{locale}.json` + loader in `resources/js/i18n.js`
 
+Also add **public UI** strings for the new locale so visitors never see raw keys — at minimum:
+
+- `lang/{locale}/view/about.php` (intro, credits, project sections, gallery `alt` keys)
+- `lang/{locale}/view/layout.php` (navigation labels, footer contact emails)
+
 For catalog locations, keep `locations.code` and translation keys in sync (`lang/{locale}/app/catalog.php` -> `app.catalog.location.codes.*`).
+
+**Admin QR:** regeneration encodes the full public item URL into a QR PNG locally (`endroid/qr-code`, GD-backed PNG writer), then `ComposesQrCodePoster` builds the printable image. Requires **GD** (same as poster composition) and valid partner PNG logos under `public/img/qrcode/`.
 
 ---
 

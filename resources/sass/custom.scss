@@ -406,7 +406,7 @@ textarea {
     width: fit-content;
 }
 
-// Público: sem scroll horizontal na página; faixa explorar continua dentro do .container
+// Public layout: prevent horizontal page scroll; explore strip stays inside .container
 body.app-public-layout {
     overflow-x: clip;
 }
@@ -588,7 +588,7 @@ footer {
     display: block;
 }
 
-// Admin: sem scroll horizontal na página; só a área da tabela rola
+// Admin layout: prevent horizontal page scroll; only the table area scrolls
 body.admin-layout {
     overflow-x: clip;
 
@@ -797,4 +797,58 @@ body.admin-layout {
         background-color: var(--bs-primary-bg-subtle);
         font-weight: 600;
     }
+}
+
+/* About page — intro + credits read as one column, theme-aligned links */
+.about-lede {
+    padding: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.about-lede__intro {
+    color: #212529;
+    line-height: 1.65;
+}
+
+.about-lede__credits {
+    margin-top: 1.125rem;
+    padding-top: 1.125rem;
+    border-top: 1px solid rgba(13, 35, 61, 0.12);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #495057;
+}
+
+.about-lede__credits-lead {
+    display: inline;
+    font-weight: 600;
+    color: #0d233d;
+    margin-right: 0.25rem;
+}
+
+.about-lede__contact {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(13, 35, 61, 0.12);
+    font-size: 0.92rem;
+    color: #495057;
+}
+
+.about-inline-link {
+    color: #0d233d;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: #5be1b9;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 2px;
+
+    &:hover {
+        color: #ed6e38;
+        text-decoration-color: #ed6e38;
+    }
+}
+
+/* Gallery: tecno-lixo-1.jpg — mirror horizontally */
+.about-gallery__img--flip-x {
+    transform: scaleX(-1);
 }

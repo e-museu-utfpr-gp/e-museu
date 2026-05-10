@@ -19,6 +19,8 @@ return [
         'deleted' => 'Item excluído com sucesso.',
         'qrcode_regenerated' => 'QRCode gerado com sucesso.',
         'qrcode_regenerate_failed' => 'Não foi possível gerar o QRCode. Tente novamente mais tarde.',
+        'qrcode_regenerate_failed_encode' => 'Não foi possível gerar o QR no servidor. Verifique se a extensão GD está ativa e tente novamente.',
+        'qrcode_regenerate_failed_compose' => 'Não foi possível montar o QR para impressão (processamento de imagem no servidor). Verifique se a extensão GD está ativa e se os ficheiros de logótipos existem.',
         'qrcode_deleted' => 'QRCode excluído com sucesso.',
     ],
     'item_image' => [
