@@ -40,17 +40,19 @@
 }
 
 .img-modal-content,
-#caption {
+.img-modal-caption {
     animation-name: zoom;
     animation-duration: 0.1s;
 }
 
+/* Opacity only so inline `transform` on [data-image-modal-img] (e.g. scaleX) is not overridden. */
 @keyframes zoom {
     from {
-        transform: scale(0);
+        opacity: 0;
     }
+
     to {
-        transform: scale(1);
+        opacity: 1;
     }
 }
 
@@ -61,7 +63,7 @@
     cursor: pointer;
 }
 
-#modal-caption {
+.img-modal-caption {
     color: white;
     text-align: center;
     margin-top: 20px;

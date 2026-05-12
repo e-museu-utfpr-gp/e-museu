@@ -19,8 +19,9 @@ trait PersistsContribution
      * {@see \App\Support\Catalog\PublicCatalogContributionOutcome::throwUnlessOk()} so new values surface as
      * validation errors, not generic server errors.
      *
-     * On success, {@see \App\Services\Catalog\ItemQrCodeService::regenerateForItem()} runs after the DB transaction
-     * commits (synchronous, same request) so the transaction is not held during external HTTP.
+     * On success, {@see \App\Actions\Catalog\RegenerateItemQrCode\RegenerateItemQrCodeAction::handle()}
+     * runs after the DB transaction commits (synchronous, same request) so the transaction is not held during
+     * external HTTP.
      *
      * @param  array<string, mixed>  $collaboratorData
      * @param  array<string, mixed>  $itemPayload
@@ -82,7 +83,7 @@ trait PersistsContribution
             });
 
             try {
-                $this->itemQrCodeService->regenerateForItem($result['item']);
+                $this->regenerateItemQrCodeAction->handle($result['item']);
             } catch (Throwable $e) {
                 report($e);
             }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Admin\Catalog\Item;
 
+use App\Enums\Catalog\ItemImageType;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemImage;
 use App\Models\Collaborator\Collaborator;
@@ -17,10 +18,16 @@ use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Group;
 use Tests\Support\AbstractMysqlRefreshDatabaseTestCase;
 use Tests\Support\MinimalContributionCoverJpeg;
+use Tests\Support\MinimalQrPng;
 
 #[Group('mysql')]
 class AdminItemControllerTest extends AbstractMysqlRefreshDatabaseTestCase
 {
+    private function minimalQrPngBody(): string
+    {
+        return MinimalQrPng::binary();
+    }
+
     public function test_guest_is_redirected_from_items_index_to_login(): void
     {
         $this->get(route('admin.catalog.items.index'))
@@ -251,9 +258,7 @@ class AdminItemControllerTest extends AbstractMysqlRefreshDatabaseTestCase
     public function test_admin_update_regenerates_qr_when_identification_code_changes(): void
     {
         Storage::fake('public');
-        Http::fake([
-            'api.qrserver.com/*' => Http::response("\x89PNG\r\n\x1a\n", 200, ['Content-Type' => 'image/png']),
-        ]);
+        Http::preventStrayRequests();
 
         $admin = $this->createAdmin();
         $item = $this->createItemWithFixtures([
@@ -280,7 +285,6 @@ class AdminItemControllerTest extends AbstractMysqlRefreshDatabaseTestCase
         $response->assertRedirect(route('admin.catalog.items.show', $item));
         $item->refresh();
         $this->assertSame($newCode, $item->identification_code);
-        Http::assertSentCount(1);
     }
 
     public function test_admin_can_destroy_item(): void
@@ -332,9 +336,7 @@ class AdminItemControllerTest extends AbstractMysqlRefreshDatabaseTestCase
     public function test_admin_can_regenerate_qr_code(): void
     {
         Storage::fake('public');
-        Http::fake([
-            'api.qrserver.com/*' => Http::response("\x89PNG\r\n\x1a\n", 200, ['Content-Type' => 'image/png']),
-        ]);
+        Http::preventStrayRequests();
 
         $admin = $this->createAdmin();
         $item = $this->createItemWithFixtures();
@@ -349,38 +351,23 @@ class AdminItemControllerTest extends AbstractMysqlRefreshDatabaseTestCase
 
         $response->assertRedirect(route('admin.catalog.items.edit', $item));
         $response->assertSessionHas('success');
-        Http::assertSentCount(1);
-    }
 
-    public function test_admin_qr_regenerate_redirects_with_error_when_external_http_fails(): void
-    {
-        Storage::fake('public');
-        Http::fake([
-            'api.qrserver.com/*' => Http::response('', 503),
-        ]);
-
-        $admin = $this->createAdmin();
-        $item = $this->createItemWithFixtures();
-
-        $this->actingAs($admin);
-        $this->get(route('admin.catalog.items.edit', $item));
-
-        $response = $this->post(
-            route('admin.catalog.items.qrcode.regenerate', $item),
-            ['_token' => session()->token()]
-        );
-
-        $response->assertRedirect(route('admin.catalog.items.edit', $item));
-        $response->assertSessionHasErrors('qrcode');
-        $response->assertSessionMissing('success');
+        $item->refresh();
+        $qrImage = $item->images()->where('type', ItemImageType::QRCODE->value)->first();
+        $this->assertNotNull($qrImage);
+        $stored = Storage::disk('public')->get($qrImage->path);
+        $this->assertIsString($stored);
+        $this->assertStringStartsWith("\x89PNG\r\n\x1a\n", $stored);
+        $minimalLen = strlen($this->minimalQrPngBody());
+        if (extension_loaded('gd')) {
+            $this->assertGreaterThan($minimalLen, strlen($stored));
+        }
     }
 
     public function test_admin_can_delete_qr_code(): void
     {
         Storage::fake('public');
-        Http::fake([
-            'api.qrserver.com/*' => Http::response("\x89PNG\r\n\x1a\n", 200, ['Content-Type' => 'image/png']),
-        ]);
+        Http::preventStrayRequests();
 
         $admin = $this->createAdmin();
         $item = $this->createItemWithFixtures();

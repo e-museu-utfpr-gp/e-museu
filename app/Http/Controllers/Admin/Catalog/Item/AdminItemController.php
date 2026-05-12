@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Catalog\Item;
 
+use App\Actions\Catalog\RegenerateItemQrCode\RegenerateItemQrCodeAction;
 use App\Actions\Catalog\UpdateAdminItemFromRequestAction;
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\Admin\Catalog\{AdminStoreItemRequest, AdminUpdateItemRequest};
 use App\Models\Catalog\Item;
-use App\Services\Catalog\{AdminItemAdminViewDataService, ItemImagesService, ItemQrCodeService, ItemService};
+use App\Services\Catalog\{AdminItemAdminViewDataService, ItemImagesService, ItemService};
 use App\Services\Identity\LockService;
 use Illuminate\Http\{JsonResponse, RedirectResponse, Request};
 use Illuminate\View\View;
@@ -43,12 +44,12 @@ class AdminItemController extends AdminBaseController
         AdminStoreItemRequest $request,
         ItemService $itemService,
         ItemImagesService $itemImagesService,
-        ItemQrCodeService $itemQrCodeService
+        RegenerateItemQrCodeAction $regenerateItemQrCodeAction,
     ): RedirectResponse {
         $item = $itemService->createItemWithIdentificationCode($request);
         $itemImagesService->storeImagesFromStoreRequest($item, $request);
         try {
-            $itemQrCodeService->regenerateForItem($item);
+            $regenerateItemQrCodeAction->handle($item);
         } catch (Throwable $e) {
             report($e);
         }

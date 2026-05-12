@@ -326,7 +326,11 @@ class Item extends Model
         return $query->with([
             'translations.language',
             'images' => function ($q): void {
-                $q->whereIn('type', [ItemImageType::COVER->value, ItemImageType::GALLERY->value]);
+                $q->whereIn('type', [
+                    ItemImageType::COVER->value,
+                    ItemImageType::GALLERY->value,
+                    ItemImageType::QRCODE->value,
+                ]);
             },
             'itemCategory.translations.language',
             'location',

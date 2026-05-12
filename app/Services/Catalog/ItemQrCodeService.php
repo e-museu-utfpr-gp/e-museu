@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Services\Catalog;
 
 use App\Enums\Catalog\ItemImageType;
+use App\Enums\Content\ContentLanguage;
 use App\Models\Catalog\Item;
 use App\Models\Catalog\ItemImage;
-use Illuminate\Support\Facades\Http;
+use App\Models\Language;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 
 class ItemQrCodeService
 {
@@ -79,37 +79,48 @@ class ItemQrCodeService
         ];
     }
 
-    public function regenerateForItem(Item $item): ItemImage
+    /**
+     * Title line for the printable QR: prefer pt_BR, then universal, then any other locale with a non-empty name.
+     *
+     * Public for tests and diagnostics; not used by HTTP routes directly.
+     */
+    public function pieceNameForQrPoster(Item $item): string
     {
-        $this->deleteForItem($item);
-
-        $targetUrl = $this->destinationUrlForItem($item);
-        $response = Http::timeout(20)
-            ->retry(2, 200)
-            ->get('https://api.qrserver.com/v1/create-qr-code/', [
-                'size' => '512x512',
-                'format' => 'png',
-                'margin' => '0',
-                'data' => $targetUrl,
-            ]);
-
-        if (! $response->successful()) {
-            throw new RuntimeException('Failed to generate QRCode image.');
+        $translations = $item->translations()->get(['language_id', 'name']);
+        if ($translations->isEmpty()) {
+            return '';
         }
 
-        $path = ItemImage::buildQrCodePath($item, $targetUrl, 'png');
-        if (! Storage::disk('public')->put($path, $response->body())) {
-            throw new RuntimeException(__('app.catalog.item.upload_store_failed'));
+        $priorityLanguageIds = [];
+        $ptId = Language::tryIdForCode(ContentLanguage::PT_BR->value);
+        if ($ptId !== null) {
+            $priorityLanguageIds[] = $ptId;
+        }
+        $universalId = Language::tryIdForCode(ContentLanguage::UNIVERSAL->value);
+        if ($universalId !== null) {
+            $priorityLanguageIds[] = $universalId;
         }
 
-        /** @var ItemImage $img */
-        $img = $item->images()->create([
-            'path' => $path,
-            'type' => ItemImageType::QRCODE,
-            'sort_order' => 0,
-        ]);
+        $tried = [];
+        foreach ($priorityLanguageIds as $languageId) {
+            $tried[$languageId] = true;
+            $name = trim((string) ($translations->firstWhere('language_id', $languageId)?->name ?? ''));
+            if ($name !== '') {
+                return $name;
+            }
+        }
 
-        return $img;
+        foreach ($translations->sortBy('language_id')->values() as $row) {
+            if (isset($tried[$row->language_id])) {
+                continue;
+            }
+            $name = trim((string) $row->name);
+            if ($name !== '') {
+                return $name;
+            }
+        }
+
+        return '';
     }
 
     private function normalizeOriginForCompare(string $url): string

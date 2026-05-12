@@ -17,6 +17,8 @@ return [
     'locale_no_ui' => 'sem interface',
     'footer' => [
         'contact' => 'Contato:',
+        'contact_email_general' => 'emuseuvirtual@gmail.com',
+        'contact_email_institutional' => 'e-museu-gp@utfpr.edu.br',
         'copyright' => ':year - UTFPR - Unicentro',
     ],
 ];

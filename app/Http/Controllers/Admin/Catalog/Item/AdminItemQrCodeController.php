@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Catalog\Item;
 
+use App\Actions\Catalog\RegenerateItemQrCode\RegenerateItemQrCodeAction;
+use App\Exceptions\ItemQrRegenerateException;
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Models\Catalog\Item;
 use App\Services\Catalog\ItemQrCodeService;
@@ -19,12 +21,19 @@ class AdminItemQrCodeController extends AdminBaseController
      */
     public function regenerate(
         Item $item,
-        ItemQrCodeService $itemQrCodeService,
+        RegenerateItemQrCodeAction $regenerateItemQrCodeAction,
         LockService $lockService,
     ): RedirectResponse {
         $lockService->requireUnlocked($item);
         try {
-            $itemQrCodeService->regenerateForItem($item);
+            $regenerateItemQrCodeAction->handle($item);
+        } catch (ItemQrRegenerateException $e) {
+            $previous = $e->getPrevious();
+            report($previous ?? $e);
+
+            return redirect()
+                ->route('admin.catalog.items.edit', $item)
+                ->withErrors(['qrcode' => __($e->translationKey)]);
         } catch (Throwable $e) {
             report($e);
 

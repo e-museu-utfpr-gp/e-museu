@@ -19,6 +19,8 @@ return [
         'deleted' => 'Item deleted successfully.',
         'qrcode_regenerated' => 'QRCode generated successfully.',
         'qrcode_regenerate_failed' => 'The QRCode could not be generated. Please try again later.',
+        'qrcode_regenerate_failed_encode' => 'The QR image could not be encoded on the server. Ensure the GD extension is enabled and try again.',
+        'qrcode_regenerate_failed_compose' => 'The printable QR image could not be built (server image processing). Ensure the GD extension is enabled and logo files exist.',
         'qrcode_deleted' => 'QRCode deleted successfully.',
     ],
     'item_image' => [
