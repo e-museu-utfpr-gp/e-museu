@@ -32,7 +32,7 @@ Optional (to avoid `sudo` on Docker commands):
 
 ```bash
 sudo usermod -aG docker $USER
-newgrp docker
+newgrp docker 
 ```
 
 ### 2) ⚙️ Set up the project
