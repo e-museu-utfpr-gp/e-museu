@@ -1,11 +1,12 @@
 # SDD — Software design document (for AI)
 
 > **Rule for AI:** always update this file and `docs/prd.md` together when there is a relevant change to architecture, flows, rules, or operations.  
-> **How these docs relate:** this SDD describes **how the system works**; the PRD describes **what the product must deliver**.
+> **How these docs relate:** this SDD describes **how the system works**; the PRD describes **what the product must deliver**.  
+> **Public UI copy:** keep `lang/en` and `lang/pt_BR` aligned for the same keys when changing About, footer, or navigation strings (see PRD note).
 
 > **Code language:** all source code must be in **English** — identifiers (classes, methods, variables), comments inside code, PHPDoc/DocBlocks, and technical strings in code (e.g. translation keys). User-facing copy may be localized via `lang/` and frontend i18n; the codebase itself stays English-only.
 
-- **Last updated:** 2026-05-06  
+- **Last updated:** 2026-05-10  
 - **Purpose:** technical baseline so AI agents can understand the project quickly
 
 ## PHP `use` imports (project convention)
@@ -89,14 +90,16 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 - Tests: `./run test`
 - Quality: `./run phpcs`, `./run phpstan`, `./run all-tests`
 - Local dev and CI assume MySQL.
-- **Coolify auto-deploy (optional):** `scripts/coolify-auto-deploy.sh` runs inside the staging/production app container (Coolify **Scheduled Tasks**). It reads `COOLIFY_AUTO_DEPLOY_GITHUB_*`, `COOLIFY_AUTO_DEPLOY_DEPLOY_URL`, and `COOLIFY_AUTO_DEPLOY_TOKEN` (or `COOLIFY_AUTO_DEPLOY_TOKEN_FILE`), compares `git ls-remote` to `storage/coolify/last_sha_github_repo_staging` / `last_sha_github_repo_production` (from `APP_ENV`), then calls the Coolify deploy HTTP API with `Authorization: Bearer`. See `docs/deploy-coolify/auto-deploy/doc.md`.
+- **Hosting releases:** staging/production are deployed via the platform (e.g. Coolify). The Laravel app does not expose deploy-trigger routes or related configuration.
+- **Repository lineage:** The first public application version (2024) was authored by Alexandre Takeshi Ogassahara ([tankesho/e-museu](https://github.com/tankesho/e-museu)). Continued development from 2026 by Vinicius Ferreira Novacoski; canonical source is [e-museu-utfpr-gp/e-museu](https://github.com/e-museu-utfpr-gp/e-museu).
+- **Admin QR:** `RegenerateItemQrCodeAction` encodes the full destination URL into a PNG locally (`endroid/qr-code`, GD), then the `ComposesQrCodePoster` concern composes the printable PNG; partner logos under `public/img/qrcode/` must be valid PNGs with positive width and height.
 
 ## 7) Known technical risks
 
 - Tight coupling in central catalog classes.
 - MySQL-specific SQL (limited portability).
 - Contribution flow relies on session state.
-- External QR generation can add latency or intermittent failures.
+- QR regeneration depends on GD and image libraries; failures surface as controlled admin errors (`ItemQrRegenerateException`).
 
 ## 8) How AI should use this file
 
@@ -111,4 +114,7 @@ HTTP redirect and flash success are **not** inside the action; `ItemController::
 - **2026-04-21 (later still):** `config/ai.php`, `RegistersRateLimiters::admin-ai-translate`, `AdminContentTranslationController` + `AdminContentTranslationRequest`, feature tests `AdminContentTranslationControllerTest`; admin AI support classes live under `App\Support\Admin\Ai` (registry, prompts, layout flags, etc.). (Superseded for HTTP stack by **2026-04-24** below.)
 - **2026-04-24:** Admin AI chat HTTP is `AiChatCompletionHttpClient` + `AdminChatCompletionHttpRequestFactory` (no per-vendor client classes). Provider order `AI_CHAT_COMPLETION_CHAIN`; each block uses `provider_url` and optional `*_LOG_LABEL` → `human_label` for UI/log copy. Lang `view.admin.ai` no longer defines fixed strings per provider slug; `AdminAi::providerLabel()` reads `config('ai.{slug}.human_label')` with a generic `provider_default` fallback.
 - **2026-04-25:** Public catalog collaborator email verification is feature-flagged by `MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED` (`config/mail.php`, default `false`). When disabled, contribution endpoints/UI skip verification-code flow and backend collaborator gate no longer requires session-authenticated email verification.
-- **2026-05-06:** Coolify-oriented GitHub poll + deploy API automation: `scripts/coolify-auto-deploy.sh`, state files under `storage/coolify/`, env keys in deploy templates; documented in `docs/deploy-coolify/auto-deploy/doc.md`.
+- **2026-05-06:** Removed **`scripts/coolify-auto-deploy.sh`**, Docker `chmod` for it, **`storage/coolify`** gitignore entries, and **`COOLIFY_AUTO_DEPLOY_*`** documentation.
+- **2026-05-09:** Removed application-mediated deploy automation from the codebase and templates; releases are platform-only.
+- **2026-05-09:** About page intro includes an authorship paragraph; README and SDD record repository lineage (2024 tankesho/e-museu, 2026 e-museu-utfpr-gp/e-museu).
+- **2026-05-10:** Admin QR regeneration uses local `endroid/qr-code` (GD) instead of `api.qrserver.com`; README/SDD updated accordingly.

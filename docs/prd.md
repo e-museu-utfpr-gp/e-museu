@@ -1,14 +1,15 @@
 # PRD — Product Requirements (for AI)
 
 > **Rule for AI:** always update this file and `docs/sdd.md` together when there is a relevant change to product, user journeys, business rules, or scope.  
-> **How these docs relate:** this PRD describes **what the product is and why it exists**; the SDD describes **how the system implements it**.
+> **How these docs relate:** this PRD describes **what the product is and why it exists**; the SDD describes **how the system implements it**.  
+> **Public UI copy:** when changing visitor-facing strings (About, footer, navigation labels), update **`lang/en` and `lang/pt_BR`** together for the same keys, and adjust `README.md` / `docs/sdd.md` if product scope or naming changes.
 
 > **Code language:** all source code must be in **English** (identifiers, in-code comments, DocBlocks). End-user text is localized via translation files; product docs for humans may be localized separately — this PRD/SDD pair is maintained in **English** for tooling and AI.
 
-- **Last updated:** 2026-05-06  
+- **Last updated:** 2026-05-10  
 - **Purpose:** fast product understanding for AI agents
 
-**Note (ops):** Coolify/env templates are under `docs/deploy-coolify/` (see root `README.md` and `.env.example`). Optional **GitHub branch poll → Coolify deploy API** is documented in `docs/deploy-coolify/auto-deploy/doc.md` (operations automation, not an end-user feature).
+**Note (ops):** Coolify-oriented env templates live under `docs/deploy-coolify/` (see root `README.md` and `.env.example`). Application releases and redeploys are handled only in the hosting platform (e.g. Coolify), not from the Laravel codebase.
 
 ## 1) Problem and goal
 
@@ -38,6 +39,8 @@
   - optional AI-assisted translation on admin multilingual forms: fill missing fields or regenerate from other locales (not on the universal tab; gated by provider `*_ENABLED` flags in `.env` / `config/ai.php` and valid `provider_url` + API key + models per block). Multiple providers can be chained (`AI_CHAT_COMPLETION_CHAIN`); recoverable failures try the next ready block in order.
 - **Multi-locale content:**
   - translations and locale fallback.
+- **Public About page:**
+  - institutional context (partner projects), gallery, and a short software authorship paragraph with links to the original (2024) and current (2026) GitHub repositories.
 
 ## 4) Core functional requirements
 
@@ -54,7 +57,7 @@
 - NFR-02: MySQL-oriented compatibility.
 - NFR-03: throttling and anti-automation on sensitive endpoints.
 - NFR-04: transactional robustness on contribution flows.
-- NFR-05 (ops): staging/production may use Coolify scheduled tasks to poll GitHub and trigger deploys via the Coolify API when the watched branch SHA changes (see deploy docs).
+- NFR-05 (ops): staging/production releases are operated via the deployment platform (e.g. Coolify); the application does not expose a deploy trigger endpoint.
 
 ## 6) Boundaries and out of scope (today)
 
@@ -83,4 +86,7 @@
 - **2026-04-21 (later still):** Admin-only translation assist on multilingual catalog/taxonomy forms; per-user rate limit on `POST /admin/ai/translate-content`.
 - **2026-04-24:** Translation assist is driven by dynamic provider blocks in `config/ai.php` / `.env` (chain, `provider_url`, keys, models); UI provider names follow each block’s `human_label` env (e.g. `OPENROUTER_LOG_LABEL`), not fixed translation keys per vendor.
 - **2026-04-25:** Public collaborator email verification for catalog item/extra contribution is now configurable via `MAIL_PUBLIC_CONTRIBUTION_EMAIL_VERIFICATION_ENABLED` (`config/mail.php`), with default disabled. When disabled, contribution works without the email-code UI/session flow.
-- **2026-05-06:** Documented optional Coolify auto-deploy (GitHub SHA poll + deploy API); env keys in Coolify templates and `docs/deploy-coolify/auto-deploy/doc.md`.
+- **2026-05-06:** Removed **`scripts/coolify-auto-deploy.sh`** and **`COOLIFY_AUTO_DEPLOY_*`** / `storage/coolify` state files.
+- **2026-05-09:** Removed application-mediated deploy automation; releases use the hosting platform only.
+- **2026-05-09:** Public About page includes a short software authorship paragraph (2024 original, 2026 current) with repository links; see also `README.md` and `docs/sdd.md` (repository lineage).
+- **2026-05-10:** Admin QR regeneration stays an in-app capability but no longer depends on a third-party QR HTTP API (generation is local; see `docs/sdd.md`).

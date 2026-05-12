@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>E-museu: {{ $title }}</title>
+    <title>E-Museu: {{ $title }}</title>
 
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
@@ -87,9 +87,16 @@
     </nav>
     {{ $slot }}
     <div>
-        <footer class="d-md-flex custom-footer px-md-5 justify-content-between fixed align-items-center  py-5 mt-2">
-            <p class="custom-nav mb-0 d-flex justify-content-center col-md-4"><strong class="me-1">{{ __('view.layout.footer.contact') }}
-                </strong>emuseuvirtual@gmail.com</p>
+        <footer class="d-md-flex custom-footer px-md-5 justify-content-between align-items-center py-5 mt-2">
+            <p class="custom-nav mb-0 d-flex flex-wrap justify-content-center align-items-center gap-1 col-md-4">
+                <strong class="me-1">{{ __('view.layout.footer.contact') }}</strong>
+                <span class="footer-contact-links">
+                    <a class="about-inline-link"
+                        href="mailto:{{ e(__('view.layout.footer.contact_email_general')) }}">{{ __('view.layout.footer.contact_email_general') }}</a><span
+                        class="footer-contact-sep"> · </span><a class="about-inline-link"
+                        href="mailto:{{ e(__('view.layout.footer.contact_email_institutional')) }}">{{ __('view.layout.footer.contact_email_institutional') }}</a>
+                </span>
+            </p>
 
             <a href="{{ route('home') }}"
                 class="col-md-4 d-flex align-items-center justify-content-center my-3 me-md-auto link-dark text-decoration-none">

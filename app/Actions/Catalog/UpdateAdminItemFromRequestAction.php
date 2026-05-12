@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Catalog;
 
+use App\Actions\Catalog\RegenerateItemQrCode\RegenerateItemQrCodeAction;
 use App\Http\Requests\Admin\Catalog\AdminUpdateItemRequest;
 use App\Models\Catalog\Item;
-use App\Services\Catalog\{ItemImagesService, ItemQrCodeService, ItemService};
+use App\Services\Catalog\{ItemImagesService, ItemService};
 use Illuminate\Support\Arr;
 use Throwable;
 
@@ -18,7 +19,7 @@ final class UpdateAdminItemFromRequestAction
     public function __construct(
         private readonly ItemService $itemService,
         private readonly ItemImagesService $itemImagesService,
-        private readonly ItemQrCodeService $itemQrCodeService,
+        private readonly RegenerateItemQrCodeAction $regenerateItemQrCodeAction,
     ) {
     }
 
@@ -45,7 +46,7 @@ final class UpdateAdminItemFromRequestAction
 
         if ((string) $item->identification_code !== $originalIdentificationCode) {
             try {
-                $this->itemQrCodeService->regenerateForItem($item);
+                $this->regenerateItemQrCodeAction->handle($item);
             } catch (Throwable $e) {
                 report($e);
             }

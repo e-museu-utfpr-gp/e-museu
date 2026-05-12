@@ -1,16 +1,19 @@
 import $ from 'jquery';
 
 $(document).ready(function () {
-    const modal = document.getElementById('myModal');
+    const modal = document.querySelector('[data-image-modal]');
     if (!modal) {
         return;
     }
 
-    const modalImg = document.getElementById('modal-img');
-    const captionText = document.getElementById('modal-caption');
+    const modalImg = modal.querySelector('[data-image-modal-img]');
+    const captionText = modal.querySelector('[data-image-modal-caption]');
 
     function closeModal() {
         modal.style.display = 'none';
+        if (modalImg) {
+            modalImg.style.transform = '';
+        }
     }
 
     document.addEventListener('click', function (e) {
@@ -20,12 +23,14 @@ $(document).ready(function () {
         }
         modal.style.display = 'block';
         modalImg.src = img.src;
+        const imgTransform = window.getComputedStyle(img).transform;
+        modalImg.style.transform = imgTransform === 'none' ? '' : imgTransform;
         if (captionText) {
             captionText.textContent = img.alt || '';
         }
     });
 
-    const closeBtn = modal.querySelector('.close');
+    const closeBtn = modal.querySelector('[data-image-modal-close]');
     if (closeBtn) {
         closeBtn.addEventListener('click', closeModal);
     }
