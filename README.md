@@ -5,7 +5,7 @@ Technology - Parana (UTFPR) and the State University of Central-West (Unicentro)
 unused computer parts and motivated the creation of a museum to preserve their history, with contributions
 from both project members and the broader community.
 
-- **Version:** `1.1.0`
+- **Version:** `2.0.0`
 
 **Credits (software).** The first version was developed by **Alexandre Takeshi Ogassahara** in **2024** ([tankesho/e-museu](https://github.com/tankesho/e-museu)). **Vinicius Ferreira Novacoski** led further work from **2026**; the current upstream is [**e-museu-utfpr-gp/e-museu**](https://github.com/e-museu-utfpr-gp/e-museu). An earlier fork also existed as [vinifen/e-museu-2.1.0-beta](https://github.com/vinifen/e-museu-2.1.0-beta).
 
